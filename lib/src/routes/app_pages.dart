@@ -1,0 +1,36 @@
+import 'package:flutter/cupertino.dart';
+import 'package:get/get.dart';
+
+import '../ui/auth/login/login_view.dart';
+
+import '../ui/dashboard/bindings/dhasboard_binding.dart';
+import '../ui/dashboard/views/dashboard_view.dart';
+import '../ui/home/bindings/home_binding.dart';
+import '../ui/home/views/home_view.dart';
+import '../ui/support/about_view.dart';
+import '../ui/support/help_view.dart';
+import '../ui/support/theme_settings_view.dart';
+import 'app_routes.dart';
+
+class AppPages {
+  static final pages = [
+    GetPage(
+      name: AppRoutes.home,
+      page: () => HomeView(),
+      binding: HomeBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.DASHBOARD,
+      page: () => DashboardView(),
+      binding: DashboardBinding(),
+    ),
+    GetPage(name: AppRoutes.help, page: () => HelpView(), binding: null),
+    GetPage(name: AppRoutes.about, page: () => AboutView(), binding: null),
+    GetPage(name: AppRoutes.login, page: () => LoginView(), binding: null),
+    GetPage(
+      name: AppRoutes.theme_settings,
+      page: () => ThemeSettingsView(),
+      binding: null,
+    ),
+  ];
+}
