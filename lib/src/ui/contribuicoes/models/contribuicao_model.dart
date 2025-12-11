@@ -2,7 +2,6 @@ class Contribuicao {
   final int id;
   final int dizimistaId;
   final String dizimistaNome;
-  final String mesReferencia;
   final String tipo;
   final double valor;
   final String metodo;
@@ -12,7 +11,6 @@ class Contribuicao {
     required this.id,
     required this.dizimistaId,
     required this.dizimistaNome,
-    required this.mesReferencia,
     required this.tipo,
     required this.valor,
     required this.metodo,
@@ -33,7 +31,6 @@ class Contribuicao {
       id: id ?? this.id,
       dizimistaId: dizimistaId ?? this.dizimistaId,
       dizimistaNome: dizimistaNome ?? this.dizimistaNome,
-      mesReferencia: mesReferencia ?? this.mesReferencia,
       tipo: tipo ?? this.tipo,
       valor: valor ?? this.valor,
       metodo: metodo ?? this.metodo,
@@ -46,7 +43,6 @@ class Contribuicao {
       'id': id,
       'dizimistaId': dizimistaId,
       'dizimistaNome': dizimistaNome,
-      'mesReferencia': mesReferencia,
       'tipo': tipo,
       'valor': valor,
       'metodo': metodo,
@@ -59,7 +55,6 @@ class Contribuicao {
       id: map['id']?.toInt() ?? 0,
       dizimistaId: map['dizimistaId']?.toInt() ?? 0,
       dizimistaNome: map['dizimistaNome'] ?? '',
-      mesReferencia: map['mesReferencia'] ?? '',
       tipo: map['tipo'] ?? '',
       valor: (map['valor'] is int) ? (map['valor'] as int).toDouble() : map['valor']?.toDouble() ?? 0.0,
       metodo: map['metodo'] ?? '',
@@ -69,7 +64,7 @@ class Contribuicao {
 
   @override
   String toString() {
-    return 'Contribuicao(id: $id, dizimistaId: $dizimistaId, dizimistaNome: $dizimistaNome, mesReferencia: $mesReferencia, tipo: $tipo, valor: $valor, metodo: $metodo, dataRegistro: $dataRegistro)';
+    return 'Contribuicao(id: $id, dizimistaId: $dizimistaId, dizimistaNome: $dizimistaNome,  tipo: $tipo, valor: $valor, metodo: $metodo, dataRegistro: $dataRegistro)';
   }
 
   @override

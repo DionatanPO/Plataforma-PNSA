@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
+import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
+import 'package:intl/intl.dart'; // Necessário para formatar a data visualmente
+
 import '../controllers/contribuicao_controller.dart';
 import '../../dizimistas/models/dizimista_model.dart';
 import '../models/contribuicao_model.dart';
@@ -16,7 +20,14 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
   final ContribuicaoController controller = Get.find<ContribuicaoController>();
   final TextEditingController _valorController = TextEditingController();
 
-  // Cores e Estilos Locais
+  // Formatador de Moeda atualizado
+  final CurrencyTextInputFormatter _currencyFormatter = CurrencyTextInputFormatter.currency(
+    locale: 'pt_BR',
+    symbol: 'R\$',
+    decimalDigits: 2,
+  );
+
+  // Variáveis de Estilo
   late ThemeData theme;
   late bool isDark;
   late Color surfaceColor;
@@ -33,7 +44,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
 
     return Scaffold(
       backgroundColor: backgroundColor,
-      // Header Minimalista
+      // Header
       appBar: AppBar(
         backgroundColor: backgroundColor,
         surfaceTintColor: Colors.transparent,
@@ -61,6 +72,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
           ],
         ),
       ),
+      // Corpo com Scrollbar
       body: Scrollbar(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(24, 0, 24, 40),
@@ -68,6 +80,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
             children: [
               LayoutBuilder(
                 builder: (context, constraints) {
+                  // Layout Responsivo: Lado a lado (Desktop) ou Empilhado (Mobile)
                   if (constraints.maxWidth > 900) {
                     return Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -96,7 +109,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
   }
 
   // ===========================================================================
-  // WIDGET: CARTÃO DE FORMULÁRIO (NOVA ENTRADA)
+  // WIDGET: FORMULÁRIO DE NOVA ENTRADA
   // ===========================================================================
   Widget _buildFormCard() {
     return Container(
@@ -111,6 +124,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Título do Card
           Row(
             children: [
               Container(
@@ -134,61 +148,113 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
           ),
           const SizedBox(height: 32),
 
-          // 1. Dizimista (Dropdown)
+          // =========================================================
+          // 1. DROPDOWN "CONTRIBUINTE" (MODERNIZADO)
+          // =========================================================
           _label('Contribuinte'),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              color: backgroundColor,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: borderColor),
-            ),
-            child: Obx(() {
-              return DropdownButtonHideUnderline(
+          Obx(() {
+            final selecionado = controller.dizimistaSelecionado.value;
+            final isActive = selecionado != null;
+
+            return Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              decoration: BoxDecoration(
+                color: backgroundColor,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  // Borda verde se tiver item selecionado, senão cinza
+                  color: isActive ? Colors.green.withOpacity(0.5) : borderColor,
+                  width: isActive ? 1.5 : 1.0,
+                ),
+                boxShadow: [
+                  if (isActive)
+                    BoxShadow(
+                      color: Colors.green.withOpacity(0.05),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                ],
+              ),
+              child: DropdownButtonHideUnderline(
                 child: DropdownButton<Dizimista>(
                   isExpanded: true,
                   dropdownColor: isDark ? const Color(0xFF2C2C2C) : Colors.white,
-                  hint: Text(
-                    'Selecione o fiel...',
-                    style: GoogleFonts.inter(color: theme.colorScheme.onSurface.withOpacity(0.4)),
+                  borderRadius: BorderRadius.circular(16),
+                  icon: Icon(Icons.keyboard_arrow_down_rounded, color: theme.colorScheme.onSurface.withOpacity(0.6)),
+
+                  // Estado Vazio (Hint Moderno)
+                  hint: Row(
+                    children: [
+                      Icon(Icons.person_search_rounded, size: 20, color: theme.colorScheme.onSurface.withOpacity(0.4)),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Selecione o fiel...',
+                        style: GoogleFonts.inter(color: theme.colorScheme.onSurface.withOpacity(0.4), fontSize: 14),
+                      ),
+                    ],
                   ),
-                  value: controller.dizimistaSelecionado.value,
-                  icon: Icon(Icons.keyboard_arrow_down_rounded, color: theme.colorScheme.onSurface),
-                  style: GoogleFonts.inter(color: theme.colorScheme.onSurface, fontSize: 14),
+
+                  value: selecionado,
+
+                  // Customização do Item Selecionado (Avatar + Nome Negrito)
+                  selectedItemBuilder: (BuildContext context) {
+                    return controller.dizimistas.map<Widget>((Dizimista item) {
+                      return Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 12,
+                            backgroundColor: Colors.green.withOpacity(0.1),
+                            child: Text(
+                              item.nome.isNotEmpty ? item.nome[0].toUpperCase() : '?',
+                              style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.green),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              item.nome,
+                              style: GoogleFonts.outfit(
+                                fontWeight: FontWeight.w600,
+                                color: theme.colorScheme.onSurface,
+                                fontSize: 14,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      );
+                    }).toList();
+                  },
+
+                  // Itens da Lista Aberta
                   items: controller.dizimistas.map((dizimista) {
                     return DropdownMenuItem(
                       value: dizimista,
-                      child: Text(
-                        dizimista.nome,
-                        style: GoogleFonts.inter(color: theme.colorScheme.onSurface),
+                      child: Row(
+                        children: [
+                          Icon(Icons.person_outline_rounded, size: 18, color: theme.colorScheme.onSurface.withOpacity(0.4)),
+                          const SizedBox(width: 12),
+                          Text(
+                            dizimista.nome,
+                            style: GoogleFonts.inter(color: theme.colorScheme.onSurface),
+                          ),
+                        ],
                       ),
                     );
                   }).toList(),
                   onChanged: (val) => controller.dizimistaSelecionado.value = val,
                 ),
-              );
-            }),
-          ),
+              ),
+            );
+          }),
 
           const SizedBox(height: 20),
 
-          // 2. Linha Dupla: Referência e Tipo
+          // 2. Referência e Tipo (Mantido conforme seu código)
           Row(
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _label('Referência'),
-                    _buildModernDropdown(
-                      value: controller.mesReferencia,
-                      items: ['12/2025', '11/2025', '10/2025'],
-                      onChanged: (val) => setState(() => controller.mesReferencia = val!),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 16),
+              // Nota: Parece que o campo "Referência" foi removido nesta linha no seu código,
+              // mantive apenas o "Tipo" conforme você enviou.
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -205,9 +271,46 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
             ],
           ),
 
+          const SizedBox(height: 20),
+
+          // 3. SELETOR DE DATA E HORA
+          _label('Data do Recebimento'),
+          InkWell(
+            onTap: () => _pickDateTime(context),
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              decoration: BoxDecoration(
+                color: backgroundColor,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: borderColor),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.calendar_month_rounded,
+                      size: 20,
+                      color: theme.colorScheme.onSurface.withOpacity(0.6)),
+                  const SizedBox(width: 12),
+                  // Observa a mudança da data no controller
+                  Obx(() => Text(
+                    '${controller.dataSelecionada.value.day.toString().padLeft(2, '0')}/${controller.dataSelecionada.value.month.toString().padLeft(2, '0')}/${controller.dataSelecionada.value.year} às ${controller.dataSelecionada.value.hour.toString().padLeft(2, '0')}:${controller.dataSelecionada.value.minute.toString().padLeft(2, '0')}',
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  )),
+                  const Spacer(),
+                  Icon(Icons.access_time_rounded,
+                      size: 16,
+                      color: theme.colorScheme.onSurface.withOpacity(0.4)),
+                ],
+              ),
+            ),
+          ),
+
           const SizedBox(height: 32),
 
-          // 3. Valor (Destaque)
+          // 4. Valor Monetário
           Text(
             'VALOR DA CONTRIBUIÇÃO',
             style: GoogleFonts.inter(
@@ -227,22 +330,11 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
             ),
             child: Row(
               children: [
-                Text(
-                  'R\$',
-                  style: GoogleFonts.outfit(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.onSurface.withOpacity(0.5)
-                  ),
-                ),
-                const SizedBox(width: 12),
                 Expanded(
                   child: TextField(
                     controller: _valorController,
                     keyboardType: TextInputType.number,
-                    // =================================================
-                    // CORREÇÃO: Usar onSurface para garantir branco no escuro
-                    // =================================================
+                    inputFormatters: [_currencyFormatter],
                     style: GoogleFonts.outfit(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
@@ -250,11 +342,9 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
                     ),
                     decoration: InputDecoration(
                       border: InputBorder.none,
-                      hintText: '0,00',
-                      // Hint com cor ajustada para contraste
+                      hintText: 'R\$ 0,00',
                       hintStyle: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.2)),
                     ),
-                    onChanged: (val) => controller.valor = val,
                   ),
                 ),
               ],
@@ -263,7 +353,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
 
           const SizedBox(height: 32),
 
-          // 4. Métodos de Pagamento (Chips)
+          // 5. Forma de Pagamento
           _label('Forma de Pagamento'),
           Wrap(
             spacing: 10,
@@ -278,7 +368,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
 
           const SizedBox(height: 40),
 
-          // 5. Botão Confirmar
+          // 6. Botão de Ação
           SizedBox(
             width: double.infinity,
             height: 56,
@@ -302,7 +392,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
   }
 
   // ===========================================================================
-  // WIDGET: CARTÃO DE HISTÓRICO
+  // WIDGET: LISTA DE HISTÓRICO
   // ===========================================================================
   Widget _buildHistoryCard() {
     return Container(
@@ -315,7 +405,6 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
       ),
       child: Column(
         children: [
-          // Header do Card
           Padding(
             padding: const EdgeInsets.all(24),
             child: Row(
@@ -347,8 +436,6 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
             ),
           ),
           const Divider(height: 1),
-
-          // Lista
           Obx(() {
             if (controller.isLoading) return const Padding(padding: EdgeInsets.all(40), child: CircularProgressIndicator());
 
@@ -393,10 +480,6 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
                     item.dizimistaNome,
                     style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 15, color: theme.colorScheme.onSurface),
                   ),
-                  subtitle: Text(
-                    '${item.tipo} • Ref: ${item.mesReferencia}',
-                    style: GoogleFonts.inter(fontSize: 12, color: theme.colorScheme.onSurface.withOpacity(0.6)),
-                  ),
                   trailing: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.end,
@@ -421,7 +504,129 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
   }
 
   // ===========================================================================
-  // HELPERS E COMPONENTES
+  // MÉTODOS E LÓGICA
+  // ===========================================================================
+
+  Future<void> _pickDateTime(BuildContext context) async {
+    // 1. Abre o Calendário
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: controller.dataSelecionada.value,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+      builder: (context, child) {
+        return Theme(
+          data: theme.copyWith(
+            colorScheme: theme.colorScheme.copyWith(
+              primary: Colors.green,
+              onPrimary: Colors.white,
+              surface: surfaceColor,
+              onSurface: theme.colorScheme.onSurface,
+            ),
+            dialogBackgroundColor: surfaceColor,
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (pickedDate == null) return;
+
+    // 2. Abre o Relógio
+    if (!mounted) return;
+    final TimeOfDay? pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(controller.dataSelecionada.value),
+      builder: (context, child) {
+        return Theme(
+          data: theme.copyWith(
+            timePickerTheme: TimePickerThemeData(
+              backgroundColor: surfaceColor,
+              dayPeriodColor: Colors.green.withOpacity(0.2),
+              hourMinuteColor: backgroundColor,
+              dialHandColor: Colors.green,
+              dialBackgroundColor: backgroundColor,
+              dialTextColor: theme.colorScheme.onSurface,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (pickedTime == null) return;
+
+    // 3. Combina e Salva
+    final DateTime combinedDateTime = DateTime(
+      pickedDate.year,
+      pickedDate.month,
+      pickedDate.day,
+      pickedTime.hour,
+      pickedTime.minute,
+    );
+
+    controller.dataSelecionada.value = combinedDateTime;
+  }
+
+  void _submitForm() {
+    if (controller.dizimistaSelecionado.value != null && _valorController.text.isNotEmpty) {
+
+      // Lógica segura para converter a string formatada em double
+      String valorLimpo = _valorController.text
+          .replaceAll('.', '')       // Remove separador de milhar
+          .replaceAll('R\$', '')     // Remove simbolo
+          .replaceAll(' ', '')       // Remove espaços
+          .replaceAll(',', '.');     // Troca vírgula por ponto
+
+      final double valorNumerico = double.tryParse(valorLimpo) ?? 0.0;
+
+      if (valorNumerico <= 0) {
+        Get.snackbar('Atenção', 'O valor da contribuição é inválido.',
+            snackPosition: SnackPosition.BOTTOM,
+            margin: const EdgeInsets.all(24),
+            colorText: theme.colorScheme.onSurface);
+        return;
+      }
+
+      final novaContribuicao = Contribuicao(
+        id: controller.contribuicoes.length + 1,
+        dizimistaId: controller.dizimistaSelecionado.value!.id,
+        dizimistaNome: controller.dizimistaSelecionado.value!.nome,
+        tipo: controller.tipo,
+        valor: valorNumerico,
+        metodo: controller.metodo,
+        // Usa a data selecionada no picker
+        dataRegistro: controller.dataSelecionada.value,
+      );
+
+      controller.addContribuicao(novaContribuicao);
+
+      _valorController.clear();
+      controller.dizimistaSelecionado.value = null;
+      // Reinicia a data para "agora" para o próximo lançamento
+      controller.dataSelecionada.value = DateTime.now();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lançamento registrado!', style: GoogleFonts.inter()),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          )
+      );
+    } else {
+      Get.snackbar(
+        'Atenção',
+        'Preencha o contribuinte e o valor.',
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(24),
+        colorText: theme.colorScheme.onSurface,
+      );
+    }
+  }
+
+  // ===========================================================================
+  // COMPONENTES AUXILIARES
   // ===========================================================================
 
   Widget _label(String text) {
@@ -465,7 +670,6 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
 
   Widget _paymentChip(String label, IconData icon) {
     final isSelected = controller.metodo == label;
-    // Cor do texto quando NÃO selecionado ajustada para dark mode
     final unselectedColor = theme.colorScheme.onSurface.withOpacity(0.7);
 
     return InkWell(
@@ -499,42 +703,6 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
         ),
       ),
     );
-  }
-
-  void _submitForm() {
-    if (controller.dizimistaSelecionado.value != null && _valorController.text.isNotEmpty) {
-      final novaContribuicao = Contribuicao(
-        id: controller.contribuicoes.length + 1,
-        dizimistaId: controller.dizimistaSelecionado.value!.id,
-        dizimistaNome: controller.dizimistaSelecionado.value!.nome,
-        mesReferencia: controller.mesReferencia,
-        tipo: controller.tipo,
-        valor: double.tryParse(_valorController.text.replaceAll(',', '.')) ?? 0.0,
-        metodo: controller.metodo,
-        dataRegistro: DateTime.now(),
-      );
-
-      controller.addContribuicao(novaContribuicao);
-      _valorController.clear();
-      controller.dizimistaSelecionado.value = null;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Lançamento registrado!', style: GoogleFonts.inter()),
-            backgroundColor: Colors.green,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          )
-      );
-    } else {
-      Get.snackbar(
-        'Atenção',
-        'Preencha o contribuinte e o valor.',
-        snackPosition: SnackPosition.BOTTOM,
-        margin: const EdgeInsets.all(24),
-        colorText: theme.colorScheme.onSurface,
-      );
-    }
   }
 
   IconData _getMetodoIcon(String metodo) {

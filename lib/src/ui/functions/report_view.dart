@@ -125,36 +125,36 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
                         ? Row(
                       children: [
                         Expanded(child: _HoverStatCard(
-                            title: 'Receita Total', value: 'R\$ 124.5k', change: '+12.5%',
+                            title: 'Total Arrecadado', value: 'R\$ 45.2k', change: '+8.3%',
                             isPositive: true, icon: Icons.attach_money, color: Colors.green, theme: theme
                         )),
                         const SizedBox(width: 16),
                         Expanded(child: _HoverStatCard(
-                            title: 'Pedidos', value: '1,248', change: '+3.1%',
-                            isPositive: true, icon: Icons.shopping_bag_outlined, color: Colors.blue, theme: theme
+                            title: 'Dízimos', value: 'R\$ 28.5k', change: '+5.2%',
+                            isPositive: true, icon: Icons.money_outlined, color: Colors.blue, theme: theme
                         )),
                         const SizedBox(width: 16),
                         Expanded(child: _HoverStatCard(
-                            title: 'Taxa de Cancelamento', value: '2.4%', change: '-0.5%',
-                            isPositive: true, icon: Icons.close, color: Colors.red, theme: theme, reverseColor: true
+                            title: 'Ofertas', value: 'R\$ 12.3k', change: '+15.7%',
+                            isPositive: true, icon: Icons.volunteer_activism_outlined, color: Colors.purple, theme: theme
                         )),
                         const SizedBox(width: 16),
                         Expanded(child: _HoverStatCard(
-                            title: 'Novos Clientes', value: '342', change: '+18%',
-                            isPositive: true, icon: Icons.people_outline, color: Colors.purple, theme: theme
+                            title: 'Despesas', value: 'R\$ 23.1k', change: '-3.2%',
+                            isPositive: false, icon: Icons.money_off_outlined, color: Colors.red, theme: theme
                         )),
                       ],
                     )
                         : Column(
                       children: [
                         _HoverStatCard(
-                            title: 'Receita Total', value: 'R\$ 124.5k', change: '+12.5%',
+                            title: 'Total Arrecadado', value: 'R\$ 45.2k', change: '+8.3%',
                             isPositive: true, icon: Icons.attach_money, color: Colors.green, theme: theme
                         ),
                         const SizedBox(height: 16),
                         _HoverStatCard(
-                            title: 'Pedidos', value: '1,248', change: '+3.1%',
-                            isPositive: true, icon: Icons.shopping_bag_outlined, color: Colors.blue, theme: theme
+                            title: 'Dízimos', value: 'R\$ 28.5k', change: '+5.2%',
+                            isPositive: true, icon: Icons.money_outlined, color: Colors.blue, theme: theme
                         ),
                       ],
                     ),
@@ -190,11 +190,11 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Análise de Receita',
+                                    'Evolução Financeira',
                                     style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
                                   ),
                                   Text(
-                                    'Comparativo com período anterior',
+                                    'Receitas e despesas mensais',
                                     style: GoogleFonts.inter(fontSize: 13, color: theme.colorScheme.onSurface.withOpacity(0.5)),
                                   ),
                                 ],
@@ -202,9 +202,9 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
                               // Legenda simples
                               Row(
                                 children: [
-                                  _ChartLegend(label: "Atual", color: primaryColor),
+                                  _ChartLegend(label: "Receitas", color: primaryColor),
                                   const SizedBox(width: 16),
-                                  _ChartLegend(label: "Anterior", color: Colors.grey.withOpacity(0.3), isDashed: true),
+                                  _ChartLegend(label: "Despesas", color: Colors.grey.withOpacity(0.3), isDashed: true),
                                 ],
                               )
                             ],
@@ -228,38 +228,38 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(child: _ModernTableCard(
-                            title: 'Transações Recentes',
-                            headers: const ['ID', 'Cliente', 'Status', 'Valor'],
+                            title: 'Receitas Recentais',
+                            headers: const ['ID', 'Fiéis', 'Tipo', 'Valor'],
                             rows: const [
-                              ['#TR-9821', 'Empresa ABC', 'Concluído', 'R\$ 1.200'],
-                              ['#TR-9822', 'Tech Solutions', 'Pendente', 'R\$ 3.450'],
-                              ['#TR-9823', 'João Silva', 'Falha', 'R\$ 120'],
-                              ['#TR-9824', 'Maria Oliveira', 'Concluído', 'R\$ 850'],
-                              ['#TR-9825', 'Studio Design', 'Concluído', 'R\$ 2.100'],
+                              ['#REC-001', 'Maria Santos', 'Dízimo', 'R\$ 300'],
+                              ['#REC-002', 'Carlos Oliveira', 'Oferta', 'R\$ 150'],
+                              ['#REC-003', 'Ana Costa', 'Dízimo', 'R\$ 200'],
+                              ['#REC-004', 'Pedro Silva', 'Doação', 'R\$ 500'],
+                              ['#REC-005', 'Lucia Ferreira', 'Dízimo', 'R\$ 180'],
                             ],
                             theme: theme
                         )),
                         const SizedBox(width: 24),
                         Expanded(child: _ModernTableCard(
-                            title: 'Top Produtos',
-                            headers: const ['Produto', 'Vendas', 'Estoque'],
+                            title: 'Despesas Recentes',
+                            headers: const ['ID', 'Categoria', 'Valor'],
                             rows: const [
-                              ['Licença Pro', '1,204', 'Infinito'],
-                              ['Consultoria', '84', '12 slots'],
-                              ['Setup Básico', '320', 'Disponível'],
-                              ['Manutenção', '110', 'Agendado'],
-                              ['Hospedagem', '450', 'Automático'],
+                              ['#DES-001', 'Alimentação', 'R\$ 2.500'],
+                              ['#DES-002', 'Manutenção', 'R\$ 1.800'],
+                              ['#DES-003', 'Salários', 'R\$ 8.500'],
+                              ['#DES-004', 'Materiais', 'R\$ 950'],
+                              ['#DES-005', 'Serviços', 'R\$ 1.200'],
                             ],
                             theme: theme
                         )),
                       ],
                     )
                         : _ModernTableCard(
-                        title: 'Transações Recentes',
-                        headers: const ['ID', 'Cliente', 'Status', 'Valor'],
+                        title: 'Receitas Recentais',
+                        headers: const ['ID', 'Fiéis', 'Tipo', 'Valor'],
                         rows: const [
-                          ['#TR-9821', 'Empresa ABC', 'Concluído', 'R\$ 1.200'],
-                          ['#TR-9822', 'Tech Solutions', 'Pendente', 'R\$ 3.450'],
+                          ['#REC-001', 'Maria Santos', 'Dízimo', 'R\$ 300'],
+                          ['#REC-002', 'Carlos Oliveira', 'Oferta', 'R\$ 150'],
                         ],
                         theme: theme
                     ),
@@ -583,7 +583,7 @@ class _TableRowState extends State<_TableRow> {
         child: Row(
           children: widget.row.map((cell) {
             // Lógica simples para detectar se é coluna de Status e renderizar Badge
-            if (['Concluído', 'Pendente', 'Falha', 'Ativo', 'Manutenção'].contains(cell)) {
+            if (['Dízimo', 'Oferta', 'Doação', 'Concluído', 'Pendente', 'Alimentação', 'Manutenção', 'Salários', 'Materiais', 'Serviços', 'Recebido', 'Processando', 'Estornado'].contains(cell)) {
               return Expanded(child: Align(
                   alignment: Alignment.centerLeft,
                   child: _StatusBadge(status: cell)
@@ -614,16 +614,26 @@ class _StatusBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     Color color;
     switch (status) {
+      case 'Dízimo':
+      case 'Oferta':
+      case 'Doação':
       case 'Concluído':
-      case 'Ativo':
+      case 'Recebido':
+      case 'Salários':
         color = Colors.green;
         break;
       case 'Pendente':
-        color = Colors.orange;
+      case 'Processando':
+      case 'Alimentação':
+      case 'Materiais':
+        color = Colors.blue;
         break;
-      case 'Falha':
-      case 'Manutenção':
+      case 'Estornado':
         color = Colors.red;
+        break;
+      case 'Manutenção':
+      case 'Serviços':
+        color = Colors.orange;
         break;
       default:
         color = Colors.grey;

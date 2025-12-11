@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
 import 'package:plataforma_pnsa/src/routes/app_pages.dart';
 import 'package:plataforma_pnsa/src/routes/app_routes.dart';
@@ -24,6 +25,11 @@ class _AppState extends State<App> {
       themeMode: ThemeMode.system,
       initialRoute: AppRoutes.login,
       getPages: AppPages.pages,
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
+      supportedLocales: [
+        const Locale('pt', 'BR'), // Português do Brasil
+        const Locale('en', 'US'), // Inglês dos Estados Unidos
+      ],
     );
   }
 }
