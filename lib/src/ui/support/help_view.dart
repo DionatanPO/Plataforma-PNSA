@@ -31,7 +31,7 @@ class HelpView extends StatelessWidget {
         slivers: [
           CustomSliverAppBar(
             title: 'Ajuda',
-            subtitle: 'Como podemos ajudar você hoje?',
+            subtitle: 'Sistema de Gestão da Paróquia Nossa Senhora Auxiliadora',
             actions: [],
           ),
           SliverPadding(
@@ -155,7 +155,7 @@ class HelpView extends StatelessWidget {
                 color: theme.colorScheme.onSurface,
               ),
               decoration: InputDecoration(
-                hintText: 'Buscar por dúvidas, erros ou tópicos...',
+                hintText: 'Buscar por funcionalidades, dúvidas ou tópicos...',
                 hintStyle: GoogleFonts.inter(
                   color: theme.colorScheme.onSurface.withOpacity(0.5),
                   fontSize: 15,
@@ -190,24 +190,24 @@ class HelpView extends StatelessWidget {
   ) {
     final topics = [
       {
-        'icon': Icons.lock_outline_rounded,
-        'title': 'Privacidade',
-        'desc': 'Dados e segurança',
+        'icon': Icons.church_outlined,
+        'title': 'Cadastro de Fiéis',
+        'desc': 'Adicionar e gerenciar membros',
       },
       {
-        'icon': Icons.notifications_none_rounded,
-        'title': 'Notificações',
-        'desc': 'Alertas e sons',
+        'icon': Icons.payments_outlined,
+        'title': 'Controle de Dízimos',
+        'desc': 'Registro e acompanhamento',
       },
       {
-        'icon': Icons.payment_rounded,
-        'title': 'Pagamentos',
-        'desc': 'Faturas e planos',
+        'icon': Icons.group_work_outlined,
+        'title': 'Gestão de Acesso',
+        'desc': 'Usuários e permissões',
       },
       {
-        'icon': Icons.settings_outlined,
-        'title': 'Conta',
-        'desc': 'Perfil e acesso',
+        'icon': Icons.dashboard_outlined,
+        'title': 'Painel Administrativo',
+        'desc': 'Relatórios e estatísticas',
       },
     ];
 
@@ -351,10 +351,10 @@ class HelpView extends StatelessWidget {
             primaryColor,
             isDark,
             cardColor,
-            Icons.chat_bubble_outline_rounded,
-            'Chat em Tempo Real',
-            'Fale com nossa equipe agora',
-            () => Get.snackbar('Suporte', 'Iniciando chat...'),
+            Icons.church_outlined,
+            'Secretaria Paroquial',
+            'Presencial ou telefone',
+            () => Get.snackbar('Contato', 'Entre em contato com a secretaria: (64) 3674-1540'),
           ),
         ),
         SizedBox(width: isDesktop ? 16 : 0, height: isDesktop ? 0 : 16),
@@ -366,9 +366,9 @@ class HelpView extends StatelessWidget {
             isDark,
             cardColor,
             Icons.mail_outline_rounded,
-            'Enviar E-mail',
-            'Resposta em até 24 horas',
-            () => Get.snackbar('Email', 'Abrindo cliente de email...'),
+            'Envie um E-mail',
+            'Dúvidas sobre o sistema',
+            () => Get.snackbar('Email', 'auxiliadora@gmail.com'),
           ),
         ),
       ],

@@ -79,7 +79,9 @@ class _AccessManagementViewState extends State<AccessManagementView> {
 
                     const SizedBox(height: 40),
 
-                    // --- TÍTULO DA SEÇÃO DE CARDS ---
+                    // ========================================================
+                    // SEÇÃO 1: DEFINIÇÕES DE FUNÇÕES
+                    // ========================================================
                     Text(
                       'Definições de Funções',
                       style: GoogleFonts.outfit(
@@ -90,7 +92,7 @@ class _AccessManagementViewState extends State<AccessManagementView> {
                     ),
                     const SizedBox(height: 16),
 
-                    // --- CARDS INFORMATIVOS (GRID RESPONSIVA) ---
+                    // --- CARDS INFORMATIVOS FUNÇÕES (GRID RESPONSIVA) ---
                     LayoutBuilder(
                       builder: (context, constraints) {
                         // Se for tela larga, coloca em linha (Row). Se for estreita, empilha (Column).
@@ -113,6 +115,70 @@ class _AccessManagementViewState extends State<AccessManagementView> {
                               _buildRoleInfoCard('Secretaria', 'Foca no cadastro e atualização de dados dos dizimistas, além de lançar contribuições do dia a dia.', Icons.support_agent_rounded, Colors.blue),
                               const SizedBox(height: 12),
                               _buildRoleInfoCard('Financeiro', 'Visualiza fluxo de caixa, emite relatórios para contabilidade e analisa a saúde financeira da paróquia.', Icons.analytics_rounded, Colors.green),
+                            ],
+                          );
+                        }
+                      },
+                    ),
+
+                    const SizedBox(height: 40),
+
+                    // ========================================================
+                    // SEÇÃO 2: LEGENDA DE STATUS (ATIVO / INATIVO)
+                    // ========================================================
+                    Text(
+                      'Legenda de Status',
+                      style: GoogleFonts.outfit(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // --- CARDS INFORMATIVOS STATUS (GRID RESPONSIVA) ---
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        // Usa um breakpoint menor (700) pois são apenas 2 cards
+                        if (constraints.maxWidth > 700) {
+                          return Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                  child: _buildRoleInfoCard(
+                                      'Ativo',
+                                      'O usuário possui acesso liberado ao sistema conforme seu perfil. Pode realizar login e registrar operações normalmente.',
+                                      Icons.check_circle_outline_rounded,
+                                      Colors.green
+                                  )
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                  child: _buildRoleInfoCard(
+                                      'Inativo',
+                                      'O acesso ao sistema está bloqueado. O usuário não pode fazer login, mas seu histórico de ações é preservado para auditoria.',
+                                      Icons.block_rounded,
+                                      Colors.grey
+                                  )
+                              ),
+                            ],
+                          );
+                        } else {
+                          return Column(
+                            children: [
+                              _buildRoleInfoCard(
+                                  'Ativo',
+                                  'O usuário possui acesso liberado ao sistema conforme seu perfil. Pode realizar login e registrar operações normalmente.',
+                                  Icons.check_circle_outline_rounded,
+                                  Colors.green
+                              ),
+                              const SizedBox(height: 12),
+                              _buildRoleInfoCard(
+                                  'Inativo',
+                                  'O acesso ao sistema está bloqueado. O usuário não pode fazer login, mas seu histórico de ações é preservado para auditoria.',
+                                  Icons.block_rounded,
+                                  Colors.grey
+                              ),
                             ],
                           );
                         }
@@ -165,7 +231,7 @@ class _AccessManagementViewState extends State<AccessManagementView> {
             icon: const Icon(Icons.add_rounded, size: 20),
             label: const Text('Novo Usuário'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: theme.primaryColor,
+              backgroundColor: Colors.green,
               foregroundColor: Colors.white,
               elevation: 0,
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -355,7 +421,7 @@ class _AccessManagementViewState extends State<AccessManagementView> {
   }
 
   // ===========================================================================
-  // WIDGET: CARD DE FUNÇÃO (LEGENDA)
+  // WIDGET: CARD DE FUNÇÃO / STATUS (GENÉRICO)
   // ===========================================================================
 
   Widget _buildRoleInfoCard(String title, String description, IconData icon, Color color) {
@@ -485,7 +551,7 @@ class _AccessManagementViewState extends State<AccessManagementView> {
                   ),
                 ),
                 actions: [
-                  TextButton(onPressed: () => Navigator.pop(context), child: Text('Cancelar', style: GoogleFonts.inter(color: theme.colorScheme.onSurface.withOpacity(0.6)))),
+                  TextButton(onPressed: () => Navigator.pop(context), child: Text('Cancelar', style: GoogleFonts.inter(color: Colors.red))),
                   ElevatedButton(
                     onPressed: () {
                       if (nome.isNotEmpty && email.isNotEmpty) {
@@ -505,7 +571,7 @@ class _AccessManagementViewState extends State<AccessManagementView> {
                         Navigator.pop(context);
                       }
                     },
-                    style: ElevatedButton.styleFrom(backgroundColor: theme.primaryColor, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
                     child: const Text('Criar Acesso'),
                   ),
                 ],

@@ -53,7 +53,7 @@ class AboutView extends StatelessWidget {
 
                       // Description
                       Text(
-                        'Este aplicativo foi desenvolvido com as mais recentes tecnologias de design e desenvolvimento, focado em proporcionar uma experiência de usuário excepcional, moderna e intuitiva.',
+                        'Este aplicativo foi desenvolvido para auxiliar na gestão da Paróquia Nossa Senhora Auxiliadora, facilitando o controle de fiéis, dízimos e administração dos acessos ao sistema por diferentes perfis.',
                         textAlign: TextAlign.center,
                         style: GoogleFonts.inter(
                           fontSize: 16,
@@ -88,7 +88,7 @@ class AboutView extends StatelessWidget {
 
                       // Copyright
                       Text(
-                        '© 2025 Untitled App. Todos os direitos reservados.',
+                        '© 2025 Paróquia Nossa Senhora Auxiliadora. Todos os direitos reservados.',
                         style: GoogleFonts.inter(
                           fontSize: 12,
                           color: theme.colorScheme.onSurface.withOpacity(0.4),
@@ -147,7 +147,7 @@ class AboutView extends StatelessWidget {
         ),
         const SizedBox(height: 24),
         Text(
-          'Untitled App',
+          'Sistema Paróquia NS Auxiliadora',
           style: GoogleFonts.outfit(
             fontSize: 32,
             fontWeight: FontWeight.w700,
@@ -166,7 +166,7 @@ class AboutView extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
-            'Versão 1.0.0 (Beta)',
+            'Sistema de Gestão Paroquial',
             style: GoogleFonts.inter(
               fontSize: 13,
               fontWeight: FontWeight.w600,
@@ -188,24 +188,24 @@ class AboutView extends StatelessWidget {
   ) {
     final items = [
       {
-        'label': 'Desenvolvedor',
-        'value': 'Sua Empresa',
-        'icon': Icons.code_rounded,
+        'label': 'Paróquia',
+        'value': 'Nossa Senhora Auxiliadora',
+        'icon': Icons.church_outlined,
       },
       {
-        'label': 'Framework',
-        'value': 'Flutter 3.27',
-        'icon': Icons.flutter_dash_rounded,
+        'label': 'Localização',
+        'value': 'Iporá, GO',
+        'icon': Icons.location_city_outlined,
       },
       {
-        'label': 'Website',
-        'value': 'www.site.com',
-        'icon': Icons.language_rounded,
+        'label': 'Endereço',
+        'value': 'Av. Pará, n. 491',
+        'icon': Icons.location_on_outlined,
       },
       {
         'label': 'Contato',
-        'value': 'contato@site.com',
-        'icon': Icons.mail_outline_rounded,
+        'value': '(64) 3674-1540',
+        'icon': Icons.phone_outlined,
       },
     ];
 

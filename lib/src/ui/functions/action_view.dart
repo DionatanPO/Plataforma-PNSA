@@ -505,13 +505,13 @@ class _ButtonsActionsSection extends StatelessWidget {
             DesktopButton(
               label: "Salvar Alterações",
               onPressed: () {},
-              color: theme.primaryColor,
+              color: Colors.green,
             ),
             DesktopButton(
               label: "Cancelar",
               isOutlined: true,
               onPressed: () {},
-              color: theme.primaryColor,
+              color: Colors.red,
             ),
             DesktopButton(
               label: "Exportar PDF",

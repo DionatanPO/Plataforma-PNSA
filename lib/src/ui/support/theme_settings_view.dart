@@ -44,7 +44,7 @@ class ThemeSettingsView extends StatelessWidget {
         slivers: [
           CustomSliverAppBar(
             title: 'Aparência',
-            subtitle: 'Personalize a experiência visual do aplicativo',
+            subtitle: 'Personalize a aparência do Sistema Paroquial',
             backgroundColor: bgColor.withOpacity(0.8), // Ajuste para combinar com o fundo
             actions: [],
           ),

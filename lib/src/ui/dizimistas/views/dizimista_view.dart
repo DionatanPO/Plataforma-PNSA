@@ -69,7 +69,7 @@ class _DizimistaViewState extends State<DizimistaView> {
                         icon: const Icon(Icons.add_rounded, size: 20),
                         label: const Text('Novo Fiel'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: theme.primaryColor,
+                          backgroundColor: Colors.green,
                           foregroundColor: Colors.white,
                           elevation: 0,
                           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -363,7 +363,7 @@ class _DizimistaViewState extends State<DizimistaView> {
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
                   style: TextButton.styleFrom(
-                    foregroundColor: theme.colorScheme.onSurface.withOpacity(0.7),
+                    foregroundColor: Colors.red,
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                   ),
                   child: Text(
@@ -404,7 +404,7 @@ class _DizimistaViewState extends State<DizimistaView> {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: theme.primaryColor,
+                    backgroundColor: Colors.green,
                     foregroundColor: Colors.white,
                     elevation: 0,
                     padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
