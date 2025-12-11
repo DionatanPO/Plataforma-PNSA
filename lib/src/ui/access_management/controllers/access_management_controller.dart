@@ -29,41 +29,61 @@ class AccessManagementController extends GetxController {
           id: 1,
           nome: "Pe. Carlos Silva",
           email: "padre.carlos@paroquia.org",
+          cpf: "123.456.789-00",
+          telefone: "(64) 99988-7766",
+          endereco: "Rua das Igrejas, 100",
           funcao: "Administrador",
           status: "Ativo",
           ultimoAcesso: DateTime(2024, 5, 20, 10, 30, 0),
+          pendencia: false,
         ),
         Acesso(
           id: 2,
           nome: "Ana Paula Souza",
           email: "ana.secretaria@paroquia.org",
+          cpf: "234.567.890-11",
+          telefone: "(64) 98877-6655",
+          endereco: "Av. Central, 450",
           funcao: "Secretaria",
           status: "Ativo",
           ultimoAcesso: DateTime(2024, 5, 19, 14, 15, 0),
+          pendencia: false,
         ),
         Acesso(
           id: 3,
           nome: "Marcos Oliveira",
           email: "marcos.finan@paroquia.org",
+          cpf: "345.678.901-22",
+          telefone: "(64) 97766-5544",
+          endereco: "Rua Comercial, 230",
           funcao: "Financeiro",
           status: "Ativo",
           ultimoAcesso: DateTime(2024, 5, 18, 9, 0, 0),
+          pendencia: false,
         ),
         Acesso(
           id: 4,
           nome: "Maria Eduarda Santos",
           email: "maria.edu@paroquia.org",
+          cpf: "456.789.012-33",
+          telefone: "(64) 96655-4433",
+          endereco: "Praça da Matriz, 50",
           funcao: "Secretaria",
           status: "Inativo",
           ultimoAcesso: DateTime(2024, 4, 15, 11, 45, 0),
+          pendencia: false,
         ),
         Acesso(
           id: 5,
           nome: "João Batista",
           email: "joao.batista@paroquia.org",
+          cpf: "567.890.123-44",
+          telefone: "(64) 95544-3322",
+          endereco: "Rua das Flores, 800",
           funcao: "Financeiro",
           status: "Ativo",
           ultimoAcesso: DateTime(2024, 5, 21, 16, 20, 0),
+          pendencia: true,
         ),
       ]);
     } catch (e) {
@@ -97,7 +117,10 @@ class AccessManagementController extends GetxController {
     _isLoading.value = true;
     try {
       await Future.delayed(const Duration(seconds: 1));
-      _acessos.add(acesso.copyWith(id: _acessos.length + 1));
+      _acessos.add(acesso.copyWith(
+        id: _acessos.length + 1,
+        pendencia: false, // New users start without password pendencia
+      ));
     } catch (e) {
       print("Erro ao adicionar acesso: $e");
     } finally {

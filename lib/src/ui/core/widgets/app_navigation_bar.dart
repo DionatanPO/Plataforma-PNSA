@@ -126,9 +126,6 @@ class AdaptiveNavigation extends StatelessWidget {
                   },
                 ),
               ),
-
-              // Footer / Perfil
-              _buildTrailingSection(context, theme, desktop),
             ],
           ),
         ),
@@ -199,41 +196,7 @@ class AdaptiveNavigation extends StatelessWidget {
     );
   }
 
-  // =====================================================
-  // ====================== TRAILING =====================
-  // =====================================================
-  Widget _buildTrailingSection(BuildContext context, ThemeData theme, bool isExpanded) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 24, left: 8, right: 8),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (isExpanded) Divider(color: theme.dividerColor.withOpacity(0.1), height: 30),
 
-          _DesktopSidebarItem(
-            icon: const Icon(Icons.help_outline_rounded),
-            label: "Ajuda & Suporte",
-            isSelected: false,
-            isCollapsed: !isExpanded,
-            onTap: () {},
-            theme: theme,
-          ),
-
-          const SizedBox(height: 4),
-
-          _DesktopSidebarItem(
-            icon: const Icon(Icons.logout_rounded, color: Colors.redAccent),
-            label: "Sair",
-            isSelected: false,
-            isCollapsed: !isExpanded,
-            onTap: () {},
-            theme: theme,
-            textColor: Colors.redAccent,
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 // ==============================================================================
