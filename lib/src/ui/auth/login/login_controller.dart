@@ -57,10 +57,10 @@ class LoginController extends GetxController {
         if (success) {
           Get.offAllNamed(AppRoutes.home);
         } else {
-          Get.snackbar('Erro', 'Credenciais inválidas');
+          Get.snackbar('Erro', 'Credenciais inválidas ou erro de autenticação');
         }
       } catch (e) {
-        Get.snackbar('Erro', 'Ocorreu um erro durante o login');
+        Get.snackbar('Erro', 'Ocorreu um erro durante o login: $e');
       } finally {
         isLoading.value = false;
       }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:plataforma_pnsa/src/ui/contribuicoes/views/contribuicao_view.dart';
+import 'package:plataforma_pnsa/src/ui/dizimistas/views/dizimista_view.dart';
 
 import '../../core/widgets/app_navigation_bar.dart';
 import '../../dashboard/views/dashboard_view.dart';
@@ -40,7 +42,8 @@ class HomeView extends StatelessWidget {
           index: controller.selectedIndex.value,
           children: [
             DashboardView(),
-            DesktopComponentsView(),
+            DizimistaView(),
+            const ContribuicaoView(),
             ReportView(),
             ProfileView(),
           ],
@@ -62,12 +65,12 @@ class HomeView extends StatelessWidget {
                   NavigationDestination(
                     icon: Icon(Icons.home_outlined),
                     selectedIcon: Icon(Icons.home),
-                    label: 'Início',
+                    label: 'Painel Geral',
                   ),
                   NavigationDestination(
-                    icon: Icon(Icons.apps_outlined),
-                    selectedIcon: Icon(Icons.apps),
-                    label: 'UI Kit',
+                    icon: Icon(Icons.church_outlined),
+                    selectedIcon: Icon(Icons.church),
+                    label: 'Dizimistas',
                   ),
                   NavigationDestination(
                     icon: Icon(Icons.bar_chart_outlined),
@@ -77,7 +80,7 @@ class HomeView extends StatelessWidget {
                   NavigationDestination(
                     icon: Icon(Icons.person_outline),
                     selectedIcon: Icon(Icons.person),
-                    label: 'Usuário',
+                    label: 'Conta',
                   ),
                 ],
               ),
@@ -106,12 +109,12 @@ class HomeView extends StatelessWidget {
             NavigationDestination(
               icon: Icon(Icons.home_outlined),
               selectedIcon: Icon(Icons.home),
-              label: 'Início',
+              label: 'Painel Geral',
             ),
             NavigationDestination(
-              icon: Icon(Icons.apps_outlined),
-              selectedIcon: Icon(Icons.apps),
-              label: 'UI Kit',
+              icon: Icon(Icons.church_outlined),
+              selectedIcon: Icon(Icons.church),
+              label: 'Dizimistas',
             ),
             NavigationDestination(
               icon: Icon(Icons.bar_chart_outlined),
@@ -121,7 +124,7 @@ class HomeView extends StatelessWidget {
             NavigationDestination(
               icon: Icon(Icons.person_outline),
               selectedIcon: Icon(Icons.person),
-              label: 'Usuário',
+              label: 'Conta',
             ),
           ],
         ),

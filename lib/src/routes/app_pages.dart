@@ -3,8 +3,12 @@ import 'package:get/get.dart';
 
 import '../ui/auth/login/login_view.dart';
 
+import '../ui/contribuicoes/bindings/contribuicao_binding.dart';
+import '../ui/contribuicoes/views/contribuicao_view.dart';
 import '../ui/dashboard/bindings/dhasboard_binding.dart';
 import '../ui/dashboard/views/dashboard_view.dart';
+import '../ui/dizimistas/bindings/dizimista_binding.dart';
+import '../ui/dizimistas/views/dizimista_view.dart';
 import '../ui/home/bindings/home_binding.dart';
 import '../ui/home/views/home_view.dart';
 import '../ui/support/about_view.dart';
@@ -23,6 +27,16 @@ class AppPages {
       name: AppRoutes.DASHBOARD,
       page: () => DashboardView(),
       binding: DashboardBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.dizimista,
+      page: () => const DizimistaView(),
+      binding: DizimistaBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.contribuicao,
+      page: () => const ContribuicaoView(),
+      binding: ContribuicaoBinding(),
     ),
     GetPage(name: AppRoutes.help, page: () => HelpView(), binding: null),
     GetPage(name: AppRoutes.about, page: () => AboutView(), binding: null),

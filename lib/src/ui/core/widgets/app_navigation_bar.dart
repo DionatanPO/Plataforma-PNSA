@@ -23,10 +23,11 @@ class AdaptiveNavigation extends StatelessWidget {
 
   // ===== NAV ITEMS PADRÃO =====
   static List<NavigationDestination> get defaultDestinations => [
-    const NavigationDestination(icon: Icon(Icons.dashboard_outlined), selectedIcon: Icon(Icons.dashboard), label: 'Dashboard'),
-    const NavigationDestination(icon: Icon(Icons.rocket_launch_outlined), selectedIcon: Icon(Icons.rocket_launch), label: 'Ações'),
-    const NavigationDestination(icon: Icon(Icons.analytics_outlined), selectedIcon: Icon(Icons.analytics), label: 'Relatórios'),
-    const NavigationDestination(icon: Icon(Icons.people_outlined), selectedIcon: Icon(Icons.people), label: 'Equipe'),
+    const NavigationDestination(icon: Icon(Icons.dashboard_outlined), selectedIcon: Icon(Icons.dashboard), label: 'Painel Geral'),
+    const NavigationDestination(icon: Icon(Icons.church_outlined), selectedIcon: Icon(Icons.church), label: 'Dizimistas'),
+    const NavigationDestination(icon: Icon(Icons.payments_outlined), selectedIcon: Icon(Icons.payments), label: 'Contribuições'),
+    const NavigationDestination(icon: Icon(Icons.bar_chart_outlined), selectedIcon: Icon(Icons.bar_chart), label: 'Relatórios'),
+    const NavigationDestination(icon: Icon(Icons.people_outlined), selectedIcon: Icon(Icons.people), label: 'Paróquia'),
     const NavigationDestination(icon: Icon(Icons.settings_outlined), selectedIcon: Icon(Icons.settings), label: 'Configurações'),
   ];
 
@@ -156,7 +157,7 @@ class AdaptiveNavigation extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Business Pro',
+                  'Paróquia NS Auxiliadora',
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                     letterSpacing: -0.5,
@@ -165,7 +166,7 @@ class AdaptiveNavigation extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  'Workspace',
+                  'Sistema de Dízimo',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.textTheme.bodySmall?.color?.withOpacity(0.6),
                   ),

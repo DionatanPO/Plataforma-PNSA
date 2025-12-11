@@ -461,16 +461,16 @@ class LoginView extends StatelessWidget {
               flex: 1, // Ocupa 50% da tela (ou ajuste para mudar a proporção)
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.black, // Fundo base caso a imagem falhe
+                  color: const Color(0xFF1B4B29), // Verde escuro religioso
                   image: DecorationImage(
-                    // Imagem mais abstrata e arquitetônica
+                    // Imagem religiosa da Paróquia
                     image: const NetworkImage(
-                      'https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1920&auto=format&fit=crop',
+                      'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=1920&auto=format&fit=crop',
                     ),
                     fit: BoxFit.cover,
                     // Filtro escuro para garantir que textos brancos fiquem legíveis
                     colorFilter: ColorFilter.mode(
-                      Colors.black.withOpacity(0.4),
+                      Colors.black.withOpacity(0.5),
                       BlendMode.darken,
                     ),
                   ),
@@ -481,44 +481,44 @@ class LoginView extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Logo simples no topo
+                      // Logo da Paróquia no topo
                       Row(
                         children: [
                           Icon(
-                            Icons.hexagon_outlined,
+                            Icons.church,
                             color: Colors.white,
                             size: 32,
                           ),
                           const SizedBox(width: 12),
                           Text(
-                            "Enterprise",
+                            "Paróquia NS Auxiliadora",
                             style: GoogleFonts.outfit(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
-                              fontSize: 24,
+                              fontSize: 20,
                             ),
                           ),
                         ],
                       ),
 
-                      // Citação ou Texto de Marketing no rodapé
+                      // Citação religiosa no rodapé
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '"A simplicidade é o último grau de sofisticação."',
+                            '"A generosidade é a virtude que nos aproxima de Deus."',
                             style: GoogleFonts.outfit(
                               color: Colors.white,
-                              fontSize: 32,
-                              fontWeight: FontWeight.w600,
-                              height: 1.2,
+                              fontSize: 24,
+                              fontWeight: FontWeight.w500,
+                              height: 1.3,
                             ),
                           ),
                           const SizedBox(height: 20),
                           Text(
-                            'Gerencie seus projetos com clareza absoluta.',
+                            'Sistema de Gestão do Dízimo',
                             style: GoogleFonts.inter(
-                              color: Colors.white.withOpacity(0.8),
+                              color: Colors.white.withOpacity(0.9),
                               fontSize: 16,
                             ),
                           ),
@@ -550,7 +550,7 @@ class LoginView extends StatelessWidget {
                         // No mobile mostramos o logo aqui já que a barra lateral sumiu
                         if (!isDesktop) ...[
                           Icon(
-                            Icons.hexagon_rounded,
+                            Icons.church,
                             size: 40,
                             color: theme.primaryColor,
                           ),
@@ -558,21 +558,20 @@ class LoginView extends StatelessWidget {
                         ],
 
                         Text(
-                          'Olá novamente',
+                          'Bem-vindo ao Sistema de Dízimo',
                           style: GoogleFonts.outfit(
-                            fontSize: 36,
+                            fontSize: 28,
                             fontWeight: FontWeight.bold,
                             color: theme.colorScheme.onSurface,
-                            letterSpacing:
-                                -1, // Tracking apertado (tendência moderna)
+                            letterSpacing: -1, // Tracking apertado (tendência moderna)
                           ),
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Digite seus dados para acessar o painel.',
+                          'Acesse para gerenciar as contribuições da Paróquia.',
                           style: GoogleFonts.inter(
-                            fontSize: 15,
-                            color: theme.colorScheme.onSurface.withOpacity(0.5),
+                            fontSize: 14,
+                            color: theme.colorScheme.onSurface.withOpacity(0.6),
                           ),
                         ),
                         const SizedBox(height: 48),
@@ -586,7 +585,7 @@ class LoginView extends StatelessWidget {
                               Obx(() => _MinimalInput(
                                 label: "Email",
                                 controller: controller.emailController,
-                                hint: "nome@empresa.com",
+                                hint: "seu.email@paroquia.com.br",
                                 icon: Icons.alternate_email_rounded,
                                 validator: controller.validateEmail,
                                 errorText: controller.emailError.value,
