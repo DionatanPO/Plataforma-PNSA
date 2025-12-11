@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:plataforma_pnsa/src/ui/access_management/views/access_management_view.dart';
 import 'package:plataforma_pnsa/src/ui/contribuicoes/views/contribuicao_view.dart';
 import 'package:plataforma_pnsa/src/ui/dizimistas/views/dizimista_view.dart';
 
@@ -44,6 +45,7 @@ class HomeView extends StatelessWidget {
             DashboardView(),
             DizimistaView(),
             const ContribuicaoView(),
+            const AccessManagementView(),
             ReportView(),
             ProfileView(),
           ],
@@ -71,6 +73,16 @@ class HomeView extends StatelessWidget {
                     icon: Icon(Icons.church_outlined),
                     selectedIcon: Icon(Icons.church),
                     label: 'Dizimistas',
+                  ),
+                  NavigationDestination(
+                    icon: Icon(Icons.payments_outlined),
+                    selectedIcon: Icon(Icons.payments),
+                    label: 'Contribuições',
+                  ),
+                  NavigationDestination(
+                    icon: Icon(Icons.group_work_outlined),
+                    selectedIcon: Icon(Icons.group_work),
+                    label: 'Gestão de Acesso',
                   ),
                   NavigationDestination(
                     icon: Icon(Icons.bar_chart_outlined),
@@ -115,6 +127,16 @@ class HomeView extends StatelessWidget {
               icon: Icon(Icons.church_outlined),
               selectedIcon: Icon(Icons.church),
               label: 'Dizimistas',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.payments_outlined),
+              selectedIcon: Icon(Icons.payments),
+              label: 'Contribuições',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.group_work_outlined),
+              selectedIcon: Icon(Icons.group_work),
+              label: 'Gestão de Acesso',
             ),
             NavigationDestination(
               icon: Icon(Icons.bar_chart_outlined),

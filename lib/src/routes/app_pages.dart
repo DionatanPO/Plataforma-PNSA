@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 
 import '../ui/auth/login/login_view.dart';
+import '../ui/access_management/bindings/access_management_binding.dart';
+import '../ui/access_management/views/access_management_view.dart';
 
 import '../ui/contribuicoes/bindings/contribuicao_binding.dart';
 import '../ui/contribuicoes/views/contribuicao_view.dart';
@@ -37,6 +39,11 @@ class AppPages {
       name: AppRoutes.contribuicao,
       page: () => const ContribuicaoView(),
       binding: ContribuicaoBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.access_management,
+      page: () => const AccessManagementView(),
+      binding: AccessManagementBinding(),
     ),
     GetPage(name: AppRoutes.help, page: () => HelpView(), binding: null),
     GetPage(name: AppRoutes.about, page: () => AboutView(), binding: null),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:plataforma_pnsa/src/services/auth_service.dart';
+import 'package:plataforma_pnsa/src/ui/access_management/controllers/access_management_controller.dart';
 import 'package:plataforma_pnsa/src/ui/auth/login/login_controller.dart';
 import 'package:plataforma_pnsa/src/ui/contribuicoes/controllers/contribuicao_controller.dart';
 import 'package:plataforma_pnsa/src/ui/dizimistas/controllers/dizimista_controller.dart';
@@ -27,6 +28,7 @@ Future<void> main() async {
   Get.put(LoginController());
   Get.put(DizimistaController());
   Get.put(ContribuicaoController());
+  Get.put(AccessManagementController());
 
   runApp(App());
 }
