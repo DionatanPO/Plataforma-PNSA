@@ -182,17 +182,36 @@ class AdaptiveNavigation extends StatelessWidget {
       width: 36,
       height: 36,
       decoration: BoxDecoration(
-          color: theme.colorScheme.primary,
-          borderRadius: BorderRadius.circular(8), // Borda mais quadrada (Windows/Mac style)
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: theme.brightness == Brightness.dark
+                ? Colors.white.withOpacity(0.3)
+                : Colors.black.withOpacity(0.2),
+            width: 1.5,
+          ),
           boxShadow: [
             BoxShadow(
-              color: theme.colorScheme.primary.withOpacity(0.3),
+              color: theme.colorScheme.primary.withOpacity(0.2),
               blurRadius: 8,
               offset: const Offset(0, 2),
             )
           ]
       ),
-      child: const Icon(Icons.grid_view_rounded, color: Colors.white, size: 20),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(18),
+        child: Image.asset(
+          'assets/images/logo.jpg',
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) => Container(
+            color: theme.colorScheme.primary,
+            child: const Icon(
+              Icons.image_not_supported_outlined,
+              color: Colors.white,
+              size: 16,
+            ),
+          ),
+        ),
+      ),
     );
   }
 

@@ -44,6 +44,7 @@ dependencies:
   mask_text_input_formatter: ^2.0.0
   flutter_localizations:
     sdk: flutter
+  url_launcher: ^6.3.0 # Added for WhatsApp functionality
 
 
 dev_dependencies:
@@ -64,7 +65,9 @@ flutter:
 
   # "assets" deve ter 2 espaços para estar DENTRO de "flutter"
   assets:
+    - assets/images/logo.jpg
     - assets/images/paroquia.png
+    - assets/images/qrcode.png
 
 # --- CONFIGURAÇÕES DE PACOTES EXTERNOS (Ficam na raiz, sem recuo) ---
 
@@ -74,5 +77,5 @@ msix_config:
   publisher_display_name: Dionatan
   identity_name: com.dionatan.meuapp
   msix_version: 1.0.0.0
-  logo_path: assets/images/logo.png
+  logo_path: assets/images/logo.jpg
   capabilities: internetClient

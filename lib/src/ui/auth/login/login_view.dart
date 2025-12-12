@@ -61,25 +61,69 @@ class LoginView extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Logo / Nome
-                        Row(
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(8),
+                            // Circular logo image centered above the name
+                            Align(
+                              alignment: Alignment.center,
+                              child: Container(
+                                width: 100,
+                                height: 100,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Colors.white.withOpacity(0.3),
+                                    width: 2,
+                                  ),
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(50),
+                                  child: Image.asset(
+                                    'assets/images/logo.jpg',
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) => Container(
+                                      color: Colors.grey,
+                                      child: const Icon(
+                                        Icons.image_not_supported_outlined,
+                                        color: Colors.white,
+                                        size: 28,
+                                      ),
+                                    ),
+                                  ),
+                                ),
                               ),
-                              child: const Icon(Icons.church_rounded, color: Colors.white, size: 24),
                             ),
-                            const SizedBox(width: 16),
-                            Text(
-                              "NS Auxiliadora",
-                              style: GoogleFonts.outfit(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                                letterSpacing: 1,
-                              ),
+                            const SizedBox(height: 24),
+                            TweenAnimationBuilder<double>(
+                              tween: Tween(begin: 0.0, end: 1.0),
+                              duration: const Duration(milliseconds: 1200),
+                              curve: Curves.elasticOut,
+                              builder: (context, value, child) {
+                                return Transform.scale(
+                                  scale: value,
+                                  child: Align(
+                                    alignment: Alignment.center,
+                                    child: Text(
+                                      "PARÓQUIA\nN. S. AUXILIADORA",
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.outfit(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w900,
+                                        fontSize: 32,
+                                        letterSpacing: 1.2,
+                                        shadows: [
+                                          Shadow(
+                                            color: Colors.black.withOpacity(0.7),
+                                            offset: const Offset(2, 2),
+                                            blurRadius: 4,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
                           ],
                         ),
@@ -162,7 +206,33 @@ class LoginView extends StatelessWidget {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(Icons.church_rounded, color: Colors.white, size: 40),
+                            // Circular logo image for mobile
+                            Container(
+                              width: 60,
+                              height: 60,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.3),
+                                  width: 2,
+                                ),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(30),
+                                child: Image.asset(
+                                  'assets/images/logo.jpg',
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) => Container(
+                                    color: Colors.grey,
+                                    child: const Icon(
+                                      Icons.image_not_supported_outlined,
+                                      color: Colors.white,
+                                      size: 24,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
                             const SizedBox(height: 8),
                             Text(
                               "Paróquia NS Auxiliadora",
@@ -226,7 +296,7 @@ class LoginView extends StatelessWidget {
                                   child: Column(
                                     children: [
                                       Obx(() => _ModernInput(
-                                        label: "E-mail Corporativo",
+                                        label: "E-mail",
                                         controller: controller.emailController,
                                         hint: "ex: tesouraria@paroquia.com",
                                         icon: Icons.email_outlined,
@@ -260,13 +330,15 @@ class LoginView extends StatelessWidget {
                                   child: ElevatedButton(
                                     onPressed: controller.isLoading.value ? null : controller.login,
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFF1B4B29),
+                                      backgroundColor: controller.isLoading.value
+                                        ? theme.colorScheme.onSurface.withOpacity(0.4) // Gray state when loading
+                                        : theme.colorScheme.primary, // Use theme primary color when not loading
                                       foregroundColor: Colors.white,
                                       elevation: 0,
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(12),
                                       ),
-                                      shadowColor: const Color(0xFF1B4B29).withOpacity(0.4),
+                                      shadowColor: theme.colorScheme.primary.withOpacity(0.4),
                                     ).copyWith(
                                       elevation: MaterialStateProperty.resolveWith((states) {
                                         if (states.contains(MaterialState.hovered)) return 10;

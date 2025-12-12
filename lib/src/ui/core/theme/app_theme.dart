@@ -3,8 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
   // Cores da Paróquia Nossa Senhora Auxiliadora
-  static const Color primaryColor = Color(0xFF1B5E20); // Verde escuro religioso
-  static const Color secondaryColor = Color(0xFF4CAF50); // Verde médio
+  static const Color primaryColor = Color(0xFF4f84f0); // Verde escuro religioso
+  static const Color secondaryColor = Color(0xFFc8a755); // Verde médio
   static const Color accentColor = Color(0xFFFFB300); // Dourado/Amarelo para destaque
   static const Color backgroundColor = Color(0xFFF5F5F5); // Fundo claro
   static const Color surfaceColor = Color(0xFFFFFFFF); // Superfície branca
@@ -42,8 +42,8 @@ class AppTheme {
       colorScheme: ColorScheme.fromSeed(
         seedColor: primaryColor,
         brightness: Brightness.dark,
-        primary: secondaryColor,
-        secondary: primaryColor,
+        primary: primaryColor,
+        secondary: secondaryColor,
         tertiary: accentColor,
       ),
       textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme),
@@ -53,7 +53,7 @@ class AppTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ButtonStyle(
-          backgroundColor: MaterialStateProperty.all(secondaryColor),
+          backgroundColor: MaterialStateProperty.all(primaryColor),
           foregroundColor: MaterialStateProperty.all(Colors.white),
         ),
       ),

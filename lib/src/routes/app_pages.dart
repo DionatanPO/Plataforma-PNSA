@@ -13,13 +13,23 @@ import '../ui/dizimistas/bindings/dizimista_binding.dart';
 import '../ui/dizimistas/views/dizimista_view.dart';
 import '../ui/home/bindings/home_binding.dart';
 import '../ui/home/views/home_view.dart';
+import '../ui/web/home/home_web_view.dart';
 import '../ui/support/about_view.dart';
 import '../ui/support/help_view.dart';
+import '../ui/web/contact/contact_web_view.dart';
+import '../ui/web/parish/parish_view.dart';
+import '../ui/web/events/events_view.dart';
+import '../ui/web/tithe/tithe_view.dart';
 import '../ui/support/theme_settings_view.dart';
 import 'app_routes.dart';
 
 class AppPages {
   static final pages = [
+    GetPage(
+      name: AppRoutes.web_home,
+      page: () => HomeWebView(),
+      binding: HomeBinding(),
+    ),
     GetPage(
       name: AppRoutes.home,
       page: () => HomeView(),
@@ -52,6 +62,26 @@ class AppPages {
       name: AppRoutes.theme_settings,
       page: () => ThemeSettingsView(),
       binding: null,
+    ),
+    GetPage(
+      name: AppRoutes.CONTACT,
+      page: () => const ContactWebView(),
+      binding: null, // No binding for now
+    ),
+    GetPage(
+      name: AppRoutes.PARISH,
+      page: () => const ParishView(),
+      binding: null, // No binding for now
+    ),
+    GetPage(
+      name: AppRoutes.EVENTS,
+      page: () => const EventsView(),
+      binding: null, // No binding for now
+    ),
+    GetPage(
+      name: AppRoutes.TITHE,
+      page: () => const TitheView(),
+      binding: null, // No binding for now
     ),
   ];
 }

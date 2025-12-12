@@ -23,7 +23,7 @@ class _AppState extends State<App> {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: ThemeMode.system,
-      initialRoute: AppRoutes.login,
+      initialRoute: AppRoutes.web_home,
       getPages: AppPages.pages,
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
       supportedLocales: [
