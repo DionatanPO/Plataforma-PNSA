@@ -39,13 +39,13 @@ dependencies:
   get: ^4.7.3
   firebase_core: ^3.1.0
   firebase_auth: ^5.1.1
-  firebase_database: ^11.1.1
   intl: ^0.20.2
   currency_text_input_formatter: ^2.2.9
   mask_text_input_formatter: ^2.0.0
   flutter_localizations:
     sdk: flutter
   url_launcher: ^6.3.0 # Added for WhatsApp functionality
+  cloud_firestore: ^5.6.12
 
 
 dev_dependencies:

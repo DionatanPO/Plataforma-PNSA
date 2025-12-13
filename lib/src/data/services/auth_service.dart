@@ -1,5 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Changed from firebase_database
 import 'package:get/get.dart';
 
 import '../../domain/models/user_model.dart';
@@ -7,7 +7,7 @@ import '../../domain/models/user_model.dart';
 
 class AuthService extends GetxService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseDatabase _database = FirebaseDatabase.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance; // Changed from FirebaseDatabase
 
   // Observable para o usuário atual
   final Rxn<User> _firebaseUser = Rxn<User>();
@@ -36,22 +36,22 @@ class AuthService extends GetxService {
     }
   }
 
-  /// Cria ou atualiza as informações de um usuário no Realtime Database.
+  /// Cria ou atualiza as informações de um usuário no Firestore.
   /// A chave do usuário no banco de dados será o seu UID.
   Future<void> createUserInDatabase(User user, String nome) async {
     try {
-      final userRef = _database.ref().child('usuarios').child(user.uid);
+      final userRef = _firestore.collection('usuarios').doc(user.uid); // Changed for Firestore
 
       // Para garantir que o modelo seja preenchido corretamente,
       // buscamos o usuário existente ou criamos um novo com valores padrão.
-      final snapshot = await userRef.get();
-      if (snapshot.exists) {
+      final docSnapshot = await userRef.get(); // Changed for Firestore
+      if (docSnapshot.exists) {
         // Se o usuário já existe, apenas atualizamos o último acesso.
         await userRef.update({
           'lastLoginAt': DateTime.now().millisecondsSinceEpoch,
           'ultimoAcesso': DateTime.now().millisecondsSinceEpoch,
         });
-        print('Usuário já existe. Último acesso atualizado.');
+        print('Usuário já existe. Último acesso atualizado no Firestore.');
         return;
       }
 
@@ -76,12 +76,11 @@ class AuthService extends GetxService {
 
       // Usando .set() para criar ou sobrescrever os dados do usuário
       await userRef.set(userModel.toJson());
-      print('Novo usuário salvo no banco de dados com sucesso!');
+      print('Novo usuário salvo no Firestore com sucesso!');
 
     } catch (e) {
-      // O erro de permissão negada será capturado aqui.
-      print('Error saving user to database: $e');
-      // Re-lança o erro para que a camada de UI possa tratá-lo se necessário
+      // Erros de permissão serão capturados aqui.
+      print('Error saving user to Firestore: $e');
       rethrow;
     }
   }
