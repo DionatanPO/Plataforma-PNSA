@@ -89,4 +89,31 @@ class AuthService extends GetxService {
   Future<void> logout() async {
     await _auth.signOut();
   }
+
+  /// Atualiza o status de pendência do usuário no Firestore.
+  Future<void> updateUserPendencyStatus(bool pendencia) async {
+    final user = _auth.currentUser;
+    if (user != null) {
+      final userRef = _firestore.collection('usuarios').doc(user.uid);
+      await userRef.update({
+        'pendencia': pendencia,
+        'ultimoAcesso': DateTime.now().millisecondsSinceEpoch,
+      });
+      print('Status de pendência do usuário atualizado para: $pendencia');
+    }
+  }
+
+  /// Obtém os dados do usuário do Firestore.
+  Future<UserModel?> getUserData(String uid) async {
+    try {
+      final userDoc = await _firestore.collection('usuarios').doc(uid).get();
+      if (userDoc.exists) {
+        return UserModel.fromJson(userDoc.data()!);
+      }
+      return null;
+    } catch (e) {
+      print('Erro ao obter dados do usuário: $e');
+      return null;
+    }
+  }
 }

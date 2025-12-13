@@ -61,8 +61,17 @@ class LoginController extends GetxController {
           if (user != null) {
             // Salvar informações do usuário no Realtime Database
             await _authService.createUserInDatabase(user, user.email?.split('@')[0] ?? 'Usuário');
+
+            // Verificar se o usuário tem pendências
+            final userData = await _authService.getUserData(user.uid);
+            if (userData != null && userData.pendencia) {
+              Get.offAllNamed(AppRoutes.password_reset);
+            } else {
+              Get.offAllNamed(AppRoutes.home);
+            }
+          } else {
+            Get.snackbar('Erro', 'Não foi possível obter os dados do usuário');
           }
-          Get.offAllNamed(AppRoutes.home);
         } else {
           Get.snackbar('Erro', 'Credenciais inválidas ou erro de autenticação');
         }

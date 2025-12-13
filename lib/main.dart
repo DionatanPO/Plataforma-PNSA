@@ -7,6 +7,7 @@ import 'package:plataforma_pnsa/src/ui/access_management/controllers/access_mana
 import 'package:plataforma_pnsa/src/ui/auth/login/login_controller.dart';
 import 'package:plataforma_pnsa/src/ui/contribuicoes/controllers/contribuicao_controller.dart';
 import 'package:plataforma_pnsa/src/ui/dizimistas/controllers/dizimista_controller.dart';
+import 'package:plataforma_pnsa/src/ui/auth/password_reset/password_reset_controller.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'dart:io' show Platform;
@@ -31,6 +32,7 @@ Future<void> main() async {
   Get.put(DizimistaController());
   Get.put(ContribuicaoController());
   Get.put(AccessManagementController());
+  Get.put(PasswordResetController());
 
   runApp(App());
 }

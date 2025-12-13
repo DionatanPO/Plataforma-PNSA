@@ -14,4 +14,5 @@ abstract class AppRoutes {
   static const PARISH = '/parish';
   static const EVENTS = '/events';
   static const TITHE = '/tithe';
+  static const password_reset = '/password_reset';
 }

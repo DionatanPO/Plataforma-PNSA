@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 
 import '../ui/auth/login/login_view.dart';
+import '../ui/auth/password_reset/password_reset_binding.dart';
 import '../ui/access_management/bindings/access_management_binding.dart';
 import '../ui/access_management/views/access_management_view.dart';
 
@@ -21,6 +22,7 @@ import '../ui/web/parish/parish_view.dart';
 import '../ui/web/events/events_view.dart';
 import '../ui/web/tithe/tithe_view.dart';
 import '../ui/support/theme_settings_view.dart';
+import '../ui/auth/password_reset/password_reset_view.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -82,6 +84,11 @@ class AppPages {
       name: AppRoutes.TITHE,
       page: () => const TitheView(),
       binding: null, // No binding for now
+    ),
+    GetPage(
+      name: AppRoutes.password_reset,
+      page: () => const PasswordResetView(),
+      binding: PasswordResetBinding(),
     ),
   ];
 }
