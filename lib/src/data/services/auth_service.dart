@@ -3,11 +3,13 @@ import 'package:cloud_firestore/cloud_firestore.dart'; // Changed from firebase_
 import 'package:get/get.dart';
 
 import '../../domain/models/user_model.dart';
+import 'session_service.dart';
 
 
 class AuthService extends GetxService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance; // Changed from FirebaseDatabase
+  final SessionService _sessionService = Get.find<SessionService>();
 
   // Observable para o usuário atual
   final Rxn<User> _firebaseUser = Rxn<User>();
@@ -19,18 +21,42 @@ class AuthService extends GetxService {
     super.onInit();
     // Escuta as mudanças no estado de autenticação
     _firebaseUser.bindStream(_auth.authStateChanges());
+
+    // Restaura a sessão se ela existir
+    _restoreSession();
+  }
+
+  // Método para restaurar a sessão do usuário
+  Future<void> _restoreSession() async {
+    if (_sessionService.hasValidSession()) {
+      // O Firebase Auth já mantém a sessão automaticamente,
+      // mas podemos verificar se o usuário ainda é válido
+      final user = _auth.currentUser;
+      if (user != null) {
+        // Atualiza o último acesso
+        await _sessionService.updateLastAccess();
+      }
+    }
   }
 
   /// Efetua o login com email e senha.
   Future<bool> login(String email, String password) async {
     try {
-      await _auth.signInWithEmailAndPassword(email: email, password: password);
+      final result = await _auth.signInWithEmailAndPassword(email: email, password: password);
+      final user = result.user;
+
+      if (user != null) {
+        // Salvar dados da sessão
+        await _sessionService.saveSession(user.uid, user.email ?? '', user.email?.split('@')[0] ?? 'Usuário');
+      }
+
       return true;
     } on FirebaseAuthException catch (e) {
       // Log do erro para depuração
       print('Firebase Auth Exception: ${e.message} (code: ${e.code})');
       return false;
     } catch (e) {
+      // Log do erro geral
       print('Erro desconhecido no login: $e');
       return false;
     }
@@ -88,6 +114,7 @@ class AuthService extends GetxService {
   /// Efetua o logout do usuário.
   Future<void> logout() async {
     await _auth.signOut();
+    await _sessionService.clearSession();
   }
 
   /// Atualiza o status de pendência do usuário no Firestore.

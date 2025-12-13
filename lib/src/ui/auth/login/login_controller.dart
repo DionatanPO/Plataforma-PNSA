@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -62,6 +63,9 @@ class LoginController extends GetxController {
             // Salvar informações do usuário no Realtime Database
             await _authService.createUserInDatabase(user, user.email?.split('@')[0] ?? 'Usuário');
 
+            // Aguardar um pouco antes de verificar pendências para garantir que os dados estejam sincronizados
+            await Future.delayed(const Duration(milliseconds: 500));
+
             // Verificar se o usuário tem pendências
             final userData = await _authService.getUserData(user.uid);
             if (userData != null && userData.pendencia) {
@@ -75,6 +79,8 @@ class LoginController extends GetxController {
         } else {
           Get.snackbar('Erro', 'Credenciais inválidas ou erro de autenticação');
         }
+      } on FirebaseAuthException catch (e) {
+        Get.snackbar('Erro de Autenticação', 'Erro: ${e.message}');
       } catch (e) {
         Get.snackbar('Erro', 'Ocorreu um erro durante o login: $e');
       } finally {
@@ -88,6 +94,11 @@ class LoginController extends GetxController {
       email: emailController.text.trim(),
       password: passwordController.text,
     );
+  }
+
+  void logout() async {
+    await _authService.logout();
+    Get.offAllNamed(AppRoutes.login);
   }
 
   @override

@@ -1,7 +1,10 @@
 import 'package:get/get.dart';
 import '../../routes/app_routes.dart';
+import '../../data/services/auth_service.dart';
 
 class ProfileController extends GetxController {
+  final AuthService _authService = Get.find<AuthService>();
+
   // User data (would come from auth service in production)
   final name = 'Dionatan Oliveira'.obs;
   final email = 'dionatan@email.com'.obs;
@@ -37,7 +40,12 @@ class ProfileController extends GetxController {
     Get.toNamed('/help');
   }
 
-  void logout() {
+  void logout() async {
+    // Chama o método de logout do serviço de autenticação
+    // que cuida de limpar a sessão e fazer o logout do Firebase
+    await _authService.logout();
+
+    // Redireciona para a tela de login
     Get.offAllNamed(AppRoutes.login);
   }
 }

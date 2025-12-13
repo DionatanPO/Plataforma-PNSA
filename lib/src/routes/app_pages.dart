@@ -5,6 +5,7 @@ import '../ui/auth/login/login_view.dart';
 import '../ui/auth/password_reset/password_reset_binding.dart';
 import '../ui/access_management/bindings/access_management_binding.dart';
 import '../ui/access_management/views/access_management_view.dart';
+import '../ui/splash/splash_view.dart';
 
 import '../ui/contribuicoes/bindings/contribuicao_binding.dart';
 import '../ui/contribuicoes/views/contribuicao_view.dart';
@@ -89,6 +90,10 @@ class AppPages {
       name: AppRoutes.password_reset,
       page: () => const PasswordResetView(),
       binding: PasswordResetBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.splash,
+      page: () => const SplashScreen(),
     ),
   ];
 }
