@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../model/login_model.dart';
+
+import '../../../data/services/auth_service.dart';
+import '../../../domain/models/login_model.dart';
 import '../../../routes/app_routes.dart';
-import '../../../services/auth_service.dart';
+
 
 class LoginController extends GetxController {
   final AuthService _authService = Get.find<AuthService>();
@@ -55,6 +57,11 @@ class LoginController extends GetxController {
         );
 
         if (success) {
+          final user = _authService.currentUser;
+          if (user != null) {
+            // Salvar informações do usuário no Realtime Database
+            await _authService.createUserInDatabase(user, user.email?.split('@')[0] ?? 'Usuário');
+          }
           Get.offAllNamed(AppRoutes.home);
         } else {
           Get.snackbar('Erro', 'Credenciais inválidas ou erro de autenticação');

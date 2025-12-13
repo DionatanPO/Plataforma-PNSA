@@ -82,14 +82,19 @@ class LoginView extends StatelessWidget {
                                   child: Image.asset(
                                     'assets/images/logo.jpg',
                                     fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) => Container(
-                                      color: Colors.grey,
-                                      child: const Icon(
-                                        Icons.image_not_supported_outlined,
-                                        color: Colors.white,
-                                        size: 28,
-                                      ),
-                                    ),
+                                    errorBuilder:
+                                        (
+                                          context,
+                                          error,
+                                          stackTrace,
+                                        ) => Container(
+                                          color: Colors.grey,
+                                          child: const Icon(
+                                            Icons.image_not_supported_outlined,
+                                            color: Colors.white,
+                                            size: 28,
+                                          ),
+                                        ),
                                   ),
                                 ),
                               ),
@@ -114,7 +119,9 @@ class LoginView extends StatelessWidget {
                                         letterSpacing: 1.2,
                                         shadows: [
                                           Shadow(
-                                            color: Colors.black.withOpacity(0.7),
+                                            color: Colors.black.withOpacity(
+                                              0.7,
+                                            ),
                                             offset: const Offset(2, 2),
                                             blurRadius: 4,
                                           ),
@@ -139,7 +146,9 @@ class LoginView extends StatelessWidget {
                               padding: const EdgeInsets.all(32),
                               decoration: BoxDecoration(
                                 color: Colors.white.withOpacity(0.1),
-                                border: Border.all(color: Colors.white.withOpacity(0.2)),
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.2),
+                                ),
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Column(
@@ -159,13 +168,12 @@ class LoginView extends StatelessWidget {
                                   Row(
                                     children: [
                                       Container(
-                                          height: 2,
-                                          width: 40,
-                                          color: Colors.white.withOpacity(0.5)
+                                        height: 2,
+                                        width: 40,
+                                        color: Colors.white.withOpacity(0.5),
                                       ),
-
                                     ],
-                                  )
+                                  ),
                                 ],
                               ),
                             ),
@@ -199,7 +207,9 @@ class LoginView extends StatelessWidget {
                           image: AssetImage(heroImage),
                           fit: BoxFit.cover,
                           colorFilter: ColorFilter.mode(
-                              Colors.black.withOpacity(0.6), BlendMode.darken),
+                            Colors.black.withOpacity(0.6),
+                            BlendMode.darken,
+                          ),
                         ),
                       ),
                       child: Center(
@@ -222,14 +232,15 @@ class LoginView extends StatelessWidget {
                                 child: Image.asset(
                                   'assets/images/logo.jpg',
                                   fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) => Container(
-                                    color: Colors.grey,
-                                    child: const Icon(
-                                      Icons.image_not_supported_outlined,
-                                      color: Colors.white,
-                                      size: 24,
-                                    ),
-                                  ),
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      Container(
+                                        color: Colors.grey,
+                                        child: const Icon(
+                                          Icons.image_not_supported_outlined,
+                                          color: Colors.white,
+                                          size: 24,
+                                        ),
+                                      ),
                                 ),
                               ),
                             ),
@@ -237,11 +248,11 @@ class LoginView extends StatelessWidget {
                             Text(
                               "Paróquia NS Auxiliadora",
                               style: GoogleFonts.outfit(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
                               ),
-                            )
+                            ),
                           ],
                         ),
                       ),
@@ -251,7 +262,10 @@ class LoginView extends StatelessWidget {
                   Expanded(
                     child: Center(
                       child: SingleChildScrollView(
-                        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 24),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 40,
+                          vertical: 24,
+                        ),
                         child: ConstrainedBox(
                           constraints: const BoxConstraints(maxWidth: 420),
                           child: TweenAnimationBuilder<double>(
@@ -283,9 +297,10 @@ class LoginView extends StatelessWidget {
                                 Text(
                                   'Digite seus dados para acessar o painel administrativo.',
                                   style: GoogleFonts.inter(
-                                      fontSize: 15,
-                                      color: theme.colorScheme.onSurface.withOpacity(0.6),
-                                      height: 1.5
+                                    fontSize: 15,
+                                    color: theme.colorScheme.onSurface
+                                        .withOpacity(0.6),
+                                    height: 1.5,
                                   ),
                                 ),
                                 const SizedBox(height: 40),
@@ -295,71 +310,104 @@ class LoginView extends StatelessWidget {
                                   key: controller.formKey,
                                   child: Column(
                                     children: [
-                                      Obx(() => _ModernInput(
-                                        label: "E-mail",
-                                        controller: controller.emailController,
-                                        hint: "ex: tesouraria@paroquia.com",
-                                        icon: Icons.email_outlined,
-                                        errorText: controller.emailError.value,
-                                        validator: controller.validateEmail,
-                                      )),
+                                      Obx(
+                                        () => _ModernInput(
+                                          label: "E-mail",
+                                          controller:
+                                              controller.emailController,
+                                          hint: "ex: tesouraria@paroquia.com",
+                                          icon: Icons.email_outlined,
+                                          errorText:
+                                              controller.emailError.value,
+                                          validator: controller.validateEmail,
+                                        ),
+                                      ),
                                       const SizedBox(height: 24),
-                                      Obx(() => _ModernInput(
-                                        label: "Senha",
-                                        controller: controller.passwordController,
-                                        hint: "Digite sua senha",
-                                        icon: Icons.lock_outline,
-                                        isPassword: true,
-                                        obscureText: controller.obscurePassword.value,
-                                        onToggleVisibility: controller.togglePasswordVisibility,
-                                        errorText: controller.passwordError.value,
-                                        validator: controller.validatePassword,
-                                      )),
+                                      Obx(
+                                        () => _ModernInput(
+                                          label: "Senha",
+                                          controller:
+                                              controller.passwordController,
+                                          hint: "Digite sua senha",
+                                          icon: Icons.lock_outline,
+                                          isPassword: true,
+                                          obscureText:
+                                              controller.obscurePassword.value,
+                                          onToggleVisibility: controller
+                                              .togglePasswordVisibility,
+                                          errorText:
+                                              controller.passwordError.value,
+                                          validator:
+                                              controller.validatePassword,
+                                        ),
+                                      ),
                                     ],
                                   ),
                                 ),
 
-
-
                                 const SizedBox(height: 32),
 
                                 // Botão Principal
-                                Obx(() => SizedBox(
-                                  width: double.infinity,
-                                  height: 56,
-                                  child: ElevatedButton(
-                                    onPressed: controller.isLoading.value ? null : controller.login,
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: controller.isLoading.value
-                                        ? theme.colorScheme.onSurface.withOpacity(0.4) // Gray state when loading
-                                        : theme.colorScheme.primary, // Use theme primary color when not loading
-                                      foregroundColor: Colors.white,
-                                      elevation: 0,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      shadowColor: theme.colorScheme.primary.withOpacity(0.4),
-                                    ).copyWith(
-                                      elevation: MaterialStateProperty.resolveWith((states) {
-                                        if (states.contains(MaterialState.hovered)) return 10;
-                                        return 0;
-                                      }),
-                                    ),
-                                    child: controller.isLoading.value
-                                        ? const SizedBox(
-                                        height: 24, width: 24,
-                                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5)
-                                    )
-                                        : Text(
-                                      'Acessar Sistema',
-                                      style: GoogleFonts.outfit(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
-                                          letterSpacing: 0.5
-                                      ),
+                                Obx(
+                                  () => SizedBox(
+                                    width: double.infinity,
+                                    height: 56,
+                                    child: ElevatedButton(
+                                      onPressed: controller.isLoading.value
+                                          ? null
+                                          : controller.login,
+                                      style:
+                                          ElevatedButton.styleFrom(
+                                            backgroundColor:
+                                                controller.isLoading.value
+                                                ? theme.colorScheme.onSurface
+                                                      .withOpacity(
+                                                        0.4,
+                                                      ) // Gray state when loading
+                                                : theme.colorScheme.primary,
+                                            // Use theme primary color when not loading
+                                            foregroundColor: Colors.white,
+                                            elevation: 0,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                            ),
+                                            shadowColor: theme
+                                                .colorScheme
+                                                .primary
+                                                .withOpacity(0.4),
+                                          ).copyWith(
+                                            elevation:
+                                                MaterialStateProperty.resolveWith(
+                                                  (states) {
+                                                    if (states.contains(
+                                                      MaterialState.hovered,
+                                                    ))
+                                                      return 10;
+                                                    return 0;
+                                                  },
+                                                ),
+                                          ),
+                                      child: controller.isLoading.value
+                                          ? const SizedBox(
+                                              height: 24,
+                                              width: 24,
+                                              child: CircularProgressIndicator(
+                                                color: Colors.white,
+                                                strokeWidth: 2.5,
+                                              ),
+                                            )
+                                          : Text(
+                                              'Acessar Sistema',
+                                              style: GoogleFonts.outfit(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w600,
+                                                letterSpacing: 0.5,
+                                              ),
+                                            ),
                                     ),
                                   ),
-                                )),
+                                ),
 
                                 const SizedBox(height: 40),
 
@@ -368,11 +416,12 @@ class LoginView extends StatelessWidget {
                                   child: Text(
                                     "© 2025 - Paroquia Nossa Senhora Auxiliadora",
                                     style: GoogleFonts.inter(
-                                        fontSize: 12,
-                                        color: theme.colorScheme.onSurface.withOpacity(0.4)
+                                      fontSize: 12,
+                                      color: theme.colorScheme.onSurface
+                                          .withOpacity(0.4),
                                     ),
                                   ),
-                                )
+                                ),
                               ],
                             ),
                           ),
@@ -446,7 +495,9 @@ class _ModernInputState extends State<_ModernInput> {
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             decoration: BoxDecoration(
-              color: _isFocused ? Colors.white : theme.colorScheme.surfaceVariant.withOpacity(0.2),
+              color: _isFocused
+                  ? Colors.white
+                  : theme.colorScheme.surfaceVariant.withOpacity(0.2),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: hasError
@@ -455,35 +506,55 @@ class _ModernInputState extends State<_ModernInput> {
                 width: 1.5,
               ),
               boxShadow: _isFocused && !hasError
-                  ? [BoxShadow(color: primaryColor.withOpacity(0.1), blurRadius: 8, offset: const Offset(0, 4))]
+                  ? [
+                      BoxShadow(
+                        color: primaryColor.withOpacity(0.1),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ]
                   : [],
             ),
             child: TextFormField(
               controller: widget.controller,
               obscureText: widget.obscureText,
               validator: widget.validator,
-              style: GoogleFonts.inter(fontSize: 15, color: theme.colorScheme.onSurface),
+              style: GoogleFonts.inter(
+                fontSize: 15,
+                color: theme.colorScheme.onSurface,
+              ),
               cursorColor: primaryColor,
               decoration: InputDecoration(
                 hintText: widget.hint,
-                hintStyle: GoogleFonts.inter(color: theme.colorScheme.onSurface.withOpacity(0.3)),
+                hintStyle: GoogleFonts.inter(
+                  color: theme.colorScheme.onSurface.withOpacity(0.3),
+                ),
                 prefixIcon: Icon(
-                    widget.icon,
-                    size: 20,
-                    color: hasError ? Colors.red : (_isFocused ? primaryColor : theme.colorScheme.onSurface.withOpacity(0.4))
+                  widget.icon,
+                  size: 20,
+                  color: hasError
+                      ? Colors.red
+                      : (_isFocused
+                            ? primaryColor
+                            : theme.colorScheme.onSurface.withOpacity(0.4)),
                 ),
                 suffixIcon: widget.isPassword
                     ? IconButton(
-                  icon: Icon(
-                    widget.obscureText ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                    size: 20,
-                    color: theme.colorScheme.onSurface.withOpacity(0.5),
-                  ),
-                  onPressed: widget.onToggleVisibility,
-                )
+                        icon: Icon(
+                          widget.obscureText
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility_outlined,
+                          size: 20,
+                          color: theme.colorScheme.onSurface.withOpacity(0.5),
+                        ),
+                        onPressed: widget.onToggleVisibility,
+                      )
                     : null,
                 border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                contentPadding: const EdgeInsets.symmetric(
+                  vertical: 16,
+                  horizontal: 16,
+                ),
               ),
             ),
           ),
@@ -494,7 +565,11 @@ class _ModernInputState extends State<_ModernInput> {
             padding: const EdgeInsets.only(top: 6, left: 4),
             child: Text(
               widget.errorText!,
-              style: GoogleFonts.inter(color: Colors.red, fontSize: 12, fontWeight: FontWeight.w500),
+              style: GoogleFonts.inter(
+                color: Colors.red,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
       ],

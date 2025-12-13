@@ -1,0 +1,93 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:get/get.dart';
+
+import '../../domain/models/user_model.dart';
+
+
+class AuthService extends GetxService {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseDatabase _database = FirebaseDatabase.instance;
+
+  // Observable para o usuário atual
+  final Rxn<User> _firebaseUser = Rxn<User>();
+
+  User? get currentUser => _firebaseUser.value;
+
+  @override
+  void onInit() {
+    super.onInit();
+    // Escuta as mudanças no estado de autenticação
+    _firebaseUser.bindStream(_auth.authStateChanges());
+  }
+
+  /// Efetua o login com email e senha.
+  Future<bool> login(String email, String password) async {
+    try {
+      await _auth.signInWithEmailAndPassword(email: email, password: password);
+      return true;
+    } on FirebaseAuthException catch (e) {
+      // Log do erro para depuração
+      print('Firebase Auth Exception: ${e.message} (code: ${e.code})');
+      return false;
+    } catch (e) {
+      print('Erro desconhecido no login: $e');
+      return false;
+    }
+  }
+
+  /// Cria ou atualiza as informações de um usuário no Realtime Database.
+  /// A chave do usuário no banco de dados será o seu UID.
+  Future<void> createUserInDatabase(User user, String nome) async {
+    try {
+      final userRef = _database.ref().child('usuarios').child(user.uid);
+
+      // Para garantir que o modelo seja preenchido corretamente,
+      // buscamos o usuário existente ou criamos um novo com valores padrão.
+      final snapshot = await userRef.get();
+      if (snapshot.exists) {
+        // Se o usuário já existe, apenas atualizamos o último acesso.
+        await userRef.update({
+          'lastLoginAt': DateTime.now().millisecondsSinceEpoch,
+          'ultimoAcesso': DateTime.now().millisecondsSinceEpoch,
+        });
+        print('Usuário já existe. Último acesso atualizado.');
+        return;
+      }
+
+      // Se o usuário não existe, criamos um novo com todos os campos.
+      final now = DateTime.now();
+      final userModel = UserModel(
+        uid: user.uid,
+        email: user.email ?? '',
+        nome: nome,
+        displayName: user.displayName ?? nome,
+        photoURL: user.photoURL ?? '',
+        createdAt: user.metadata.creationTime?.millisecondsSinceEpoch ?? now.millisecondsSinceEpoch,
+        lastLoginAt: user.metadata.lastSignInTime?.millisecondsSinceEpoch ?? now.millisecondsSinceEpoch,
+        cpf: '', // Padrão
+        telefone: '', // Padrão
+        endereco: '', // Padrão
+        funcao: 'Membro', // Padrão
+        status: 'Ativo', // Padrão
+        ultimoAcesso: now, // Padrão
+        pendencia: false, // Padrão
+      );
+
+      // Usando .set() para criar ou sobrescrever os dados do usuário
+      await userRef.set(userModel.toJson());
+      print('Novo usuário salvo no banco de dados com sucesso!');
+
+    } catch (e) {
+      // O erro de permissão negada será capturado aqui.
+      print('Error saving user to database: $e');
+      // Re-lança o erro para que a camada de UI possa tratá-lo se necessário
+      rethrow;
+    }
+  }
+
+  /// Efetua o logout do usuário.
+  Future<void> logout() async {
+    await _auth.signOut();
+  }
+}

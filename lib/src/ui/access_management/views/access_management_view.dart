@@ -3,9 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import '../../../domain/models/acesso_model.dart';
 import '../controllers/access_management_controller.dart';
-import '../models/acesso_model.dart';
-import '../models/funcao_model.dart';
+
 
 class AccessManagementView extends StatefulWidget {
   const AccessManagementView({Key? key}) : super(key: key);

@@ -1,6 +1,8 @@
 import 'package:get/get.dart';
-import '../models/acesso_model.dart';
-import '../models/funcao_model.dart';
+
+import '../../../domain/models/acesso_model.dart';
+import '../../../domain/models/funcao_model.dart';
+
 
 class AccessManagementController extends GetxController {
   final _acessos = <Acesso>[].obs;
