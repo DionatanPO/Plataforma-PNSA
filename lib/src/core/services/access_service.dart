@@ -169,6 +169,7 @@ class AccessService {
           'nome',
           isLessThanOrEqualTo: '${query.toLowerCase()}zz',
         )
+        .orderBy('nome') // Adicionado para ordenar resultados de busca
         .snapshots()
         .map((snapshot) {
       return snapshot.docs.map((doc) => _fromFirestoreDocument(doc)).toList();

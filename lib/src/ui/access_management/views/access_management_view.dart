@@ -363,6 +363,7 @@ class _AccessManagementViewState extends State<AccessManagementView> {
                 _tableHeader('CONTATO / CPF', flex: 2),
                 _tableHeader('FUNÇÃO', flex: 2),
                 _tableHeader('STATUS', flex: 1),
+                _tableHeader('ÚLTIMO ACESSO', flex: 2), // New Header
                 _tableHeader('AÇÕES', flex: 1, alignRight: true),
               ],
             ),
@@ -460,6 +461,18 @@ class _AccessManagementViewState extends State<AccessManagementView> {
                       child: Align(
                         alignment: Alignment.centerLeft,
                         child: _StatusBadge(status: acesso.status),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 2, // New column for Last Access
+                      child: Text(
+                        acesso.ultimoAcesso != null
+                            ? controller.formatarData(acesso.ultimoAcesso!)
+                            : 'Nunca',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: theme.colorScheme.onSurface.withOpacity(0.6),
+                        ),
                       ),
                     ),
                     Expanded(
@@ -686,25 +699,27 @@ class _AccessManagementViewState extends State<AccessManagementView> {
   }
 
   void _openEditUserDialog(Acesso acesso) {
-    String nome = acesso.nome;
-    String email = acesso.email;
-    String cpf = _formatarCPF(acesso.cpf);
-    String telefone = _formatarTelefone(acesso.telefone);
-    String endereco = acesso.endereco;
+    // --- CONTROLLERS PARA OS CAMPOS ---
+    final nomeController = TextEditingController(text: acesso.nome);
+    final emailController = TextEditingController(text: acesso.email);
+    final enderecoController = TextEditingController(text: acesso.endereco);
+    final cpfController = TextEditingController();
+    final telefoneController = TextEditingController();
+
+    // --- VARIÁVEIS DE ESTADO PARA DROPDOWNS ---
     String funcao = acesso.funcao;
     String status = acesso.status;
 
-    // Formatters para máscaras
+    // --- FORMATTERS E VALORES INICIAIS ---
     final cpfFormatter = MaskTextInputFormatter(
-      mask: '###.###.###-##',
-      filter: {"#": RegExp(r'[0-9]')},
-      initialText: _formatarCPF(acesso.cpf),
+      mask: '###.###.###-##', filter: {"#": RegExp(r'[0-9]')},
     );
+    cpfController.text = cpfFormatter.maskText(acesso.cpf);
+
     final telefoneFormatter = MaskTextInputFormatter(
-      mask: '(##) #####-####',
-      filter: {"#": RegExp(r'[0-9]')},
-      initialText: _formatarTelefone(acesso.telefone),
+      mask: '(##) #####-####', filter: {"#": RegExp(r'[0-9]')},
     );
+    telefoneController.text = telefoneFormatter.maskText(acesso.telefone);
 
     showDialog(
       context: context,
@@ -731,16 +746,13 @@ class _AccessManagementViewState extends State<AccessManagementView> {
                       _label('Dados Pessoais'),
                       _buildTextField(
                         label: 'Nome Completo',
-                        onChanged: (v) => nome = v,
-                        inputFormatters: [], // Nome não precisa de formatação
+                        controller: nomeController,
                         keyboardType: TextInputType.text,
                       ),
                       const SizedBox(height: 16),
                       _buildTextField(
                         label: 'E-mail Corporativo',
-                        onChanged: (v) => email = v,
-                        inputFormatters: [],
-                        // E-mail não precisa de formatação específica
+                        controller: emailController,
                         keyboardType: TextInputType.emailAddress,
                       ),
                       const SizedBox(height: 16),
@@ -749,7 +761,7 @@ class _AccessManagementViewState extends State<AccessManagementView> {
                           Expanded(
                             child: _buildTextField(
                               label: 'CPF',
-                              onChanged: (v) => cpf = v,
+                              controller: cpfController,
                               inputFormatters: [cpfFormatter],
                               keyboardType: TextInputType.number,
                             ),
@@ -758,7 +770,7 @@ class _AccessManagementViewState extends State<AccessManagementView> {
                           Expanded(
                             child: _buildTextField(
                               label: 'Celular',
-                              onChanged: (v) => telefone = v,
+                              controller: telefoneController,
                               inputFormatters: [telefoneFormatter],
                               keyboardType: TextInputType.phone,
                             ),
@@ -768,9 +780,7 @@ class _AccessManagementViewState extends State<AccessManagementView> {
                       const SizedBox(height: 16),
                       _buildTextField(
                         label: 'Endereço',
-                        onChanged: (v) => endereco = v,
-                        inputFormatters: [],
-                        // Endereço não precisa de formatação específica
+                        controller: enderecoController,
                         keyboardType: TextInputType.text,
                       ),
                       const SizedBox(height: 24),
@@ -813,24 +823,14 @@ class _AccessManagementViewState extends State<AccessManagementView> {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    if (nome.isNotEmpty && email.isNotEmpty) {
-                      // Remove a máscara antes de salvar
-                      final cpfSemMascara = cpf.replaceAll(
-                        RegExp(r'[^\d]'),
-                        '',
-                      );
-                      final telefoneSemMascara = telefone.replaceAll(
-                        RegExp(r'[^\d]'),
-                        '',
-                      );
-
+                    if (nomeController.text.isNotEmpty && emailController.text.isNotEmpty) {
                       final acessoAtualizado = Acesso(
                         id: acesso.id,
-                        nome: nome,
-                        email: email,
-                        cpf: cpfSemMascara,
-                        telefone: telefoneSemMascara,
-                        endereco: endereco,
+                        nome: nomeController.text,
+                        email: emailController.text,
+                        cpf: cpfFormatter.getUnmaskedText(),
+                        telefone: telefoneFormatter.getUnmaskedText(),
+                        endereco: enderecoController.text,
                         funcao: funcao,
                         status: status,
                         ultimoAcesso: acesso.ultimoAcesso,
@@ -1126,10 +1126,12 @@ class _AccessManagementViewState extends State<AccessManagementView> {
 
   Widget _buildTextField({
     required String label,
-    required Function(String) onChanged,
+    TextEditingController? controller,
+    Function(String)? onChanged,
     List<TextInputFormatter>? inputFormatters,
     TextInputType? keyboardType,
   }) => TextField(
+    controller: controller,
     decoration: InputDecoration(
       labelText: label,
       filled: true,
