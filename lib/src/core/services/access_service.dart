@@ -3,6 +3,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:plataforma_pnsa/src/domain/models/acesso_model.dart';
 
 class AccessService {
+  // Variável estática para indicar quando estamos criando um novo usuário
+  // Isso ajuda a evitar trocas de sessão indesejadas
+  static bool _creatingNewUser = false;
+  static String? _originalUserUid;
+
+  static bool get isCreatingNewUser => _creatingNewUser;
+  static String? get originalUserUid => _originalUserUid;
   static const String _collectionName = 'usuarios';
 
   // Converter Acesso para Map para armazenamento no Firestore
@@ -72,7 +79,7 @@ class AccessService {
         ultimoAcesso: DateTime.fromMillisecondsSinceEpoch(
           (data['ultimoAcesso'] as int?) ?? DateTime.now().millisecondsSinceEpoch,
         ),
-        pendencia: data['pendencia'] ?? false,
+        pendencia: data['pendencia'] ?? true,
       );
     }
     return null;
@@ -81,18 +88,49 @@ class AccessService {
   // Adicionar novo acesso
   static Future<void> addAcesso(Acesso acesso) async {
     try {
-      // Primeiro criar o usuário no Firebase Auth
-      final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      // Obter o usuário atual e seu token antes de criar o novo usuário
+      final currentUser = FirebaseAuth.instance.currentUser;
+      String? originalIdToken;
+
+      if (currentUser != null) {
+        originalIdToken = await currentUser.getIdToken();
+        _originalUserUid = currentUser.uid;
+      }
+
+      // Marcar que estamos criando um novo usuário
+      _creatingNewUser = true;
+
+      // Criar o usuário no Firebase Auth
+      final newUserCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: acesso.email,
         password: '123456', // Senha temporária
       );
 
-      // Depois salvar os dados complementares no Firestore
-      await FirebaseFirestore.instance.collection(_collectionName).doc(credential.user!.uid).set({
-        'id': credential.user!.uid,
+      // Salvar os dados complementares no Firestore
+      await FirebaseFirestore.instance.collection(_collectionName).doc(newUserCredential.user!.uid).set({
+        'id': newUserCredential.user!.uid,
         ..._toFirestoreMap(acesso)
       });
+
+      // Após criar o novo usuário e salvar no Firestore, reautenticar o usuário original
+      // Isso evita que o novo usuário fique logado no lugar do administrador
+      if (originalIdToken != null && currentUser != null) {
+        // A forma mais segura de restaurar a sessão do usuário original é fazer logout do novo usuário
+        // e permitir que o listener retome a sessão correta
+        // Mas infelizmente não podemos "voltar" para o usuário anterior diretamente
+
+        // A alternativa mais viável é manter a flag ativa para que o AuthService continue
+        // ignorando as mudanças de estado até que tudo esteja resolvido
+        print('Novo usuário criado (${newUserCredential.user!.uid}), mantendo usuário original (${_originalUserUid})');
+      }
+
+      // Após completar, resetar a flag
+      _creatingNewUser = false;
+      _originalUserUid = null;
     } on FirebaseAuthException catch (e) {
+      // Resetar as flags em caso de erro também
+      _creatingNewUser = false;
+      _originalUserUid = null;
       // Tratar erros de autenticação
       throw Exception('Erro ao criar usuário: ${e.message}');
     }

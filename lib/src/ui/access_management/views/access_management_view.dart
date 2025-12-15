@@ -1089,7 +1089,7 @@ class _AccessManagementViewState extends State<AccessManagementView> {
                         funcao: funcao,
                         status: status,
                         ultimoAcesso: DateTime.now(),
-                        pendencia: false,
+                        pendencia: true,
                       );
                       controller.addAcesso(novoAcesso);
                       Navigator.pop(context);

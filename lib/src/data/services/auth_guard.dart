@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../routes/app_routes.dart';
 import 'auth_service.dart';
+import '../../core/services/access_service.dart';
 
 
 class AuthGuard extends GetxService {
@@ -27,6 +28,13 @@ class AuthGuard extends GetxService {
 
   // Método chamado quando o estado de autenticação muda
   void _onAuthStateChanged(User? user) async {
+    // Verificar se estamos atualmente criando um novo usuário via AccessService
+    // Se estivermos, ignorar temporariamente essa mudança de estado para evitar redirecionamento indesejado
+    if (AccessService.isCreatingNewUser) {
+      // Apenas retornar sem fazer nenhuma ação de navegação
+      return;
+    }
+
     if (user != null) {
       // Usuário está autenticado
       _checkUserStatus(user.uid);

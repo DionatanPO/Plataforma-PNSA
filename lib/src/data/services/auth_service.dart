@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // Changed from firebase_database
 import 'package:get/get.dart';
 
+import '../../core/services/access_service.dart';
 import '../../domain/models/user_model.dart';
 import 'session_service.dart';
 
@@ -20,7 +21,19 @@ class AuthService extends GetxService {
   void onInit() {
     super.onInit();
     // Escuta as mudanças no estado de autenticação
-    _firebaseUser.bindStream(_auth.authStateChanges());
+    _auth.authStateChanges().listen((firebaseUser) {
+      // Verificar se estamos atualmente criando um novo usuário via AccessService
+      // Se estivermos, ignorar essa mudança de estado para evitar troca indesejada
+      if (!AccessService.isCreatingNewUser) {
+        _firebaseUser.value = firebaseUser;
+      } else {
+        // Se estivermos criando um novo usuário mas o firebaseUser é nulo (logout ou erro),
+        // ainda devemos atualizar o usuário
+        if (firebaseUser == null) {
+          _firebaseUser.value = firebaseUser;
+        }
+      }
+    });
 
     // Restaura a sessão se ela existir
     _restoreSession();

@@ -85,11 +85,24 @@ class AccessManagementController extends GetxController {
   }
 
   String getInitials(String name) {
-    var nameParts = name.split(' ');
+    if (name == null || name.isEmpty) {
+      return "";
+    }
+
+    var nameParts = name.split(' ').where((part) => part.isNotEmpty).toList();
+
     if (nameParts.length >= 2) {
-      return (nameParts[0][0] + nameParts[1][0]).toUpperCase();
+      String firstInitial = nameParts[0].isNotEmpty ? nameParts[0][0] : '';
+      String secondInitial = nameParts[1].isNotEmpty ? nameParts[1][0] : '';
+      return (firstInitial + secondInitial).toUpperCase();
     } else if (nameParts.length == 1) {
-      return nameParts[0].substring(0, 2).toUpperCase();
+      if (nameParts[0].length >= 2) {
+        return nameParts[0].substring(0, 2).toUpperCase();
+      } else if (nameParts[0].isNotEmpty) {
+        return nameParts[0][0].toUpperCase();
+      } else {
+        return "";
+      }
     } else {
       return "";
     }

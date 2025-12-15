@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../core/services/access_service.dart';
 import '../../routes/app_routes.dart';
 import '../../data/services/auth_service.dart';
 
@@ -29,26 +30,45 @@ class ProfileController extends GetxController {
 
   Future<void> loadUserData() async {
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        // Preenche com dados básicos do Firebase Auth
-        name.value = user.displayName ?? user.email?.split('@')[0] ?? 'Usuário';
-        email.value = user.email ?? '';
-        avatarUrl.value = user.photoURL ?? 'https://i.pravatar.cc/150?img=12';
+      // Verifica se estamos em processo de criação de novo usuário
+      // Se estivermos, podemos querer usar o UID original armazenado
+      String? userIdToUse;
 
-        // Busca dados completos do Firestore
-        final userData = await _authService.getUserData(user.uid);
+      if (AccessService.isCreatingNewUser && AccessService.originalUserUid != null) {
+        // Usar o UID do usuário original se estivermos criando um novo usuário
+        userIdToUse = AccessService.originalUserUid;
+      } else {
+        // Caso contrário, usar o usuário atual
+        userIdToUse = FirebaseAuth.instance.currentUser?.uid;
+      }
+
+      if (userIdToUse != null) {
+        // Buscar os dados do usuário específico
+        final userData = await _authService.getUserData(userIdToUse);
         if (userData != null) {
           name.value = userData.nome;
+          email.value = userData.email;
           cpf.value = userData.cpf;
           telefone.value = userData.telefone;
+
           endereco.value = userData.endereco;
           funcao.value = userData.funcao;
           status.value = userData.status;
+          // Para avatar, usar o padrão ou o que estiver disponível
+          avatarUrl.value = userData.photoURL ?? 'https://i.pravatar.cc/150?img=12';
+        } else {
+          // Se não encontrarmos os dados completos no Firestore, usar dados básicos do Auth
+          final authUser = FirebaseAuth.instance.currentUser;
+          if (authUser != null) {
+            name.value = authUser.displayName ?? authUser.email?.split('@')[0] ?? 'Usuário';
+            email.value = authUser.email ?? '';
+            avatarUrl.value = authUser.photoURL ?? 'https://i.pravatar.cc/150?img=12';
+          }
         }
       }
     } catch (e) {
       // Tratar erro ao carregar dados do usuário
+      print('Erro ao carregar dados do usuário: $e');
     }
   }
 
