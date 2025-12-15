@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:get/get.dart';
 import '../models/contribuicao_model.dart';
 import '../../dizimistas/models/dizimista_model.dart'; // Ajuste se necessário
 import '../../dizimistas/controllers/dizimista_controller.dart';
+import '../../../core/services/dizimista_service.dart';
 
 class ContribuicaoController extends GetxController {
   // Estado privado
@@ -43,32 +46,11 @@ class ContribuicaoController extends GetxController {
   Future<void> fetchContribuicoes() async {
     _isLoading.value = true;
     try {
-      await Future.delayed(const Duration(seconds: 1));
+      // Buscar contribuições reais do Firestore
+      // Implementação futura para buscar do Firestore
+      // Por enquanto, usando uma lista vazia pois os dados reais serão buscados via listeners
+      _contribuicoes.clear();
 
-      // Dados de exemplo
-      _contribuicoes.assignAll([
-        Contribuicao(
-          id: 1,
-          dizimistaId: 1,
-          dizimistaNome: "João Santos",
-          tipo: "Dízimo Regular",
-          valor: 200.00,
-          metodo: "Dinheiro",
-          dataRegistro: DateTime(2024, 5, 11),
-        ),
-        Contribuicao(
-          id: 2,
-          dizimistaId: 2,
-          dizimistaNome: "Maria Silva",
-          tipo: "Dízimo Regular",
-          valor: 150.00,
-          metodo: "PIX",
-          dataRegistro: DateTime(2024, 5, 9),
-        ),
-        // Adicionei mais itens para testar o scroll se precisar...
-        Contribuicao(id: 3, dizimistaId: 4, dizimistaNome: "Pedro Costa", tipo: "Oferta", valor: 50.00, metodo: "Cartão", dataRegistro: DateTime(2024, 5, 4)),
-        Contribuicao(id: 4, dizimistaId: 1, dizimistaNome: "João Santos",tipo: "Dízimo", valor: 200.00, metodo: "Dinheiro", dataRegistro: DateTime(2024, 4, 11)),
-      ]);
     } catch (e) {
       print("Erro ao carregar contribuições: $e");
     } finally {
@@ -79,38 +61,15 @@ class ContribuicaoController extends GetxController {
   Future<void> fetchDizimistas() async {
     _isLoading.value = true;
     try {
-      await Future.delayed(const Duration(seconds: 1));
+      // Buscar diretamente do Firestore usando o serviço
+      final dizimistasStream = DizimistaService.getAllDizimistas();
 
-      _dizimistas.assignAll([
-        // Dizimista(
-        //   id: 1,
-        //   nome: "João Santos",
-        //   cpf: "123.456.789-00",
-        //   telefone: "(11) 99999-1234",
-        //   email: "joao@email.com",
-        //   status: "Ativo",
-        //   rua: "Rua A",
-        //   bairro: "Centro",
-        //   cidade: "Iporá",
-        //   estado: "GO",
-        //   dataRegistro: DateTime(2022, 1, 14),
-        //   consentimento: true, numeroRegistro: '',
-        // ),
-        // Dizimista(
-        //   id: 2,
-        //   nome: "Maria Silva",
-        //   cpf: "987.654.321-00",
-        //   telefone: "(11) 98888-5678",
-        //   email: "maria@email.com",
-        //   status: "Ativo",
-        //   rua: "Rua B",
-        //   bairro: "Centro",
-        //   cidade: "Iporá",
-        //   estado: "GO",
-        //   dataRegistro: DateTime(2023, 3, 9),
-        //   consentimento: true, numeroRegistro: '',
-        // ),
-      ]);
+      // Escutar o stream e atualizar a lista local
+      dizimistasStream.listen((dizimistasList) {
+        _dizimistas.assignAll(dizimistasList);
+      }).onError((error) {
+        print("Erro ao carregar dizimistas do Firestore: $error");
+      });
     } catch (e) {
       print("Erro ao carregar dizimistas: $e");
     } finally {
@@ -146,16 +105,61 @@ class ContribuicaoController extends GetxController {
   List<Dizimista> searchDizimistas(String query) {
     if (query.isEmpty) return _dizimistas;
 
+    final queryLower = query.toLowerCase().trim();
+
     return _dizimistas.where((dizimista) {
-      return dizimista.nome.toLowerCase().contains(query.toLowerCase()) ||
+      return dizimista.nome.toLowerCase().contains(queryLower) ||
              dizimista.cpf.contains(query) ||
              dizimista.telefone.contains(query) ||
-             (dizimista.email?.toLowerCase().contains(query.toLowerCase()) ?? false) ||
-             (dizimista.rua?.toLowerCase().contains(query.toLowerCase()) ?? false) ||
-             (dizimista.bairro?.toLowerCase().contains(query.toLowerCase()) ?? false) ||
-             dizimista.cidade.toLowerCase().contains(query.toLowerCase()) ||
-             (dizimista.observacoes?.toLowerCase().contains(query.toLowerCase()) ?? false);
+             (dizimista.email?.toLowerCase().contains(queryLower) ?? false) ||
+             (dizimista.rua?.toLowerCase().contains(queryLower) ?? false) ||
+             (dizimista.numero?.toLowerCase().contains(queryLower) ?? false) ||
+             (dizimista.bairro?.toLowerCase().contains(queryLower) ?? false) ||
+             dizimista.cidade.toLowerCase().contains(queryLower) ||
+             dizimista.estado.toLowerCase().contains(queryLower) ||
+             (dizimista.cep?.contains(query) ?? false) ||
+             (dizimista.nomeConjugue?.toLowerCase().contains(queryLower) ?? false) ||
+             (dizimista.estadoCivil?.toLowerCase().contains(queryLower) ?? false) ||
+             (dizimista.observacoes?.toLowerCase().contains(queryLower) ?? false) ||
+             dizimista.status.toLowerCase().contains(queryLower);
     }).toList();
+  }
+
+  // Método para busca direta no Firestore
+  Future<List<Dizimista>> searchDizimistasFirestore(String query) async {
+    if (query.isEmpty) {
+      // Se não houver consulta, retornar todos
+      final dizimistasStream = DizimistaService.getAllDizimistas();
+      final completer = Completer<List<Dizimista>>();
+
+      dizimistasStream.listen((dizimistasList) {
+        if (!completer.isCompleted) {
+          completer.complete(dizimistasList);
+        }
+      }).onError((error) {
+        if (!completer.isCompleted) {
+          completer.complete([]);
+        }
+      });
+
+      return completer.future;
+    } else {
+      // Se houver consulta, usar busca avançada
+      final dizimistasStream = DizimistaService.advancedSearch(query);
+      final completer = Completer<List<Dizimista>>();
+
+      dizimistasStream.listen((dizimistasList) {
+        if (!completer.isCompleted) {
+          completer.complete(dizimistasList);
+        }
+      }).onError((error) {
+        if (!completer.isCompleted) {
+          completer.complete([]);
+        }
+      });
+
+      return completer.future;
+    }
   }
 
   // Método para obter os dados de um dizimista pelo ID
