@@ -31,7 +31,7 @@ class ContribuicaoController extends GetxController {
   final dataSelecionada = DateTime.now().obs;
 
   // Campos simples (Strings)
-  String mesReferencia = '12/2025';
+
   String tipo = 'Dízimo Regular';
   String metodo = 'PIX';
   String valor = '';

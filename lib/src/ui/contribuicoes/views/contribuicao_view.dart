@@ -468,7 +468,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Fiel Selecionado',
+                  'cionado',
                   style: GoogleFonts.outfit(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -520,32 +520,6 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
             ),
           ),
         ],
-
-        const SizedBox(height: 16),
-
-        // Mensagem de confirmação
-        if (controller.dizimistaSelecionado.value != null)
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.green.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.green.withOpacity(0.3)),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.check_circle, color: Colors.green, size: 20),
-                const SizedBox(width: 8),
-                Text(
-                  'Fiél selecionado: ${controller.dizimistaSelecionado.value?.nome}',
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    color: Colors.green,
-                  ),
-                ),
-              ],
-            ),
-          ),
       ],
     );
   }
