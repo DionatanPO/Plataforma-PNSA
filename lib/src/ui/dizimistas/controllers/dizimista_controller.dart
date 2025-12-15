@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import '../../../core/services/dizimista_service.dart';
 import '../models/dizimista_model.dart';
 
 class DizimistaController extends GetxController {
@@ -17,6 +18,7 @@ class DizimistaController extends GetxController {
       return _dizimistas.where((dizimista) {
         return dizimista.nome.toLowerCase().contains(queryLower) ||
                dizimista.cpf.contains(searchQuery.value) ||
+               dizimista.numeroRegistro.contains(searchQuery.value) ||
                dizimista.telefone.contains(searchQuery.value) ||
                (dizimista.email?.toLowerCase().contains(queryLower) ?? false) ||
                (dizimista.rua?.toLowerCase().contains(queryLower) ?? false) ||
@@ -36,186 +38,63 @@ class DizimistaController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    fetchDizimistas();
+
+    // Escutar mudanças em tempo real no Firestore
+    DizimistaService.getAllDizimistas().listen((dizimistasList) {
+      _dizimistas.assignAll(dizimistasList);
+    }).onError((error) {
+      print("Erro ao carregar dizimistas do Firestore: $error");
+    });
+
+    // Observar mudanças na pesquisa para atualizar a lista filtrada
+    ever(searchQuery, (_) {
+      // A atualização é automática graças ao getter filteredDizimistas
+    });
   }
-  
+
   Future<void> fetchDizimistas() async {
+    // Esta função agora é opcional já que estamos usando escuta em tempo real
+    // Pode ser usada para forçar um refresh se necessário
     _isLoading.value = true;
     try {
-      // Simulando carregamento de dados
-      await Future.delayed(const Duration(seconds: 1));
-
-      // Dados de exemplo
-      _dizimistas.assignAll([
-        Dizimista(
-          id: 1,
-          numeroRegistro: "0001",
-          nome: "Maria Silva",
-          cpf: "123.456.789-00",
-          telefone: "(11) 99999-1234",
-          email: "maria.silva@email.com",
-          rua: "Rua das Flores",
-          numero: "123",
-          bairro: "Centro",
-          cidade: "Iporá",
-          estado: "GO",
-          cep: "75200-000",
-          estadoCivil: "Casado",
-          nomeConjugue: "José Silva",
-          dataCasamento: DateTime(1995, 5, 15),
-          dataNascimento: DateTime(1980, 3, 20),
-          dataNascimentoConjugue: DateTime(1978, 8, 10),
-          sexo: "Feminino",
-          observacoes: "Membro ativo da pastoral",
-          consentimento: true,
-          status: "Ativo",
-          dataRegistro: DateTime(2022, 1, 14),
-        ),
-        Dizimista(
-          id: 2,
-          numeroRegistro: "0002",
-          nome: "João Santos",
-          cpf: "987.654.321-00",
-          telefone: "(11) 98888-5678",
-          email: "joao.santos@email.com",
-          rua: "Av. Principal",
-          numero: "500",
-          bairro: "Vila Nova",
-          cidade: "Iporá",
-          estado: "GO",
-          cep: "75200-100",
-          estadoCivil: "Solteiro",
-          dataNascimento: DateTime(1990, 7, 12),
-          sexo: "Masculino",
-          observacoes: "Interessado em participar da pastoral da juventude",
-          consentimento: true,
-          status: "Ativo",
-          dataRegistro: DateTime(2023, 3, 9),
-        ),
-        Dizimista(
-          id: 3,
-          numeroRegistro: "0003",
-          nome: "Ana Oliveira",
-          cpf: "456.789.123-00",
-          telefone: "(11) 97777-4321",
-          email: "ana.oliveira@email.com",
-          rua: "Rua do Campo",
-          numero: "45",
-          bairro: "Jardim Primavera",
-          cidade: "Iporá",
-          estado: "GO",
-          cep: "75200-200",
-          estadoCivil: "Viúvo",
-          dataNascimento: DateTime(1975, 11, 25),
-          sexo: "Feminino",
-          observacoes: "Viúva, participa regularmente das celebrações",
-          consentimento: true,
-          status: "Afastado",
-          dataRegistro: DateTime(2021, 11, 4),
-        ),
-        Dizimista(
-          id: 4,
-          numeroRegistro: "0004",
-          nome: "Pedro Costa",
-          cpf: "321.654.987-00",
-          telefone: "(11) 96666-9876",
-          email: "pedro.costa@email.com",
-          rua: "Alameda dos Anjos",
-          numero: "77",
-          bairro: "Parque das Acácias",
-          cidade: "Iporá",
-          estado: "GO",
-          cep: "75200-300",
-          estadoCivil: "Casado",
-          nomeConjugue: "Carla Costa",
-          dataNascimento: DateTime(1985, 2, 8),
-          dataNascimentoConjugue: DateTime(1987, 12, 30),
-          dataCasamento: DateTime(2010, 8, 20),
-          sexo: "Masculino",
-          observacoes: "Novo membro da comunidade",
-          consentimento: true,
-          status: "Ativo", // Alterado de "Novo Contribuinte" para "Ativo"
-          dataRegistro: DateTime(2024, 1, 19),
-        ),
-        Dizimista(
-          id: 5,
-          numeroRegistro: "0005",
-          nome: "Lúcia Ferreira",
-          cpf: "147.258.369-00",
-          telefone: "(11) 95555-1111",
-          email: "lucia.ferreira@email.com",
-          rua: "Beco da Paz",
-          numero: "8",
-          bairro: "Vila Esperança",
-          cidade: "Iporá",
-          estado: "GO",
-          cep: "75200-400",
-          estadoCivil: "Separado",
-          dataNascimento: DateTime(1970, 9, 5),
-          sexo: "Feminino",
-          observacoes: "Afastada temporariamente por motivos pessoais",
-          consentimento: true,
-          status: "Inativo",
-          dataRegistro: DateTime(2020, 5, 14),
-        ),
-      ]);
+      // A atualização é feita automaticamente pela escuta em tempo real
     } catch (e) {
       print("Erro ao carregar dizimistas: $e");
     } finally {
       _isLoading.value = false;
     }
   }
-  
+
   Future<void> addDizimista(Dizimista dizimista) async {
     _isLoading.value = true;
     try {
-      // Simulando adição
-      await Future.delayed(const Duration(seconds: 1));
-
-      // Atribui um novo ID baseado no timestamp para garantir unicidade
-      _dizimistas.add(dizimista.copyWith(
-        id: DateTime.now().millisecondsSinceEpoch,
-        numeroRegistro: _generateNewRegistrationNumber(),
-      ));
+      await DizimistaService.addDizimista(dizimista);
     } catch (e) {
-      print("Erro ao adicionar dizimista: $e");
+      print("Erro ao adicionar dizimista no Firestore: $e");
+      rethrow;
     } finally {
       _isLoading.value = false;
     }
   }
 
-  String _generateNewRegistrationNumber() {
-    // Gera um número de registro baseado no timestamp ou contador
-    // Pode ser personalizado conforme regra de negócio da paróquia
-    return "${DateTime.now().millisecondsSinceEpoch}";
-  }
-  
   Future<void> updateDizimista(Dizimista dizimista) async {
     _isLoading.value = true;
     try {
-      await Future.delayed(const Duration(seconds: 1));
-      
-      final index = _dizimistas.indexWhere((d) => d.id == dizimista.id);
-      if (index != -1) {
-        _dizimistas[index] = dizimista;
-      }
+      await DizimistaService.updateDizimista(dizimista);
     } catch (e) {
-      print("Erro ao atualizar dizimista: $e");
+      print("Erro ao atualizar dizimista no Firestore: $e");
+      rethrow;
     } finally {
       _isLoading.value = false;
     }
   }
-  
-  Future<void> deleteDizimista(int id) async {
-    _isLoading.value = true;
-    try {
-      await Future.delayed(const Duration(seconds: 1));
-      
-      _dizimistas.removeWhere((d) => d.id == id);
-    } catch (e) {
-      print("Erro ao deletar dizimista: $e");
-    } finally {
-      _isLoading.value = false;
+
+  // Método para busca com base na pesquisa
+  Stream<List<Dizimista>> searchDizimistas(String query) {
+    if (query.isEmpty) {
+      return DizimistaService.getAllDizimistas();
+    } else {
+      return DizimistaService.advancedSearch(query);
     }
   }
 }

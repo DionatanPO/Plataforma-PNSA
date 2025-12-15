@@ -13,6 +13,7 @@ import '../widgets/access_management_function_cards.dart';
 import '../widgets/access_management_status_cards.dart';
 import '../widgets/password_reset_info_card.dart';
 import '../widgets/first_access_info_card.dart';
+import '../widgets/access_management_empty_state.dart';
 
 class AccessManagementView extends StatefulWidget {
   const AccessManagementView({Key? key}) : super(key: key);
@@ -66,7 +67,9 @@ class _AccessManagementViewState extends State<AccessManagementView> {
               );
             }
             if (controller.filteredAcessos.isEmpty) {
-              return SliverToBoxAdapter(child: _buildEmptyState());
+              return SliverToBoxAdapter(
+                child: AccessManagementEmptyState(searchQuery: controller.searchQuery),
+              );
             }
             return SliverLayoutBuilder(builder: (context, constraints) {
               if (constraints.crossAxisExtent > 850) {
@@ -342,18 +345,6 @@ class _AccessManagementViewState extends State<AccessManagementView> {
     );
   }
 
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.search_off_rounded, size: 64, color: theme.dividerColor),
-          const SizedBox(height: 16),
-          Text('Nenhum usuário encontrado', style: GoogleFonts.outfit(fontSize: 18, color: theme.colorScheme.onSurface)),
-        ],
-      ),
-    );
-  }
 
   void _openAddUserDialog() {
     String nome = '';

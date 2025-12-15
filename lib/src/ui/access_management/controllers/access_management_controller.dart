@@ -22,9 +22,19 @@ class AccessManagementController extends GetxController {
   Future<void> fetchAcessos() async {
     _isLoading.value = true;
     try {
+      final authService = Get.find<AuthService>();
+      final currentUser = authService.currentUser;
+      final currentUserId = currentUser?.uid;
+
       // Subscreve ao stream de dados do Firestore
       AccessService.getAllAcessos().listen((acessosList) {
-        _acessos.assignAll(acessosList);
+        // Filtrar o usuário logado da lista (excluir o próprio usuário dos resultados)
+        if (currentUserId != null) {
+          final filteredList = acessosList.where((acesso) => acesso.id != currentUserId).toList();
+          _acessos.assignAll(filteredList);
+        } else {
+          _acessos.assignAll(acessosList);
+        }
         _isLoading.value = false;
       }).onError((error) {
         print("Erro ao carregar acessos do Firestore: $error");
@@ -45,10 +55,21 @@ class AccessManagementController extends GetxController {
   }
 
   List<Acesso> get filteredAcessos {
+    final authService = Get.find<AuthService>();
+    final currentUser = authService.currentUser;
+    final currentUserId = currentUser?.uid;
+
+    List<Acesso> baseList = _acessos.toList();
+
+    // Filtrar o usuário logado da lista base
+    if (currentUserId != null) {
+      baseList = baseList.where((acesso) => acesso.id != currentUserId).toList();
+    }
+
     if (_searchQuery.isEmpty) {
-      return _acessos.toList();
+      return baseList;
     } else {
-      return _acessos.where((acesso) =>
+      return baseList.where((acesso) =>
         acesso.nome.toLowerCase().contains(_searchQuery.toLowerCase()) ||
         acesso.email.toLowerCase().contains(_searchQuery.toLowerCase()) ||
         acesso.funcao.toLowerCase().contains(_searchQuery.toLowerCase())

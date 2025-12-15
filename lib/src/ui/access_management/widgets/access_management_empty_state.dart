@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class DizimistaEmptyStateView extends StatelessWidget {
+class AccessManagementEmptyState extends StatelessWidget {
   final String? searchQuery;
 
-  const DizimistaEmptyStateView({Key? key, this.searchQuery}) : super(key: key);
+  const AccessManagementEmptyState({Key? key, this.searchQuery}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -15,11 +15,11 @@ class DizimistaEmptyStateView extends StatelessWidget {
     // Determina se a mensagem é para busca vazia ou para total ausência de dados
     final isSearching = searchQuery != null && searchQuery!.isNotEmpty;
     final title = isSearching
-        ? 'Nenhum fiel encontrado'
-        : 'Nenhum fiel cadastrado';
+        ? 'Nenhum usuário encontrado'
+        : 'Nenhum usuário cadastrado';
     final subtitle = isSearching
-        ? 'Nenhum fiel corresponde à sua pesquisa "$searchQuery". Tente usar palavras-chave diferentes.'
-        : 'Comece cadastrando seu primeiro fiel usando o botão "Novo Fiel".';
+        ? 'Nenhum usuário corresponde à sua pesquisa "$searchQuery". Tente usar palavras-chave diferentes.'
+        : 'Não há usuários cadastrados no sistema. Comece adicionando um novo usuário usando o botão "Novo Usuário".';
 
     return Center(
       child: Container(
@@ -35,7 +35,7 @@ class DizimistaEmptyStateView extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              isSearching ? Icons.search_off_rounded : Icons.people_outline_rounded,
+              isSearching ? Icons.search_off_rounded : Icons.people_alt_rounded,
               size: 64,
               color: theme.colorScheme.onSurface.withOpacity(0.4),
             ),

@@ -52,7 +52,7 @@ class _DizimistaViewState extends State<DizimistaView> {
               child: DizimistaSearchBarView(
                 controller: _searchController,
                 onChanged: (val) {
-                  // Chamar filtro no controller
+                  controller.searchQuery.value = val ?? '';
                 },
               ),
             ),
@@ -66,8 +66,8 @@ class _DizimistaViewState extends State<DizimistaView> {
                   return const Center(child: CircularProgressIndicator());
                 }
 
-                if (controller.dizimistas.isEmpty) {
-                  return const DizimistaEmptyStateView();
+                if (controller.filteredDizimistas.isEmpty) {
+                  return DizimistaEmptyStateView(searchQuery: controller.searchQuery.value);
                 }
 
                 // LayoutBuilder decide se mostra Tabela (Desktop) ou Cards (Mobile)
@@ -77,14 +77,14 @@ class _DizimistaViewState extends State<DizimistaView> {
 
                     if (isDesktop) {
                       return DizimistaDesktopTableView(
-                        lista: controller.dizimistas,
+                        lista: controller.filteredDizimistas,
                         theme: theme,
                         surfaceColor: surfaceColor,
                         onEditPressed: (dizimista) => _showEditarDialog(context, dizimista),
                       );
                     } else {
                       return DizimistaMobileListView(
-                        lista: controller.dizimistas,
+                        lista: controller.filteredDizimistas,
                         theme: theme,
                         surfaceColor: surfaceColor,
                         onEditPressed: (dizimista) => _showEditarDialog(context, dizimista),

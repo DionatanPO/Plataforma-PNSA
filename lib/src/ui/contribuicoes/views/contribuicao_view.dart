@@ -590,7 +590,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
 
       final novaContribuicao = Contribuicao(
         id: controller.contribuicoes.length + 1,
-        dizimistaId: controller.dizimistaSelecionado.value!.id,
+        dizimistaId: 1,
         dizimistaNome: controller.dizimistaSelecionado.value!.nome,
         tipo: controller.tipo,
         valor: valorNumerico,

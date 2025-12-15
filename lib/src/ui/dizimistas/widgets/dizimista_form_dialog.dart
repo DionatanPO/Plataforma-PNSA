@@ -609,7 +609,7 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
             final cepSemMascara = cepController.text.replaceAll(RegExp(r'[^\d]'), '');
 
             final novoDizimista = Dizimista(
-              id: widget.dizimista?.id ?? DateTime.now().millisecondsSinceEpoch,
+              id: widget.dizimista?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
               numeroRegistro: numeroRegistroController.text,
               nome: nomeController.text,
               cpf: cpfSemMascara,

@@ -1,5 +1,5 @@
 class Dizimista {
-  final int id;
+  final String id;
   final String numeroRegistro;
   final String nome;
   final String cpf;
@@ -48,7 +48,7 @@ class Dizimista {
   });
 
   Dizimista copyWith({
-    int? id,
+    String? id,
     String? numeroRegistro,
     String? nome,
     String? cpf,
@@ -126,7 +126,7 @@ class Dizimista {
 
   factory Dizimista.fromMap(Map<String, dynamic> map) {
     return Dizimista(
-      id: map['id']?.toInt() ?? 0,
+      id: map['id']?.toString() ?? '',
       numeroRegistro: map['numero_registro'] ?? '',
       nome: map['nome'] ?? '',
       cpf: map['cpf'] ?? '',

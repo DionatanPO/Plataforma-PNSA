@@ -126,18 +126,6 @@ class DizimistaMobileListView extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () => onViewHistoryPressed(d),
-                      icon: const Icon(Icons.history, size: 16),
-                      label: const Text('Histórico'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: theme.colorScheme.onSurface,
-                        side: BorderSide(color: theme.dividerColor),
-                      ),
-                    ),
-                  ),
                 ],
               )
             ],
