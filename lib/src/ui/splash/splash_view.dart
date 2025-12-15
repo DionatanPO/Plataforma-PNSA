@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../routes/app_routes.dart';
 import '../../data/services/auth_service.dart';
+import '../../data/services/session_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -46,53 +47,61 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   }
 
   void _checkAuthState() async {
-    await Future.delayed(const Duration(seconds: 3));
-
-    final auth = FirebaseAuth.instance;
-
-    AuthService authService;
+    final sessionService = Get.find<SessionService>();
     try {
-      authService = Get.find<AuthService>();
-    } catch (e) {
-      authService = Get.put(AuthService());
-    }
+      await Future.delayed(const Duration(seconds: 3));
 
-    if (auth.currentUser != null) {
-      // Verificar se o token de autenticação é válido
+      final auth = FirebaseAuth.instance;
+
+      AuthService authService;
       try {
-        // Forçar a renovação do token de ID para verificar sua validade
-        await auth.currentUser!.getIdToken(true); // Força a renovação se necessário
+        authService = Get.find<AuthService>();
+      } catch (e) {
+        authService = Get.put(AuthService());
+      }
 
-        final userData = await authService.getUserDataWithRetry(auth.currentUser!.uid);
-        if (userData != null) {
-          // Verificar se o usuário está ativo
-          final isActive = await authService.isUserActiveWithRetry(auth.currentUser!.uid);
-          if (!isActive) {
-            // Deslogar o usuário e redirecionar para login com mensagem
+      if (auth.currentUser != null) {
+        // Verificar se o token de autenticação é válido
+        try {
+          // Forçar a renovação do token de ID para verificar sua validade
+          await auth.currentUser!.getIdToken(true); // Força a renovação se necessário
+
+          final userData =
+          await authService.getUserDataWithRetry(auth.currentUser!.uid);
+          if (userData != null) {
+            // Verificar se o usuário está ativo
+            final isActive =
+            await authService.isUserActiveWithRetry(auth.currentUser!.uid);
+            if (!isActive) {
+              // Deslogar o usuário e redirecionar para login com mensagem
+              await authService.logout();
+              Get.offAllNamed(AppRoutes.login);
+              Get.snackbar('Acesso Negado',
+                  'Sua conta foi desativada pelo administrador.');
+              return;
+            }
+
+            if (userData.pendencia) {
+              Get.offAllNamed(AppRoutes.password_reset);
+            } else {
+              Get.offAllNamed(AppRoutes.home);
+            }
+          } else {
+            // Se não encontrar os dados do usuário, deslogar e ir para login
             await authService.logout();
             Get.offAllNamed(AppRoutes.login);
-            Get.snackbar('Acesso Negado', 'Sua conta foi desativada pelo administrador.');
-            return;
           }
-
-          if (userData.pendencia) {
-            Get.offAllNamed(AppRoutes.password_reset);
-          } else {
-            Get.offAllNamed(AppRoutes.home);
-          }
-        } else {
-          // Se não encontrar os dados do usuário, deslogar e ir para login
+        } catch (e) {
+          // Se houver erro na validação do token (ex: token expirado), deslogar e ir para login
+          print('Erro na validação do token de autenticação: $e');
           await authService.logout();
           Get.offAllNamed(AppRoutes.login);
         }
-      } catch (e) {
-        // Se houver erro na validação do token (ex: token expirado), deslogar e ir para login
-        print('Erro na validação do token de autenticação: $e');
-        await authService.logout();
+      } else {
         Get.offAllNamed(AppRoutes.login);
       }
-    } else {
-      Get.offAllNamed(AppRoutes.login);
+    } finally {
+      sessionService.isInitialCheckComplete.value = true;
     }
   }
 

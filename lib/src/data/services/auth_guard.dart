@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../routes/app_routes.dart';
 import 'auth_service.dart';
 import '../../core/services/access_service.dart';
+import 'session_service.dart';
 
 
 class AuthGuard extends GetxService {
@@ -14,7 +15,10 @@ class AuthGuard extends GetxService {
     super.onInit();
 
     // Ouvinte de estado de autenticação do Firebase
-    _auth.authStateChanges().listen(_onAuthStateChanged);
+    // Usamos skip(1) para ignorar o primeiro evento, que é o estado de autenticação em cache.
+    // Isso evita o redirecionamento antes que o app esteja pronto, deixando a tela de Splash
+    // gerenciar a rota inicial, conforme pretendido.
+    _auth.authStateChanges().skip(1).listen(_onAuthStateChanged);
 
     // Executar verificação inicial imediatamente
     _checkInitialAuthState();
@@ -28,6 +32,11 @@ class AuthGuard extends GetxService {
 
   // Método chamado quando o estado de autenticação muda
   void _onAuthStateChanged(User? user) async {
+    // Aguarda a verificação inicial do splash ser concluída antes de agir.
+    if (!Get.find<SessionService>().isInitialCheckComplete.value) {
+      return;
+    }
+
     // Verificar se estamos atualmente criando um novo usuário via AccessService
     // Se estivermos, ignorar temporariamente essa mudança de estado para evitar redirecionamento indesejado
     if (AccessService.isCreatingNewUser) {

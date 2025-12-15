@@ -5,7 +5,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'auth_service.dart';
 
-class SessionService {
+class SessionService extends GetxService {
+  final RxBool isInitialCheckComplete = false.obs;
   static const String _storageKey = 'user_session';
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
