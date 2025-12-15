@@ -18,6 +18,7 @@ class LoginController extends GetxController {
   final isLoading = false.obs;
   final emailError = RxnString();
   final passwordError = RxnString();
+  final loginError = RxnString();
 
   late LoginModel _loginModel;
 
@@ -49,6 +50,7 @@ class LoginController extends GetxController {
   }
 
   Future<void> login() async {
+    loginError.value = null;
     if (formKey.currentState!.validate()) {
       isLoading.value = true;
       try {
@@ -60,40 +62,38 @@ class LoginController extends GetxController {
         if (success) {
           final user = _authService.currentUser;
           if (user != null) {
-            // Salvar informações do usuário no Firestore
-            await _authService.createUserInDatabase(user, user.email?.split('@')[0] ?? 'Usuário');
-
-            // Aguardar e obter dados completos do usuário com retry
-            final userData = await _authService.getUserDataWithRetry(user.uid);
-
-            if (userData != null) {
-              // Verificar se o usuário está ativo
-              final isActive = await _authService.isUserActiveWithRetry(user.uid);
-              if (!isActive) {
-                // Deslogar o usuário e mostrar mensagem
-                await _authService.logout();
-                Get.snackbar('Acesso Negado', 'Sua conta foi desativada pelo administrador.');
-                return;
-              }
-
-              if (userData.pendencia) {
-                Get.offAllNamed(AppRoutes.password_reset);
-              } else {
-                Get.offAllNamed(AppRoutes.home);
-              }
-            } else {
-              Get.snackbar('Erro', 'Não foi possível obter os dados do usuário');
-            }
+                        // Salvar informações do usuário no Firestore
+                        await _authService.createUserInDatabase(user, user.email?.split('@')[0] ?? 'Usuário');
+            
+                        // A lógica de redirecionamento foi removida daqui.
+                        // O AuthGuard será responsável por redirecionar o usuário
+                        // para a tela correta (home ou redefinição de senha) após
+                        // a mudança de estado de autenticação ser detectada.
           } else {
-            Get.snackbar('Erro', 'Não foi possível obter os dados do usuário');
+            loginError.value = 'Não foi possível obter os dados do usuário.';
           }
         } else {
-          Get.snackbar('Erro', 'Credenciais inválidas ou erro de autenticação');
+          loginError.value = 'Credenciais inválidas. Verifique seu e-mail e senha.';
         }
       } on FirebaseAuthException catch (e) {
-        Get.snackbar('Erro de Autenticação', 'Erro: ${e.message}');
+        // Mapear códigos de erro do Firebase para mensagens amigáveis
+        switch (e.code) {
+          case 'user-not-found':
+          case 'wrong-password':
+          case 'invalid-credential':
+            loginError.value = 'E-mail ou senha incorretos.';
+            break;
+          case 'invalid-email':
+            loginError.value = 'O formato do e-mail é inválido.';
+            break;
+          case 'user-disabled':
+            loginError.value = 'Este usuário foi desativado.';
+            break;
+          default:
+            loginError.value = 'Ocorreu um erro durante o login. Tente novamente.';
+        }
       } catch (e) {
-        Get.snackbar('Erro', 'Ocorreu um erro durante o login: $e');
+        loginError.value = 'Ocorreu um erro inesperado. Tente novamente mais tarde.';
       } finally {
         isLoading.value = false;
       }

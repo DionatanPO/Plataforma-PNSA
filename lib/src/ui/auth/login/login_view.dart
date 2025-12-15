@@ -409,7 +409,43 @@ class LoginView extends StatelessWidget {
                                   ),
                                 ),
 
-                                const SizedBox(height: 40),
+                                const SizedBox(height: 24),
+
+                                // Área de Mensagem de Erro
+                                Obx(() {
+                                  if (controller.loginError.value == null) {
+                                    return const SizedBox.shrink();
+                                  }
+                                  return Container(
+                                    margin: const EdgeInsets.only(bottom: 16),
+                                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                                    decoration: BoxDecoration(
+                                      color: Colors.red.withOpacity(0.08),
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                        color: Colors.red.withOpacity(0.3),
+                                        width: 1.5,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Icon(Icons.error_outline, color: Colors.red.shade600, size: 20),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Text(
+                                            controller.loginError.value!,
+                                            style: GoogleFonts.inter(
+                                              color: Colors.red.shade800,
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }),
 
                                 // Rodapé
                                 Center(

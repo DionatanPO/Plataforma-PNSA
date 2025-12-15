@@ -4,6 +4,7 @@ import '../../routes/app_routes.dart';
 import 'auth_service.dart';
 import '../../core/services/access_service.dart';
 import 'session_service.dart';
+import '../../ui/auth/login/login_controller.dart';
 
 
 class AuthGuard extends GetxService {
@@ -27,7 +28,7 @@ class AuthGuard extends GetxService {
   // Método para verificar o estado inicial de autenticação
   void _checkInitialAuthState() {
     // Não faz nada na inicialização, pois o SplashScreen já gerencia isso
-    // O AuthGuard é usado principalmente para monitorar mudanças após o login inicial
+    // 1O AuthGuard é usado principalmente para monitorar mudanças após o login inicial
   }
 
   // Método chamado quando o estado de autenticação muda
@@ -67,14 +68,13 @@ class AuthGuard extends GetxService {
     try {
       // Verificar se o usuário está ativo
       final isActive = await _authService.isUserActiveWithRetry(uid);
-      if (!isActive) {
-        // Deslogar o usuário e redirecionar para login com mensagem
-        await _authService.logout();
-        Get.offAllNamed(AppRoutes.login);
-        Get.snackbar('Acesso Negado', 'Sua conta foi desativada pelo administrador.');
-        return;
-      }
-
+                    if (!isActive) {
+                      // Deslogar o usuário e redirecionar para login com mensagem
+                      await _authService.logout();
+                      Get.find<LoginController>().loginError.value = 'Sua conta foi desativada pelo administrador.';
+                      Get.offAllNamed(AppRoutes.login);
+                      return;
+                    }
       // Verificar se o usuário tem pendências
       final userData = await _authService.getUserDataWithRetry(uid);
       if (userData != null && userData.pendencia) {

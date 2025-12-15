@@ -15,6 +15,7 @@ class PasswordResetController extends GetxController {
   final obscureConfirmPassword = true.obs;
   final isLoading = false.obs;
   final errorMessage = RxnString();
+  final successMessage = RxnString();
   final newPasswordError = RxnString();
   final confirmPasswordError = RxnString();
 
@@ -59,6 +60,8 @@ class PasswordResetController extends GetxController {
   }
 
   Future<void> resetPassword() async {
+    errorMessage.value = null;
+    successMessage.value = null;
     validatePasswords(); // Valida os campos
 
     // Verificar se há erros de validação
@@ -82,25 +85,28 @@ class PasswordResetController extends GetxController {
       // Atualizar o status de pendência no Firestore
       await _authService.updateUserPendencyStatus(false);
 
-      Get.snackbar('Sucesso', 'Senha redefinida com sucesso!');
+      successMessage.value = 'Senha redefinida com sucesso!';
+
+      // Atraso para o usuário ver a mensagem antes de redirecionar
+      await Future.delayed(const Duration(seconds: 2));
 
       // Redirecionar para a tela principal
       Get.offAllNamed(AppRoutes.home);
     } on FirebaseAuthException catch (e) {
-      String message = 'Ocorreu um erro ao redefinir a senha.';
       if (e.code == 'weak-password') {
-        message = 'A senha é muito fraca. Use pelo menos 6 caracteres.';
+        errorMessage.value = 'A senha é muito fraca. Use pelo menos 6 caracteres.';
       } else if (e.code == 'requires-recent-login') {
-        message = 'Por favor, faça login novamente e tente redefinir a senha.';
+        errorMessage.value = 'Sessão expirada. Por favor, faça login novamente.';
+        // Atraso para o usuário ver a mensagem antes de redirecionar
+        await Future.delayed(const Duration(seconds: 3));
         // Fazer logout e redirecionar para login
         await _authService.logout();
         Get.offAllNamed(AppRoutes.login);
       } else {
-        message = 'Erro: ${e.message}';
+        errorMessage.value = 'Ocorreu um erro. Tente novamente mais tarde.';
       }
-      Get.snackbar('Erro', message);
     } catch (e) {
-      Get.snackbar('Erro', 'Ocorreu um erro ao redefinir a senha: $e');
+      errorMessage.value = 'Ocorreu um erro inesperado. Tente novamente.';
     } finally {
       isLoading.value = false;
     }

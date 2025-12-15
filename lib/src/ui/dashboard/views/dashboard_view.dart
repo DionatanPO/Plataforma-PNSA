@@ -11,14 +11,6 @@ class DashboardView extends StatefulWidget {
 }
 
 class _DashboardViewState extends State<DashboardView> {
-  final ScrollController _scrollController = ScrollController();
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -66,10 +58,9 @@ class _DashboardViewState extends State<DashboardView> {
     return Scaffold(
       backgroundColor: backgroundColor,
       body: Scrollbar(
-        controller: _scrollController,
         thumbVisibility: isDesktop,
         child: CustomScrollView(
-          controller: _scrollController,
+          primary: true, // Adicionado para usar o PrimaryScrollController
           physics: const BouncingScrollPhysics(),
           slivers: [
             // 1. HEADER (Full Width novamente)

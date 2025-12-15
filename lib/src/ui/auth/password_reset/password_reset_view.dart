@@ -77,6 +77,38 @@ class PasswordResetView extends GetView<PasswordResetController> {
                   ),
                   const SizedBox(height: 32),
 
+                  // Mensagem de sucesso
+                  Obx(() {
+                    if (controller.successMessage.value == null) {
+                      return const SizedBox.shrink();
+                    }
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 24),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.green[50],
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.green.shade200),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.check_circle_outline, color: Colors.green[700], size: 18),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              controller.successMessage.value!,
+                              style: TextStyle(
+                                color: Colors.green[800],
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+
                   // Campos de Texto
                   Column(
                     children: [
