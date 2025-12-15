@@ -5,6 +5,7 @@ import '../models/contribuicao_model.dart';
 import '../../dizimistas/models/dizimista_model.dart'; // Ajuste se necessário
 import '../../dizimistas/controllers/dizimista_controller.dart';
 import '../../../core/services/dizimista_service.dart';
+import '../../../core/services/contribuicao_service.dart';
 
 class ContribuicaoController extends GetxController {
   // Estado privado
@@ -46,10 +47,15 @@ class ContribuicaoController extends GetxController {
   Future<void> fetchContribuicoes() async {
     _isLoading.value = true;
     try {
-      // Buscar contribuições reais do Firestore
-      // Implementação futura para buscar do Firestore
-      // Por enquanto, usando uma lista vazia pois os dados reais serão buscados via listeners
-      _contribuicoes.clear();
+      // Buscar contribuições reais do Firestore usando stream
+      final contribuicoesStream = ContribuicaoService.getAllContribuicoes();
+
+      // Escutar o stream e atualizar a lista local
+      contribuicoesStream.listen((contribuicoesList) {
+        _contribuicoes.assignAll(contribuicoesList);
+      }).onError((error) {
+        print("Erro ao carregar contribuições do Firestore: $error");
+      });
 
     } catch (e) {
       print("Erro ao carregar contribuições: $e");
@@ -80,13 +86,18 @@ class ContribuicaoController extends GetxController {
   Future<void> addContribuicao(Contribuicao contribuicao) async {
     _isLoading.value = true;
     try {
-      await Future.delayed(const Duration(seconds: 1));
+      // Salvar no Firestore e obter o ID do documento criado
+      final docId = await ContribuicaoService.addContribuicao(contribuicao);
 
-      // Insere no topo da lista
-      _contribuicoes.insert(0, contribuicao.copyWith(id: _contribuicoes.length + 1));
+      // Criar uma nova contribuição com o ID do documento do Firestore
+      final contribuicaoComId = contribuicao.copyWith(id: docId);
+
+      // Atualizar a lista local adicionando no topo
+      _contribuicoes.insert(0, contribuicaoComId);
 
     } catch (e) {
-      print("Erro ao adicionar contribuição: $e");
+      print("Erro ao adicionar contribuição no Firestore: $e");
+      rethrow; // Re-lançar o erro para que a view possa tratar
     } finally {
       _isLoading.value = false;
     }
@@ -163,12 +174,49 @@ class ContribuicaoController extends GetxController {
   }
 
   // Método para obter os dados de um dizimista pelo ID
-  Dizimista? getDizimistaById(int id) {
+  Dizimista? getDizimistaById(String id) {
     final controller = Get.find<DizimistaController>();
     try {
       return controller.dizimistas.firstWhere((dizimista) => dizimista.id == id);
     } catch (e) {
       return null;
     }
+  }
+
+  // Validações
+  bool validateForm() {
+    if (dizimistaSelecionado.value == null) {
+      print("Erro: Nenhum dizimista selecionado");
+      return false;
+    }
+
+    if (valor.isEmpty) {
+      print("Erro: Valor não informado");
+      return false;
+    }
+
+    final valorDouble = double.tryParse(valor);
+    if (valorDouble == null || valorDouble <= 0) {
+      print("Erro: Valor inválido");
+      return false;
+    }
+
+    return true;
+  }
+
+  // Criar uma nova contribuição a partir dos dados do formulário
+  Contribuicao createContribuicaoFromForm() {
+    final dizimista = dizimistaSelecionado.value!;
+    final valorDouble = double.tryParse(valor) ?? 0.0;
+
+    return Contribuicao(
+      id: '', // O ID será definido pelo Firestore
+      dizimistaId: dizimista.id,
+      dizimistaNome: dizimista.nome,
+      tipo: tipo,
+      valor: valorDouble,
+      metodo: metodo,
+      dataRegistro: dataSelecionada.value,
+    );
   }
 }

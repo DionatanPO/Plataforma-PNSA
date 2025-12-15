@@ -1,6 +1,6 @@
 class Contribuicao {
-  final int id;
-  final int dizimistaId;
+  final String id;
+  final String dizimistaId;
   final String dizimistaNome;
   final String tipo;
   final double valor;
@@ -18,8 +18,8 @@ class Contribuicao {
   });
 
   Contribuicao copyWith({
-    int? id,
-    int? dizimistaId,
+    String? id,
+    String? dizimistaId,
     String? dizimistaNome,
     String? mesReferencia,
     String? tipo,
@@ -52,8 +52,8 @@ class Contribuicao {
 
   factory Contribuicao.fromMap(Map<String, dynamic> map) {
     return Contribuicao(
-      id: map['id']?.toInt() ?? 0,
-      dizimistaId: map['dizimistaId']?.toInt() ?? 0,
+      id: map['id']?.toString() ?? '',
+      dizimistaId: map['dizimistaId']?.toString() ?? '',
       dizimistaNome: map['dizimistaNome'] ?? '',
       tipo: map['tipo'] ?? '',
       valor: (map['valor'] is int) ? (map['valor'] as int).toDouble() : map['valor']?.toDouble() ?? 0.0,
@@ -70,7 +70,7 @@ class Contribuicao {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    
+
     return other is Contribuicao &&
            other.id == id;
   }

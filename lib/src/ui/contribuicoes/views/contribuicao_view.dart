@@ -929,41 +929,48 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
     controller.dataSelecionada.value = combinedDateTime;
   }
 
-  void _submitForm() {
-    if (controller.dizimistaSelecionado.value != null &&
-        _valorController.text.isNotEmpty) {
-      // Lógica segura para converter a string formatada em double
-      String valorLimpo = _valorController.text
-          .replaceAll('.', '') // Remove separador de milhar
-          .replaceAll('R\$', '') // Remove simbolo
-          .replaceAll(' ', '') // Remove espaços
-          .replaceAll(',', '.'); // Troca vírgula por ponto
+  void _submitForm() async {
+    // Lógica segura para converter a string formatada em double
+    String valorLimpo = _valorController.text
+        .replaceAll('.', '') // Remove separador de milhar
+        .replaceAll('R\$', '') // Remove simbolo
+        .replaceAll(' ', '') // Remove espaços
+        .replaceAll(',', '.'); // Troca vírgula por ponto
 
-      final double valorNumerico = double.tryParse(valorLimpo) ?? 0.0;
+    // Atualizar o valor no controller
+    controller.valor = valorLimpo;
+    controller.valorNumerico = double.tryParse(valorLimpo) ?? 0.0;
 
-      if (valorNumerico <= 0) {
-        Get.snackbar(
-          'Atenção',
-          'O valor da contribuição é inválido.',
-          snackPosition: SnackPosition.BOTTOM,
-          margin: const EdgeInsets.all(24),
-          colorText: theme.colorScheme.onSurface,
-        );
-        return;
-      }
-
-      final novaContribuicao = Contribuicao(
-        id: controller.contribuicoes.length + 1,
-        dizimistaId: 1,
-        dizimistaNome: controller.dizimistaSelecionado.value!.nome,
-        tipo: controller.tipo,
-        valor: valorNumerico,
-        metodo: controller.metodo,
-        // Usa a data selecionada no picker
-        dataRegistro: controller.dataSelecionada.value,
+    // Validar o formulário usando a lógica do controller
+    if (!controller.validateForm()) {
+      Get.snackbar(
+        'Atenção',
+        'Preencha todos os campos obrigatórios corretamente.',
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(24),
+        colorText: theme.colorScheme.onSurface,
       );
+      return;
+    }
 
-      controller.addContribuicao(novaContribuicao);
+    try {
+      // Criar a contribuição a partir dos dados do formulário
+      final novaContribuicao = controller.createContribuicaoFromForm();
+
+      // Salvar no Firestore
+      await controller.addContribuicao(novaContribuicao);
+
+      // Mostrar mensagem de sucesso
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Lançamento registrado com sucesso!', style: GoogleFonts.inter()),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      );
 
       // Limpar campos e voltar para a primeira etapa
       _valorController.clear();
@@ -973,23 +980,15 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
         _currentStep = 0; // Volta para a tela de seleção
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Lançamento registrado!', style: GoogleFonts.inter()),
-          backgroundColor: Colors.green,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-        ),
-      );
-    } else {
+    } catch (e) {
+      // Mostrar mensagem de erro
       Get.snackbar(
-        'Atenção',
-        'Preencha todos os campos obrigatórios.',
+        'Erro',
+        'Falha ao registrar lançamento: ${e.toString()}',
         snackPosition: SnackPosition.BOTTOM,
         margin: const EdgeInsets.all(24),
         colorText: theme.colorScheme.onSurface,
+        backgroundColor: Colors.red,
       );
     }
   }
