@@ -68,8 +68,16 @@ class PasswordResetController extends GetxController {
 
     isLoading.value = true;
     try {
+      final user = _auth.currentUser;
+      if (user == null) {
+        throw Exception('Nenhum usuário autenticado encontrado.');
+      }
+
+      // Verificar se o token de autenticação é válido antes de tentar alterar a senha
+      await user.getIdToken(true); // Força a renovação do token se necessário
+
       // Atualizar a senha do usuário no Firebase Auth
-      await _auth.currentUser!.updatePassword(newPasswordController.text);
+      await user.updatePassword(newPasswordController.text);
 
       // Atualizar o status de pendência no Firestore
       await _authService.updateUserPendencyStatus(false);
@@ -84,10 +92,15 @@ class PasswordResetController extends GetxController {
         message = 'A senha é muito fraca. Use pelo menos 6 caracteres.';
       } else if (e.code == 'requires-recent-login') {
         message = 'Por favor, faça login novamente e tente redefinir a senha.';
+        // Fazer logout e redirecionar para login
+        await _authService.logout();
+        Get.offAllNamed(AppRoutes.login);
+      } else {
+        message = 'Erro: ${e.message}';
       }
-      errorMessage.value = message;
+      Get.snackbar('Erro', message);
     } catch (e) {
-      errorMessage.value = 'Ocorreu um erro ao redefinir a senha: $e';
+      Get.snackbar('Erro', 'Ocorreu um erro ao redefinir a senha: $e');
     } finally {
       isLoading.value = false;
     }

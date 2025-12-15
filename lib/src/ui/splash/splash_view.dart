@@ -58,11 +58,38 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     }
 
     if (auth.currentUser != null) {
-      final userData = await authService.getUserData(auth.currentUser!.uid);
-      if (userData != null && userData.pendencia) {
-        Get.offAllNamed(AppRoutes.password_reset);
-      } else {
-        Get.offAllNamed(AppRoutes.home);
+      // Verificar se o token de autenticação é válido
+      try {
+        // Forçar a renovação do token de ID para verificar sua validade
+        await auth.currentUser!.getIdToken(true); // Força a renovação se necessário
+
+        final userData = await authService.getUserDataWithRetry(auth.currentUser!.uid);
+        if (userData != null) {
+          // Verificar se o usuário está ativo
+          final isActive = await authService.isUserActiveWithRetry(auth.currentUser!.uid);
+          if (!isActive) {
+            // Deslogar o usuário e redirecionar para login com mensagem
+            await authService.logout();
+            Get.offAllNamed(AppRoutes.login);
+            Get.snackbar('Acesso Negado', 'Sua conta foi desativada pelo administrador.');
+            return;
+          }
+
+          if (userData.pendencia) {
+            Get.offAllNamed(AppRoutes.password_reset);
+          } else {
+            Get.offAllNamed(AppRoutes.home);
+          }
+        } else {
+          // Se não encontrar os dados do usuário, deslogar e ir para login
+          await authService.logout();
+          Get.offAllNamed(AppRoutes.login);
+        }
+      } catch (e) {
+        // Se houver erro na validação do token (ex: token expirado), deslogar e ir para login
+        print('Erro na validação do token de autenticação: $e');
+        await authService.logout();
+        Get.offAllNamed(AppRoutes.login);
       }
     } else {
       Get.offAllNamed(AppRoutes.login);

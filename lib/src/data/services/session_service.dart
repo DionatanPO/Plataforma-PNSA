@@ -1,6 +1,9 @@
+import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+import 'auth_service.dart';
 
 class SessionService {
   static const String _storageKey = 'user_session';
@@ -62,5 +65,16 @@ class SessionService {
   Future<void> signOut() async {
     await _auth.signOut();
     await clearSession();
+  }
+
+  // Verifica se o usuário tem dados completos
+  Future<bool> hasCompleteUserData() async {
+    final user = _auth.currentUser;
+    if (user != null) {
+      final authService = Get.find<AuthService>();
+      final userData = await authService.getUserDataWithRetry(user.uid);
+      return userData != null;
+    }
+    return false;
   }
 }

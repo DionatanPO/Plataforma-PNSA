@@ -36,19 +36,38 @@ class AuthGuard extends GetxService {
     }
 
     if (user != null) {
-      // Usuário está autenticado
-      _checkUserStatus(user.uid);
+      try {
+        // Verificar se o token de autenticação é válido
+        await user.getIdToken(true); // Força a renovação se necessário
+        // Usuário está autenticado e token é válido
+        _checkUserStatus(user.uid);
+      } catch (e) {
+        // Se o token não for válido, fazer logout
+        print('Token de autenticação inválido: $e');
+        await _authService.logout();
+        Get.offAllNamed(AppRoutes.login);
+      }
     } else {
       // Usuário não está autenticado
       Get.offAllNamed(AppRoutes.login);
     }
   }
 
-  // Verifica o status do usuário (pendências, etc.)
+  // Verifica o status do usuário (pendências, status ativo, etc.)
   Future<void> _checkUserStatus(String uid) async {
     try {
+      // Verificar se o usuário está ativo
+      final isActive = await _authService.isUserActiveWithRetry(uid);
+      if (!isActive) {
+        // Deslogar o usuário e redirecionar para login com mensagem
+        await _authService.logout();
+        Get.offAllNamed(AppRoutes.login);
+        Get.snackbar('Acesso Negado', 'Sua conta foi desativada pelo administrador.');
+        return;
+      }
+
       // Verificar se o usuário tem pendências
-      final userData = await _authService.getUserData(uid);
+      final userData = await _authService.getUserDataWithRetry(uid);
       if (userData != null && userData.pendencia) {
         Get.offAllNamed(AppRoutes.password_reset);
       } else {

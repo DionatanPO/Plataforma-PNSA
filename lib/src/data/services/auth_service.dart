@@ -109,7 +109,7 @@ class AuthService extends GetxService {
         endereco: '', // Padrão
         funcao: 'Membro', // Padrão
         status: 'Ativo', // Padrão
-        ultimoAcesso: now, // Padrão
+        ultimoAcesso: now, // Padrão - armazenado como DateTime
         pendencia: false, // Padrão
       );
 
@@ -153,5 +153,41 @@ class AuthService extends GetxService {
     } catch (e) {
       return null;
     }
+  }
+
+  /// Obtém os dados do usuário com retry até que estejam disponíveis ou timeout
+  Future<UserModel?> getUserDataWithRetry(String uid, {int maxRetries = 10, Duration delay = const Duration(milliseconds: 500)}) async {
+    for (int i = 0; i < maxRetries; i++) {
+      try {
+        final userData = await getUserData(uid);
+        if (userData != null) {
+          return userData;
+        }
+        // Aguarda antes de tentar novamente
+        await Future.delayed(delay);
+      } catch (e) {
+        print('Erro ao obter dados do usuário (tentativa $i): $e');
+        if (i == maxRetries - 1) rethrow; // Lança o erro na última tentativa
+      }
+    }
+    return null;
+  }
+
+  /// Verifica se o usuário está ativo com retry
+  Future<bool> isUserActiveWithRetry(String uid, {int maxRetries = 10, Duration delay = const Duration(milliseconds: 500)}) async {
+    for (int i = 0; i < maxRetries; i++) {
+      try {
+        final userData = await getUserData(uid);
+        if (userData != null) {
+          return userData.status == 'Ativo';
+        }
+        // Aguarda antes de tentar novamente
+        await Future.delayed(delay);
+      } catch (e) {
+        print('Erro ao verificar status do usuário (tentativa $i): $e');
+        if (i == maxRetries - 1) rethrow; // Lança o erro na última tentativa
+      }
+    }
+    return false;
   }
 }

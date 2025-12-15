@@ -60,18 +60,29 @@ class LoginController extends GetxController {
         if (success) {
           final user = _authService.currentUser;
           if (user != null) {
-            // Salvar informações do usuário no Realtime Database
+            // Salvar informações do usuário no Firestore
             await _authService.createUserInDatabase(user, user.email?.split('@')[0] ?? 'Usuário');
 
-            // Aguardar um pouco antes de verificar pendências para garantir que os dados estejam sincronizados
-            await Future.delayed(const Duration(milliseconds: 500));
+            // Aguardar e obter dados completos do usuário com retry
+            final userData = await _authService.getUserDataWithRetry(user.uid);
 
-            // Verificar se o usuário tem pendências
-            final userData = await _authService.getUserData(user.uid);
-            if (userData != null && userData.pendencia) {
-              Get.offAllNamed(AppRoutes.password_reset);
+            if (userData != null) {
+              // Verificar se o usuário está ativo
+              final isActive = await _authService.isUserActiveWithRetry(user.uid);
+              if (!isActive) {
+                // Deslogar o usuário e mostrar mensagem
+                await _authService.logout();
+                Get.snackbar('Acesso Negado', 'Sua conta foi desativada pelo administrador.');
+                return;
+              }
+
+              if (userData.pendencia) {
+                Get.offAllNamed(AppRoutes.password_reset);
+              } else {
+                Get.offAllNamed(AppRoutes.home);
+              }
             } else {
-              Get.offAllNamed(AppRoutes.home);
+              Get.snackbar('Erro', 'Não foi possível obter os dados do usuário');
             }
           } else {
             Get.snackbar('Erro', 'Não foi possível obter os dados do usuário');

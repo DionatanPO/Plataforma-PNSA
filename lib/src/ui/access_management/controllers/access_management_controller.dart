@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import '../../../data/services/auth_service.dart';
 import '../../../domain/models/acesso_model.dart';
 import '../../../domain/models/funcao_model.dart';
 import '../../../core/services/access_service.dart';
@@ -70,6 +71,15 @@ class AccessManagementController extends GetxController {
     _isLoading.value = true;
     try {
       await AccessService.updateAcesso(acesso);
+
+      // Verificar se o usuário atual está sendo atualizado e se o status foi alterado para Inativo
+      final authService = Get.find<AuthService>();
+      final currentUser = authService.currentUser;
+      if (currentUser != null && currentUser.uid == acesso.id && acesso.status != 'Ativo') {
+        // Se o usuário atual está sendo desativado, fazer logout
+        await authService.logout();
+        Get.snackbar('Acesso Negado', 'Sua conta foi desativada pelo administrador.');
+      }
     } catch (e) {
       print("Erro ao atualizar acesso: $e");
     } finally {
