@@ -188,16 +188,16 @@ class _DizimistaViewState extends State<DizimistaView> {
 
     // Formatters para máscaras
     final cpfFormatter = MaskTextInputFormatter(
-      mask: '###.###.###-##',
-      filter: { "#": RegExp(r'[0-9]') }
+        mask: '###.###.###-##',
+        filter: { "#": RegExp(r'[0-9]') }
     );
     final telefoneFormatter = MaskTextInputFormatter(
-      mask: '(##) #####-####',
-      filter: { "#": RegExp(r'[0-9]') }
+        mask: '(##) #####-####',
+        filter: { "#": RegExp(r'[0-9]') }
     );
     final cepFormatter = MaskTextInputFormatter(
-      mask: '#####-###',
-      filter: { "#": RegExp(r'[0-9]') }
+        mask: '#####-###',
+        filter: { "#": RegExp(r'[0-9]') }
     );
 
     // Estado para os campos não-texto
@@ -263,9 +263,9 @@ class _DizimistaViewState extends State<DizimistaView> {
                       Text(
                         'Dados Pessoais',
                         style: GoogleFonts.inter(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: theme.primaryColor,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: theme.primaryColor,
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -349,9 +349,9 @@ class _DizimistaViewState extends State<DizimistaView> {
                       Text(
                         'Dados de Contato',
                         style: GoogleFonts.inter(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: theme.primaryColor,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: theme.primaryColor,
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -379,9 +379,9 @@ class _DizimistaViewState extends State<DizimistaView> {
                       Text(
                         'Endereço',
                         style: GoogleFonts.inter(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: theme.primaryColor,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: theme.primaryColor,
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -493,9 +493,9 @@ class _DizimistaViewState extends State<DizimistaView> {
                         Text(
                           'Dados do Cônjuge',
                           style: GoogleFonts.inter(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: theme.primaryColor,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: theme.primaryColor,
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -565,9 +565,9 @@ class _DizimistaViewState extends State<DizimistaView> {
                       Text(
                         'Observações',
                         style: GoogleFonts.inter(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: theme.primaryColor,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: theme.primaryColor,
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -1235,9 +1235,9 @@ class _DizimistaViewState extends State<DizimistaView> {
                       Text(
                         'Dados de Contato',
                         style: GoogleFonts.inter(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: theme.primaryColor,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: theme.primaryColor,
                         ),
                       ),
                       const SizedBox(height: 12),

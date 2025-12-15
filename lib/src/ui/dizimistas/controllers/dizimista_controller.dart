@@ -7,6 +7,31 @@ class DizimistaController extends GetxController {
   
   List<Dizimista> get dizimistas => _dizimistas;
   bool get isLoading => _isLoading.value;
+  final searchQuery = ''.obs;
+
+  List<Dizimista> get filteredDizimistas {
+    if (searchQuery.value.isEmpty) {
+      return _dizimistas;
+    } else {
+      final queryLower = searchQuery.value.toLowerCase().trim();
+      return _dizimistas.where((dizimista) {
+        return dizimista.nome.toLowerCase().contains(queryLower) ||
+               dizimista.cpf.contains(searchQuery.value) ||
+               dizimista.telefone.contains(searchQuery.value) ||
+               (dizimista.email?.toLowerCase().contains(queryLower) ?? false) ||
+               (dizimista.rua?.toLowerCase().contains(queryLower) ?? false) ||
+               (dizimista.numero?.toLowerCase().contains(queryLower) ?? false) ||
+               (dizimista.bairro?.toLowerCase().contains(queryLower) ?? false) ||
+               dizimista.cidade.toLowerCase().contains(queryLower) ||
+               dizimista.estado.toLowerCase().contains(queryLower) ||
+               (dizimista.cep?.contains(searchQuery.value) ?? false) ||
+               (dizimista.nomeConjugue?.toLowerCase().contains(queryLower) ?? false) ||
+               (dizimista.estadoCivil?.toLowerCase().contains(queryLower) ?? false) ||
+               (dizimista.observacoes?.toLowerCase().contains(queryLower) ?? false) ||
+               dizimista.status.toLowerCase().contains(queryLower);
+      }).toList();
+    }
+  }
   
   @override
   void onInit() {
@@ -178,27 +203,5 @@ class DizimistaController extends GetxController {
     } finally {
       _isLoading.value = false;
     }
-  }
-  
-  List<Dizimista> searchDizimistas(String query) {
-    if (query.isEmpty) return _dizimistas;
-
-    final queryLower = query.toLowerCase().trim();
-    return _dizimistas.where((dizimista) {
-      return dizimista.nome.toLowerCase().contains(queryLower) ||
-             dizimista.cpf.contains(query) ||
-             dizimista.telefone.contains(query) ||
-             (dizimista.email?.toLowerCase().contains(queryLower) ?? false) ||
-             (dizimista.rua?.toLowerCase().contains(queryLower) ?? false) ||
-             (dizimista.numero?.toLowerCase().contains(queryLower) ?? false) ||
-             (dizimista.bairro?.toLowerCase().contains(queryLower) ?? false) ||
-             dizimista.cidade.toLowerCase().contains(queryLower) ||
-             dizimista.estado.toLowerCase().contains(queryLower) ||
-             (dizimista.cep?.contains(query) ?? false) ||
-             (dizimista.nomeConjugue?.toLowerCase().contains(queryLower) ?? false) ||
-             (dizimista.estadoCivil?.toLowerCase().contains(queryLower) ?? false) ||
-             (dizimista.observacoes?.toLowerCase().contains(queryLower) ?? false) ||
-             dizimista.status.toLowerCase().contains(queryLower);
-    }).toList();
   }
 }
