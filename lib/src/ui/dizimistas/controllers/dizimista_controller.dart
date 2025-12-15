@@ -49,6 +49,7 @@ class DizimistaController extends GetxController {
       _dizimistas.assignAll([
         Dizimista(
           id: 1,
+          numeroRegistro: "0001",
           nome: "Maria Silva",
           cpf: "123.456.789-00",
           telefone: "(11) 99999-1234",
@@ -72,6 +73,7 @@ class DizimistaController extends GetxController {
         ),
         Dizimista(
           id: 2,
+          numeroRegistro: "0002",
           nome: "João Santos",
           cpf: "987.654.321-00",
           telefone: "(11) 98888-5678",
@@ -92,6 +94,7 @@ class DizimistaController extends GetxController {
         ),
         Dizimista(
           id: 3,
+          numeroRegistro: "0003",
           nome: "Ana Oliveira",
           cpf: "456.789.123-00",
           telefone: "(11) 97777-4321",
@@ -112,6 +115,7 @@ class DizimistaController extends GetxController {
         ),
         Dizimista(
           id: 4,
+          numeroRegistro: "0004",
           nome: "Pedro Costa",
           cpf: "321.654.987-00",
           telefone: "(11) 96666-9876",
@@ -130,11 +134,12 @@ class DizimistaController extends GetxController {
           sexo: "Masculino",
           observacoes: "Novo membro da comunidade",
           consentimento: true,
-          status: "Novo Contribuinte",
+          status: "Ativo", // Alterado de "Novo Contribuinte" para "Ativo"
           dataRegistro: DateTime(2024, 1, 19),
         ),
         Dizimista(
           id: 5,
+          numeroRegistro: "0005",
           nome: "Lúcia Ferreira",
           cpf: "147.258.369-00",
           telefone: "(11) 95555-1111",
@@ -168,12 +173,21 @@ class DizimistaController extends GetxController {
       await Future.delayed(const Duration(seconds: 1));
 
       // Atribui um novo ID baseado no timestamp para garantir unicidade
-      _dizimistas.add(dizimista.copyWith(id: DateTime.now().millisecondsSinceEpoch));
+      _dizimistas.add(dizimista.copyWith(
+        id: DateTime.now().millisecondsSinceEpoch,
+        numeroRegistro: _generateNewRegistrationNumber(),
+      ));
     } catch (e) {
       print("Erro ao adicionar dizimista: $e");
     } finally {
       _isLoading.value = false;
     }
+  }
+
+  String _generateNewRegistrationNumber() {
+    // Gera um número de registro baseado no timestamp ou contador
+    // Pode ser personalizado conforme regra de negócio da paróquia
+    return "${DateTime.now().millisecondsSinceEpoch}";
   }
   
   Future<void> updateDizimista(Dizimista dizimista) async {

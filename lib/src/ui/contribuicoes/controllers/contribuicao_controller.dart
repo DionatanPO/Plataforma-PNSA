@@ -94,7 +94,7 @@ class ContribuicaoController extends GetxController {
           cidade: "Iporá",
           estado: "GO",
           dataRegistro: DateTime(2022, 1, 14),
-          consentimento: true,
+          consentimento: true, numeroRegistro: '',
         ),
         Dizimista(
           id: 2,
@@ -108,7 +108,7 @@ class ContribuicaoController extends GetxController {
           cidade: "Iporá",
           estado: "GO",
           dataRegistro: DateTime(2023, 3, 9),
-          consentimento: true,
+          consentimento: true, numeroRegistro: '',
         ),
       ]);
     } catch (e) {

@@ -1,5 +1,6 @@
 class Dizimista {
   final int id;
+  final String numeroRegistro;
   final String nome;
   final String cpf;
   final DateTime? dataNascimento;
@@ -23,6 +24,7 @@ class Dizimista {
 
   Dizimista({
     required this.id,
+    required this.numeroRegistro,
     required this.nome,
     required this.cpf,
     this.dataNascimento,
@@ -47,6 +49,7 @@ class Dizimista {
 
   Dizimista copyWith({
     int? id,
+    String? numeroRegistro,
     String? nome,
     String? cpf,
     DateTime? dataNascimento,
@@ -70,6 +73,7 @@ class Dizimista {
   }) {
     return Dizimista(
       id: id ?? this.id,
+      numeroRegistro: numeroRegistro ?? this.numeroRegistro,
       nome: nome ?? this.nome,
       cpf: cpf ?? this.cpf,
       dataNascimento: dataNascimento ?? this.dataNascimento,
@@ -96,6 +100,7 @@ class Dizimista {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
+      'numero_registro': numeroRegistro,
       'nome': nome,
       'cpf': cpf,
       'data_nascimento': dataNascimento?.millisecondsSinceEpoch,
@@ -122,6 +127,7 @@ class Dizimista {
   factory Dizimista.fromMap(Map<String, dynamic> map) {
     return Dizimista(
       id: map['id']?.toInt() ?? 0,
+      numeroRegistro: map['numero_registro'] ?? '',
       nome: map['nome'] ?? '',
       cpf: map['cpf'] ?? '',
       dataNascimento: map['data_nascimento'] != null
@@ -153,7 +159,7 @@ class Dizimista {
 
   @override
   String toString() {
-    return 'Dizimista(id: $id, nome: $nome, cpf: $cpf, dataNascimento: $dataNascimento, sexo: $sexo, telefone: $telefone, email: $email, rua: $rua, numero: $numero, bairro: $bairro, cidade: $cidade, estado: $estado, cep: $cep, estadoCivil: $estadoCivil, nomeConjugue: $nomeConjugue, dataCasamento: $dataCasamento, dataNascimentoConjugue: $dataNascimentoConjugue, observacoes: $observacoes, consentimento: $consentimento, status: $status, dataRegistro: $dataRegistro)';
+    return 'Dizimista(id: $id, numeroRegistro: $numeroRegistro, nome: $nome, cpf: $cpf, dataNascimento: $dataNascimento, sexo: $sexo, telefone: $telefone, email: $email, rua: $rua, numero: $numero, bairro: $bairro, cidade: $cidade, estado: $estado, cep: $cep, estadoCivil: $estadoCivil, nomeConjugue: $nomeConjugue, dataCasamento: $dataCasamento, dataNascimentoConjugue: $dataNascimentoConjugue, observacoes: $observacoes, consentimento: $consentimento, status: $status, dataRegistro: $dataRegistro)';
   }
 
   @override
