@@ -47,7 +47,6 @@ class AuthGuard extends GetxService {
         Get.offAllNamed(AppRoutes.home);
       }
     } catch (e) {
-      print('Erro ao verificar status do usuário: $e');
       // Em caso de erro, redireciona para o login
       Get.offAllNamed(AppRoutes.login);
     }

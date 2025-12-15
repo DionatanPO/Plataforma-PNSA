@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:ui';
+import '../../data/services/theme_service.dart';
 import '../core/widgets/custom_sliver_app_bar.dart';
 
 class ThemeSettingsView extends StatelessWidget {
@@ -15,6 +16,10 @@ class ThemeSettingsView extends StatelessWidget {
   // Function to change theme
   void _changeTheme(ThemeMode mode) {
     Get.changeThemeMode(mode);
+
+    // Salva o tema selecionado
+    final themeService = Get.find<ThemeService>();
+    themeService.setTheme(mode);
 
     // Atualiza estados locais para feedback visual imediato
     isDarkMode.value = mode == ThemeMode.dark ||

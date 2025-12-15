@@ -6,7 +6,6 @@ import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import '../../../domain/models/acesso_model.dart';
 import '../controllers/access_management_controller.dart';
 
-
 class AccessManagementView extends StatefulWidget {
   const AccessManagementView({Key? key}) : super(key: key);
 
@@ -468,9 +467,11 @@ class _AccessManagementViewState extends State<AccessManagementView> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          _actionButton(Icons.edit_outlined, Colors.blue, () => _openEditUserDialog(acesso)),
-                          const SizedBox(width: 8),
-                          _actionButton(Icons.delete_outline, Colors.red, () {}),
+                          _actionButton(
+                            Icons.edit_outlined,
+                            Colors.blue,
+                            () => _openEditUserDialog(acesso),
+                          ),
                         ],
                       ),
                     ),
@@ -696,12 +697,12 @@ class _AccessManagementViewState extends State<AccessManagementView> {
     // Formatters para máscaras
     final cpfFormatter = MaskTextInputFormatter(
       mask: '###.###.###-##',
-      filter: { "#": RegExp(r'[0-9]') },
+      filter: {"#": RegExp(r'[0-9]')},
       initialText: _formatarCPF(acesso.cpf),
     );
     final telefoneFormatter = MaskTextInputFormatter(
       mask: '(##) #####-####',
-      filter: { "#": RegExp(r'[0-9]') },
+      filter: {"#": RegExp(r'[0-9]')},
       initialText: _formatarTelefone(acesso.telefone),
     );
 
@@ -738,7 +739,8 @@ class _AccessManagementViewState extends State<AccessManagementView> {
                       _buildTextField(
                         label: 'E-mail Corporativo',
                         onChanged: (v) => email = v,
-                        inputFormatters: [], // E-mail não precisa de formatação específica
+                        inputFormatters: [],
+                        // E-mail não precisa de formatação específica
                         keyboardType: TextInputType.emailAddress,
                       ),
                       const SizedBox(height: 16),
@@ -767,7 +769,8 @@ class _AccessManagementViewState extends State<AccessManagementView> {
                       _buildTextField(
                         label: 'Endereço',
                         onChanged: (v) => endereco = v,
-                        inputFormatters: [], // Endereço não precisa de formatação específica
+                        inputFormatters: [],
+                        // Endereço não precisa de formatação específica
                         keyboardType: TextInputType.text,
                       ),
                       const SizedBox(height: 24),
@@ -812,8 +815,14 @@ class _AccessManagementViewState extends State<AccessManagementView> {
                   onPressed: () {
                     if (nome.isNotEmpty && email.isNotEmpty) {
                       // Remove a máscara antes de salvar
-                      final cpfSemMascara = cpf.replaceAll(RegExp(r'[^\d]'), '');
-                      final telefoneSemMascara = telefone.replaceAll(RegExp(r'[^\d]'), '');
+                      final cpfSemMascara = cpf.replaceAll(
+                        RegExp(r'[^\d]'),
+                        '',
+                      );
+                      final telefoneSemMascara = telefone.replaceAll(
+                        RegExp(r'[^\d]'),
+                        '',
+                      );
 
                       final acessoAtualizado = Acesso(
                         id: acesso.id,
@@ -853,7 +862,8 @@ class _AccessManagementViewState extends State<AccessManagementView> {
     // Remove caracteres não numéricos
     String cpfNumerico = cpf.replaceAll(RegExp(r'[^\d]'), '');
 
-    if (cpfNumerico.length != 11) return cpf; // Retorna o valor original se não tiver 11 dígitos
+    if (cpfNumerico.length != 11)
+      return cpf; // Retorna o valor original se não tiver 11 dígitos
     return "${cpfNumerico.substring(0, 3)}.${cpfNumerico.substring(3, 6)}.${cpfNumerico.substring(6, 9)}-${cpfNumerico.substring(9, 11)}";
   }
 
@@ -862,11 +872,14 @@ class _AccessManagementViewState extends State<AccessManagementView> {
     // Remove caracteres não numéricos
     String telefoneNumerico = telefone.replaceAll(RegExp(r'[^\d]'), '');
 
-    if (telefoneNumerico.length < 10) return telefone; // Retorna o valor original se não tiver dígitos suficientes
+    if (telefoneNumerico.length < 10)
+      return telefone; // Retorna o valor original se não tiver dígitos suficientes
 
-    if (telefoneNumerico.length == 10) { // Telefone fixo (8 dígitos + 2 dígitos DDD)
+    if (telefoneNumerico.length == 10) {
+      // Telefone fixo (8 dígitos + 2 dígitos DDD)
       return "(${telefoneNumerico.substring(0, 2)}) ${telefoneNumerico.substring(2, 6)}-${telefoneNumerico.substring(6, 10)}";
-    } else { // Celular (9 dígitos + 2 dígitos DDD)
+    } else {
+      // Celular (9 dígitos + 2 dígitos DDD)
       return "(${telefoneNumerico.substring(0, 2)}) ${telefoneNumerico.substring(2, 7)}-${telefoneNumerico.substring(7, 11)}";
     }
   }
@@ -949,11 +962,11 @@ class _AccessManagementViewState extends State<AccessManagementView> {
     // Formatters para máscaras
     final cpfFormatter = MaskTextInputFormatter(
       mask: '###.###.###-##',
-      filter: { "#": RegExp(r'[0-9]') }
+      filter: {"#": RegExp(r'[0-9]')},
     );
     final telefoneFormatter = MaskTextInputFormatter(
       mask: '(##) #####-####',
-      filter: { "#": RegExp(r'[0-9]') }
+      filter: {"#": RegExp(r'[0-9]')},
     );
 
     showDialog(
@@ -1057,11 +1070,17 @@ class _AccessManagementViewState extends State<AccessManagementView> {
                   onPressed: () {
                     if (nome.isNotEmpty && email.isNotEmpty) {
                       // Remove a máscara antes de salvar
-                      final cpfSemMascara = cpf.replaceAll(RegExp(r'[^\d]'), '');
-                      final telefoneSemMascara = telefone.replaceAll(RegExp(r'[^\d]'), '');
+                      final cpfSemMascara = cpf.replaceAll(
+                        RegExp(r'[^\d]'),
+                        '',
+                      );
+                      final telefoneSemMascara = telefone.replaceAll(
+                        RegExp(r'[^\d]'),
+                        '',
+                      );
 
                       final novoAcesso = Acesso(
-                        id: controller.acessos.length + 1,
+                        id: (controller.acessos.length + 1).toString(),
                         nome: nome,
                         email: email,
                         cpf: cpfSemMascara,

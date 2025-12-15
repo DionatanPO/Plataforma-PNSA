@@ -77,8 +77,6 @@ class ProfileView extends StatelessWidget {
                     Expanded(
                       child: Column(
                         children: [
-                          _buildStatsSection(context, isDesktop: true),
-                          const SizedBox(height: 32),
                           _buildSettingsSection(context, isDesktop: true),
                         ],
                       ),
@@ -105,8 +103,6 @@ class ProfileView extends StatelessWidget {
           const SizedBox(height: 20),
           _ProfileCard(controller: controller, isDesktop: false),
           const SizedBox(height: 32),
-          _buildStatsSection(context, isDesktop: false),
-          const SizedBox(height: 32),
           _buildSettingsSection(context, isDesktop: false),
           const SizedBox(height: 40),
         ],
@@ -114,90 +110,47 @@ class ProfileView extends StatelessWidget {
     );
   }
 
-  Widget _buildStatsSection(BuildContext context, {required bool isDesktop}) {
-    final theme = Theme.of(context);
 
-    // No Desktop, usamos Row ou Wrap expandido.
-    // Os cards devem parecer "widgets" do sistema.
-    final children = [
-      _FluentStatCard(
-        label: "Tarefas Concluídas",
-        value: controller.tasksCompleted.value.toString(),
-        icon: Icons.check_circle_outline_rounded,
-        color: Colors.blueAccent,
-        theme: theme,
-      ),
-      _FluentStatCard(
-        label: "Projetos Ativos",
-        value: controller.projectsActive.value.toString(),
-        icon: Icons.folder_open_rounded,
-        color: Colors.orangeAccent,
-        theme: theme,
-      ),
-      if (isDesktop)
-        _FluentStatCard(
-          label: "Produtividade",
-          value: "94%",
-          icon: Icons.trending_up_rounded,
-          color: Colors.greenAccent,
-          theme: theme,
-        ),
-    ];
-
-    if (isDesktop) {
-      return Row(
-        children: children.map((e) => Expanded(child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 6),
-          child: e,
-        ))).toList(),
-      );
-    } else {
-      return Wrap(
-        spacing: 12,
-        runSpacing: 12,
-        children: children,
-      );
-    }
-  }
 
   Widget _buildSettingsSection(BuildContext context, {required bool isDesktop}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _FluentSectionTitle(Theme.of(context), "GERAL"),
-        _FluentSettingsGroup(
-          children: [
-            _DesktopHoverTile(
-              icon: Icons.person_outline_rounded,
-              title: 'Dados Pessoais',
-              subtitle: 'Nome, bio e foto',
-              onTap: () {
+    return Obx(() {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _FluentSectionTitle(Theme.of(context), "GERAL"),
+          _FluentSettingsGroup(
+            children: [
+              _DesktopHoverTile(
+                icon: Icons.person_outline_rounded,
+                title: 'Dados Pessoais',
+                subtitle: controller.cpf.value.isNotEmpty ? controller.cpf.value : 'CPF não informado',
+                onTap: () {
 
-              },
-            ),
-            _DesktopHoverTile(
-              icon: Icons.lock_outline_rounded,
-              title: 'Segurança',
-              subtitle: 'Senha e autenticação',
-              onTap: controller.changePassword,
-            ),
-          ],
-        ),
+                },
+              ),
+              _DesktopHoverTile(
+                icon: Icons.lock_outline_rounded,
+                title: 'Segurança',
+                subtitle: controller.funcao.value.isNotEmpty ? controller.funcao.value : 'Função não informada',
+                onTap: controller.changePassword,
+              ),
+            ],
+          ),
         const SizedBox(height: 24),
         _FluentSectionTitle(Theme.of(context), "PREFERÊNCIAS"),
         _FluentSettingsGroup(
           children: [
-            _DesktopHoverTile(
-              icon: Icons.notifications_outlined,
-              title: 'Notificações',
-              // Desktop geralmente usa toggles diretos, mas manteremos o padrão por enquanto
-              trailing: Switch(
-                value: true,
-                onChanged: (v) => controller.toggleNotifications(),
-                activeColor: Theme.of(context).primaryColor,
-              ),
-              onTap: (){},
-            ),
+            // _DesktopHoverTile(
+            //   icon: Icons.notifications_outlined,
+            //   title: 'Notificações',
+            //   // Desktop geralmente usa toggles diretos, mas manteremos o padrão por enquanto
+            //   trailing: Switch(
+            //     value: true,
+            //     onChanged: (v) => controller.toggleNotifications(),
+            //     activeColor: Theme.of(context).primaryColor,
+            //   ),
+            //   onTap: (){},
+            // ),
             _DesktopHoverTile(
               icon: Icons.dark_mode_outlined,
               title: 'Aparência',
@@ -226,7 +179,9 @@ class ProfileView extends StatelessWidget {
         ),
       ],
     );
+    });
   }
+}
 
   Widget _FluentSectionTitle(ThemeData theme, String title) {
     return Padding(
@@ -242,7 +197,7 @@ class ProfileView extends StatelessWidget {
       ),
     );
   }
-}
+
 
 // ==========================================================
 // COMPONENTES REUTILIZÁVEIS E MODERNIZADOS
@@ -259,7 +214,7 @@ class _ProfileCard extends StatelessWidget {
     final theme = Theme.of(context);
     final borderColor = theme.dividerColor.withOpacity(0.1);
 
-    return Container(
+    return Obx(() => Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
@@ -285,13 +240,20 @@ class _ProfileCard extends StatelessWidget {
             ),
             child: CircleAvatar(
               radius: 50,
-              backgroundImage: NetworkImage(controller.avatarUrl.value),
+              backgroundImage: NetworkImage(controller.avatarUrl.value.isNotEmpty
+                  ? controller.avatarUrl.value
+                  : 'https://i.pravatar.cc/150?img=12'),
               backgroundColor: theme.colorScheme.surfaceVariant,
+              child: controller.avatarUrl.value.isEmpty
+                  ? Icon(Icons.person, size: 50, color: theme.colorScheme.onSurface)
+                  : null,
             ),
           ),
           const SizedBox(height: 16),
           Text(
-            controller.name.value,
+            controller.name.value.isNotEmpty
+                ? controller.name.value
+                : 'Carregando...',
             style: GoogleFonts.outfit(
               fontSize: 22,
               fontWeight: FontWeight.w600,
@@ -301,13 +263,39 @@ class _ProfileCard extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            controller.email.value,
+            controller.email.value.isNotEmpty
+                ? controller.email.value
+                : 'Email não disponível',
             style: GoogleFonts.inter(
               fontSize: 14,
               color: theme.colorScheme.onSurface.withOpacity(0.6),
             ),
             textAlign: TextAlign.center,
           ),
+          const SizedBox(height: 16),
+          // Informações adicionais do usuário
+          if (controller.funcao.value.isNotEmpty || controller.status.value.isNotEmpty)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (controller.funcao.value.isNotEmpty)
+                    _buildInfoRow(Icons.work_outline, 'Função', controller.funcao.value, theme),
+                  if (controller.status.value.isNotEmpty)
+                    _buildInfoRow(Icons.circle, 'Status', controller.status.value, theme),
+                  if (controller.telefone.value.isNotEmpty)
+                    _buildInfoRow(Icons.phone_outlined, 'Telefone', controller.telefone.value, theme),
+                  if (controller.endereco.value.isNotEmpty)
+                    _buildInfoRow(Icons.location_on_outlined, 'Endereço', controller.endereco.value, theme),
+                ],
+              ),
+            ),
           const SizedBox(height: 24),
 
           // Botões de Ação
@@ -315,7 +303,7 @@ class _ProfileCard extends StatelessWidget {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () {
-
+                // TODO: Implementar edição de perfil
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: theme.colorScheme.primary,
@@ -327,18 +315,32 @@ class _ProfileCard extends StatelessWidget {
               child: const Text("Editar Perfil"),
             ),
           ),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton(
-              onPressed: () {},
-              style: OutlinedButton.styleFrom(
-                foregroundColor: theme.colorScheme.onSurface,
-                side: BorderSide(color: theme.dividerColor),
-                padding: const EdgeInsets.symmetric(vertical: 18),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-              ),
-              child: const Text("Compartilhar"),
+
+        ],
+      ),
+    ));
+  }
+
+  Widget _buildInfoRow(IconData icon, String label, String value, ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Icon(icon, size: 16, color: theme.colorScheme.onSurface.withOpacity(0.6)),
+          const SizedBox(width: 8),
+          Text(
+            '$label: ',
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: theme.colorScheme.onSurface.withOpacity(0.8),
+            ),
+          ),
+          Text(
+            value,
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              color: theme.colorScheme.onSurface.withOpacity(0.6),
             ),
           ),
         ],

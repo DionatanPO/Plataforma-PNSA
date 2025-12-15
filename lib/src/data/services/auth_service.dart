@@ -126,7 +126,6 @@ class AuthService extends GetxService {
         'pendencia': pendencia,
         'ultimoAcesso': DateTime.now().millisecondsSinceEpoch,
       });
-      print('Status de pendência do usuário atualizado para: $pendencia');
     }
   }
 
@@ -139,7 +138,6 @@ class AuthService extends GetxService {
       }
       return null;
     } catch (e) {
-      print('Erro ao obter dados do usuário: $e');
       return null;
     }
   }

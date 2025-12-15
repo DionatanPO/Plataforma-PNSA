@@ -1,5 +1,5 @@
 class Acesso {
-  final int id;
+  final String id;
   final String nome;
   final String email;
   final String cpf;
@@ -24,7 +24,7 @@ class Acesso {
   });
 
   Acesso copyWith({
-    int? id,
+    String? id,
     String? nome,
     String? email,
     String? cpf,
@@ -66,7 +66,7 @@ class Acesso {
 
   factory Acesso.fromMap(Map<String, dynamic> map) {
     return Acesso(
-      id: map['id']?.toInt() ?? 0,
+      id: map['id']?.toString() ?? '',
       nome: map['nome'] ?? '',
       email: map['email'] ?? '',
       cpf: map['cpf'] ?? '',

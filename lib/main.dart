@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:plataforma_pnsa/src/data/services/auth_guard.dart';
+import 'package:plataforma_pnsa/src/data/services/theme_service.dart';
 import 'package:plataforma_pnsa/src/ui/access_management/controllers/access_management_controller.dart';
 import 'package:plataforma_pnsa/src/ui/auth/login/login_controller.dart';
 import 'package:plataforma_pnsa/src/ui/contribuicoes/controllers/contribuicao_controller.dart';
@@ -31,6 +32,7 @@ Future<void> main() async {
 
   Get.put<SessionService>(SessionService());
   Get.put<AuthService>(AuthService());
+  Get.put<ThemeService>(ThemeService());
   Get.put(AuthGuard());
 
   // Instanciar os controllers após os serviços

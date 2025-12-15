@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import '../models/contribuicao_model.dart';
 import '../../dizimistas/models/dizimista_model.dart'; // Ajuste se necessário
+import '../../dizimistas/controllers/dizimista_controller.dart';
 
 class ContribuicaoController extends GetxController {
   // Estado privado
@@ -81,8 +82,34 @@ class ContribuicaoController extends GetxController {
       await Future.delayed(const Duration(seconds: 1));
 
       _dizimistas.assignAll([
-        Dizimista(id: 1, nome: "João Santos", cpf: "123.456.789-00", telefone: "(11) 99999-1234", email: "joao@email.com", status: "Ativo", endereco: "Rua A", cidade: "Iporá", estado: "GO", dataRegistro: DateTime(2022, 1, 14)),
-        Dizimista(id: 2, nome: "Maria Silva", cpf: "987.654.321-00", telefone: "(11) 98888-5678", email: "maria@email.com", status: "Ativo", endereco: "Rua B", cidade: "Iporá", estado: "GO", dataRegistro: DateTime(2023, 3, 9)),
+        Dizimista(
+          id: 1,
+          nome: "João Santos",
+          cpf: "123.456.789-00",
+          telefone: "(11) 99999-1234",
+          email: "joao@email.com",
+          status: "Ativo",
+          rua: "Rua A",
+          bairro: "Centro",
+          cidade: "Iporá",
+          estado: "GO",
+          dataRegistro: DateTime(2022, 1, 14),
+          consentimento: true,
+        ),
+        Dizimista(
+          id: 2,
+          nome: "Maria Silva",
+          cpf: "987.654.321-00",
+          telefone: "(11) 98888-5678",
+          email: "maria@email.com",
+          status: "Ativo",
+          rua: "Rua B",
+          bairro: "Centro",
+          cidade: "Iporá",
+          estado: "GO",
+          dataRegistro: DateTime(2023, 3, 9),
+          consentimento: true,
+        ),
       ]);
     } catch (e) {
       print("Erro ao carregar dizimistas: $e");
@@ -114,5 +141,30 @@ class ContribuicaoController extends GetxController {
 
   String formatarMoeda(double valor) {
     return "R\$ ${valor.toStringAsFixed(2).replaceAll('.', ',')}";
+  }
+
+  List<Dizimista> searchDizimistas(String query) {
+    if (query.isEmpty) return _dizimistas;
+
+    return _dizimistas.where((dizimista) {
+      return dizimista.nome.toLowerCase().contains(query.toLowerCase()) ||
+             dizimista.cpf.contains(query) ||
+             dizimista.telefone.contains(query) ||
+             (dizimista.email?.toLowerCase().contains(query.toLowerCase()) ?? false) ||
+             (dizimista.rua?.toLowerCase().contains(query.toLowerCase()) ?? false) ||
+             (dizimista.bairro?.toLowerCase().contains(query.toLowerCase()) ?? false) ||
+             dizimista.cidade.toLowerCase().contains(query.toLowerCase()) ||
+             (dizimista.observacoes?.toLowerCase().contains(query.toLowerCase()) ?? false);
+    }).toList();
+  }
+
+  // Método para obter os dados de um dizimista pelo ID
+  Dizimista? getDizimistaById(int id) {
+    final controller = Get.find<DizimistaController>();
+    try {
+      return controller.dizimistas.firstWhere((dizimista) => dizimista.id == id);
+    } catch (e) {
+      return null;
+    }
   }
 }
