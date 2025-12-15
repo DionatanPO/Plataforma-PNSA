@@ -60,6 +60,8 @@ class AccessManagementController extends GetxController {
     _isLoading.value = true;
     try {
       await AccessService.addAcesso(acesso);
+      // Após adicionar o acesso, não precisamos fazer nenhuma ação adicional
+      // O sistema deve manter o administrador logado graças às proteções implementadas
     } catch (e) {
       print("Erro ao adicionar acesso: $e");
     } finally {

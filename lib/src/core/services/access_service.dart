@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:plataforma_pnsa/src/domain/models/acesso_model.dart';
 
 class AccessService {
@@ -12,7 +14,7 @@ class AccessService {
   static String? get originalUserUid => _originalUserUid;
   static const String _collectionName = 'usuarios';
 
-  // Converter Acesso para Map para armazenamento no Firestore
+  // Converter Acesso para Map para armazenamento no Firestore (usado para dados complementares)
   static Map<String, dynamic> _toFirestoreMap(Acesso acesso) {
     return {
       'nome': acesso.nome,
@@ -87,52 +89,53 @@ class AccessService {
 
   // Adicionar novo acesso
   static Future<void> addAcesso(Acesso acesso) async {
+    // Obter o usuário atual antes de criar o novo usuário
+    final currentUser = FirebaseAuth.instance.currentUser;
+    _originalUserUid = currentUser?.uid;
+
+    // Marcar que estamos criando um novo usuário
+    _creatingNewUser = true;
+
     try {
-      // Obter o usuário atual e seu token antes de criar o novo usuário
-      final currentUser = FirebaseAuth.instance.currentUser;
-      String? originalIdToken;
+      // Chamar a Cloud Function para criar o usuário
+      // Isso evita a troca de sessão que ocorre com createUserWithEmailAndPassword
+      final functions = FirebaseFunctions.instance;
 
-      if (currentUser != null) {
-        originalIdToken = await currentUser.getIdToken();
-        _originalUserUid = currentUser.uid;
-      }
-
-      // Marcar que estamos criando um novo usuário
-      _creatingNewUser = true;
-
-      // Criar o usuário no Firebase Auth
-      final newUserCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: acesso.email,
-        password: '123456', // Senha temporária
-      );
-
-      // Salvar os dados complementares no Firestore
-      await FirebaseFirestore.instance.collection(_collectionName).doc(newUserCredential.user!.uid).set({
-        'id': newUserCredential.user!.uid,
-        ..._toFirestoreMap(acesso)
+      final result = await functions.httpsCallable('createUser').call({
+        'email': acesso.email,
+        'password': '123456', // Senha padrão
+        'displayName': acesso.nome,
+        'cpf': acesso.cpf,
+        'telefone': acesso.telefone,
+        'endereco': acesso.endereco,
+        'funcao': acesso.funcao,
+        'status': acesso.status,
+        'ultimoAcesso': acesso.ultimoAcesso.millisecondsSinceEpoch,
+        'pendencia': acesso.pendencia,
       });
 
-      // Após criar o novo usuário e salvar no Firestore, reautenticar o usuário original
-      // Isso evita que o novo usuário fique logado no lugar do administrador
-      if (originalIdToken != null && currentUser != null) {
-        // A forma mais segura de restaurar a sessão do usuário original é fazer logout do novo usuário
-        // e permitir que o listener retome a sessão correta
-        // Mas infelizmente não podemos "voltar" para o usuário anterior diretamente
-
-        // A alternativa mais viável é manter a flag ativa para que o AuthService continue
-        // ignorando as mudanças de estado até que tudo esteja resolvido
-        print('Novo usuário criado (${newUserCredential.user!.uid}), mantendo usuário original (${_originalUserUid})');
+      final responseData = result.data as Map<String, dynamic>;
+      if (responseData['success'] != true) {
+        throw Exception('Falha ao criar usuário: ${responseData['error']}');
       }
 
-      // Após completar, resetar a flag
+      print('Novo usuário criado via Cloud Function (${responseData['uid']}), mantendo usuário original (${_originalUserUid})');
+    } on FirebaseFunctionsException catch (e) {
+      // Resetar as flags em caso de erro
       _creatingNewUser = false;
       _originalUserUid = null;
-    } on FirebaseAuthException catch (e) {
-      // Resetar as flags em caso de erro também
+      throw Exception('Erro na Cloud Function: ${e.message}');
+    } catch (e) {
+      // Resetar as flags em caso de erro
       _creatingNewUser = false;
       _originalUserUid = null;
-      // Tratar erros de autenticação
-      throw Exception('Erro ao criar usuário: ${e.message}');
+      throw Exception('Erro ao criar usuário: $e');
+    } finally {
+      // Ajuste: manter a flag ativa por mais tempo para garantir que qualquer
+      // operação assíncrona relacionada à criação seja concluída
+      await Future.delayed(const Duration(milliseconds: 200));
+      _creatingNewUser = false;
+      _originalUserUid = null;
     }
   }
 

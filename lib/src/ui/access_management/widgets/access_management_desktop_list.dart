@@ -8,6 +8,7 @@ import '../widgets/table_header.dart';
 class AccessManagementDesktopList extends StatelessWidget {
   final List<Acesso> acessos;
   final Function(Acesso) onEditUser;
+  final Function(Acesso) onResetPassword;
   final ThemeData theme;
   final bool isDark;
   final Color surfaceColor;
@@ -17,6 +18,7 @@ class AccessManagementDesktopList extends StatelessWidget {
     Key? key,
     required this.acessos,
     required this.onEditUser,
+    required this.onResetPassword,
     required this.theme,
     required this.isDark,
     required this.surfaceColor,
@@ -140,6 +142,8 @@ class AccessManagementDesktopList extends StatelessWidget {
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
                                   _actionButton(Icons.edit_outlined, Colors.blue, () => onEditUser(acesso)),
+                                  const SizedBox(width: 8),
+                                  _actionButton(Icons.lock_reset_outlined, Colors.orange, () => onResetPassword(acesso)),
                                 ],
                               ),
                             ),

@@ -71,6 +71,7 @@ class _AccessManagementViewState extends State<AccessManagementView> {
                 return AccessManagementDesktopList(
                   acessos: controller.filteredAcessos,
                   onEditUser: _openEditUserDialog,
+                  onResetPassword: _openResetPasswordDialog,
                   theme: theme,
                   isDark: isDark,
                   surfaceColor: surfaceColor,
@@ -80,6 +81,7 @@ class _AccessManagementViewState extends State<AccessManagementView> {
                 return AccessManagementMobileList(
                   acessos: controller.filteredAcessos,
                   onEditUser: _openEditUserDialog,
+                  onResetPassword: _openResetPasswordDialog,
                   theme: theme,
                   isDark: isDark,
                   surfaceColor: surfaceColor,
@@ -234,6 +236,64 @@ class _AccessManagementViewState extends State<AccessManagementView> {
               ],
             );
           },
+        );
+      },
+    );
+  }
+
+  void _openResetPasswordDialog(Acesso acesso) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: surfaceColor,
+          surfaceTintColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Text('Redefinir Senha', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+          content: Text(
+            'Deseja redefinir a senha do usuário ${acesso.nome} para o padrão 123456? Esta ação definirá a pendência de troca de senha para este usuário.',
+            style: GoogleFonts.inter(fontSize: 14),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Cancelar', style: GoogleFonts.inter(color: theme.colorScheme.onSurface)),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                // Atualizar o campo pendencia para true
+                final acessoAtualizado = Acesso(
+                  id: acesso.id,
+                  nome: acesso.nome,
+                  email: acesso.email,
+                  cpf: acesso.cpf,
+                  telefone: acesso.telefone,
+                  endereco: acesso.endereco,
+                  funcao: acesso.funcao,
+                  status: acesso.status,
+                  ultimoAcesso: acesso.ultimoAcesso,
+                  pendencia: true, // Definir pendência como true para forçar troca de senha
+                );
+
+                await controller.updateAcesso(acessoAtualizado);
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Senha do usuário ${acesso.nome} redefinida. A pendência de troca de senha foi ativada.'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+              child: const Text('Redefinir'),
+            ),
+          ],
         );
       },
     );

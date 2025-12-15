@@ -8,6 +8,7 @@ import '../widgets/info_badge.dart';
 class AccessManagementMobileList extends StatelessWidget {
   final List<Acesso> acessos;
   final Function(Acesso) onEditUser;
+  final Function(Acesso) onResetPassword;
   final ThemeData theme;
   final bool isDark;
   final Color surfaceColor;
@@ -17,6 +18,7 @@ class AccessManagementMobileList extends StatelessWidget {
     Key? key,
     required this.acessos,
     required this.onEditUser,
+    required this.onResetPassword,
     required this.theme,
     required this.isDark,
     required this.surfaceColor,
@@ -103,6 +105,16 @@ class AccessManagementMobileList extends StatelessWidget {
                       style: OutlinedButton.styleFrom(
                         foregroundColor: theme.colorScheme.onSurface,
                         side: BorderSide(color: theme.dividerColor),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    OutlinedButton.icon(
+                      onPressed: () => onResetPassword(acesso),
+                      icon: const Icon(Icons.lock_reset_outlined, size: 16),
+                      label: const Text('Redefinir Senha'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.orange,
+                        side: BorderSide(color: Colors.orange),
                       ),
                     ),
                   ],

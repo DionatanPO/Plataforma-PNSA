@@ -27,11 +27,8 @@ class AuthService extends GetxService {
       if (!AccessService.isCreatingNewUser) {
         _firebaseUser.value = firebaseUser;
       } else {
-        // Se estivermos criando um novo usuário mas o firebaseUser é nulo (logout ou erro),
-        // ainda devemos atualizar o usuário
-        if (firebaseUser == null) {
-          _firebaseUser.value = firebaseUser;
-        }
+        // Durante a criação de novo usuário, apenas registrar o evento mas não atualizar o estado
+        print('Mudança de estado ignorada durante criação de novo usuário: ${firebaseUser?.uid}');
       }
     });
 

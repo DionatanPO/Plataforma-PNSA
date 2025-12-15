@@ -42,6 +42,7 @@ class AuthGuard extends GetxService {
     // Se estivermos, ignorar temporariamente essa mudança de estado para evitar redirecionamento indesejado
     if (AccessService.isCreatingNewUser) {
       // Apenas retornar sem fazer nenhuma ação de navegação
+      print('Estado de autenticação ignorado durante criação de novo usuário');
       return;
     }
 
@@ -59,6 +60,12 @@ class AuthGuard extends GetxService {
       }
     } else {
       // Usuário não está autenticado
+      // Verificar se foi causado pela criação de novo usuário (logout temporário)
+      if (AccessService.isCreatingNewUser) {
+        print('Logout temporário durante criação de novo usuário - ignorando navegação');
+        return;
+      }
+
       Get.offAllNamed(AppRoutes.login);
     }
   }
