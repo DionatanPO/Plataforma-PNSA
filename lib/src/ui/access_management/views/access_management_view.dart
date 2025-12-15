@@ -11,6 +11,8 @@ import '../widgets/access_management_desktop_list.dart';
 import '../widgets/access_management_mobile_list.dart';
 import '../widgets/access_management_function_cards.dart';
 import '../widgets/access_management_status_cards.dart';
+import '../widgets/password_reset_info_card.dart';
+import '../widgets/first_access_info_card.dart';
 
 class AccessManagementView extends StatefulWidget {
   const AccessManagementView({Key? key}) : super(key: key);
@@ -93,6 +95,47 @@ class _AccessManagementViewState extends State<AccessManagementView> {
           _buildInfoSectionSliver(
               'Definições de Funções', const AccessManagementFunctionCards()),
           _buildInfoSectionSliver('Legenda de Status', const AccessManagementStatusCards()),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 40, 24, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Como Funciona o Sistema de Senhas',
+                    style: GoogleFonts.outfit(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      if (constraints.maxWidth > 700) {
+                        return Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(child: const PasswordResetInfoCard()),
+                            const SizedBox(width: 16),
+                            Expanded(child: const FirstAccessInfoCard()),
+                          ],
+                        );
+                      } else {
+                        return Column(
+                          children: [
+                            const PasswordResetInfoCard(),
+                            const SizedBox(height: 12),
+                            const FirstAccessInfoCard(),
+                          ],
+                        );
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
           const SliverToBoxAdapter(child: SizedBox(height: 40)),
         ],
       ),
