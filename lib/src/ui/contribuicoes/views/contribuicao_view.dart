@@ -71,7 +71,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Financeiro',
+              'Contribução',
               style: GoogleFonts.outfit(
                 fontSize: 26,
                 fontWeight: FontWeight.bold,

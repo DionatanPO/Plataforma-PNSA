@@ -28,7 +28,14 @@ class AppTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ButtonStyle(
-          backgroundColor: MaterialStateProperty.all(primaryColor),
+          backgroundColor: MaterialStateProperty.resolveWith<Color>(
+            (Set<MaterialState> states) {
+              if (states.contains(MaterialState.disabled)) {
+                return Colors.grey.shade400; // Cinza para botões desabilitados
+              }
+              return primaryColor; // Cor primária para botões habilitados
+            },
+          ),
           foregroundColor: MaterialStateProperty.all(Colors.white),
         ),
       ),
@@ -53,7 +60,14 @@ class AppTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ButtonStyle(
-          backgroundColor: MaterialStateProperty.all(primaryColor),
+          backgroundColor: MaterialStateProperty.resolveWith<Color>(
+            (Set<MaterialState> states) {
+              if (states.contains(MaterialState.disabled)) {
+                return Colors.grey.shade400; // Cinza para botões desabilitados
+              }
+              return primaryColor; // Cor primária para botões habilitados
+            },
+          ),
           foregroundColor: MaterialStateProperty.all(Colors.white),
         ),
       ),
