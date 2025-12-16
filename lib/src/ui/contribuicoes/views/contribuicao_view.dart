@@ -11,6 +11,7 @@ import '../widgets/step_indicator_widget.dart';
 import '../widgets/contribution_form_widget.dart';
 import '../widgets/dizimista_selection_widget.dart';
 import '../widgets/step_navigation_buttons.dart';
+import '../../core/widgets/modern_header.dart';
 
 class ContribuicaoView extends StatefulWidget {
   const ContribuicaoView({Key? key}) : super(key: key);
@@ -21,18 +22,19 @@ class ContribuicaoView extends StatefulWidget {
 
 class _ContribuicaoViewState extends State<ContribuicaoView> {
   final ContribuicaoController controller = Get.find<ContribuicaoController>();
-  final DizimistaController dizimistaController = Get.find<DizimistaController>();
+  final DizimistaController dizimistaController =
+      Get.find<DizimistaController>();
   final TextEditingController _valorController = TextEditingController();
   final TextEditingController _searchController = TextEditingController();
   int _currentStep = 0;
   Timer? _debounceTimer;
 
   final CurrencyTextInputFormatter _currencyFormatter =
-  CurrencyTextInputFormatter.currency(
-    locale: 'pt_BR',
-    symbol: 'R\$',
-    decimalDigits: 2,
-  );
+      CurrencyTextInputFormatter.currency(
+        locale: 'pt_BR',
+        symbol: 'R\$',
+        decimalDigits: 2,
+      );
 
   late ThemeData theme;
   late bool isDark;
@@ -54,7 +56,9 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
     theme = Theme.of(context);
     isDark = theme.brightness == Brightness.dark;
     surfaceColor = isDark ? const Color(0xFF1A1A1A) : Colors.white;
-    backgroundColor = isDark ? const Color(0xFF0D0D0D) : const Color(0xFFF8F9FA);
+    backgroundColor = isDark
+        ? const Color(0xFF0D0D0D)
+        : const Color(0xFFF8F9FA);
     borderColor = isDark
         ? Colors.white.withOpacity(0.08)
         : Colors.black.withOpacity(0.06);
@@ -65,97 +69,17 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
       body: CustomScrollView(
         slivers: [
           // Modern App Bar
-          SliverAppBar(
-            expandedHeight: 140,
-            floating: false,
-            pinned: true,
-            backgroundColor: surfaceColor,
-            elevation: 0,
-            flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                decoration: BoxDecoration(
-                  color: surfaceColor,
-                  border: Border(
-                    bottom: BorderSide(
-                      color: borderColor,
-                      width: 1,
-                    ),
-                  ),
-                ),
-                child: SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    accentColor,
-                                    accentColor.withOpacity(0.8),
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(16),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: accentColor.withOpacity(0.3),
-                                    blurRadius: 12,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ],
-                              ),
-                              child: Icon(
-                                Icons.payment_rounded,
-                                color: Colors.white,
-                                size: 28,
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Contribuição',
-                                    style: GoogleFonts.outfit(
-                                      fontSize: 28,
-                                      fontWeight: FontWeight.bold,
-                                      color: theme.colorScheme.onSurface,
-                                      height: 1.2,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    'Registro de entradas e dízimos',
-                                    style: GoogleFonts.inter(
-                                      fontSize: 14,
-                                      color: theme.colorScheme.onSurface.withOpacity(0.5),
-                                      letterSpacing: -0.2,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
+          // Modern Header
+          ModernHeader(
+            title: 'Contribuição',
+            subtitle: 'Registro de entradas e dízimos',
+            icon: Icons.payment_rounded,
           ),
 
           // Content
           SliverPadding(
             padding: const EdgeInsets.all(24),
-            sliver: SliverToBoxAdapter(
-              child: _buildMainContent(),
-            ),
+            sliver: SliverToBoxAdapter(child: _buildMainContent()),
           ),
         ],
       ),
@@ -168,9 +92,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
         if (constraints.maxWidth > 900) {
           return Row(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(flex: 4, child: _buildStepperCard()),
-            ],
+            children: [Expanded(flex: 4, child: _buildStepperCard())],
           );
         } else {
           return _buildStepperCard();
@@ -212,9 +134,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
                 topLeft: Radius.circular(20),
                 topRight: Radius.circular(20),
               ),
-              border: Border(
-                bottom: BorderSide(color: borderColor),
-              ),
+              border: Border(bottom: BorderSide(color: borderColor)),
             ),
             child: Row(
               children: [
@@ -302,19 +222,19 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
         decoration: BoxDecoration(
           gradient: isActive
               ? LinearGradient(
-            colors: [accentColor, accentColor.withOpacity(0.8)],
-          )
+                  colors: [accentColor, accentColor.withOpacity(0.8)],
+                )
               : null,
           color: isActive ? null : Colors.transparent,
           borderRadius: BorderRadius.circular(50),
           boxShadow: isActive
               ? [
-            BoxShadow(
-              color: accentColor.withOpacity(0.3),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ]
+                  BoxShadow(
+                    color: accentColor.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
               : null,
         ),
         child: Row(
@@ -479,16 +399,18 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
                     colors: isSelected
                         ? [accentColor, accentColor.withOpacity(0.8)]
                         : [
-                      theme.colorScheme.onSurface.withOpacity(0.1),
-                      theme.colorScheme.onSurface.withOpacity(0.05),
-                    ],
+                            theme.colorScheme.onSurface.withOpacity(0.1),
+                            theme.colorScheme.onSurface.withOpacity(0.05),
+                          ],
                   ),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Center(
                   child: Text(
-                    dizimista.nome.isNotEmpty && dizimista.nome.split(' ').length > 1
-                        ? '${dizimista.nome.split(' ')[0][0]}${dizimista.nome.split(' ').last[0]}'.toUpperCase()
+                    dizimista.nome.isNotEmpty &&
+                            dizimista.nome.split(' ').length > 1
+                        ? '${dizimista.nome.split(' ')[0][0]}${dizimista.nome.split(' ').last[0]}'
+                              .toUpperCase()
                         : dizimista.nome.isNotEmpty
                         ? dizimista.nome[0].toUpperCase()
                         : '?',
@@ -695,11 +617,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
                   color: accentColor.withOpacity(0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(
-                  Icons.person_rounded,
-                  color: accentColor,
-                  size: 20,
-                ),
+                child: Icon(Icons.person_rounded, color: accentColor, size: 20),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -736,12 +654,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
         _label('Tipo de Contribuição'),
         _buildModernDropdown(
           value: controller.tipo.value,
-          items: [
-            'Dízimo Regular',
-            'Dízimo Atrasado',
-            'Oferta',
-            'Doação',
-          ],
+          items: ['Dízimo Regular', 'Dízimo Atrasado', 'Oferta', 'Doação'],
           onChanged: (val) => setState(() => controller.tipo.value = val!),
         ),
 
@@ -776,7 +689,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Obx(
-                        () => Text(
+                    () => Text(
                       '${controller.dataSelecionada.value.day.toString().padLeft(2, '0')}/${controller.dataSelecionada.value.month.toString().padLeft(2, '0')}/${controller.dataSelecionada.value.year} às ${controller.dataSelecionada.value.hour.toString().padLeft(2, '0')}:${controller.dataSelecionada.value.minute.toString().padLeft(2, '0')}',
                       style: GoogleFonts.inter(
                         fontSize: 14,
@@ -837,16 +750,18 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
 
         // Forma de Pagamento
         _label('Forma de Pagamento'),
-        Obx(() => Wrap(
-          spacing: 10,
-          runSpacing: 10,
-          children: [
-            _paymentChip('PIX', Icons.qr_code_2_rounded),
-            _paymentChip('Dinheiro', Icons.payments_rounded),
-            _paymentChip('Cartão', Icons.credit_card_rounded),
-            _paymentChip('Transferência', Icons.sync_alt_rounded),
-          ],
-        )),
+        Obx(
+          () => Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              _paymentChip('PIX', Icons.qr_code_2_rounded),
+              _paymentChip('Dinheiro', Icons.payments_rounded),
+              _paymentChip('Cartão', Icons.credit_card_rounded),
+              _paymentChip('Transferência', Icons.sync_alt_rounded),
+            ],
+          ),
+        ),
       ],
     );
   }
@@ -1076,8 +991,8 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
           decoration: BoxDecoration(
             gradient: isSelected
                 ? LinearGradient(
-              colors: [accentColor, accentColor.withOpacity(0.8)],
-            )
+                    colors: [accentColor, accentColor.withOpacity(0.8)],
+                  )
                 : null,
             color: isSelected ? null : backgroundColor,
             borderRadius: BorderRadius.circular(12),
@@ -1087,12 +1002,12 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
             ),
             boxShadow: isSelected
                 ? [
-              BoxShadow(
-                color: accentColor.withOpacity(0.3),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ]
+                    BoxShadow(
+                      color: accentColor.withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
                 : null,
           ),
           child: Row(

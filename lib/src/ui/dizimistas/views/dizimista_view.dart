@@ -4,12 +4,12 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/dizimista_controller.dart';
 import '../models/dizimista_model.dart';
-import '../widgets/dizimista_header_view.dart';
-import '../widgets/dizimista_search_bar_view.dart';
 import '../widgets/dizimista_empty_state_view.dart';
 import '../widgets/dizimista_mobile_list_view.dart';
 import '../widgets/dizimista_desktop_table_view.dart';
 import '../widgets/dizimista_form_dialog.dart';
+import '../widgets/dizimista_search_bar_view.dart';
+import '../../core/widgets/modern_header.dart';
 
 class DizimistaView extends StatefulWidget {
   const DizimistaView({Key? key}) : super(key: key);
@@ -29,7 +29,9 @@ class _DizimistaViewState extends State<DizimistaView> {
 
     // Cores modernas e refinadas
     final surfaceColor = isDark ? const Color(0xFF1A1A1A) : Colors.white;
-    final backgroundColor = isDark ? const Color(0xFF0D0D0D) : const Color(0xFFF8F9FA);
+    final backgroundColor = isDark
+        ? const Color(0xFF0D0D0D)
+        : const Color(0xFFF8F9FA);
     final borderColor = isDark
         ? Colors.white.withOpacity(0.08)
         : Colors.black.withOpacity(0.06);
@@ -42,144 +44,17 @@ class _DizimistaViewState extends State<DizimistaView> {
           // =======================================================
           // MODERN APP BAR COM GRADIENTE
           // =======================================================
-          SliverAppBar(
-            expandedHeight: 160,
-            floating: false,
-            pinned: true,
-            backgroundColor: surfaceColor,
-            elevation: 0,
-            flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                decoration: BoxDecoration(
-                  color: surfaceColor,
-                  border: Border(
-                    bottom: BorderSide(
-                      color: borderColor,
-                      width: 1,
-                    ),
-                  ),
-                ),
-                child: SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            // Ícone com gradiente
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    accentColor,
-                                    accentColor.withOpacity(0.8),
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(16),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: accentColor.withOpacity(0.3),
-                                    blurRadius: 12,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ],
-                              ),
-                              child: Icon(
-                                Icons.people_rounded,
-                                color: Colors.white,
-                                size: 28,
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-
-                            // Título e Subtítulo
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Fiéis',
-                                    style: GoogleFonts.outfit(
-                                      fontSize: 28,
-                                      fontWeight: FontWeight.bold,
-                                      color: theme.colorScheme.onSurface,
-                                      height: 1.2,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    'Gerenciamento de cadastros',
-                                    style: GoogleFonts.inter(
-                                      fontSize: 14,
-                                      color: theme.colorScheme.onSurface.withOpacity(0.5),
-                                      letterSpacing: -0.2,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            // Botão de adicionar moderno
-                            Container(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    accentColor,
-                                    accentColor.withOpacity(0.8),
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(14),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: accentColor.withOpacity(0.3),
-                                    blurRadius: 12,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ],
-                              ),
-                              child: Material(
-                                color: Colors.transparent,
-                                child: InkWell(
-                                  onTap: () => _showCadastroDialog(context),
-                                  borderRadius: BorderRadius.circular(14),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 20,
-                                      vertical: 12,
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(
-                                          Icons.add_rounded,
-                                          color: Colors.white,
-                                          size: 20,
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          'Novo Fiel',
-                                          style: GoogleFonts.inter(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w600,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
+          // =======================================================
+          // MODERN HEADER
+          // =======================================================
+          ModernHeader(
+            title: 'Fiéis',
+            subtitle: 'Gerenciamento de cadastros',
+            icon: Icons.people_rounded,
+            onActionPressed: () => _showCadastroDialog(context),
+            actionLabel: 'Novo Fiel',
+            actionIcon: Icons.add_rounded,
+            actionColor: accentColor,
           ),
 
           // =======================================================
@@ -187,11 +62,15 @@ class _DizimistaViewState extends State<DizimistaView> {
           // =======================================================
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
-              child: _buildModernSearchBar(theme, backgroundColor, borderColor, accentColor),
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
+              child: _buildModernSearchBar(
+                theme,
+                backgroundColor,
+                borderColor,
+                accentColor,
+              ),
             ),
           ),
-
           // =======================================================
           // LISTA DE DADOS (RESPONSIVA)
           // =======================================================
@@ -269,58 +148,16 @@ class _DizimistaViewState extends State<DizimistaView> {
   // SEARCH BAR MODERNA
   // =======================================================
   Widget _buildModernSearchBar(
-      ThemeData theme,
-      Color backgroundColor,
-      Color borderColor,
-      Color accentColor,
-      ) {
-    return Container(
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: borderColor),
-      ),
-      child: TextField(
-        controller: _searchController,
-        style: GoogleFonts.inter(
-          fontSize: 14,
-          color: theme.colorScheme.onSurface,
-        ),
-        decoration: InputDecoration(
-          hintText: 'Buscar por nome, CPF, telefone ou endereço...',
-          hintStyle: GoogleFonts.inter(
-            color: theme.colorScheme.onSurface.withOpacity(0.4),
-            fontSize: 14,
-          ),
-          prefixIcon: Icon(
-            Icons.search_rounded,
-            color: theme.colorScheme.onSurface.withOpacity(0.4),
-            size: 20,
-          ),
-          suffixIcon: Obx(() {
-            if (controller.searchQuery.value.isEmpty) return const SizedBox();
-            return IconButton(
-              icon: Icon(
-                Icons.close_rounded,
-                color: theme.colorScheme.onSurface.withOpacity(0.4),
-                size: 18,
-              ),
-              onPressed: () {
-                _searchController.clear();
-                controller.searchQuery.value = '';
-              },
-            );
-          }),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 16,
-          ),
-        ),
-        onChanged: (val) {
-          controller.searchQuery.value = val;
-        },
-      ),
+    ThemeData theme,
+    Color backgroundColor,
+    Color borderColor,
+    Color accentColor,
+  ) {
+    return DizimistaSearchBarView(
+      controller: _searchController,
+      onChanged: (val) {
+        controller.searchQuery.value = val;
+      },
     );
   }
 
@@ -488,5 +325,165 @@ class _DizimistaViewState extends State<DizimistaView> {
     } else {
       return "(${telefoneNumerico.substring(0, 2)}) ${telefoneNumerico.substring(2, 7)}-${telefoneNumerico.substring(7, 11)}";
     }
+  }
+}
+
+// =======================================================
+// WIDGET DE SEARCH BAR MODERNA REUTILIZÁVEL
+// =======================================================
+class _ModernSearchBar extends StatefulWidget {
+  final TextEditingController controller;
+  final ThemeData theme;
+  final Color backgroundColor;
+  final Color accentColor;
+  final ValueChanged<String> onChanged;
+  final VoidCallback onClear;
+
+  const _ModernSearchBar({
+    required this.controller,
+    required this.theme,
+    required this.backgroundColor,
+    required this.accentColor,
+    required this.onChanged,
+    required this.onClear,
+  });
+
+  @override
+  State<_ModernSearchBar> createState() => _ModernSearchBarState();
+}
+
+class _ModernSearchBarState extends State<_ModernSearchBar> {
+  bool _isFocused = false;
+  bool _isHovering = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = widget.theme;
+    final isDark = theme.brightness == Brightness.dark;
+
+    // Cores modernas e refinadas
+    final surfaceColor = isDark ? const Color(0xFF1A1A1A) : Colors.white;
+    final inputBgColor = isDark
+        ? const Color(0xFF252525)
+        : const Color(0xFFF8FAFC);
+    final accentColor = widget.accentColor;
+
+    // Cores de estado
+    final borderColor = _isFocused
+        ? accentColor.withOpacity(0.5)
+        : (_isHovering
+              ? theme.dividerColor.withOpacity(0.2)
+              : theme.dividerColor.withOpacity(0.1));
+
+    final iconColor = _isFocused
+        ? accentColor
+        : theme.colorScheme.onSurface.withOpacity(0.4);
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovering = true),
+      onExit: (_) => setState(() => _isHovering = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOutCubic,
+        decoration: BoxDecoration(
+          color: surfaceColor,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: borderColor, width: _isFocused ? 1.5 : 1),
+          boxShadow: [
+            BoxShadow(
+              color: _isFocused
+                  ? accentColor.withOpacity(0.08)
+                  : Colors.black.withOpacity(isDark ? 0.15 : 0.04),
+              blurRadius: _isFocused ? 20 : 12,
+              offset: const Offset(0, 4),
+              spreadRadius: _isFocused ? 2 : 0,
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            // Ícone de busca com container estilizado
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              margin: const EdgeInsets.only(left: 16),
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: _isFocused ? accentColor.withOpacity(0.1) : inputBgColor,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(Icons.search_rounded, color: iconColor, size: 18),
+            ),
+
+            // Campo de texto
+            Expanded(
+              child: Focus(
+                onFocusChange: (focused) =>
+                    setState(() => _isFocused = focused),
+                child: TextField(
+                  controller: widget.controller,
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: 'Buscar por nome, CPF, telefone ou endereço...',
+                    hintStyle: GoogleFonts.inter(
+                      color: theme.colorScheme.onSurface.withOpacity(0.35),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                    ),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 16,
+                    ),
+                  ),
+                  onChanged: widget.onChanged,
+                ),
+              ),
+            ),
+
+            // Botão de limpar (aparece apenas quando há texto)
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              transitionBuilder: (child, animation) => ScaleTransition(
+                scale: animation,
+                child: FadeTransition(opacity: animation, child: child),
+              ),
+              child: widget.controller.text.isNotEmpty
+                  ? Container(
+                      key: const ValueKey('clear'),
+                      margin: const EdgeInsets.only(right: 8),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: widget.onClear,
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.onSurface.withOpacity(
+                                0.05,
+                              ),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(
+                              Icons.close_rounded,
+                              color: theme.colorScheme.onSurface.withOpacity(
+                                0.4,
+                              ),
+                              size: 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
+                  : const SizedBox(width: 16, key: ValueKey('empty')),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
