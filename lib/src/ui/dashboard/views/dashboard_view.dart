@@ -16,8 +16,13 @@ class _DashboardViewState extends State<DashboardView> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    final backgroundColor = isDark ? const Color(0xFF181818) : const Color(0xFFF9F9F9);
-    final surfaceColor = isDark ? const Color(0xFF252525) : Colors.white;
+    // Cores modernas e refinadas
+    final backgroundColor = isDark ? const Color(0xFF0D0D0D) : const Color(0xFFF8F9FA);
+    final surfaceColor = isDark ? const Color(0xFF1A1A1A) : Colors.white;
+    final borderColor = isDark
+        ? Colors.white.withOpacity(0.08)
+        : Colors.black.withOpacity(0.06);
+    final accentColor = theme.primaryColor;
 
     // Medidas da tela
     final width = MediaQuery.of(context).size.width;
@@ -26,23 +31,14 @@ class _DashboardViewState extends State<DashboardView> {
 
     // Configuração de Colunas e Padding
     final crossAxisCount = isDesktop ? 3 : (isTablet ? 2 : 1);
-    final padding = isDesktop ? 32.0 : 16.0;
+    final padding = isDesktop ? 32.0 : 24.0;
 
-    // =========================================================================
-    // LÓGICA MÁGICA DO ASPECT RATIO (CORREÇÃO DOS CARDS)
-    // =========================================================================
-    // Queremos que os cards tenham uma altura visualmente agradável (ex: ~180px)
-    // independentemente da largura da tela.
-    // Fórmula: (LarguraTotal - Paddings) / NumeroColunas / AlturaDesejada
+    // Cálculo do aspect ratio dinâmico
+    double cardHeightTarget = 200.0;
+    if (!isDesktop) cardHeightTarget = 180.0;
 
-    double cardHeightTarget = 200.0; // Altura fixa alvo para o card
-    if (!isDesktop) cardHeightTarget = 180.0; // Mobile pode ser um pouco menor
-
-    // Calcula a largura disponível para os cards
     final double availableWidth = width - (padding * 2) - ((crossAxisCount - 1) * 16);
     final double cardWidth = availableWidth / crossAxisCount;
-
-    // Define a proporção baseada na largura real do card vs altura desejada
     final double dynamicAspectRatio = cardWidth / cardHeightTarget;
 
     // Formatação de data
@@ -57,245 +53,404 @@ class _DashboardViewState extends State<DashboardView> {
 
     return Scaffold(
       backgroundColor: backgroundColor,
-      body: Scrollbar(
-        thumbVisibility: isDesktop,
-        child: CustomScrollView(
-          primary: true, // Adicionado para usar o PrimaryScrollController
-          physics: const BouncingScrollPhysics(),
-          slivers: [
-            // 1. HEADER (Full Width novamente)
-            SliverAppBar(
-              backgroundColor: backgroundColor.withOpacity(0.98),
-              surfaceTintColor: Colors.transparent,
-              pinned: true,
-              floating: true,
-              elevation: 0,
-              toolbarHeight: 90,
-              flexibleSpace: FlexibleSpaceBar(
-                background: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: padding),
-                  child: Center(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
+      body: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          // =======================================================
+          // MODERN APP BAR
+          // =======================================================
+          SliverAppBar(
+            expandedHeight: 160,
+            floating: false,
+            pinned: true,
+            backgroundColor: surfaceColor,
+            elevation: 0,
+            flexibleSpace: FlexibleSpaceBar(
+              background: Container(
+                decoration: BoxDecoration(
+                  color: surfaceColor,
+                  border: Border(
+                    bottom: BorderSide(
+                      color: borderColor,
+                      width: 1,
+                    ),
+                  ),
+                ),
+                child: SafeArea(
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(padding, 20, padding, 0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Painel Geral',
-                                style: GoogleFonts.outfit(
-                                  fontSize: isDesktop ? 28 : 22,
-                                  fontWeight: FontWeight.bold,
-                                  color: theme.colorScheme.onSurface,
+                        Row(
+                          children: [
+                            // Ícone com gradiente
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    accentColor,
+                                    accentColor.withOpacity(0.8),
+                                  ],
                                 ),
+                                borderRadius: BorderRadius.circular(16),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: accentColor.withOpacity(0.3),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
                               ),
-                              Text(
-                                'Visão Geral',
-                                style: GoogleFonts.inter(
-                                  fontSize: 14,
-                                  color: theme.colorScheme.onSurface.withOpacity(0.6),
-                                ),
+                              child: Icon(
+                                Icons.dashboard_rounded,
+                                color: Colors.white,
+                                size: 28,
                               ),
-                            ],
-                          ),
-                        ),
-                        if (width > 600) ...[
-                          const SizedBox(width: 16),
-                          Row(
-                            children: [
-                              _HeaderAction(icon: Icons.calendar_today_rounded, label: "Mês", theme: theme),
+                            ),
+                            const SizedBox(width: 16),
+
+                            // Título e Subtítulo
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Dashboard',
+                                    style: GoogleFonts.outfit(
+                                      fontSize: 28,
+                                      fontWeight: FontWeight.bold,
+                                      color: theme.colorScheme.onSurface,
+                                      height: 1.2,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Visão geral das atividades',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 14,
+                                      color: theme.colorScheme.onSurface.withOpacity(0.5),
+                                      letterSpacing: -0.2,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            // Botões de ação (apenas desktop)
+                            if (width > 600) ...[
+                              _HeaderAction(
+                                icon: Icons.calendar_month_rounded,
+                                label: "Mês",
+                                theme: theme,
+                                borderColor: borderColor,
+                              ),
                               const SizedBox(width: 8),
-                              _HeaderAction(icon: Icons.download_rounded, label: "Exportar", theme: theme, isPrimary: true),
+                              _HeaderAction(
+                                icon: Icons.file_download_rounded,
+                                label: "Exportar",
+                                theme: theme,
+                                isPrimary: true,
+                                accentColor: accentColor,
+                              ),
                             ],
-                          )
-                        ]
+                          ],
+                        ),
                       ],
                     ),
                   ),
                 ),
               ),
             ),
+          ),
 
-            // 2. CARD DE BOAS VINDAS (No corpo, Full Width com padding)
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(padding, 16, padding, 0),
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: surfaceColor,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.03),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
+          // =======================================================
+          // CARD DE INFORMAÇÕES DA PARÓQUIA
+          // =======================================================
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(padding, 24, padding, 0),
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      accentColor.withOpacity(0.08),
+                      accentColor.withOpacity(0.04),
                     ],
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Paróquia N. Sra. Auxiliadora',
-                                  style: GoogleFonts.outfit(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: theme.colorScheme.onSurface,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: accentColor.withOpacity(0.2)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Ícone da paróquia
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: accentColor.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Icon(
+                            Icons.church_rounded,
+                            color: accentColor,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+
+                        // Informações
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Paróquia N. Sra. Auxiliadora',
+                                style: GoogleFonts.outfit(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: theme.colorScheme.onSurface,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
+                              const SizedBox(height: 6),
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.location_on_rounded,
+                                    size: 16,
+                                    color: theme.colorScheme.onSurface.withOpacity(0.5),
                                   ),
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                ),
-                                const SizedBox(height: 4),
-                                Row(
-                                  children: [
-                                    Icon(Icons.location_on_outlined, size: 14, color: theme.colorScheme.onSurface.withOpacity(0.5)),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      'Iporá, GO',
-                                      style: GoogleFonts.inter(
-                                        fontSize: 14,
-                                        color: theme.colorScheme.onSurface.withOpacity(0.6),
-                                      ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'Iporá, GO',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 14,
+                                      color: theme.colorScheme.onSurface.withOpacity(0.6),
                                     ),
-                                  ],
-                                ),
-                              ],
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        // Badge Admin
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: accentColor,
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: accentColor.withOpacity(0.3),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Text(
+                            'Admin',
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
                             ),
                           ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.primary.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: surfaceColor.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.info_outline_rounded,
+                            size: 16,
+                            color: theme.colorScheme.onSurface.withOpacity(0.5),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
                             child: Text(
-                              'Admin',
+                              'Resumo financeiro e atividades recentes',
                               style: GoogleFonts.inter(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: theme.colorScheme.primary,
+                                fontSize: 13,
+                                color: theme.colorScheme.onSurface.withOpacity(0.7),
                               ),
                             ),
                           ),
                         ],
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Resumo financeiro e atividades recentes.',
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          color: theme.colorScheme.onSurface.withOpacity(0.7),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-
-            // 3. GRID DE CARDS (KPIs) COM ALTURA CONTROLADA
-            SliverPadding(
-              padding: EdgeInsets.fromLTRB(padding, 24, padding, 24),
-              sliver: SliverGrid(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: crossAxisCount,
-                  mainAxisSpacing: 16,
-                  crossAxisSpacing: 16,
-                  // AQUI ESTÁ A CORREÇÃO PRINCIPAL:
-                  // Usamos a variável calculada lá em cima.
-                  // Se a tela for larga, o ratio aumenta (ex: 3.0), achatando o card.
-                  // Se a tela for estreita, o ratio diminui (ex: 1.5).
-                  childAspectRatio: dynamicAspectRatio,
-                ),
-                delegate: SliverChildListDelegate([
-                  _ResponsiveStatCard(
-                    title: 'Arrecadação',
-                    value: 'R\$ 12.450,00',
-                    change: '+12.5%',
-                    icon: Icons.attach_money_rounded,
-                    color: Colors.green,
-                    theme: theme,
-                    surfaceColor: surfaceColor,
-                  ),
-                  _ResponsiveStatCard(
-                    title: 'Dizimistas',
-                    value: '350 Ativos',
-                    change: '',
-                    icon: Icons.group_rounded,
-                    color: Colors.blue,
-                    theme: theme,
-                    surfaceColor: surfaceColor,
-                  ),
-                  _ResponsiveStatCard(
-                    title: 'Ticket Médio',
-                    value: 'R\$ 35,50',
-                    change: '-2.0%',
-                    isNegative: true,
-                    icon: Icons.analytics_rounded,
-                    color: Colors.purple,
-                    theme: theme,
-                    surfaceColor: surfaceColor,
-                  ),
-                ]),
-              ),
-            ),
-
-            // 4. GRÁFICO
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(padding, 0, padding, 60),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Histórico de Movimentações',
-                      style: GoogleFonts.outfit(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Container(
-                      height: 350,
-                      decoration: BoxDecoration(
-                        color: surfaceColor,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
-                      ),
-                      child: Center(
-                        child: Text(
-                          'Gráfico',
-                          style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.5)),
-                        ),
                       ),
                     ),
                   ],
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+
+          // =======================================================
+          // GRID DE CARDS (KPIs)
+          // =======================================================
+          SliverPadding(
+            padding: EdgeInsets.fromLTRB(padding, 24, padding, 24),
+            sliver: SliverGrid(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: crossAxisCount,
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 16,
+                childAspectRatio: dynamicAspectRatio,
+              ),
+              delegate: SliverChildListDelegate([
+                _ResponsiveStatCard(
+                  title: 'Arrecadação',
+                  value: 'R\$ 12.450,00',
+                  change: '+12.5%',
+                  icon: Icons.trending_up_rounded,
+                  color: Colors.green,
+                  theme: theme,
+                  surfaceColor: surfaceColor,
+                  borderColor: borderColor,
+                ),
+                _ResponsiveStatCard(
+                  title: 'Dizimistas',
+                  value: '350',
+                  subtitle: 'Ativos',
+                  change: '',
+                  icon: Icons.people_rounded,
+                  color: Colors.blue,
+                  theme: theme,
+                  surfaceColor: surfaceColor,
+                  borderColor: borderColor,
+                ),
+                _ResponsiveStatCard(
+                  title: 'Ticket Médio',
+                  value: 'R\$ 35,50',
+                  change: '-2.0%',
+                  isNegative: true,
+                  icon: Icons.analytics_rounded,
+                  color: Colors.purple,
+                  theme: theme,
+                  surfaceColor: surfaceColor,
+                  borderColor: borderColor,
+                ),
+              ]),
+            ),
+          ),
+
+          // =======================================================
+          // GRÁFICO DE HISTÓRICO
+          // =======================================================
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(padding, 0, padding, 60),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: accentColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          Icons.show_chart_rounded,
+                          color: accentColor,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Histórico de Movimentações',
+                        style: GoogleFonts.outfit(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Container(
+                    height: 350,
+                    decoration: BoxDecoration(
+                      color: surfaceColor,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: borderColor),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(isDark ? 0.2 : 0.03),
+                          blurRadius: 24,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.onSurface.withOpacity(0.05),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.bar_chart_rounded,
+                              size: 48,
+                              color: theme.colorScheme.onSurface.withOpacity(0.2),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Gráfico em Desenvolvimento',
+                            style: GoogleFonts.outfit(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: theme.colorScheme.onSurface.withOpacity(0.4),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Visualização de dados em breve',
+                            style: GoogleFonts.inter(
+                              fontSize: 13,
+                              color: theme.colorScheme.onSurface.withOpacity(0.3),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
 // =============================================================================
-// COMPONENTES (Card Otimizado para redimensionamento)
+// COMPONENTES
 // =============================================================================
 
 class _HeaderAction extends StatelessWidget {
@@ -303,43 +458,68 @@ class _HeaderAction extends StatelessWidget {
   final String label;
   final ThemeData theme;
   final bool isPrimary;
+  final Color? accentColor;
+  final Color? borderColor;
 
   const _HeaderAction({
     required this.icon,
     required this.label,
     required this.theme,
-    this.isPrimary = false
+    this.isPrimary = false,
+    this.accentColor,
+    this.borderColor,
   });
 
   @override
   Widget build(BuildContext context) {
-    final color = isPrimary ? theme.primaryColor : theme.colorScheme.surfaceContainerHighest;
-    final contentColor = isPrimary ? Colors.white : theme.colorScheme.onSurface;
-
-    return InkWell(
-      onTap: () {},
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        decoration: BoxDecoration(
-          color: isPrimary ? color : Colors.transparent,
-          border: isPrimary ? null : Border.all(color: theme.dividerColor.withOpacity(0.3)),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 18, color: contentColor.withOpacity(isPrimary ? 1 : 0.7)),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: GoogleFonts.inter(
-                fontWeight: FontWeight.w600,
-                color: contentColor,
-                fontSize: 13,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {},
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          decoration: BoxDecoration(
+            gradient: isPrimary
+                ? LinearGradient(
+              colors: [
+                accentColor ?? theme.primaryColor,
+                (accentColor ?? theme.primaryColor).withOpacity(0.8),
+              ],
+            )
+                : null,
+            color: isPrimary ? null : Colors.transparent,
+            border: isPrimary ? null : Border.all(color: borderColor ?? theme.dividerColor),
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: isPrimary
+                ? [
+              BoxShadow(
+                color: (accentColor ?? theme.primaryColor).withOpacity(0.3),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
               ),
-            ),
-          ],
+            ]
+                : null,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 18,
+                color: isPrimary ? Colors.white : theme.colorScheme.onSurface.withOpacity(0.6),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: GoogleFonts.inter(
+                  fontWeight: FontWeight.w600,
+                  color: isPrimary ? Colors.white : theme.colorScheme.onSurface.withOpacity(0.7),
+                  fontSize: 13,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -349,21 +529,25 @@ class _HeaderAction extends StatelessWidget {
 class _ResponsiveStatCard extends StatefulWidget {
   final String title;
   final String value;
+  final String? subtitle;
   final String change;
   final IconData icon;
   final Color color;
   final ThemeData theme;
   final bool isNegative;
   final Color surfaceColor;
+  final Color borderColor;
 
   const _ResponsiveStatCard({
     required this.title,
     required this.value,
+    this.subtitle,
     required this.change,
     required this.icon,
     required this.color,
     required this.theme,
     required this.surfaceColor,
+    required this.borderColor,
     this.isNegative = false,
   });
 
@@ -384,21 +568,20 @@ class _ResponsiveStatCardState extends State<_ResponsiveStatCard> {
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: widget.surfaceColor,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: _isHovering ? widget.color.withOpacity(0.5) : widget.theme.dividerColor.withOpacity(0.1),
-            width: _isHovering ? 1.5 : 1,
+            color: _isHovering ? widget.color.withOpacity(0.4) : widget.borderColor,
+            width: _isHovering ? 2 : 1,
           ),
           boxShadow: [
             if (_isHovering)
               BoxShadow(
-                color: widget.color.withOpacity(0.15),
-                blurRadius: 12,
+                color: widget.color.withOpacity(0.2),
+                blurRadius: 16,
                 offset: const Offset(0, 4),
               )
           ],
         ),
-        // Usamos Column com alinhamento otimizado
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -409,61 +592,94 @@ class _ResponsiveStatCardState extends State<_ResponsiveStatCard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: widget.color.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
+                    gradient: LinearGradient(
+                      colors: [
+                        widget.color.withOpacity(0.15),
+                        widget.color.withOpacity(0.08),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(widget.icon, color: widget.color, size: 20),
+                  child: Icon(widget.icon, color: widget.color, size: 22),
                 ),
-                // Badge de Porcentagem (Opcional)
+                // Badge de Porcentagem
                 if (widget.change.isNotEmpty)
-                  Flexible(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: (widget.isNegative ? Colors.red : Colors.green).withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        widget.change,
-                        style: GoogleFonts.inter(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: (widget.isNegative ? Colors.red : Colors.green).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          widget.isNegative
+                              ? Icons.trending_down_rounded
+                              : Icons.trending_up_rounded,
+                          size: 12,
                           color: widget.isNegative ? Colors.red : Colors.green,
                         ),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                      ),
+                        const SizedBox(width: 4),
+                        Text(
+                          widget.change,
+                          style: GoogleFonts.inter(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: widget.isNegative ? Colors.red : Colors.green,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
               ],
             ),
 
-            // Espaçador flexível (ajuda se o card ficar alto demais em mobile)
             const Spacer(),
 
-            // Valor Principal (FittedBox segura a onda se o card estreitar)
+            // Valor Principal
             FittedBox(
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
-              child: Text(
-                widget.value,
-                style: GoogleFonts.outfit(
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                  color: widget.theme.colorScheme.onSurface,
-                ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    widget.value,
+                    style: GoogleFonts.outfit(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: widget.theme.colorScheme.onSurface,
+                      height: 1.2,
+                    ),
+                  ),
+                  if (widget.subtitle != null) ...[
+                    const SizedBox(width: 6),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 2),
+                      child: Text(
+                        widget.subtitle!,
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          color: widget.theme.colorScheme.onSurface.withOpacity(0.5),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
 
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
 
             // Título
             Text(
               widget.title,
               style: GoogleFonts.inter(
-                fontSize: 14,
+                fontSize: 13,
                 color: widget.theme.colorScheme.onSurface.withOpacity(0.6),
                 fontWeight: FontWeight.w500,
               ),

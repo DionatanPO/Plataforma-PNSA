@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:plataforma_pnsa/src/domain/models/acesso_model.dart';
@@ -97,34 +96,40 @@ class AccessService {
     _creatingNewUser = true;
 
     try {
-      // Chamar a Cloud Function para criar o usuário
-      // Isso evita a troca de sessão que ocorre com createUserWithEmailAndPassword
-      final functions = FirebaseFunctions.instance;
+      // Criar usuário no Firebase Authentication como administrador (não fazendo login automaticamente)
+      // para evitar a troca de sessão do usuário atual
+      final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: acesso.email,
+        password: '123456', // Senha padrão
+      );
 
-      final result = await functions.httpsCallable('createUser').call({
-        'email': acesso.email,
-        'password': '123456', // Senha padrão
-        'displayName': acesso.nome,
-        'cpf': acesso.cpf,
-        'telefone': acesso.telefone,
-        'endereco': acesso.endereco,
-        'funcao': acesso.funcao,
-        'status': acesso.status,
-        'ultimoAcesso': acesso.ultimoAcesso.millisecondsSinceEpoch,
-        'pendencia': acesso.pendencia,
-      });
+      final newUser = credential.user!;
 
-      final responseData = result.data as Map<String, dynamic>;
-      if (responseData['success'] != true) {
-        throw Exception('Falha ao criar usuário: ${responseData['error']}');
-      }
+      // Definir o nome de exibição
+      await newUser.updateDisplayName(acesso.nome);
 
-      print('Novo usuário criado via Cloud Function (${responseData['uid']}), mantendo usuário original (${_originalUserUid})');
-    } on FirebaseFunctionsException catch (e) {
+      // Criar o documento do usuário no Firestore com os dados completos
+      await FirebaseFirestore.instance
+          .collection(_collectionName)
+          .doc(newUser.uid) // Usar o UID do usuário autenticado
+          .set({
+            'nome': acesso.nome,
+            'email': acesso.email,
+            'cpf': acesso.cpf,
+            'telefone': acesso.telefone,
+            'endereco': acesso.endereco,
+            'funcao': acesso.funcao,
+            'status': acesso.status,
+            'ultimoAcesso': acesso.ultimoAcesso.millisecondsSinceEpoch,
+            'pendencia': acesso.pendencia,
+          });
+
+      print('Novo usuário criado diretamente no Firebase (${newUser.uid}), mantendo usuário original (${_originalUserUid})');
+    } on FirebaseAuthException catch (e) {
       // Resetar as flags em caso de erro
       _creatingNewUser = false;
       _originalUserUid = null;
-      throw Exception('Erro na Cloud Function: ${e.message}');
+      throw Exception('Erro na autenticação: ${e.message}');
     } catch (e) {
       // Resetar as flags em caso de erro
       _creatingNewUser = false;

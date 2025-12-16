@@ -22,19 +22,21 @@ class DizimistaDesktopTableView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = theme.brightness == Brightness.dark;
+    final borderColor = isDark
+        ? Colors.white.withOpacity(0.08)
+        : Colors.black.withOpacity(0.06);
+
     return Container(
-      margin: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: surfaceColor,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(16),
-          topRight: Radius.circular(16),
-        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: borderColor),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
+            color: Colors.black.withOpacity(isDark ? 0.2 : 0.03),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
@@ -42,130 +44,392 @@ class DizimistaDesktopTableView extends StatelessWidget {
         children: [
           // Cabeçalho da tabela
           Container(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             decoration: BoxDecoration(
-              color: surfaceColor,
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  theme.primaryColor.withOpacity(0.05),
+                  theme.primaryColor.withOpacity(0.02),
+                ],
+              ),
               borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+              border: Border(
+                bottom: BorderSide(color: borderColor),
               ),
             ),
             child: Row(
               children: [
-                TableHeaderCell(text: 'Nº REGISTRO', flex: 1, theme: theme),
-                TableHeaderCell(text: 'FIÉL', flex: 3, theme: theme),
-                TableHeaderCell(text: 'CONTATO', flex: 2, theme: theme),
-                TableHeaderCell(text: 'LOCALIZAÇÃO', flex: 2, theme: theme),
-                TableHeaderCell(text: 'STATUS', flex: 1, theme: theme),
-                TableHeaderCell(text: 'CADASTRO', flex: 1, theme: theme),
-                TableHeaderCell(text: '', flex: 1, theme: theme), // Ações
+                _TableHeaderCell(text: 'Nº', flex: 1, theme: theme),
+                _TableHeaderCell(text: 'FIÉL', flex: 3, theme: theme),
+                _TableHeaderCell(text: 'CONTATO', flex: 2, theme: theme),
+                _TableHeaderCell(text: 'LOCALIZAÇÃO', flex: 2, theme: theme),
+                _TableHeaderCell(text: 'STATUS', flex: 1, theme: theme),
+                _TableHeaderCell(text: 'CADASTRO', flex: 1, theme: theme),
+                _TableHeaderCell(text: '', flex: 1, theme: theme),
               ],
             ),
           ),
-          const Divider(height: 1),
-          // Linhas
+
+          // Linhas da tabela
           ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: lista.length,
-            separatorBuilder: (_, __) => const Divider(height: 1, indent: 24, endIndent: 24),
+            separatorBuilder: (_, __) => Divider(
+              height: 1,
+              indent: 24,
+              endIndent: 24,
+              color: borderColor,
+            ),
             itemBuilder: (context, index) {
               final d = lista[index];
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                child: Row(
-                  children: [
-                    // Coluna 1: Número de Registro
-                    Expanded(
-                      flex: 1,
-                      child: Text(
-                        d.numeroRegistro,
-                        style: GoogleFonts.inter(fontSize: 13, color: theme.colorScheme.onSurface),
-                      ),
-                    ),
-                    // Coluna 2: Avatar + Nome + Info
-                    Expanded(
-                      flex: 3,
-                      child: Row(
-                        children: [
-                          DizimistaAvatar(nome: d.nome, theme: theme),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  d.nome,
-                                  style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 15),
-                                ),
-                                const SizedBox(height: 2),
-                                Row(
-                                  children: [
-                                    Icon(Icons.phone_outlined, size: 12, color: theme.colorScheme.onSurface.withOpacity(0.5)),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      d.telefone,
-                                      style: GoogleFonts.inter(fontSize: 12, color: theme.colorScheme.onSurface.withOpacity(0.6)),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    // Coluna 3: Contato
-                    Expanded(
-                      flex: 2,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(d.telefone, style: GoogleFonts.inter(fontSize: 13)),
-                          Text(d.email ?? '', style: GoogleFonts.inter(fontSize: 11, color: theme.colorScheme.onSurface.withOpacity(0.5))),
-                        ],
-                      ),
-                    ),
-                    // Coluna 4: Endereço
-                    Expanded(
-                      flex: 2,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('${d.rua ?? ''}${d.numero != null && d.numero!.isNotEmpty ? ", ${d.numero}" : ""}', style: GoogleFonts.inter(fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
-                          Text('${d.cidade} - ${d.estado}', style: GoogleFonts.inter(fontSize: 11, color: theme.colorScheme.onSurface.withOpacity(0.5))),
-                        ],
-                      ),
-                    ),
-                    // Coluna 5: Status
-                    Expanded(flex: 1, child: Align(alignment: Alignment.centerLeft, child: StatusBadge(status: d.status))),
-                    // Coluna 6: Data
-                    Expanded(
-                      flex: 1,
-                      child: Text(
-                        '${d.dataRegistro.day}/${d.dataRegistro.month}/${d.dataRegistro.year}',
-                        style: GoogleFonts.inter(fontSize: 13, color: theme.colorScheme.onSurface.withOpacity(0.6)),
-                      ),
-                    ),
-                    // Coluna 7: Ações
-                    Expanded(
-                      flex: 1,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          ActionButton(
-                            icon: Icons.edit_outlined,
-                            color: Colors.blue,
-                            onTap: () => onEditPressed(d),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+              return _TableRow(
+                dizimista: d,
+                theme: theme,
+                borderColor: borderColor,
+                onEditPressed: onEditPressed,
               );
             },
           ),
         ],
+      ),
+    );
+  }
+}
+
+// =============================================================================
+// COMPONENTE: HEADER CELL
+// =============================================================================
+class _TableHeaderCell extends StatelessWidget {
+  final String text;
+  final int flex;
+  final ThemeData theme;
+
+  const _TableHeaderCell({
+    required this.text,
+    required this.flex,
+    required this.theme,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      flex: flex,
+      child: Text(
+        text,
+        style: GoogleFonts.inter(
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
+          color: theme.colorScheme.onSurface.withOpacity(0.6),
+          letterSpacing: 0.5,
+        ),
+      ),
+    );
+  }
+}
+
+// =============================================================================
+// COMPONENTE: TABLE ROW COM HOVER
+// =============================================================================
+class _TableRow extends StatefulWidget {
+  final Dizimista dizimista;
+  final ThemeData theme;
+  final Color borderColor;
+  final Function(Dizimista) onEditPressed;
+
+  const _TableRow({
+    required this.dizimista,
+    required this.theme,
+    required this.borderColor,
+    required this.onEditPressed,
+  });
+
+  @override
+  State<_TableRow> createState() => _TableRowState();
+}
+
+class _TableRowState extends State<_TableRow> {
+  bool _isHovering = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final d = widget.dizimista;
+    final theme = widget.theme;
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovering = true),
+      onExit: (_) => setState(() => _isHovering = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        decoration: BoxDecoration(
+          color: _isHovering
+              ? theme.colorScheme.onSurface.withOpacity(0.02)
+              : Colors.transparent,
+        ),
+        child: Row(
+          children: [
+            // Coluna 1: Número de Registro
+            Expanded(
+              flex: 1,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: theme.primaryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  d.numeroRegistro,
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: theme.primaryColor,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+
+            const SizedBox(width: 12),
+
+            // Coluna 2: Avatar + Nome
+            Expanded(
+              flex: 3,
+              child: Row(
+                children: [
+                  DizimistaAvatar(nome: d.nome, theme: theme),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          d.nome,
+                          style: GoogleFonts.outfit(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(3),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.onSurface.withOpacity(0.08),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Icon(
+                                Icons.badge_outlined,
+                                size: 10,
+                                color: theme.colorScheme.onSurface.withOpacity(0.5),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              d.cpf,
+                              style: GoogleFonts.inter(
+                                fontSize: 11,
+                                color: theme.colorScheme.onSurface.withOpacity(0.5),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(width: 12),
+
+            // Coluna 3: Contato
+            Expanded(
+              flex: 2,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.phone_outlined,
+                        size: 13,
+                        color: theme.colorScheme.onSurface.withOpacity(0.5),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        d.telefone,
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (d.email != null && d.email!.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.email_outlined,
+                          size: 13,
+                          color: theme.colorScheme.onSurface.withOpacity(0.5),
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            d.email!,
+                            style: GoogleFonts.inter(
+                              fontSize: 11,
+                              color: theme.colorScheme.onSurface.withOpacity(0.5),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+            ),
+
+            const SizedBox(width: 12),
+
+            // Coluna 4: Endereço
+            Expanded(
+              flex: 2,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.location_on_outlined,
+                        size: 13,
+                        color: theme.colorScheme.onSurface.withOpacity(0.5),
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          '${d.rua ?? ''}${d.numero != null && d.numero!.isNotEmpty ? ", ${d.numero}" : ""}',
+                          style: GoogleFonts.inter(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 19),
+                    child: Text(
+                      '${d.cidade} - ${d.estado}',
+                      style: GoogleFonts.inter(
+                        fontSize: 11,
+                        color: theme.colorScheme.onSurface.withOpacity(0.5),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(width: 12),
+
+            // Coluna 5: Status
+            Expanded(
+              flex: 1,
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: StatusBadge(status: d.status),
+              ),
+            ),
+
+            const SizedBox(width: 12),
+
+            // Coluna 6: Data
+            Expanded(
+              flex: 1,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.onSurface.withOpacity(0.04),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.calendar_today_rounded,
+                      size: 11,
+                      color: theme.colorScheme.onSurface.withOpacity(0.5),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      '${d.dataRegistro.day.toString().padLeft(2, '0')}/${d.dataRegistro.month.toString().padLeft(2, '0')}/${d.dataRegistro.year}',
+                      style: GoogleFonts.inter(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                        color: theme.colorScheme.onSurface.withOpacity(0.6),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(width: 12),
+
+            // Coluna 7: Ações
+            Expanded(
+              flex: 1,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () => widget.onEditPressed(d),
+                      borderRadius: BorderRadius.circular(10),
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.blue.withOpacity(0.15),
+                              Colors.blue.withOpacity(0.08),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(
+                          Icons.edit_rounded,
+                          size: 18,
+                          color: Colors.blue,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

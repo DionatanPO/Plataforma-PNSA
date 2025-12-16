@@ -15,15 +15,12 @@ class ProfileView extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    // Configuração de barra de status (mais relevante para mobile, mas ok manter)
     SystemChrome.setSystemUIOverlayStyle(
       isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
     );
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      // No Desktop, geralmente não usamos AppBar padrão se tivermos Sidebar.
-      // Se não tiver Sidebar, deixamos transparente ou usamos uma header customizada.
+      backgroundColor: isDark ? const Color(0xFF0D0D0D) : const Color(0xFFF8F9FA),
       body: LayoutBuilder(
         builder: (context, constraints) {
           bool isDesktop = constraints.maxWidth > 900;
@@ -42,52 +39,123 @@ class ProfileView extends StatelessWidget {
   // LAYOUT DESKTOP (2 Colunas)
   // ==========================================================
   Widget _buildDesktopLayout(BuildContext context, ThemeData theme) {
-    return Scrollbar( // Desktop precisa de Scrollbar
-      thumbVisibility: true,
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(40),
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 1200),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Título da Página (Estilo Windows Settings)
-                Text(
-                  'Meu Perfil',
-                  style: GoogleFonts.outfit(
-                    fontSize: 32,
-                    fontWeight: FontWeight.w600,
-                    color: theme.colorScheme.onSurface,
+    final isDark = theme.brightness == Brightness.dark;
+    final surfaceColor = isDark ? const Color(0xFF1A1A1A) : Colors.white;
+    final borderColor = isDark
+        ? Colors.white.withOpacity(0.08)
+        : Colors.black.withOpacity(0.06);
+    final accentColor = theme.primaryColor;
+
+    return CustomScrollView(
+      physics: const BouncingScrollPhysics(),
+      slivers: [
+        // Modern App Bar
+        SliverAppBar(
+          expandedHeight: 160,
+          floating: false,
+          pinned: true,
+          backgroundColor: surfaceColor,
+          elevation: 0,
+          flexibleSpace: FlexibleSpaceBar(
+            background: Container(
+              decoration: BoxDecoration(
+                color: surfaceColor,
+                border: Border(
+                  bottom: BorderSide(color: borderColor, width: 1),
+                ),
+              ),
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(40, 20, 40, 0),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              accentColor,
+                              accentColor.withOpacity(0.8),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: accentColor.withOpacity(0.3),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          Icons.person_rounded,
+                          color: Colors.white,
+                          size: 28,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Meu Perfil',
+                              style: GoogleFonts.outfit(
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold,
+                                color: theme.colorScheme.onSurface,
+                                height: 1.2,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Gerencie suas informações pessoais',
+                              style: GoogleFonts.inter(
+                                fontSize: 14,
+                                color: theme.colorScheme.onSurface.withOpacity(0.5),
+                                letterSpacing: -0.2,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 32),
-
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Coluna Esquerda: Cartão de Perfil Fixo
-                    SizedBox(
-                      width: 320,
-                      child: _ProfileCard(controller: controller, isDesktop: true),
-                    ),
-                    const SizedBox(width: 32),
-
-                    // Coluna Direita: Estatísticas e Configurações
-                    Expanded(
-                      child: Column(
-                        children: [
-                          _buildSettingsSection(context, isDesktop: true),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+              ),
             ),
           ),
         ),
-      ),
+
+        // Content
+        SliverPadding(
+          padding: const EdgeInsets.all(40),
+          sliver: SliverToBoxAdapter(
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1200),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      width: 380,
+                      child: _ProfileCard(
+                        controller: controller,
+                        isDesktop: true,
+                      ),
+                    ),
+                    const SizedBox(width: 32),
+                    Expanded(
+                      child: _buildSettingsSection(context, isDesktop: true),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -95,112 +163,218 @@ class ProfileView extends StatelessWidget {
   // LAYOUT MOBILE (Vertical)
   // ==========================================================
   Widget _buildMobileLayout(BuildContext context, ThemeData theme) {
-    return SingleChildScrollView(
+    final isDark = theme.brightness == Brightness.dark;
+    final surfaceColor = isDark ? const Color(0xFF1A1A1A) : Colors.white;
+    final borderColor = isDark
+        ? Colors.white.withOpacity(0.08)
+        : Colors.black.withOpacity(0.06);
+    final accentColor = theme.primaryColor;
+
+    return CustomScrollView(
       physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-      child: Column(
-        children: [
-          const SizedBox(height: 20),
-          _ProfileCard(controller: controller, isDesktop: false),
-          const SizedBox(height: 32),
-          _buildSettingsSection(context, isDesktop: false),
-          const SizedBox(height: 40),
-        ],
-      ),
+      slivers: [
+        // Mobile App Bar
+        SliverAppBar(
+          expandedHeight: 140,
+          floating: false,
+          pinned: true,
+          backgroundColor: surfaceColor,
+          elevation: 0,
+          flexibleSpace: FlexibleSpaceBar(
+            background: Container(
+              decoration: BoxDecoration(
+                color: surfaceColor,
+                border: Border(
+                  bottom: BorderSide(color: borderColor, width: 1),
+                ),
+              ),
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              accentColor,
+                              accentColor.withOpacity(0.8),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: accentColor.withOpacity(0.3),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          Icons.person_rounded,
+                          color: Colors.white,
+                          size: 28,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Meu Perfil',
+                              style: GoogleFonts.outfit(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: theme.colorScheme.onSurface,
+                                height: 1.2,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Suas informações',
+                              style: GoogleFonts.inter(
+                                fontSize: 14,
+                                color: theme.colorScheme.onSurface.withOpacity(0.5),
+                                letterSpacing: -0.2,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+
+        // Content
+        SliverPadding(
+          padding: const EdgeInsets.all(24),
+          sliver: SliverToBoxAdapter(
+            child: Column(
+              children: [
+                _ProfileCard(controller: controller, isDesktop: false),
+                const SizedBox(height: 32),
+                _buildSettingsSection(context, isDesktop: false),
+                const SizedBox(height: 40),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
-
-
   Widget _buildSettingsSection(BuildContext context, {required bool isDesktop}) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final accentColor = theme.primaryColor;
+
     return Obx(() {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _FluentSectionTitle(Theme.of(context), "GERAL"),
+          _FluentSectionTitle(theme, "GERAL", Icons.settings_rounded, accentColor),
+          const SizedBox(height: 12),
           _FluentSettingsGroup(
             children: [
               _DesktopHoverTile(
                 icon: Icons.person_outline_rounded,
                 title: 'Dados Pessoais',
-                subtitle: controller.cpf.value.isNotEmpty ? controller.cpf.value : 'CPF não informado',
-                onTap: () {
-
-                },
+                subtitle: controller.cpf.value.isNotEmpty
+                    ? controller.cpf.value
+                    : 'CPF não informado',
+                onTap: () {},
               ),
               _DesktopHoverTile(
                 icon: Icons.lock_outline_rounded,
                 title: 'Segurança',
-                subtitle: controller.funcao.value.isNotEmpty ? controller.funcao.value : 'Função não informada',
+                subtitle: controller.funcao.value.isNotEmpty
+                    ? controller.funcao.value
+                    : 'Função não informada',
                 onTap: controller.changePassword,
               ),
             ],
           ),
-        const SizedBox(height: 24),
-        _FluentSectionTitle(Theme.of(context), "PREFERÊNCIAS"),
-        _FluentSettingsGroup(
-          children: [
-            // _DesktopHoverTile(
-            //   icon: Icons.notifications_outlined,
-            //   title: 'Notificações',
-            //   // Desktop geralmente usa toggles diretos, mas manteremos o padrão por enquanto
-            //   trailing: Switch(
-            //     value: true,
-            //     onChanged: (v) => controller.toggleNotifications(),
-            //     activeColor: Theme.of(context).primaryColor,
-            //   ),
-            //   onTap: (){},
-            // ),
-            _DesktopHoverTile(
-              icon: Icons.dark_mode_outlined,
-              title: 'Aparência',
-              subtitle: 'Tema do sistema',
-              onTap: () => Get.toNamed(AppRoutes.theme_settings),
-            ),
-          ],
+          const SizedBox(height: 32),
+          _FluentSectionTitle(theme, "PREFERÊNCIAS", Icons.tune_rounded, accentColor),
+          const SizedBox(height: 12),
+          _FluentSettingsGroup(
+            children: [
+              _DesktopHoverTile(
+                icon: Icons.dark_mode_outlined,
+                title: 'Aparência',
+                subtitle: 'Tema do sistema',
+                onTap: () => Get.toNamed(AppRoutes.theme_settings),
+              ),
+            ],
+          ),
+          const SizedBox(height: 32),
+          _FluentSectionTitle(theme, "SISTEMA", Icons.help_outline_rounded, accentColor),
+          const SizedBox(height: 12),
+          _FluentSettingsGroup(
+            children: [
+              _DesktopHoverTile(
+                icon: Icons.help_outline_rounded,
+                title: 'Ajuda e Suporte',
+                onTap: () => Get.toNamed(AppRoutes.help),
+              ),
+              _DesktopHoverTile(
+                icon: Icons.logout_rounded,
+                title: 'Sair',
+                onTap: controller.logout,
+                isDestructive: true,
+                showChevron: false,
+              ),
+            ],
+          ),
+        ],
+      );
+    });
+  }
+
+  Widget _FluentSectionTitle(
+      ThemeData theme,
+      String title,
+      IconData icon,
+      Color accentColor,
+      ) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: accentColor.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(
+            icon,
+            size: 16,
+            color: accentColor,
+          ),
         ),
-        const SizedBox(height: 24),
-        _FluentSectionTitle(Theme.of(context), "SISTEMA"),
-        _FluentSettingsGroup(
-          children: [
-            _DesktopHoverTile(
-              icon: Icons.help_outline_rounded,
-              title: 'Ajuda e Suporte',
-              onTap: () => Get.toNamed(AppRoutes.help),
-            ),
-            _DesktopHoverTile(
-              icon: Icons.logout_rounded,
-              title: 'Sair',
-              onTap: controller.logout,
-              isDestructive: true,
-              showChevron: false,
-            ),
-          ],
+        const SizedBox(width: 10),
+        Text(
+          title,
+          style: GoogleFonts.inter(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: theme.colorScheme.onSurface.withOpacity(0.6),
+            letterSpacing: 0.5,
+          ),
         ),
       ],
     );
-    });
   }
 }
 
-  Widget _FluentSectionTitle(ThemeData theme, String title) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 4, bottom: 8),
-      child: Text(
-        title,
-        style: GoogleFonts.inter(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: theme.colorScheme.onSurface.withOpacity(0.6),
-          letterSpacing: 0.5,
-        ),
-      ),
-    );
-  }
-
-
 // ==========================================================
-// COMPONENTES REUTILIZÁVEIS E MODERNIZADOS
+// COMPONENTES REUTILIZÁVEIS
 // ==========================================================
 
 class _ProfileCard extends StatelessWidget {
@@ -212,56 +386,85 @@ class _ProfileCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final borderColor = theme.dividerColor.withOpacity(0.1);
+    final isDark = theme.brightness == Brightness.dark;
+    final surfaceColor = isDark ? const Color(0xFF1A1A1A) : Colors.white;
+    final borderColor = isDark
+        ? Colors.white.withOpacity(0.08)
+        : Colors.black.withOpacity(0.06);
+    final accentColor = theme.primaryColor;
 
     return Obx(() => Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(12), // Bordas menos arredondadas que mobile (16->12)
+        color: surfaceColor,
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: borderColor),
-        boxShadow: isDesktop
-            ? [] // Desktop geralmente é flat ou tem sombra muito sutil
-            : [
+        boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withOpacity(isDark ? 0.2 : 0.03),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
       child: Column(
         children: [
+          // Avatar com gradiente
           Container(
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: theme.dividerColor.withOpacity(0.2), width: 1),
+              gradient: LinearGradient(
+                colors: [
+                  accentColor,
+                  accentColor.withOpacity(0.7),
+                ],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: accentColor.withOpacity(0.3),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
-            child: CircleAvatar(
-              radius: 50,
-              backgroundImage: NetworkImage(controller.avatarUrl.value.isNotEmpty
-                  ? controller.avatarUrl.value
-                  : 'https://i.pravatar.cc/150?img=12'),
-              backgroundColor: theme.colorScheme.surfaceVariant,
-              child: controller.avatarUrl.value.isEmpty
-                  ? Icon(Icons.person, size: 50, color: theme.colorScheme.onSurface)
-                  : null,
+            child: Container(
+              padding: const EdgeInsets.all(3),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: surfaceColor,
+              ),
+              child: CircleAvatar(
+                radius: 56,
+                backgroundImage: NetworkImage(
+                  controller.avatarUrl.value.isNotEmpty
+                      ? controller.avatarUrl.value
+                      : 'https://i.pravatar.cc/150?img=12',
+                ),
+                backgroundColor: theme.colorScheme.surfaceVariant,
+                child: controller.avatarUrl.value.isEmpty
+                    ? Icon(
+                  Icons.person,
+                  size: 56,
+                  color: theme.colorScheme.onSurface,
+                )
+                    : null,
+              ),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           Text(
             controller.name.value.isNotEmpty
                 ? controller.name.value
                 : 'Carregando...',
             style: GoogleFonts.outfit(
-              fontSize: 22,
-              fontWeight: FontWeight.w600,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
               color: theme.colorScheme.onSurface,
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
           Text(
             controller.email.value.isNotEmpty
                 ? controller.email.value
@@ -272,126 +475,163 @@ class _ProfileCard extends StatelessWidget {
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 16),
-          // Informações adicionais do usuário
-          if (controller.funcao.value.isNotEmpty || controller.status.value.isNotEmpty)
+          const SizedBox(height: 24),
+
+          // Informações do usuário
+          if (controller.funcao.value.isNotEmpty ||
+              controller.status.value.isNotEmpty)
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(8),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    accentColor.withOpacity(0.08),
+                    accentColor.withOpacity(0.04),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: accentColor.withOpacity(0.15)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (controller.funcao.value.isNotEmpty)
-                    _buildInfoRow(Icons.work_outline, 'Função', controller.funcao.value, theme),
+                    _buildInfoRow(
+                      Icons.work_outline_rounded,
+                      'Função',
+                      controller.funcao.value,
+                      theme,
+                    ),
                   if (controller.status.value.isNotEmpty)
-                    _buildInfoRow(Icons.circle, 'Status', controller.status.value, theme),
+                    _buildInfoRow(
+                      Icons.verified_user_outlined,
+                      'Status',
+                      controller.status.value,
+                      theme,
+                    ),
                   if (controller.telefone.value.isNotEmpty)
-                    _buildInfoRow(Icons.phone_outlined, 'Telefone', controller.telefone.value, theme),
+                    _buildInfoRow(
+                      Icons.phone_outlined,
+                      'Telefone',
+                      controller.telefone.value,
+                      theme,
+                    ),
                   if (controller.endereco.value.isNotEmpty)
-                    _buildInfoRow(Icons.location_on_outlined, 'Endereço', controller.endereco.value, theme),
+                    _buildInfoRow(
+                      Icons.location_on_outlined,
+                      'Endereço',
+                      controller.endereco.value,
+                      theme,
+                    ),
                 ],
               ),
             ),
           const SizedBox(height: 24),
 
-          // Botões de Ação
+          // Botão de editar
           SizedBox(
             width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {
-                // TODO: Implementar edição de perfil
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: theme.colorScheme.primary,
-                foregroundColor: Colors.white,
-                elevation: 0, // Flat design
-                padding: const EdgeInsets.symmetric(vertical: 18),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    accentColor,
+                    accentColor.withOpacity(0.8),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(14),
+                boxShadow: [
+                  BoxShadow(
+                    color: accentColor.withOpacity(0.3),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
-              child: const Text("Editar Perfil"),
+              child: ElevatedButton(
+                onPressed: () {
+                  // TODO: Implementar edição de perfil
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  foregroundColor: Colors.white,
+                  shadowColor: Colors.transparent,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.edit_rounded, size: 18),
+                    const SizedBox(width: 8),
+                    Text(
+                      "Editar Perfil",
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
-
         ],
       ),
     ));
   }
 
-  Widget _buildInfoRow(IconData icon, String label, String value, ThemeData theme) {
+  Widget _buildInfoRow(
+      IconData icon,
+      String label,
+      String value,
+      ThemeData theme,
+      ) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
-          Icon(icon, size: 16, color: theme.colorScheme.onSurface.withOpacity(0.6)),
-          const SizedBox(width: 8),
-          Text(
-            '$label: ',
-            style: GoogleFonts.inter(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: theme.colorScheme.onSurface.withOpacity(0.8),
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.onSurface.withOpacity(0.08),
+              borderRadius: BorderRadius.circular(8),
             ),
-          ),
-          Text(
-            value,
-            style: GoogleFonts.inter(
-              fontSize: 12,
+            child: Icon(
+              icon,
+              size: 16,
               color: theme.colorScheme.onSurface.withOpacity(0.6),
             ),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _FluentStatCard extends StatelessWidget {
-  final String label;
-  final String value;
-  final IconData icon;
-  final Color color;
-  final ThemeData theme;
-
-  const _FluentStatCard({
-    required this.label,
-    required this.value,
-    required this.icon,
-    required this.color,
-    required this.theme,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: color, size: 28),
-          const SizedBox(height: 16),
-          Text(
-            value,
-            style: GoogleFonts.outfit(
-              fontSize: 28,
-              fontWeight: FontWeight.w600,
-              color: theme.colorScheme.onSurface,
-            ),
-          ),
-          Text(
-            label,
-            style: GoogleFonts.inter(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: theme.colorScheme.onSurface.withOpacity(0.5),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: GoogleFonts.inter(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: theme.colorScheme.onSurface.withOpacity(0.5),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: theme.colorScheme.onSurface.withOpacity(0.8),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -408,29 +648,38 @@ class _FluentSettingsGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    // No desktop moderno, as vezes não usamos o card "grouped" inteiro,
-    // mas sim tiles individuais. Porém, o estilo "grouped" (iOS/macOS) ainda é muito elegante.
-    // Vamos manter, mas com bordas mais sutis.
+    final isDark = theme.brightness == Brightness.dark;
+    final surfaceColor = isDark ? const Color(0xFF1A1A1A) : Colors.white;
+    final borderColor = isDark
+        ? Colors.white.withOpacity(0.08)
+        : Colors.black.withOpacity(0.06);
+
     return Container(
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
+        color: surfaceColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: borderColor),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(isDark ? 0.2 : 0.02),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         children: children.asMap().entries.map((entry) {
           final index = entry.key;
           final widget = entry.value;
-          // Adiciona divisor entre os itens, exceto no último
           if (index != children.length - 1) {
             return Column(
               children: [
                 widget,
                 Divider(
-                    height: 1,
-                    thickness: 1,
-                    indent: 60, // Indentação estilo iOS/macOS
-                    color: theme.dividerColor.withOpacity(0.1)
+                  height: 1,
+                  thickness: 1,
+                  indent: 64,
+                  color: borderColor,
                 ),
               ],
             );
@@ -442,7 +691,6 @@ class _FluentSettingsGroup extends StatelessWidget {
   }
 }
 
-// Widget com Hover State para Desktop
 class _DesktopHoverTile extends StatefulWidget {
   final IconData icon;
   final String title;
@@ -472,7 +720,9 @@ class _DesktopHoverTileState extends State<_DesktopHoverTile> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color = widget.isDestructive ? Colors.redAccent : theme.colorScheme.onSurface;
+    final color = widget.isDestructive
+        ? Colors.redAccent
+        : theme.colorScheme.onSurface;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovering = true),
@@ -483,20 +733,34 @@ class _DesktopHoverTileState extends State<_DesktopHoverTile> {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 150),
           color: _isHovering
-              ? theme.colorScheme.onSurface.withOpacity(0.04) // Hover sutil
+              ? theme.colorScheme.onSurface.withOpacity(0.03)
               : Colors.transparent,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: widget.isDestructive
-                      ? Colors.redAccent.withOpacity(0.1)
-                      : theme.colorScheme.surfaceVariant,
-                  borderRadius: BorderRadius.circular(8),
+                  gradient: widget.isDestructive
+                      ? LinearGradient(
+                    colors: [
+                      Colors.redAccent.withOpacity(0.15),
+                      Colors.redAccent.withOpacity(0.08),
+                    ],
+                  )
+                      : LinearGradient(
+                    colors: [
+                      theme.colorScheme.onSurface.withOpacity(0.1),
+                      theme.colorScheme.onSurface.withOpacity(0.05),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(widget.icon, color: color.withOpacity(widget.isDestructive ? 1 : 0.7), size: 20),
+                child: Icon(
+                  widget.icon,
+                  color: color.withOpacity(widget.isDestructive ? 1 : 0.7),
+                  size: 20,
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -507,12 +771,12 @@ class _DesktopHoverTileState extends State<_DesktopHoverTile> {
                       widget.title,
                       style: GoogleFonts.inter(
                         fontSize: 15,
-                        fontWeight: FontWeight.w500, // Fontes um pouco mais finas no desktop
+                        fontWeight: FontWeight.w600,
                         color: color,
                       ),
                     ),
                     if (widget.subtitle != null) ...[
-                      const SizedBox(height: 2),
+                      const SizedBox(height: 4),
                       Text(
                         widget.subtitle!,
                         style: GoogleFonts.inter(
@@ -528,8 +792,8 @@ class _DesktopHoverTileState extends State<_DesktopHoverTile> {
                 widget.trailing!
               else if (widget.showChevron)
                 Icon(
-                  Icons.arrow_forward_ios_rounded, // Chevron menor e mais moderno
-                  size: 14,
+                  Icons.chevron_right_rounded,
+                  size: 20,
                   color: theme.colorScheme.onSurface.withOpacity(0.3),
                 ),
             ],

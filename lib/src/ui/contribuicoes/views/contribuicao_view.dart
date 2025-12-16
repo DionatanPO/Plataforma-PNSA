@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
 import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
-// Necessário para formatar a data visualmente
 import 'dart:async';
 
 import '../../dizimistas/controllers/dizimista_controller.dart';
@@ -25,23 +24,22 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
   final DizimistaController dizimistaController = Get.find<DizimistaController>();
   final TextEditingController _valorController = TextEditingController();
   final TextEditingController _searchController = TextEditingController();
-  int _currentStep = 0; // 0 = Dizimista Selection, 1 = Contribution Form
+  int _currentStep = 0;
   Timer? _debounceTimer;
 
-  // Formatador de Moeda atualizado
   final CurrencyTextInputFormatter _currencyFormatter =
-      CurrencyTextInputFormatter.currency(
-        locale: 'pt_BR',
-        symbol: 'R\$',
-        decimalDigits: 2,
-      );
+  CurrencyTextInputFormatter.currency(
+    locale: 'pt_BR',
+    symbol: 'R\$',
+    decimalDigits: 2,
+  );
 
-  // Variáveis de Estilo
   late ThemeData theme;
   late bool isDark;
   late Color surfaceColor;
   late Color backgroundColor;
   late Color borderColor;
+  late Color accentColor;
 
   @override
   void dispose() {
@@ -51,180 +49,313 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
     super.dispose();
   }
 
+  @override
   Widget build(BuildContext context) {
     theme = Theme.of(context);
     isDark = theme.brightness == Brightness.dark;
-    surfaceColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
-    backgroundColor = isDark
-        ? const Color(0xFF121212)
-        : const Color(0xFFF4F6F8);
-    borderColor = theme.dividerColor.withOpacity(0.1);
+    surfaceColor = isDark ? const Color(0xFF1A1A1A) : Colors.white;
+    backgroundColor = isDark ? const Color(0xFF0D0D0D) : const Color(0xFFF8F9FA);
+    borderColor = isDark
+        ? Colors.white.withOpacity(0.08)
+        : Colors.black.withOpacity(0.06);
+    accentColor = theme.primaryColor;
 
     return Scaffold(
       backgroundColor: backgroundColor,
-      // Header
-      appBar: AppBar(
-        backgroundColor: backgroundColor,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        toolbarHeight: 80,
-        titleSpacing: 24,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Contribução',
-              style: GoogleFonts.outfit(
-                fontSize: 26,
-                fontWeight: FontWeight.bold,
-                color: theme.colorScheme.onSurface,
+      body: CustomScrollView(
+        slivers: [
+          // Modern App Bar
+          SliverAppBar(
+            expandedHeight: 140,
+            floating: false,
+            pinned: true,
+            backgroundColor: surfaceColor,
+            elevation: 0,
+            flexibleSpace: FlexibleSpaceBar(
+              background: Container(
+                decoration: BoxDecoration(
+                  color: surfaceColor,
+                  border: Border(
+                    bottom: BorderSide(
+                      color: borderColor,
+                      width: 1,
+                    ),
+                  ),
+                ),
+                child: SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    accentColor,
+                                    accentColor.withOpacity(0.8),
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(16),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: accentColor.withOpacity(0.3),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Icon(
+                                Icons.payment_rounded,
+                                color: Colors.white,
+                                size: 28,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Contribuição',
+                                    style: GoogleFonts.outfit(
+                                      fontSize: 28,
+                                      fontWeight: FontWeight.bold,
+                                      color: theme.colorScheme.onSurface,
+                                      height: 1.2,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Registro de entradas e dízimos',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 14,
+                                      color: theme.colorScheme.onSurface.withOpacity(0.5),
+                                      letterSpacing: -0.2,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ),
+          ),
+
+          // Content
+          SliverPadding(
+            padding: const EdgeInsets.all(24),
+            sliver: SliverToBoxAdapter(
+              child: _buildMainContent(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMainContent() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth > 900) {
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(flex: 4, child: _buildStepperCard()),
+            ],
+          );
+        } else {
+          return _buildStepperCard();
+        }
+      },
+    );
+  }
+
+  Widget _buildStepperCard() {
+    return Container(
+      decoration: BoxDecoration(
+        color: surfaceColor,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: borderColor),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(isDark ? 0.2 : 0.03),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Header com gradiente sutil
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  accentColor.withOpacity(0.05),
+                  accentColor.withOpacity(0.02),
+                ],
+              ),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+              border: Border(
+                bottom: BorderSide(color: borderColor),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: accentColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.add_card_rounded,
+                    color: accentColor,
+                    size: 22,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Text(
+                  'Nova Entrada',
+                  style: GoogleFonts.outfit(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onSurface,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Content
+          Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              children: [
+                // Indicador de Etapas Melhorado
+                _buildModernStepIndicator(),
+
+                const SizedBox(height: 32),
+
+                // Conteúdo baseado na etapa atual
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  child: _currentStep == 0
+                      ? _buildStep1DizimistaSelection()
+                      : _buildStep2ContributionForm(),
+                ),
+
+                const SizedBox(height: 24),
+
+                // Botões de navegação
+                _buildStepNavigationButtons(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModernStepIndicator() {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(50),
+        border: Border.all(color: borderColor),
+      ),
+      child: Row(
+        children: [
+          _buildStepButton(0, 'Selecionar Fiel', Icons.person_search_rounded),
+          const SizedBox(width: 8),
+          _buildStepButton(1, 'Dados', Icons.edit_note_rounded),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStepButton(int step, String label, IconData icon) {
+    final isActive = _currentStep == step;
+    final isCompleted = _currentStep > step;
+
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          gradient: isActive
+              ? LinearGradient(
+            colors: [accentColor, accentColor.withOpacity(0.8)],
+          )
+              : null,
+          color: isActive ? null : Colors.transparent,
+          borderRadius: BorderRadius.circular(50),
+          boxShadow: isActive
+              ? [
+            BoxShadow(
+              color: accentColor.withOpacity(0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ]
+              : null,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              isCompleted ? Icons.check_circle_rounded : icon,
+              size: 18,
+              color: isActive
+                  ? Colors.white
+                  : isCompleted
+                  ? Colors.green
+                  : theme.colorScheme.onSurface.withOpacity(0.4),
+            ),
+            const SizedBox(width: 8),
             Text(
-              'Registro de entradas e dízimos',
+              label,
               style: GoogleFonts.inter(
-                fontSize: 14,
-                color: theme.colorScheme.onSurface.withOpacity(0.6),
+                fontSize: 13,
+                fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+                color: isActive
+                    ? Colors.white
+                    : theme.colorScheme.onSurface.withOpacity(0.6),
               ),
             ),
           ],
         ),
       ),
-      // Corpo com Scrollbar
-      body: Scrollbar(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(24, 0, 24, 40),
-          child: Column(
-            children: [
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  // Layout Responsivo: Lado a lado (Desktop) ou Empilhado (Mobile)
-                  if (constraints.maxWidth > 900) {
-                    return Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [Expanded(flex: 4, child: _buildStepperCard())],
-                    );
-                  } else {
-                    return Column(children: [_buildStepperCard()]);
-                  }
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
-
-  // ===========================================================================
-  // WIDGET: FORMULÁRIO DE NOVA ENTRADA
-  // ===========================================================================
-  Widget _buildStepperCard() {
-    return Container(
-      padding: const EdgeInsets.all(32),
-      decoration: BoxDecoration(
-        color: surfaceColor,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Título do Card
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: theme.primaryColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  Icons.add_card_rounded,
-                  color: theme.primaryColor,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Text(
-                'Nova Entrada',
-                style: GoogleFonts.outfit(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.onSurface,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 32),
-
-          // Indicador de Etapas
-          StepIndicatorWidget(currentStep: _currentStep),
-
-          const SizedBox(height: 32),
-
-          // Conteúdo baseado na etapa atual
-          if (_currentStep == 0)
-            DizimistaSelectionWidget(
-              searchController: _searchController,
-              onSearchChanged: (value) {
-                setState(() {}); // Força rebuild para atualizar o FutureBuilder
-              },
-              onDizimistaSelected: () {
-                setState(() {}); // Força rebuild para atualizar botões
-              },
-            )
-          else if (_currentStep == 1)
-            Obx(() => ContributionFormWidget(
-              selectedDate: controller.dataSelecionada.value,
-              onDateChanged: (date) => controller.dataSelecionada.value = date,
-              onPaymentMethodChanged: controller.metodo.value,
-              onPaymentMethodChangedCallback: (method) => controller.metodo.value = method,
-              onTypeChanged: controller.tipo.value,
-              onTypeChangedCallback: (type) => controller.tipo.value = type,
-              value: controller.valor.value,
-              onValueChanged: (value) => controller.valor.value = value,
-            )),
-
-          const SizedBox(height: 24),
-
-          // Botões de navegação entre etapas
-          _buildStepNavigationButtons(),
-        ],
-      ),
-    );
-  }
-
-  // O widget de indicador de passos agora está em outro arquivo
 
   Widget _buildStep1DizimistaSelection() {
     return Column(
+      key: const ValueKey('step1'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Título da etapa
-        Text(
-          'Selecione o Fiél',
-          style: GoogleFonts.outfit(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            color: theme.colorScheme.onSurface,
-          ),
-        ),
-        const SizedBox(height: 16),
-
-        // Campo de busca
-        _label('Buscar Fiéis'),
+        // Campo de busca moderno
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
             color: backgroundColor,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(color: borderColor),
           ),
           child: TextField(
@@ -232,268 +363,362 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
             decoration: InputDecoration(
               hintText: 'Buscar por nome, CPF ou telefone...',
               hintStyle: GoogleFonts.inter(
-                color: theme.colorScheme.onSurface.withOpacity(0.4),
+                color: theme.colorScheme.onSurface.withOpacity(0.3),
+                fontSize: 14,
               ),
-              prefixIcon: Icon(
-                Icons.search_rounded,
-                color: theme.colorScheme.onSurface.withOpacity(0.4),
+              prefixIcon: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Icon(
+                  Icons.search_rounded,
+                  color: theme.colorScheme.onSurface.withOpacity(0.3),
+                  size: 22,
+                ),
               ),
               border: InputBorder.none,
               contentPadding: const EdgeInsets.symmetric(
-                vertical: 16,
+                horizontal: 20,
+                vertical: 18,
               ),
             ),
             onChanged: (value) {
-              // O FutureBuilder já lida com a atualização quando o texto muda
-              // O debounce será gerenciado internamente pelo widget
-              setState(() {}); // Força rebuild para atualizar o FutureBuilder
+              setState(() {});
             },
           ),
         ),
 
-        const SizedBox(height: 16),
+        const SizedBox(height: 20),
 
-        // Lista de resultados da busca
-        if (_searchController.text.isNotEmpty) ...[
-          _label('Resultados da Busca'),
-          Container(
-            decoration: BoxDecoration(
-              color: backgroundColor,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: borderColor),
-            ),
-            child: Obx(() {
-              final selecionado = controller.dizimistaSelecionado.value;
-              return FutureBuilder<List<Dizimista>>(
-                future: controller.searchDizimistasFirestore(_searchController.text),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 20),
-                      child: Center(child: CircularProgressIndicator()),
-                    );
-                  }
+        // Lista de resultados
+        _buildSearchResults(),
+      ],
+    );
+  }
 
-                  final List<Dizimista> dizimistasFiltrados = snapshot.data ?? [];
+  Widget _buildSearchResults() {
+    if (_searchController.text.isEmpty) {
+      if (controller.dizimistaSelecionado.value != null) {
+        return _buildSelectedDizimistaCard();
+      }
+      return _buildEmptySearchState();
+    }
 
-                  if (dizimistasFiltrados.isEmpty) {
-                    return Container(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        children: [
-                          Icon(
-                            Icons.search_off_rounded,
-                            size: 64,
-                            color: theme.colorScheme.onSurface.withOpacity(0.4),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Nenhum fiel encontrado',
-                            style: GoogleFonts.outfit(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: theme.colorScheme.onSurface,
-                            ),
-                          ),
-                          Text(
-                            'Nenhum fiel corresponde à sua pesquisa',
-                            style: GoogleFonts.inter(
-                              fontSize: 14,
-                              color: theme.colorScheme.onSurface.withOpacity(0.6),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-
-                  return ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: dizimistasFiltrados.length,
-                    itemBuilder: (context, index) {
-                      final dizimista = dizimistasFiltrados[index];
-                      final isSelected = selecionado?.id == dizimista.id;
-
-                      return Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? theme.primaryColor.withOpacity(0.1)
-                              : Colors.transparent,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: isSelected
-                                ? Colors.green
-                                : theme.dividerColor.withOpacity(0.1),
-                          ),
-                        ),
-                        child: ListTile(
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          leading: Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: theme.primaryColor.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Center(
-                              child: Text(
-                                dizimista.nome.isNotEmpty && dizimista.nome.split(' ').length > 1
-                                    ? '${dizimista.nome.split(' ')[0][0]}${dizimista.nome.split(' ').last[0]}'.toUpperCase()
-                                    : dizimista.nome.isNotEmpty ? dizimista.nome[0].toUpperCase() : '?',
-                                style: GoogleFonts.outfit(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: theme.primaryColor,
-                                ),
-                              ),
-                            ),
-                          ),
-                          title: Text(
-                            dizimista.nome,
-                            style: GoogleFonts.outfit(
-                              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                              color: theme.colorScheme.onSurface,
-                            ),
-                          ),
-                          subtitle: Text(
-                            'CPF: ${dizimista.cpf} | Tel: ${dizimista.telefone}',
-                            style: GoogleFonts.inter(
-                              fontSize: 12,
-                              color: theme.colorScheme.onSurface.withOpacity(0.6),
-                            ),
-                          ),
-                          trailing: isSelected
-                              ? Icon(Icons.check_circle, color: Colors.green, size: 24)
-                              : null,
-                          onTap: () {
-                            controller.dizimistaSelecionado.value = dizimista;
-                          },
-                        ),
-                      );
-                    },
-                  );
-                },
+    return Container(
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: borderColor),
+      ),
+      child: Obx(() {
+        final selecionado = controller.dizimistaSelecionado.value;
+        return FutureBuilder<List<Dizimista>>(
+          future: controller.searchDizimistasFirestore(_searchController.text),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Padding(
+                padding: const EdgeInsets.all(40),
+                child: Center(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: accentColor,
+                  ),
+                ),
               );
-            }),
+            }
+
+            final List<Dizimista> dizimistasFiltrados = snapshot.data ?? [];
+
+            if (dizimistasFiltrados.isEmpty) {
+              return _buildNoResultsState();
+            }
+
+            return ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(8),
+              itemCount: dizimistasFiltrados.length,
+              separatorBuilder: (context, index) => const SizedBox(height: 8),
+              itemBuilder: (context, index) {
+                final dizimista = dizimistasFiltrados[index];
+                final isSelected = selecionado?.id == dizimista.id;
+
+                return _buildDizimistaCard(dizimista, isSelected);
+              },
+            );
+          },
+        );
+      }),
+    );
+  }
+
+  Widget _buildDizimistaCard(Dizimista dizimista, bool isSelected) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          controller.dizimistaSelecionado.value = dizimista;
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: isSelected ? accentColor.withOpacity(0.08) : surfaceColor,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSelected ? accentColor : borderColor,
+              width: isSelected ? 2 : 1,
+            ),
           ),
-        ] else if (controller.dizimistaSelecionado.value != null) ...[
-          // Mostrar o dizimista selecionado quando nenhum texto é digitado mas um dizimista está selecionado
+          child: Row(
+            children: [
+              // Avatar
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: isSelected
+                        ? [accentColor, accentColor.withOpacity(0.8)]
+                        : [
+                      theme.colorScheme.onSurface.withOpacity(0.1),
+                      theme.colorScheme.onSurface.withOpacity(0.05),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Center(
+                  child: Text(
+                    dizimista.nome.isNotEmpty && dizimista.nome.split(' ').length > 1
+                        ? '${dizimista.nome.split(' ')[0][0]}${dizimista.nome.split(' ').last[0]}'.toUpperCase()
+                        : dizimista.nome.isNotEmpty
+                        ? dizimista.nome[0].toUpperCase()
+                        : '?',
+                    style: GoogleFonts.outfit(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: isSelected ? Colors.white : accentColor,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+
+              // Info
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      dizimista.nome,
+                      style: GoogleFonts.outfit(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 15,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'CPF: ${dizimista.cpf} • Tel: ${dizimista.telefone}',
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: theme.colorScheme.onSurface.withOpacity(0.5),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Checkmark
+              if (isSelected)
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: accentColor,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.check_rounded,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSelectedDizimistaCard() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.green.withOpacity(0.1),
+            Colors.green.withOpacity(0.05),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.green.withOpacity(0.2)),
+      ),
+      child: Column(
+        children: [
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: backgroundColor,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: borderColor),
+              color: Colors.green.withOpacity(0.1),
+              shape: BoxShape.circle,
             ),
-            child: Column(
-              children: [
-                Icon(
-                  Icons.check_circle,
-                  size: 64,
-                  color: Colors.green,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'cionado',
-                  style: GoogleFonts.outfit(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: theme.colorScheme.onSurface,
-                  ),
-                ),
-                Text(
-                  controller.dizimistaSelecionado.value?.nome ?? '',
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    color: theme.colorScheme.onSurface.withOpacity(0.8),
-                  ),
-                ),
-              ],
+            child: const Icon(
+              Icons.check_circle_rounded,
+              size: 40,
+              color: Colors.green,
             ),
           ),
-        ] else ...[
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: backgroundColor,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: borderColor),
+          const SizedBox(height: 16),
+          Text(
+            'Fiel Selecionado',
+            style: GoogleFonts.outfit(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: theme.colorScheme.onSurface,
             ),
-            child: Column(
-              children: [
-                Icon(
-                  Icons.search_rounded,
-                  size: 64,
-                  color: theme.colorScheme.onSurface.withOpacity(0.4),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Digite para pesquisar fiéis',
-                  style: GoogleFonts.outfit(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: theme.colorScheme.onSurface,
-                  ),
-                ),
-                Text(
-                  'Comece digitando um nome, CPF ou telefone',
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    color: theme.colorScheme.onSurface.withOpacity(0.6),
-                  ),
-                ),
-              ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            controller.dizimistaSelecionado.value?.nome ?? '',
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              color: theme.colorScheme.onSurface.withOpacity(0.7),
             ),
           ),
         ],
-      ],
+      ),
+    );
+  }
+
+  Widget _buildEmptySearchState() {
+    return Container(
+      padding: const EdgeInsets.all(40),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: borderColor),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            Icons.search_rounded,
+            size: 56,
+            color: theme.colorScheme.onSurface.withOpacity(0.2),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Digite para pesquisar',
+            style: GoogleFonts.outfit(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Comece digitando um nome, CPF ou telefone',
+            style: GoogleFonts.inter(
+              fontSize: 13,
+              color: theme.colorScheme.onSurface.withOpacity(0.5),
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNoResultsState() {
+    return Padding(
+      padding: const EdgeInsets.all(40),
+      child: Column(
+        children: [
+          Icon(
+            Icons.search_off_rounded,
+            size: 56,
+            color: theme.colorScheme.onSurface.withOpacity(0.2),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Nenhum fiel encontrado',
+            style: GoogleFonts.outfit(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Tente buscar com outros termos',
+            style: GoogleFonts.inter(
+              fontSize: 13,
+              color: theme.colorScheme.onSurface.withOpacity(0.5),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildStep2ContributionForm() {
     return Column(
+      key: const ValueKey('step2'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Título da etapa
-        Text(
-          'Dados do Lançamento',
-          style: GoogleFonts.outfit(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            color: theme.colorScheme.onSurface,
-          ),
-        ),
-        const SizedBox(height: 16),
-
-        // Informações do dizimista selecionado
+        // Card do dizimista selecionado
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: backgroundColor,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: borderColor),
+            gradient: LinearGradient(
+              colors: [
+                accentColor.withOpacity(0.08),
+                accentColor.withOpacity(0.04),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: accentColor.withOpacity(0.2)),
           ),
           child: Row(
             children: [
-              Icon(Icons.person, color: Colors.green, size: 20),
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: accentColor.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  Icons.person_rounded,
+                  color: accentColor,
+                  size: 20,
+                ),
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Fiél selecionado:',
+                      'Fiel selecionado',
                       style: GoogleFonts.inter(
-                        fontSize: 12,
-                        color: theme.colorScheme.onSurface.withOpacity(0.6),
+                        fontSize: 11,
+                        color: theme.colorScheme.onSurface.withOpacity(0.5),
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
+                    const SizedBox(height: 2),
                     Text(
                       controller.dizimistaSelecionado.value?.nome ?? '',
                       style: GoogleFonts.outfit(
-                        fontSize: 14,
+                        fontSize: 15,
                         fontWeight: FontWeight.w600,
                         color: theme.colorScheme.onSurface,
                       ),
@@ -507,8 +732,8 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
 
         const SizedBox(height: 24),
 
-        // 2. Tipo
-        _label('Tipo'),
+        // Tipo
+        _label('Tipo de Contribuição'),
         _buildModernDropdown(
           value: controller.tipo.value,
           items: [
@@ -517,117 +742,115 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
             'Oferta',
             'Doação',
           ],
-          onChanged: (val) =>
-              setState(() => controller.tipo.value = val!),
+          onChanged: (val) => setState(() => controller.tipo.value = val!),
         ),
 
         const SizedBox(height: 20),
 
-        // 3. SELETOR DE DATA E HORA
+        // Data e Hora
         _label('Data do Recebimento'),
         InkWell(
           onTap: () => _pickDateTime(context),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: backgroundColor,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(16),
               border: Border.all(color: borderColor),
             ),
             child: Row(
               children: [
-                Icon(
-                  Icons.calendar_month_rounded,
-                  size: 20,
-                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: accentColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    Icons.calendar_today_rounded,
+                    size: 18,
+                    color: accentColor,
+                  ),
                 ),
                 const SizedBox(width: 12),
-                // Observa a mudança da data no controller
-                Obx(
-                  () => Text(
-                    '${controller.dataSelecionada.value.day.toString().padLeft(2, '0')}/${controller.dataSelecionada.value.month.toString().padLeft(2, '0')}/${controller.dataSelecionada.value.year} às ${controller.dataSelecionada.value.hour.toString().padLeft(2, '0')}:${controller.dataSelecionada.value.minute.toString().padLeft(2, '0')}',
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      color: theme.colorScheme.onSurface,
+                Expanded(
+                  child: Obx(
+                        () => Text(
+                      '${controller.dataSelecionada.value.day.toString().padLeft(2, '0')}/${controller.dataSelecionada.value.month.toString().padLeft(2, '0')}/${controller.dataSelecionada.value.year} às ${controller.dataSelecionada.value.hour.toString().padLeft(2, '0')}:${controller.dataSelecionada.value.minute.toString().padLeft(2, '0')}',
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: theme.colorScheme.onSurface,
+                      ),
                     ),
                   ),
                 ),
-                const Spacer(),
                 Icon(
-                  Icons.access_time_rounded,
-                  size: 16,
-                  color: theme.colorScheme.onSurface.withOpacity(0.4),
+                  Icons.chevron_right_rounded,
+                  size: 20,
+                  color: theme.colorScheme.onSurface.withOpacity(0.3),
                 ),
               ],
             ),
           ),
         ),
 
-        const SizedBox(height: 32),
+        const SizedBox(height: 24),
 
-        // 4. Valor Monetário
-        Text(
-          'VALOR DA CONTRIBUIÇÃO',
-          style: GoogleFonts.inter(
-            fontSize: 11,
-            fontWeight: FontWeight.bold,
-            color: theme.colorScheme.onSurface.withOpacity(0.4),
-            letterSpacing: 1,
-          ),
-        ),
-        const SizedBox(height: 8),
+        // Valor
+        _label('Valor da Contribuição'),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
           decoration: BoxDecoration(
-            color: backgroundColor,
+            gradient: LinearGradient(
+              colors: [
+                accentColor.withOpacity(0.05),
+                accentColor.withOpacity(0.02),
+              ],
+            ),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: theme.primaryColor.withOpacity(0.3)),
+            border: Border.all(color: accentColor.withOpacity(0.2), width: 1.5),
           ),
-          child: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _valorController,
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [_currencyFormatter],
-                  style: GoogleFonts.outfit(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.onSurface,
-                  ),
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintText: 'R\$ 0,00',
-                    hintStyle: TextStyle(
-                      color: theme.colorScheme.onSurface.withOpacity(0.2),
-                    ),
-                  ),
-                ),
+          child: TextField(
+            controller: _valorController,
+            keyboardType: TextInputType.number,
+            inputFormatters: [_currencyFormatter],
+            style: GoogleFonts.outfit(
+              fontSize: 36,
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.onSurface,
+              height: 1.2,
+            ),
+            decoration: InputDecoration(
+              border: InputBorder.none,
+              hintText: 'R\$ 0,00',
+              hintStyle: TextStyle(
+                color: theme.colorScheme.onSurface.withOpacity(0.15),
               ),
-            ],
+              contentPadding: const EdgeInsets.symmetric(vertical: 12),
+            ),
           ),
         ),
 
-        const SizedBox(height: 32),
+        const SizedBox(height: 24),
 
-        // 5. Forma de Pagamento
+        // Forma de Pagamento
         _label('Forma de Pagamento'),
         Obx(() => Wrap(
           spacing: 10,
           runSpacing: 10,
           children: [
-            _paymentChip('PIX', Icons.qr_code_rounded),
-            _paymentChip('Dinheiro', Icons.attach_money_rounded),
+            _paymentChip('PIX', Icons.qr_code_2_rounded),
+            _paymentChip('Dinheiro', Icons.payments_rounded),
             _paymentChip('Cartão', Icons.credit_card_rounded),
-            _paymentChip('Transferência', Icons.description_outlined),
+            _paymentChip('Transferência', Icons.sync_alt_rounded),
           ],
         )),
       ],
     );
   }
 
-  // Botões de navegação entre etapas
   Widget _buildStepNavigationButtons() {
     return StepNavigationButtons(
       currentStep: _currentStep,
@@ -642,22 +865,6 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
     );
   }
 
-  // ===========================================================================
-  // WIDGET: LISTA DE HISTÓRICO
-  // ===========================================================================
-
-  // ===========================================================================
-  // MÉTODOS E LÓGICA
-  // ===========================================================================
-
-  void _goToPreviousStep() {
-    if (_currentStep > 0) {
-      setState(() {
-        _currentStep--;
-      });
-    }
-  }
-
   void _goToNextStep() {
     if (controller.dizimistaSelecionado.value != null) {
       setState(() {
@@ -669,13 +876,15 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
         'Selecione um fiel antes de continuar.',
         snackPosition: SnackPosition.BOTTOM,
         margin: const EdgeInsets.all(24),
+        backgroundColor: surfaceColor,
         colorText: theme.colorScheme.onSurface,
+        borderRadius: 12,
+        icon: Icon(Icons.warning_rounded, color: Colors.orange),
       );
     }
   }
 
   Future<void> _pickDateTime(BuildContext context) async {
-    // 1. Abre o Calendário
     final DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: controller.dataSelecionada.value,
@@ -685,7 +894,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
         return Theme(
           data: theme.copyWith(
             colorScheme: theme.colorScheme.copyWith(
-              primary: Colors.green,
+              primary: accentColor,
               onPrimary: Colors.white,
               surface: surfaceColor,
               onSurface: theme.colorScheme.onSurface,
@@ -699,7 +908,6 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
 
     if (pickedDate == null) return;
 
-    // 2. Abre o Relógio
     if (!mounted) return;
     final TimeOfDay? pickedTime = await showTimePicker(
       context: context,
@@ -709,9 +917,9 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
           data: theme.copyWith(
             timePickerTheme: TimePickerThemeData(
               backgroundColor: surfaceColor,
-              dayPeriodColor: Colors.green.withOpacity(0.2),
+              dayPeriodColor: accentColor.withOpacity(0.2),
               hourMinuteColor: backgroundColor,
-              dialHandColor: Colors.green,
+              dialHandColor: accentColor,
               dialBackgroundColor: backgroundColor,
               dialTextColor: theme.colorScheme.onSurface,
             ),
@@ -723,7 +931,6 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
 
     if (pickedTime == null) return;
 
-    // 3. Combina e Salva
     final DateTime combinedDateTime = DateTime(
       pickedDate.year,
       pickedDate.month,
@@ -736,71 +943,77 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
   }
 
   void _submitForm() async {
-    // Validar o formulário usando a lógica do controller
     if (!controller.validateForm()) {
       Get.snackbar(
         'Atenção',
         'Preencha todos os campos obrigatórios corretamente.',
         snackPosition: SnackPosition.BOTTOM,
         margin: const EdgeInsets.all(24),
+        backgroundColor: surfaceColor,
         colorText: theme.colorScheme.onSurface,
+        borderRadius: 12,
+        icon: Icon(Icons.error_outline_rounded, color: Colors.orange),
       );
       return;
     }
 
     try {
-      // Criar a contribuição a partir dos dados do formulário
       final novaContribuicao = controller.createContribuicaoFromForm();
-
-      // Salvar no Firestore
       await controller.addContribuicao(novaContribuicao);
 
-      // Mostrar mensagem de sucesso
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Lançamento registrado com sucesso!', style: GoogleFonts.inter()),
+          content: Row(
+            children: [
+              Icon(Icons.check_circle_rounded, color: Colors.white),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Lançamento registrado com sucesso!',
+                  style: GoogleFonts.inter(fontWeight: FontWeight.w500),
+                ),
+              ),
+            ],
+          ),
           backgroundColor: Colors.green,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(12),
           ),
+          margin: const EdgeInsets.all(24),
         ),
       );
 
-      // Limpar campos e voltar para a primeira etapa
       _valorController.clear();
       controller.dizimistaSelecionado.value = null;
       controller.dataSelecionada.value = DateTime.now();
       setState(() {
-        _currentStep = 0; // Volta para a tela de seleção
+        _currentStep = 0;
       });
-
     } catch (e) {
-      // Mostrar mensagem de erro
       Get.snackbar(
         'Erro',
         'Falha ao registrar lançamento: ${e.toString()}',
         snackPosition: SnackPosition.BOTTOM,
         margin: const EdgeInsets.all(24),
-        colorText: theme.colorScheme.onSurface,
         backgroundColor: Colors.red,
+        colorText: Colors.white,
+        borderRadius: 12,
+        icon: Icon(Icons.error_rounded, color: Colors.white),
       );
     }
   }
 
-  // ===========================================================================
-  // COMPONENTES AUXILIARES
-  // ===========================================================================
-
   Widget _label(String text) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8, left: 4),
+      padding: const EdgeInsets.only(bottom: 10, left: 2),
       child: Text(
         text,
         style: GoogleFonts.inter(
-          fontSize: 13,
+          fontSize: 12,
           fontWeight: FontWeight.w600,
-          color: theme.colorScheme.onSurface.withOpacity(0.7),
+          color: theme.colorScheme.onSurface.withOpacity(0.6),
+          letterSpacing: 0.3,
         ),
       ),
     );
@@ -815,18 +1028,18 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: borderColor),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           isExpanded: true,
-          dropdownColor: isDark ? const Color(0xFF2C2C2C) : Colors.white,
+          dropdownColor: surfaceColor,
           value: value,
           icon: Icon(
-            Icons.keyboard_arrow_down_rounded,
-            size: 20,
-            color: theme.colorScheme.onSurface.withOpacity(0.6),
+            Icons.expand_more_rounded,
+            size: 22,
+            color: theme.colorScheme.onSurface.withOpacity(0.4),
           ),
           items: items.map((String val) {
             return DropdownMenuItem(
@@ -835,6 +1048,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
                 val,
                 style: GoogleFonts.inter(
                   fontSize: 14,
+                  fontWeight: FontWeight.w500,
                   color: theme.colorScheme.onSurface,
                 ),
               ),
@@ -848,43 +1062,62 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
 
   Widget _paymentChip(String label, IconData icon) {
     final isSelected = controller.metodo.value == label;
-    final unselectedColor = theme.colorScheme.onSurface.withOpacity(0.7);
 
-    return InkWell(
-      onTap: () {
-        // Atualiza o estado no controller
-        controller.metodo.value = label;
-      },
-      borderRadius: BorderRadius.circular(12),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? theme.primaryColor : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected ? theme.primaryColor : borderColor,
-            width: isSelected ? 0 : 1.5,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 18,
-              color: isSelected ? Colors.white : unselectedColor,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          controller.metodo.value = label;
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+          decoration: BoxDecoration(
+            gradient: isSelected
+                ? LinearGradient(
+              colors: [accentColor, accentColor.withOpacity(0.8)],
+            )
+                : null,
+            color: isSelected ? null : backgroundColor,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSelected ? Colors.transparent : borderColor,
+              width: 1,
             ),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: GoogleFonts.inter(
-                fontSize: 13,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                color: isSelected ? Colors.white : unselectedColor,
+            boxShadow: isSelected
+                ? [
+              BoxShadow(
+                color: accentColor.withOpacity(0.3),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
               ),
-            ),
-          ],
+            ]
+                : null,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 20,
+                color: isSelected
+                    ? Colors.white
+                    : theme.colorScheme.onSurface.withOpacity(0.6),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                label,
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                  color: isSelected
+                      ? Colors.white
+                      : theme.colorScheme.onSurface.withOpacity(0.7),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
