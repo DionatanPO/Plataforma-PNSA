@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../core/services/access_service.dart';
 import '../../routes/app_routes.dart';
 import '../../data/services/auth_service.dart';
 
@@ -30,17 +29,9 @@ class ProfileController extends GetxController {
 
   Future<void> loadUserData() async {
     try {
-      // Verifica se estamos em processo de criação de novo usuário
-      // Se estivermos, podemos querer usar o UID original armazenado
-      String? userIdToUse;
-
-      if (AccessService.isCreatingNewUser && AccessService.originalUserUid != null) {
-        // Usar o UID do usuário original se estivermos criando um novo usuário
-        userIdToUse = AccessService.originalUserUid;
-      } else {
-        // Caso contrário, usar o usuário atual
-        userIdToUse = FirebaseAuth.instance.currentUser?.uid;
-      }
+      // Com a nova implementação usando instância secundária do Firebase para criar usuários,
+      // a sessão do admin nunca é afetada, então basta usar o usuário atual
+      final userIdToUse = FirebaseAuth.instance.currentUser?.uid;
 
       if (userIdToUse != null) {
         // Buscar os dados do usuário específico
@@ -55,14 +46,19 @@ class ProfileController extends GetxController {
           funcao.value = userData.funcao;
           status.value = userData.status;
           // Para avatar, usar o padrão ou o que estiver disponível
-          avatarUrl.value = userData.photoURL ?? 'https://i.pravatar.cc/150?img=12';
+          avatarUrl.value =
+              userData.photoURL ?? 'https://i.pravatar.cc/150?img=12';
         } else {
           // Se não encontrarmos os dados completos no Firestore, usar dados básicos do Auth
           final authUser = FirebaseAuth.instance.currentUser;
           if (authUser != null) {
-            name.value = authUser.displayName ?? authUser.email?.split('@')[0] ?? 'Usuário';
+            name.value =
+                authUser.displayName ??
+                authUser.email?.split('@')[0] ??
+                'Usuário';
             email.value = authUser.email ?? '';
-            avatarUrl.value = authUser.photoURL ?? 'https://i.pravatar.cc/150?img=12';
+            avatarUrl.value =
+                authUser.photoURL ?? 'https://i.pravatar.cc/150?img=12';
           }
         }
       }

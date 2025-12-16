@@ -27,19 +27,23 @@ class AccessManagementController extends GetxController {
       final currentUserId = currentUser?.uid;
 
       // Subscreve ao stream de dados do Firestore
-      AccessService.getAllAcessos().listen((acessosList) {
-        // Filtrar o usuário logado da lista (excluir o próprio usuário dos resultados)
-        if (currentUserId != null) {
-          final filteredList = acessosList.where((acesso) => acesso.id != currentUserId).toList();
-          _acessos.assignAll(filteredList);
-        } else {
-          _acessos.assignAll(acessosList);
-        }
-        _isLoading.value = false;
-      }).onError((error) {
-        print("Erro ao carregar acessos do Firestore: $error");
-        _isLoading.value = false;
-      });
+      AccessService.getAllAcessos()
+          .listen((acessosList) {
+            // Filtrar o usuário logado da lista (excluir o próprio usuário dos resultados)
+            if (currentUserId != null) {
+              final filteredList = acessosList
+                  .where((acesso) => acesso.id != currentUserId)
+                  .toList();
+              _acessos.assignAll(filteredList);
+            } else {
+              _acessos.assignAll(acessosList);
+            }
+            _isLoading.value = false;
+          })
+          .onError((error) {
+            print("Erro ao carregar acessos do Firestore: $error");
+            _isLoading.value = false;
+          });
     } catch (e) {
       print("Erro ao carregar acessos: $e");
       _isLoading.value = false;
@@ -63,17 +67,28 @@ class AccessManagementController extends GetxController {
 
     // Filtrar o usuário logado da lista base
     if (currentUserId != null) {
-      baseList = baseList.where((acesso) => acesso.id != currentUserId).toList();
+      baseList = baseList
+          .where((acesso) => acesso.id != currentUserId)
+          .toList();
     }
 
     if (_searchQuery.isEmpty) {
       return baseList;
     } else {
-      return baseList.where((acesso) =>
-        acesso.nome.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-        acesso.email.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-        acesso.funcao.toLowerCase().contains(_searchQuery.toLowerCase())
-      ).toList();
+      return baseList
+          .where(
+            (acesso) =>
+                acesso.nome.toLowerCase().contains(
+                  _searchQuery.toLowerCase(),
+                ) ||
+                acesso.email.toLowerCase().contains(
+                  _searchQuery.toLowerCase(),
+                ) ||
+                acesso.funcao.toLowerCase().contains(
+                  _searchQuery.toLowerCase(),
+                ),
+          )
+          .toList();
     }
   }
 
@@ -98,10 +113,15 @@ class AccessManagementController extends GetxController {
       // Verificar se o usuário atual está sendo atualizado e se o status foi alterado para Inativo
       final authService = Get.find<AuthService>();
       final currentUser = authService.currentUser;
-      if (currentUser != null && currentUser.uid == acesso.id && acesso.status != 'Ativo') {
+      if (currentUser != null &&
+          currentUser.uid == acesso.id &&
+          acesso.status != 'Ativo') {
         // Se o usuário atual está sendo desativado, fazer logout
         await authService.logout();
-        Get.snackbar('Acesso Negado', 'Sua conta foi desativada pelo administrador.');
+        Get.snackbar(
+          'Acesso Negado',
+          'Sua conta foi desativada pelo administrador.',
+        );
       }
     } catch (e) {
       print("Erro ao atualizar acesso: $e");
@@ -109,8 +129,6 @@ class AccessManagementController extends GetxController {
       _isLoading.value = false;
     }
   }
-
-
 
   String formatarData(DateTime data) {
     return "${data.day.toString().padLeft(2, '0')}/${data.month.toString().padLeft(2, '0')}/${data.year}, "

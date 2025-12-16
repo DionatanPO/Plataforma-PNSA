@@ -2,14 +2,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // Changed from firebase_database
 import 'package:get/get.dart';
 
-import '../../core/services/access_service.dart';
 import '../../domain/models/user_model.dart';
 import 'session_service.dart';
 
-
 class AuthService extends GetxService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance; // Changed from FirebaseDatabase
+  final FirebaseFirestore _firestore =
+      FirebaseFirestore.instance; // Changed from FirebaseDatabase
   final SessionService _sessionService = Get.find<SessionService>();
 
   // Observable para o usuário atual
@@ -21,15 +20,10 @@ class AuthService extends GetxService {
   void onInit() {
     super.onInit();
     // Escuta as mudanças no estado de autenticação
+    // NOTA: Com a nova implementação usando instância secundária do Firebase para criar usuários,
+    // a criação de novos usuários NUNCA afeta a sessão do admin principal.
     _auth.authStateChanges().listen((firebaseUser) {
-      // Verificar se estamos atualmente criando um novo usuário via AccessService
-      // Se estivermos, ignorar essa mudança de estado para evitar troca indesejada
-      if (!AccessService.isCreatingNewUser) {
-        _firebaseUser.value = firebaseUser;
-      } else {
-        // Durante a criação de novo usuário, apenas registrar o evento mas não atualizar o estado
-        print('Mudança de estado ignorada durante criação de novo usuário: ${firebaseUser?.uid}');
-      }
+      _firebaseUser.value = firebaseUser;
     });
 
     // Restaura a sessão se ela existir
@@ -52,12 +46,19 @@ class AuthService extends GetxService {
   /// Efetua o login com email e senha.
   Future<bool> login(String email, String password) async {
     try {
-      final result = await _auth.signInWithEmailAndPassword(email: email, password: password);
+      final result = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
       final user = result.user;
 
       if (user != null) {
         // Salvar dados da sessão
-        await _sessionService.saveSession(user.uid, user.email ?? '', user.email?.split('@')[0] ?? 'Usuário');
+        await _sessionService.saveSession(
+          user.uid,
+          user.email ?? '',
+          user.email?.split('@')[0] ?? 'Usuário',
+        );
       }
 
       return true;
@@ -76,7 +77,9 @@ class AuthService extends GetxService {
   /// A chave do usuário no banco de dados será o seu UID.
   Future<void> createUserInDatabase(User user, String nome) async {
     try {
-      final userRef = _firestore.collection('usuarios').doc(user.uid); // Changed for Firestore
+      final userRef = _firestore
+          .collection('usuarios')
+          .doc(user.uid); // Changed for Firestore
 
       // Para garantir que o modelo seja preenchido corretamente,
       // buscamos o usuário existente ou criamos um novo com valores padrão.
@@ -99,8 +102,12 @@ class AuthService extends GetxService {
         nome: nome,
         displayName: user.displayName ?? nome,
         photoURL: user.photoURL ?? '',
-        createdAt: user.metadata.creationTime?.millisecondsSinceEpoch ?? now.millisecondsSinceEpoch,
-        lastLoginAt: user.metadata.lastSignInTime?.millisecondsSinceEpoch ?? now.millisecondsSinceEpoch,
+        createdAt:
+            user.metadata.creationTime?.millisecondsSinceEpoch ??
+            now.millisecondsSinceEpoch,
+        lastLoginAt:
+            user.metadata.lastSignInTime?.millisecondsSinceEpoch ??
+            now.millisecondsSinceEpoch,
         cpf: '', // Padrão
         telefone: '', // Padrão
         endereco: '', // Padrão
@@ -113,7 +120,6 @@ class AuthService extends GetxService {
       // Usando .set() para criar ou sobrescrever os dados do usuário
       await userRef.set(userModel.toJson());
       print('Novo usuário salvo no Firestore com sucesso!');
-
     } catch (e) {
       // Erros de permissão serão capturados aqui.
       print('Error saving user to Firestore: $e');
@@ -153,7 +159,11 @@ class AuthService extends GetxService {
   }
 
   /// Obtém os dados do usuário com retry até que estejam disponíveis ou timeout
-  Future<UserModel?> getUserDataWithRetry(String uid, {int maxRetries = 10, Duration delay = const Duration(milliseconds: 500)}) async {
+  Future<UserModel?> getUserDataWithRetry(
+    String uid, {
+    int maxRetries = 10,
+    Duration delay = const Duration(milliseconds: 500),
+  }) async {
     for (int i = 0; i < maxRetries; i++) {
       try {
         final userData = await getUserData(uid);
@@ -171,7 +181,11 @@ class AuthService extends GetxService {
   }
 
   /// Verifica se o usuário está ativo com retry
-  Future<bool> isUserActiveWithRetry(String uid, {int maxRetries = 10, Duration delay = const Duration(milliseconds: 500)}) async {
+  Future<bool> isUserActiveWithRetry(
+    String uid, {
+    int maxRetries = 10,
+    Duration delay = const Duration(milliseconds: 500),
+  }) async {
     for (int i = 0; i < maxRetries; i++) {
       try {
         final userData = await getUserData(uid);

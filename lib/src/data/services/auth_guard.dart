@@ -2,10 +2,8 @@ import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../routes/app_routes.dart';
 import 'auth_service.dart';
-import '../../core/services/access_service.dart';
 import 'session_service.dart';
 import '../../ui/auth/login/login_controller.dart';
-
 
 class AuthGuard extends GetxService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -38,13 +36,9 @@ class AuthGuard extends GetxService {
       return;
     }
 
-    // Verificar se estamos atualmente criando um novo usuário via AccessService
-    // Se estivermos, ignorar temporariamente essa mudança de estado para evitar redirecionamento indesejado
-    if (AccessService.isCreatingNewUser) {
-      // Apenas retornar sem fazer nenhuma ação de navegação
-      print('Estado de autenticação ignorado durante criação de novo usuário');
-      return;
-    }
+    // NOTA: Com a nova implementação usando instância secundária do Firebase para criar usuários,
+    // a criação de novos usuários NUNCA afeta a sessão do admin principal.
+    // Portanto, não precisamos mais verificar flags de "criando novo usuário".
 
     if (user != null) {
       try {
@@ -59,13 +53,7 @@ class AuthGuard extends GetxService {
         Get.offAllNamed(AppRoutes.login);
       }
     } else {
-      // Usuário não está autenticado
-      // Verificar se foi causado pela criação de novo usuário (logout temporário)
-      if (AccessService.isCreatingNewUser) {
-        print('Logout temporário durante criação de novo usuário - ignorando navegação');
-        return;
-      }
-
+      // Usuário não está autenticado - redirecionar para login
       Get.offAllNamed(AppRoutes.login);
     }
   }
@@ -75,13 +63,14 @@ class AuthGuard extends GetxService {
     try {
       // Verificar se o usuário está ativo
       final isActive = await _authService.isUserActiveWithRetry(uid);
-                    if (!isActive) {
-                      // Deslogar o usuário e redirecionar para login com mensagem
-                      await _authService.logout();
-                      Get.find<LoginController>().loginError.value = 'Sua conta foi desativada pelo administrador.';
-                      Get.offAllNamed(AppRoutes.login);
-                      return;
-                    }
+      if (!isActive) {
+        // Deslogar o usuário e redirecionar para login com mensagem
+        await _authService.logout();
+        Get.find<LoginController>().loginError.value =
+            'Sua conta foi desativada pelo administrador.';
+        Get.offAllNamed(AppRoutes.login);
+        return;
+      }
       // Verificar se o usuário tem pendências
       final userData = await _authService.getUserDataWithRetry(uid);
       if (userData != null && userData.pendencia) {

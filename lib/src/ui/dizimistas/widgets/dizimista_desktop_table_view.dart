@@ -58,9 +58,7 @@ class DizimistaDesktopTableView extends StatelessWidget {
                 topLeft: Radius.circular(20),
                 topRight: Radius.circular(20),
               ),
-              border: Border(
-                bottom: BorderSide(color: borderColor),
-              ),
+              border: Border(bottom: BorderSide(color: borderColor)),
             ),
             child: Row(
               children: [
@@ -224,13 +222,17 @@ class _TableRowState extends State<_TableRow> {
                             Container(
                               padding: const EdgeInsets.all(3),
                               decoration: BoxDecoration(
-                                color: theme.colorScheme.onSurface.withOpacity(0.08),
+                                color: theme.colorScheme.onSurface.withOpacity(
+                                  0.08,
+                                ),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Icon(
                                 Icons.badge_outlined,
                                 size: 10,
-                                color: theme.colorScheme.onSurface.withOpacity(0.5),
+                                color: theme.colorScheme.onSurface.withOpacity(
+                                  0.5,
+                                ),
                               ),
                             ),
                             const SizedBox(width: 6),
@@ -238,7 +240,9 @@ class _TableRowState extends State<_TableRow> {
                               d.cpf,
                               style: GoogleFonts.inter(
                                 fontSize: 11,
-                                color: theme.colorScheme.onSurface.withOpacity(0.5),
+                                color: theme.colorScheme.onSurface.withOpacity(
+                                  0.5,
+                                ),
                               ),
                             ),
                           ],
@@ -266,12 +270,16 @@ class _TableRowState extends State<_TableRow> {
                         color: theme.colorScheme.onSurface.withOpacity(0.5),
                       ),
                       const SizedBox(width: 6),
-                      Text(
-                        d.telefone,
-                        style: GoogleFonts.inter(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          color: theme.colorScheme.onSurface,
+                      Flexible(
+                        child: Text(
+                          d.telefone,
+                          style: GoogleFonts.inter(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
@@ -291,7 +299,9 @@ class _TableRowState extends State<_TableRow> {
                             d.email!,
                             style: GoogleFonts.inter(
                               fontSize: 11,
-                              color: theme.colorScheme.onSurface.withOpacity(0.5),
+                              color: theme.colorScheme.onSurface.withOpacity(
+                                0.5,
+                              ),
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -366,7 +376,10 @@ class _TableRowState extends State<_TableRow> {
             Expanded(
               flex: 1,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: theme.colorScheme.onSurface.withOpacity(0.04),
                   borderRadius: BorderRadius.circular(8),
@@ -379,13 +392,17 @@ class _TableRowState extends State<_TableRow> {
                       size: 11,
                       color: theme.colorScheme.onSurface.withOpacity(0.5),
                     ),
-                    const SizedBox(width: 6),
-                    Text(
-                      '${d.dataRegistro.day.toString().padLeft(2, '0')}/${d.dataRegistro.month.toString().padLeft(2, '0')}/${d.dataRegistro.year}',
-                      style: GoogleFonts.inter(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w500,
-                        color: theme.colorScheme.onSurface.withOpacity(0.6),
+                    const SizedBox(width: 4),
+                    Flexible(
+                      child: Text(
+                        '${d.dataRegistro.day.toString().padLeft(2, '0')}/${d.dataRegistro.month.toString().padLeft(2, '0')}/${d.dataRegistro.year}',
+                        style: GoogleFonts.inter(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w500,
+                          color: theme.colorScheme.onSurface.withOpacity(0.6),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],

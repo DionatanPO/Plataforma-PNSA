@@ -48,7 +48,10 @@ class AccessManagementDesktopList extends StatelessWidget {
             children: [
               // Cabeçalho da tabela
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
@@ -62,9 +65,7 @@ class AccessManagementDesktopList extends StatelessWidget {
                     topLeft: Radius.circular(20),
                     topRight: Radius.circular(20),
                   ),
-                  border: Border(
-                    bottom: BorderSide(color: borderColor),
-                  ),
+                  border: Border(bottom: BorderSide(color: borderColor)),
                 ),
                 child: Row(
                   children: [
@@ -72,7 +73,11 @@ class AccessManagementDesktopList extends StatelessWidget {
                     _TableHeaderCell(text: 'CONTATO', flex: 2, theme: theme),
                     _TableHeaderCell(text: 'FUNÇÃO', flex: 2, theme: theme),
                     _TableHeaderCell(text: 'STATUS', flex: 1, theme: theme),
-                    _TableHeaderCell(text: 'ÚLTIMO ACESSO', flex: 2, theme: theme),
+                    _TableHeaderCell(
+                      text: 'ÚLTIMO ACESSO',
+                      flex: 2,
+                      theme: theme,
+                    ),
                     _TableHeaderCell(text: '', flex: 1, theme: theme),
                   ],
                 ),
@@ -268,7 +273,9 @@ class _TableRowState extends State<_TableRow> {
                             Icon(
                               Icons.email_outlined,
                               size: 11,
-                              color: theme.colorScheme.onSurface.withOpacity(0.5),
+                              color: theme.colorScheme.onSurface.withOpacity(
+                                0.5,
+                              ),
                             ),
                             const SizedBox(width: 6),
                             Expanded(
@@ -276,7 +283,8 @@ class _TableRowState extends State<_TableRow> {
                                 a.email,
                                 style: GoogleFonts.inter(
                                   fontSize: 11,
-                                  color: theme.colorScheme.onSurface.withOpacity(0.5),
+                                  color: theme.colorScheme.onSurface
+                                      .withOpacity(0.5),
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -345,7 +353,10 @@ class _TableRowState extends State<_TableRow> {
             Expanded(
               flex: 2,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: _getFuncaoColor(a.funcao).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
@@ -396,7 +407,10 @@ class _TableRowState extends State<_TableRow> {
             Expanded(
               flex: 2,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: theme.colorScheme.onSurface.withOpacity(0.04),
                   borderRadius: BorderRadius.circular(8),
@@ -434,14 +448,15 @@ class _TableRowState extends State<_TableRow> {
               flex: 1,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Material(
                     color: Colors.transparent,
                     child: InkWell(
                       onTap: () => widget.onEditUser(a),
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(8),
                       child: Container(
-                        padding: const EdgeInsets.all(10),
+                        padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
@@ -449,24 +464,24 @@ class _TableRowState extends State<_TableRow> {
                               Colors.blue.withOpacity(0.08),
                             ],
                           ),
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(8),
                         ),
                         child: Icon(
                           Icons.edit_rounded,
-                          size: 16,
+                          size: 14,
                           color: Colors.blue,
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 4),
                   Material(
                     color: Colors.transparent,
                     child: InkWell(
                       onTap: () => widget.onResetPassword(a),
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(8),
                       child: Container(
-                        padding: const EdgeInsets.all(10),
+                        padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
@@ -474,11 +489,11 @@ class _TableRowState extends State<_TableRow> {
                               Colors.orange.withOpacity(0.08),
                             ],
                           ),
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(8),
                         ),
                         child: Icon(
                           Icons.lock_reset_rounded,
-                          size: 16,
+                          size: 14,
                           color: Colors.orange,
                         ),
                       ),
