@@ -1,6 +1,6 @@
 import 'dart:ui'; // Necessário para o blur
 import 'package:flutter/material.dart';
-import 'package:get/get.dart'; // Mantido conforme seu import
+// Mantido conforme seu import
 
 class AdaptiveNavigation extends StatelessWidget {
   final int currentIndex;

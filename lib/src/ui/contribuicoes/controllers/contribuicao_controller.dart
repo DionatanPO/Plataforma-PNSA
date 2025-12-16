@@ -12,13 +12,11 @@ class ContribuicaoController extends GetxController {
   final _contribuicoes = <Contribuicao>[].obs;
   final _dizimistas = <Dizimista>[].obs;
   final _isLoading = false.obs;
-  final _valorInput = ''.obs;
 
   // Getters públicos
   List<Contribuicao> get contribuicoes => _contribuicoes;
   List<Dizimista> get dizimistas => _dizimistas;
   bool get isLoading => _isLoading.value;
-  String get valorInput => _valorInput.value;
 
   // ==================================================================
   // VARIÁVEIS DO FORMULÁRIO
@@ -32,9 +30,9 @@ class ContribuicaoController extends GetxController {
 
   // Campos simples (Strings)
 
-  String tipo = 'Dízimo Regular';
-  String metodo = 'PIX';
-  String valor = '';
+  final tipo = 'Dízimo Regular'.obs; // Transformar em observável
+  final metodo = 'PIX'.obs; // Transformar em observável
+  final valor = ''.obs; // Transformar em observável
   double valorNumerico = 0.0;
 
   @override
@@ -190,14 +188,27 @@ class ContribuicaoController extends GetxController {
       return false;
     }
 
-    if (valor.isEmpty) {
+    if (valor.value.isEmpty) {
       print("Erro: Valor não informado");
       return false;
     }
 
-    final valorDouble = double.tryParse(valor);
+    // Limpa o valor formatado para validação numérica
+    String valorLimpo = valor.value
+        .replaceAll('.', '') // Remove separador de milhar
+        .replaceAll('R\$', '') // Remove simbolo
+        .replaceAll(' ', '') // Remove espaços
+        .replaceAll(',', '.'); // Troca vírgula por ponto
+
+    final valorDouble = double.tryParse(valorLimpo);
     if (valorDouble == null || valorDouble <= 0) {
       print("Erro: Valor inválido");
+      return false;
+    }
+
+    // Verificar se o método de pagamento foi selecionado
+    if (metodo.value.isEmpty) {
+      print("Erro: Método de pagamento não selecionado");
       return false;
     }
 
@@ -207,15 +218,23 @@ class ContribuicaoController extends GetxController {
   // Criar uma nova contribuição a partir dos dados do formulário
   Contribuicao createContribuicaoFromForm() {
     final dizimista = dizimistaSelecionado.value!;
-    final valorDouble = double.tryParse(valor) ?? 0.0;
+
+    // Limpa o valor formatado para obter o valor numérico
+    String valorLimpo = valor.value
+        .replaceAll('.', '') // Remove separador de milhar
+        .replaceAll('R\$', '') // Remove simbolo
+        .replaceAll(' ', '') // Remove espaços
+        .replaceAll(',', '.'); // Troca vírgula por ponto
+
+    final valorDouble = double.tryParse(valorLimpo) ?? 0.0;
 
     return Contribuicao(
       id: '', // O ID será definido pelo Firestore
       dizimistaId: dizimista.id,
       dizimistaNome: dizimista.nome,
-      tipo: tipo,
+      tipo: tipo.value,
       valor: valorDouble,
-      metodo: metodo,
+      metodo: metodo.value,
       dataRegistro: dataSelecionada.value,
     );
   }

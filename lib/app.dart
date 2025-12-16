@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
-import 'package:plataforma_pnsa/src/data/services/auth_guard.dart';
 import 'package:plataforma_pnsa/src/data/services/theme_service.dart';
 import 'package:plataforma_pnsa/src/routes/app_pages.dart';
 import 'package:plataforma_pnsa/src/routes/app_routes.dart';

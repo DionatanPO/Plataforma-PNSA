@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
 import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
-import 'package:intl/intl.dart'; // Necessário para formatar a data visualmente
+// Necessário para formatar a data visualmente
 import 'dart:async';
 
 import '../../dizimistas/controllers/dizimista_controller.dart';
 import '../controllers/contribuicao_controller.dart';
 import '../../dizimistas/models/dizimista_model.dart';
-import '../models/contribuicao_model.dart';
+import '../widgets/step_indicator_widget.dart';
+import '../widgets/contribution_form_widget.dart';
+import '../widgets/dizimista_selection_widget.dart';
+import '../widgets/step_navigation_buttons.dart';
 
 class ContribuicaoView extends StatefulWidget {
   const ContribuicaoView({Key? key}) : super(key: key);
@@ -163,15 +165,32 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
           const SizedBox(height: 32),
 
           // Indicador de Etapas
-          _buildStepIndicator(),
+          StepIndicatorWidget(currentStep: _currentStep),
 
           const SizedBox(height: 32),
 
           // Conteúdo baseado na etapa atual
           if (_currentStep == 0)
-            _buildStep1DizimistaSelection()
+            DizimistaSelectionWidget(
+              searchController: _searchController,
+              onSearchChanged: (value) {
+                setState(() {}); // Força rebuild para atualizar o FutureBuilder
+              },
+              onDizimistaSelected: () {
+                setState(() {}); // Força rebuild para atualizar botões
+              },
+            )
           else if (_currentStep == 1)
-            _buildStep2ContributionForm(),
+            Obx(() => ContributionFormWidget(
+              selectedDate: controller.dataSelecionada.value,
+              onDateChanged: (date) => controller.dataSelecionada.value = date,
+              onPaymentMethodChanged: controller.metodo.value,
+              onPaymentMethodChangedCallback: (method) => controller.metodo.value = method,
+              onTypeChanged: controller.tipo.value,
+              onTypeChangedCallback: (type) => controller.tipo.value = type,
+              value: controller.valor.value,
+              onValueChanged: (value) => controller.valor.value = value,
+            )),
 
           const SizedBox(height: 24),
 
@@ -182,98 +201,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
     );
   }
 
-  Widget _buildStepIndicator() {
-    return Row(
-      children: [
-        // Etapa 1
-        Expanded(
-          child: Column(
-            children: [
-              Container(
-                height: 2,
-                color: _currentStep >= 0 ? Colors.green : Colors.grey.shade400,
-              ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 24,
-                    height: 24,
-                    decoration: BoxDecoration(
-                      color: _currentStep >= 0 ? Colors.green : Colors.grey.shade400,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Center(
-                      child: Text(
-                        '1',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Fiel',
-                    style: GoogleFonts.inter(
-                      fontSize: 12,
-                      color: _currentStep >= 0 ? Colors.green : Colors.grey.shade400,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        // Etapa 2
-        Expanded(
-          child: Column(
-            children: [
-              Container(
-                height: 2,
-                color: _currentStep >= 1 ? Colors.green : Colors.grey.shade400,
-              ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 24,
-                    height: 24,
-                    decoration: BoxDecoration(
-                      color: _currentStep >= 1 ? Colors.green : Colors.grey.shade400,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Center(
-                      child: Text(
-                        '2',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Lançamento',
-                    style: GoogleFonts.inter(
-                      fontSize: 12,
-                      color: _currentStep >= 1 ? Colors.green : Colors.grey.shade400,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
+  // O widget de indicador de passos agora está em outro arquivo
 
   Widget _buildStep1DizimistaSelection() {
     return Column(
@@ -582,7 +510,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
         // 2. Tipo
         _label('Tipo'),
         _buildModernDropdown(
-          value: controller.tipo,
+          value: controller.tipo.value,
           items: [
             'Dízimo Regular',
             'Dízimo Atrasado',
@@ -590,7 +518,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
             'Doação',
           ],
           onChanged: (val) =>
-              setState(() => controller.tipo = val!),
+              setState(() => controller.tipo.value = val!),
         ),
 
         const SizedBox(height: 20),
@@ -685,7 +613,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
 
         // 5. Forma de Pagamento
         _label('Forma de Pagamento'),
-        Wrap(
+        Obx(() => Wrap(
           spacing: 10,
           runSpacing: 10,
           children: [
@@ -694,119 +622,23 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
             _paymentChip('Cartão', Icons.credit_card_rounded),
             _paymentChip('Transferência', Icons.description_outlined),
           ],
-        ),
+        )),
       ],
     );
   }
 
+  // Botões de navegação entre etapas
   Widget _buildStepNavigationButtons() {
-    return Row(
-      children: [
-        // Botão Voltar
-        if (_currentStep > 0)
-          Expanded(
-            child: Container(
-              margin: const EdgeInsets.only(right: 8),
-              height: 56,
-              child: OutlinedButton(
-                onPressed: _goToPreviousStep,
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: borderColor),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
-                child: Text(
-                  'Voltar',
-                  style: GoogleFonts.outfit(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.onSurface,
-                  ),
-                ),
-              ),
-            ),
-          ),
-
-        // Botão Próximo/Concluir
-        Expanded(
-          flex: _currentStep == 0 ? 2 : 1,
-          child: Container(
-            margin: EdgeInsets.only(left: _currentStep > 0 ? 8 : 0),
-            height: 56,
-            child: Obx(() {
-              bool dizimistaSelecionado = controller.dizimistaSelecionado.value != null;
-              bool isStep0 = _currentStep == 0;
-
-              if (isStep0) {
-                // Para a etapa 0, o botão só é habilitado quando um dizimista é selecionado
-                if (dizimistaSelecionado) {
-                  // Botão habilitado (verde)
-                  return ElevatedButton(
-                    onPressed: _goToNextStep,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    child: Text(
-                      'Próximo',
-                      style: GoogleFonts.outfit(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  );
-                } else {
-                  // Botão desabilitado (cinza)
-                  return ElevatedButton(
-                    onPressed: null, // Desabilitado
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey.shade400,
-                      foregroundColor: Colors.white.withOpacity(0.6),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    child: Text(
-                      'Próximo',
-                      style: GoogleFonts.outfit(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white.withOpacity(0.6),
-                      ),
-                    ),
-                  );
-                }
-              } else {
-                // Para a etapa 1, botão de confirmação
-                return ElevatedButton(
-                  onPressed: _submitForm,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  child: Text(
-                    'Confirmar Lançamento',
-                    style: GoogleFonts.outfit(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                );
-              }
-            }),
-          ),
-        ),
-      ],
+    return StepNavigationButtons(
+      currentStep: _currentStep,
+      goToStep: (step) {
+        setState(() {
+          _currentStep = step;
+        });
+      },
+      goToNextStep: _goToNextStep,
+      submitForm: _submitForm,
+      dizimistaSelecionado: controller.dizimistaSelecionado.value != null,
     );
   }
 
@@ -904,17 +736,6 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
   }
 
   void _submitForm() async {
-    // Lógica segura para converter a string formatada em double
-    String valorLimpo = _valorController.text
-        .replaceAll('.', '') // Remove separador de milhar
-        .replaceAll('R\$', '') // Remove simbolo
-        .replaceAll(' ', '') // Remove espaços
-        .replaceAll(',', '.'); // Troca vírgula por ponto
-
-    // Atualizar o valor no controller
-    controller.valor = valorLimpo;
-    controller.valorNumerico = double.tryParse(valorLimpo) ?? 0.0;
-
     // Validar o formulário usando a lógica do controller
     if (!controller.validateForm()) {
       Get.snackbar(
@@ -1026,11 +847,14 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
   }
 
   Widget _paymentChip(String label, IconData icon) {
-    final isSelected = controller.metodo == label;
+    final isSelected = controller.metodo.value == label;
     final unselectedColor = theme.colorScheme.onSurface.withOpacity(0.7);
 
     return InkWell(
-      onTap: () => setState(() => controller.metodo = label),
+      onTap: () {
+        // Atualiza o estado no controller
+        controller.metodo.value = label;
+      },
       borderRadius: BorderRadius.circular(12),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),

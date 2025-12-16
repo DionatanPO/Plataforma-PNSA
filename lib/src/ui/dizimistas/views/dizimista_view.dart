@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
-import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import '../controllers/dizimista_controller.dart';
 import '../models/dizimista_model.dart';
 import '../widgets/dizimista_header_view.dart';

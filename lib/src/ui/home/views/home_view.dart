@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:plataforma_pnsa/src/ui/access_management/views/access_management_view.dart';
 import 'package:plataforma_pnsa/src/ui/contribuicoes/views/contribuicao_view.dart';
 import 'package:plataforma_pnsa/src/ui/dizimistas/views/dizimista_view.dart';
 
 import '../../core/widgets/app_navigation_bar.dart';
 import '../../dashboard/views/dashboard_view.dart';
-import '../../functions/action_view.dart';
 import '../../functions/report_view.dart';
 import '../../profile/profile_view.dart';
 import '../controlles/home_controller.dart';
