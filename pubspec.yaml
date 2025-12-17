@@ -63,6 +63,21 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
   msix: ^3.16.12
+  flutter_native_splash: ^2.4.0
+
+flutter_native_splash:
+  color: "#ffffff"
+  image: assets/images/logo.jpg
+  color_dark: "#181818"
+  image_dark: assets/images/logo.jpg
+  android_12:
+    image: assets/images/logo.jpg
+    color: "#ffffff"
+    icon_background_color: "#ffffff"
+    image_dark: assets/images/logo.jpg
+    color_dark: "#181818"
+    icon_background_color_dark: "#181818"
+  web: true
 
 # --- SEÇÃO DO FLUTTER (Atenção à indentação aqui) ---
 flutter:
