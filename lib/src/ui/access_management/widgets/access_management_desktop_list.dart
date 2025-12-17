@@ -6,6 +6,25 @@ import '../widgets/status_badge.dart';
 import '../widgets/avatar_widget.dart';
 import '../widgets/table_header.dart';
 
+// Funções de formatação
+String formatCPF(String? cpf) {
+  if (cpf == null || cpf.isEmpty) return '---';
+  final numbers = cpf.replaceAll(RegExp(r'[^0-9]'), '');
+  if (numbers.length != 11) return cpf;
+  return '${numbers.substring(0, 3)}.${numbers.substring(3, 6)}.${numbers.substring(6, 9)}-${numbers.substring(9)}';
+}
+
+String formatPhone(String phone) {
+  if (phone.isEmpty) return '---';
+  final numbers = phone.replaceAll(RegExp(r'[^0-9]'), '');
+  if (numbers.length == 11) {
+    return '(${numbers.substring(0, 2)}) ${numbers.substring(2, 7)}-${numbers.substring(7)}';
+  } else if (numbers.length == 10) {
+    return '(${numbers.substring(0, 2)}) ${numbers.substring(2, 6)}-${numbers.substring(6)}';
+  }
+  return phone;
+}
+
 class AccessManagementDesktopList extends StatelessWidget {
   final List<Acesso> acessos;
   final Function(Acesso) onEditUser;
@@ -316,7 +335,7 @@ class _TableRowState extends State<_TableRow> {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        (a as dynamic).cpf ?? '---',
+                        formatCPF((a as dynamic).cpf),
                         style: GoogleFonts.inter(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
@@ -335,7 +354,7 @@ class _TableRowState extends State<_TableRow> {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        a.telefone.isNotEmpty ? a.telefone : '---',
+                        formatPhone(a.telefone),
                         style: GoogleFonts.inter(
                           fontSize: 11,
                           color: theme.colorScheme.onSurface.withOpacity(0.5),

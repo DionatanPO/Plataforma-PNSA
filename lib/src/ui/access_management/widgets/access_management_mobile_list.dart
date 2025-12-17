@@ -5,6 +5,14 @@ import '../widgets/status_badge.dart';
 import '../widgets/avatar_widget.dart';
 import '../widgets/info_badge.dart';
 
+// Função de formatação
+String formatCPF(String? cpf) {
+  if (cpf == null || cpf.isEmpty) return 'CPF N/D';
+  final numbers = cpf.replaceAll(RegExp(r'[^0-9]'), '');
+  if (numbers.length != 11) return cpf;
+  return '${numbers.substring(0, 3)}.${numbers.substring(3, 6)}.${numbers.substring(6, 9)}-${numbers.substring(9)}';
+}
+
 class AccessManagementMobileList extends StatelessWidget {
   final List<Acesso> acessos;
   final Function(Acesso) onEditUser;
@@ -94,7 +102,7 @@ class AccessManagementMobileList extends StatelessWidget {
                     InfoBadge(Icons.email_outlined, acesso.email),
                     InfoBadge(
                       Icons.badge_outlined,
-                      (acesso as dynamic).cpf ?? 'CPF N/D',
+                      formatCPF((acesso as dynamic).cpf),
                     ),
                   ],
                 ),
