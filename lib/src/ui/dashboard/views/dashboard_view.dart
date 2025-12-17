@@ -72,7 +72,7 @@ class _DashboardViewState extends State<DashboardView> {
             snap: true,
             leading: width < 600
                 ? IconButton(
-                    icon: const Icon(Icons.menu),
+                    icon: Icon(Icons.menu, color: theme.colorScheme.onSurface),
                     onPressed: () {
                       if (Get.isRegistered<HomeController>()) {
                         Get.find<HomeController>().scaffoldKey.currentState

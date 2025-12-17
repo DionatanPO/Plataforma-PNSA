@@ -74,12 +74,16 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
               backgroundColor: backgroundColor.withOpacity(0.95),
               surfaceTintColor: Colors.transparent,
               elevation: 0,
-              pinned: true,
+              pinned: false,
               floating: true,
-              toolbarHeight: 80,
+              snap: true,
+              toolbarHeight: size.width < 600 ? 80 : 100,
               leading: !isDesktop
                   ? IconButton(
-                      icon: const Icon(Icons.menu),
+                      icon: Icon(
+                        Icons.menu,
+                        color: theme.colorScheme.onSurface,
+                      ),
                       onPressed: () {
                         if (Get.isRegistered<HomeController>()) {
                           Get.find<HomeController>().scaffoldKey.currentState
@@ -91,22 +95,28 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
                     )
                   : null,
               automaticallyImplyLeading: false,
+              titleSpacing: 0,
               title: Padding(
-                padding: EdgeInsets.only(
-                  top: 8,
-                  left: isDesktop ? 0 : 0,
-                ), // Padding ajustado automaticamente pelo leading
+                padding: EdgeInsets.fromLTRB(
+                  size.width < 600
+                      ? 0
+                      : 24, // Matches ModernHeader/Dashboard logic
+                  16,
+                  16,
+                  16,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
                       'Relatório',
                       style: GoogleFonts.outfit(
-                        // Fonte mais moderna para títulos
-                        fontSize: 28,
+                        fontSize: size.width < 600 ? 20 : 28,
                         fontWeight: FontWeight.bold,
                         color: theme.colorScheme.onSurface,
                         letterSpacing: -0.5,
+                        height: 1.2,
                       ),
                     ),
                     Text(
@@ -120,46 +130,7 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
                   ],
                 ),
               ),
-              actions: [
-                // Date Picker simulado (Estilo botão segmentado)
-                Container(
-                  margin: const EdgeInsets.only(right: 24, top: 12),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 4,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceContainerHighest
-                        .withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: theme.dividerColor.withOpacity(0.1),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _HeaderActionButton(
-                        icon: Icons.calendar_today_outlined,
-                        label: _period,
-                        onTap: () {},
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        width: 1,
-                        height: 20,
-                        color: theme.dividerColor.withOpacity(0.2),
-                      ),
-                      const SizedBox(width: 8),
-                      _HeaderIconOnly(
-                        icon: Icons.cloud_download_outlined,
-                        theme: theme,
-                      ),
-                      _HeaderIconOnly(icon: Icons.print_outlined, theme: theme),
-                    ],
-                  ),
-                ),
-              ],
+              actions: [],
             ),
 
             SliverPadding(

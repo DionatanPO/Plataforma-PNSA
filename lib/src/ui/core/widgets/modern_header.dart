@@ -53,7 +53,7 @@ class ModernHeader extends StatelessWidget {
           // Botão de Menu no Mobile para abrir o Drawer
           leading: isMobile
               ? IconButton(
-                  icon: const Icon(Icons.menu),
+                  icon: Icon(Icons.menu, color: theme.colorScheme.onSurface),
                   onPressed: () {
                     // Usa a chave global do HomeController para abrir o Drawer do Scaffold pai (HomeView)
                     // Isso é necessário pois as Views internas possuem seus próprios Scaffolds
