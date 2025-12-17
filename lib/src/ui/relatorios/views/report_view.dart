@@ -1,0 +1,728 @@
+import 'dart:ui';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+import '../../home/controlles/home_controller.dart';
+import '../controllers/report_controller.dart';
+
+class ReportView extends StatefulWidget {
+  const ReportView({super.key});
+
+  @override
+  State<ReportView> createState() => _ReportViewState();
+}
+
+class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
+  late AnimationController _animationController;
+
+  final ScrollController _scrollController =
+      ScrollController(); // Controller adicionado
+
+  final ReportController controller = Get.put(ReportController());
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 1000),
+      vsync: this,
+    );
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    _scrollController.dispose(); // Dispose do controller
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final size = MediaQuery.of(context).size;
+    final isDesktop = size.width >= 1024;
+
+    // Fundo refinado
+    final backgroundColor = isDark
+        ? const Color(0xFF181818)
+        : const Color(0xFFFAFAFA);
+
+    return Scaffold(
+      backgroundColor: backgroundColor,
+      body: Scrollbar(
+        // Item essencial para Desktop
+        controller: _scrollController, // Controller vinculado
+        thumbVisibility: true,
+        thickness: 8,
+        radius: const Radius.circular(4),
+        child: CustomScrollView(
+          controller: _scrollController, // Controller vinculado
+          physics: const BouncingScrollPhysics(),
+          slivers: [
+            // HEADER FLUTUANTE ESTILO MACOS/WINDOWS
+            SliverAppBar(
+              backgroundColor: backgroundColor.withOpacity(0.95),
+              surfaceTintColor: Colors.transparent,
+              elevation: 0,
+              pinned: false,
+              floating: true,
+              snap: true,
+              toolbarHeight: size.width < 600 ? 80 : 100,
+              leading: !isDesktop
+                  ? IconButton(
+                      icon: Icon(
+                        Icons.menu,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                      onPressed: () {
+                        if (Get.isRegistered<HomeController>()) {
+                          Get.find<HomeController>().scaffoldKey.currentState
+                              ?.openDrawer();
+                        } else {
+                          Scaffold.of(context).openDrawer();
+                        }
+                      },
+                    )
+                  : null,
+              automaticallyImplyLeading: false,
+              titleSpacing: 0,
+              title: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  size.width < 600
+                      ? 0
+                      : 24, // Matches ModernHeader/Dashboard logic
+                  16,
+                  16,
+                  16,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Obx(
+                      () => Text(
+                        'Relatório Diário - ${DateFormat('dd/MM/yyyy').format(controller.selectedDate.value)}',
+                        style: GoogleFonts.outfit(
+                          fontSize: size.width < 600 ? 20 : 28,
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.onSurface,
+                          letterSpacing: -0.5,
+                          height: 1.2,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      'Visão geral de contribuições do dia',
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        color: theme.colorScheme.onSurface.withOpacity(0.5),
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.calendar_today),
+                  onPressed: () async {
+                    final date = await showDatePicker(
+                      context: context,
+                      initialDate: controller.selectedDate.value,
+                      firstDate: DateTime(2020),
+                      lastDate: DateTime(2030),
+                    );
+                    if (date != null) {
+                      controller.updateDate(date);
+                    }
+                  },
+                ),
+                const SizedBox(width: 20),
+              ],
+            ),
+
+            SliverPadding(
+              padding: EdgeInsets.symmetric(
+                horizontal: isDesktop ? 60 : 20,
+                vertical: 24,
+              ),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate([
+                  // PAYMENT METHODS SUMMARY
+                  _buildAnimatedSection(
+                    index: 0,
+                    child: Obx(() {
+                      final currency = NumberFormat.simpleCurrency(
+                        locale: 'pt_BR',
+                      );
+                      return Container(
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? const Color(0xFF202020)
+                              : Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: theme.dividerColor.withOpacity(0.1),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.04),
+                              blurRadius: 16,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Detalhes por Forma de Pagamento',
+                              style: GoogleFonts.inter(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                            Wrap(
+                              spacing: 24,
+                              runSpacing: 24,
+                              children: [
+                                _PaymentDetailItem(
+                                  theme: theme,
+                                  label: 'Dinheiro',
+                                  icon: Icons.money,
+                                  value: controller.totalDinheiro.value,
+                                  currency: currency,
+                                  color: Colors.green,
+                                ),
+                                _PaymentDetailItem(
+                                  theme: theme,
+                                  label: 'Pix',
+                                  icon: Icons.pix,
+                                  value: controller.totalPix.value,
+                                  currency: currency,
+                                  color: Colors.teal,
+                                ),
+                                _PaymentDetailItem(
+                                  theme: theme,
+                                  label: 'Cartão',
+                                  icon: Icons.credit_card,
+                                  value: controller.totalCartao.value,
+                                  currency: currency,
+                                  color: Colors.blue,
+                                ),
+                                _PaymentDetailItem(
+                                  theme: theme,
+                                  label: 'Transferência',
+                                  icon: Icons.account_balance,
+                                  value: controller.totalTransferencia.value,
+                                  currency: currency,
+                                  color: Colors.orange,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 24),
+                            Divider(color: theme.dividerColor.withOpacity(0.1)),
+                            const SizedBox(height: 16),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Total Geral',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  currency.format(
+                                    controller.totalArrecadado.value,
+                                  ),
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.green,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                  ),
+
+                  const SizedBox(height: 32),
+
+                  // TABLES SECTION
+                  _buildAnimatedSection(
+                    index: 1,
+                    child: Obx(() {
+                      final currency = NumberFormat.simpleCurrency(
+                        locale: 'pt_BR',
+                      );
+                      final rows = controller.contribuicoes.map((c) {
+                        return [
+                          c.dizimistaNome.isNotEmpty
+                              ? c.dizimistaNome
+                              : 'Anônimo',
+                          c.tipo,
+                          c.metodo,
+                          currency.format(c.valor),
+                        ];
+                      }).toList();
+
+                      return _ModernTableCard(
+                        title: 'Contribuições do Dia',
+                        headers: const ['Nome', 'Tipo', 'Método', 'Valor'],
+                        rows: rows,
+                        theme: theme,
+                        onPdfPressed: controller.generateDailyReportPdf,
+                      );
+                    }),
+                  ),
+                  const SizedBox(height: 60),
+                ]),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Helper para animação em cascata
+  Widget _buildAnimatedSection({required int index, required Widget child}) {
+    return SlideTransition(
+      position: Tween<Offset>(begin: const Offset(0, 0.1), end: Offset.zero)
+          .animate(
+            CurvedAnimation(
+              parent: _animationController,
+              curve: Interval(index * 0.1, 1.0, curve: Curves.easeOutQuart),
+            ),
+          ),
+      child: FadeTransition(
+        opacity: Tween<double>(begin: 0, end: 1).animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: Interval(index * 0.1, 1.0, curve: Curves.easeOut),
+          ),
+        ),
+        child: child,
+      ),
+    );
+  }
+}
+
+// =============================================================================
+// COMPONENTES MODERNOS E REUTILIZÁVEIS
+// =============================================================================
+
+class _PaymentDetailItem extends StatelessWidget {
+  final ThemeData theme;
+  final String label;
+  final IconData icon;
+  final double value;
+  final NumberFormat currency;
+  final Color color;
+
+  const _PaymentDetailItem({
+    required this.theme,
+    required this.label,
+    required this.icon,
+    required this.value,
+    required this.currency,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 160,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: theme.dividerColor.withOpacity(0.05)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 16, color: color),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            currency.format(value),
+            style: GoogleFonts.outfit(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HoverStatCard extends StatefulWidget {
+  final String title;
+  final String value;
+  final String change;
+  final bool isPositive;
+  final IconData icon;
+  final Color color;
+  final ThemeData theme;
+
+  const _HoverStatCard({
+    required this.title,
+    required this.value,
+    required this.change,
+    required this.isPositive,
+    required this.icon,
+    required this.color,
+    required this.theme,
+  });
+
+  @override
+  State<_HoverStatCard> createState() => _HoverStatCardState();
+}
+
+class _HoverStatCardState extends State<_HoverStatCard> {
+  bool _isHovering = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = widget.theme.brightness == Brightness.dark;
+    final statusColor = widget.isPositive ? Colors.green : Colors.red;
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovering = true),
+      onExit: (_) => setState(() => _isHovering = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+        transform: Matrix4.translationValues(0, _isHovering ? -4 : 0, 0),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF202020) : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: _isHovering
+                ? widget.color.withOpacity(0.5)
+                : widget.theme.dividerColor.withOpacity(0.1),
+            width: _isHovering ? 1.5 : 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: _isHovering
+                  ? widget.color.withOpacity(0.15)
+                  : Colors.black.withOpacity(0.04),
+              blurRadius: _isHovering ? 12 : 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: widget.color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(widget.icon, color: widget.color, size: 20),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: statusColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        widget.isPositive
+                            ? Icons.arrow_upward
+                            : Icons.arrow_downward,
+                        size: 12,
+                        color: statusColor,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        widget.change,
+                        style: GoogleFonts.inter(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: statusColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              widget.value,
+              style: GoogleFonts.outfit(
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+                color: widget.theme.colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              widget.title,
+              style: GoogleFonts.inter(
+                fontSize: 13,
+                color: widget.theme.colorScheme.onSurface.withOpacity(0.6),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ModernTableCard extends StatelessWidget {
+  final String title;
+  final List<String> headers;
+  final List<List<String>> rows;
+  final ThemeData theme;
+  final VoidCallback? onPdfPressed;
+
+  const _ModernTableCard({
+    required this.title,
+    required this.headers,
+    required this.rows,
+    required this.theme,
+    this.onPdfPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF202020) : Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                title,
+                style: GoogleFonts.inter(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Row(
+                children: [
+                  if (onPdfPressed != null)
+                    IconButton(
+                      onPressed: onPdfPressed,
+                      icon: const Icon(Icons.picture_as_pdf),
+                      tooltip: 'Gerar Relatório PDF',
+                      color: theme.primaryColor,
+                    ),
+                  TextButton(
+                    onPressed: () {},
+                    child: Text(
+                      'Ver tudo',
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Cabeçalho
+          Row(
+            children: headers
+                .map(
+                  (h) => Expanded(
+                    child: Text(
+                      h,
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: theme.colorScheme.onSurface.withOpacity(0.5),
+                      ),
+                    ),
+                  ),
+                )
+                .toList(),
+          ),
+          const SizedBox(height: 8),
+          Divider(color: theme.dividerColor.withOpacity(0.1)),
+          // Linhas com Hover Effect Interno
+          ...rows.map((row) => _TableRow(row: row, theme: theme)).toList(),
+        ],
+      ),
+    );
+  }
+}
+
+class _TableRow extends StatefulWidget {
+  final List<String> row;
+  final ThemeData theme;
+
+  const _TableRow({required this.row, required this.theme});
+
+  @override
+  State<_TableRow> createState() => _TableRowState();
+}
+
+class _TableRowState extends State<_TableRow> {
+  bool _isHovering = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovering = true),
+      onExit: (_) => setState(() => _isHovering = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: _isHovering
+              ? widget.theme.primaryColor.withOpacity(0.04)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Row(
+          children: widget.row.map((cell) {
+            // Lógica simples para detectar se é coluna de Status e renderizar Badge
+            if ([
+              'Dízimo',
+              'Oferta',
+              'Doação',
+              'Concluído',
+              'Pendente',
+              'Alimentação',
+              'Manutenção',
+              'Salários',
+              'Materiais',
+              'Serviços',
+              'Recebido',
+              'Processando',
+              'Estornado',
+            ].contains(cell)) {
+              return Expanded(
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: _StatusBadge(status: cell),
+                ),
+              );
+            }
+            return Expanded(
+              child: Text(
+                cell,
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: widget.theme.colorScheme.onSurface.withOpacity(0.9),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+}
+
+class _StatusBadge extends StatelessWidget {
+  final String status;
+  const _StatusBadge({required this.status});
+
+  @override
+  Widget build(BuildContext context) {
+    Color color;
+    switch (status) {
+      case 'Dízimo':
+      case 'Oferta':
+      case 'Doação':
+      case 'Concluído':
+      case 'Recebido':
+      case 'Salários':
+        color = Colors.green;
+        break;
+      case 'Pendente':
+      case 'Processando':
+      case 'Alimentação':
+      case 'Materiais':
+        color = Colors.blue;
+        break;
+      case 'Estornado':
+        color = Colors.red;
+        break;
+      case 'Manutenção':
+      case 'Serviços':
+        color = Colors.orange;
+        break;
+      default:
+        color = Colors.grey;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: color.withOpacity(0.2)),
+      ),
+      child: Text(
+        status,
+        style: GoogleFonts.inter(
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          color: color,
+        ),
+      ),
+    );
+  }
+}

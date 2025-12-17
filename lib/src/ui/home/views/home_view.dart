@@ -5,7 +5,7 @@ import 'package:plataforma_pnsa/src/ui/contribuicoes/views/contribuicao_view.dar
 import 'package:plataforma_pnsa/src/ui/dizimistas/views/dizimista_view.dart';
 
 import '../../dashboard/views/dashboard_view.dart';
-import '../../functions/report_view.dart';
+import '../../relatorios/views/report_view.dart';
 import '../../profile/profile_view.dart';
 import '../controlles/home_controller.dart';
 
