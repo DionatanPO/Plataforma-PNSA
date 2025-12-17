@@ -511,11 +511,15 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
           appBar: AppBar(
             title: Text(widget.title),
             leading: IconButton(
-              icon: const Icon(Icons.close),
+              icon: const Icon(Icons.close, color: Colors.white),
               onPressed: () => Navigator.of(context).pop(),
             ),
             actions: [
-              TextButton(onPressed: _submitForm, child: const Text('Salvar')),
+              TextButton(
+                onPressed: _submitForm,
+                style: TextButton.styleFrom(foregroundColor: Colors.white),
+                child: const Text('Salvar'),
+              ),
             ],
           ),
           body: formContent,

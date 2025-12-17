@@ -174,32 +174,9 @@ class HomeView extends StatelessWidget {
       // LAYOUT MOBILE - COM NAVIGATION DRAWER
       // -------------------------------------------------------------
       return Scaffold(
-        appBar: AppBar(
-          leading: Builder(
-            builder: (BuildContext context) {
-              return IconButton(
-                icon: const Icon(Icons.menu),
-                onPressed: () {
-                  Scaffold.of(context).openDrawer();
-                },
-                tooltip: 'Abrir menu',
-              );
-            },
-          ),
-          title: Text(
-            controller.selectedIndex.value == 0
-                ? 'Painel Geral'
-                : controller.selectedIndex.value == 1
-                ? 'Dizimistas'
-                : controller.selectedIndex.value == 2
-                ? 'Contribuições'
-                : controller.selectedIndex.value == 3
-                ? 'Gestão de Acesso'
-                : controller.selectedIndex.value == 4
-                ? 'Relatórios'
-                : 'Conta',
-          ),
-        ),
+        key: controller.scaffoldKey,
+        // AppBar removida para evitar duplicação com ModernHeader
+        // O Drawer será aberto pelo botão de menu no ModernHeader das páginas internas
         drawer: NavigationDrawer(
           selectedIndex: controller.selectedIndex.value,
           onDestinationSelected: (int index) {

@@ -30,14 +30,14 @@ class AppTheme {
       // Definição do botão no tema claro
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ButtonStyle(
-          backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                (Set<MaterialState> states) {
-              if (states.contains(MaterialState.disabled)) {
-                return Colors.grey.shade400;
-              }
-              return primaryColor;
-            },
-          ),
+          backgroundColor: MaterialStateProperty.resolveWith<Color>((
+            Set<MaterialState> states,
+          ) {
+            if (states.contains(MaterialState.disabled)) {
+              return Colors.grey.shade400;
+            }
+            return primaryColor;
+          }),
           foregroundColor: MaterialStateProperty.all(Colors.white),
         ),
       ),
@@ -57,6 +57,45 @@ class AppTheme {
         primary: primaryColor,
         secondary: secondaryColor,
         tertiary: accentColor,
+        onPrimary: Colors.white, // Garante texto branco em botões primários
+        surface: const Color(0xFF1E1E1E), // Fundo de cards/dialogs
+        onSurface: Colors.white, // Texto sobre suface
+        background: const Color(0xFF121212), // Fundo do app
+        onBackground: Colors.white,
+      ),
+
+      // Tema de Ícones
+      iconTheme: const IconThemeData(color: Colors.white),
+
+      // Tema para TextButton (Cancelar)
+      textButtonTheme: TextButtonThemeData(
+        style: ButtonStyle(
+          foregroundColor: MaterialStateProperty.all(primaryColor),
+        ),
+      ),
+
+      // Tema para OutlinedButton
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: ButtonStyle(
+          foregroundColor: MaterialStateProperty.all(Colors.white),
+          side: MaterialStateProperty.all(
+            const BorderSide(color: Colors.white30),
+          ),
+        ),
+      ),
+
+      // Tema para FloatingActionButton (para evitar cores escuras do container M3)
+      floatingActionButtonTheme: const FloatingActionButtonThemeData(
+        backgroundColor: primaryColor,
+        foregroundColor: Colors.white,
+      ),
+
+      // Tema para FilledButton
+      filledButtonTheme: FilledButtonThemeData(
+        style: ButtonStyle(
+          backgroundColor: MaterialStateProperty.all(primaryColor),
+          foregroundColor: MaterialStateProperty.all(Colors.white),
+        ),
       ),
       // Ajuste de texto para modo escuro
       textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme),
@@ -69,16 +108,16 @@ class AppTheme {
       // AQUI ESTÁ A SOLUÇÃO: Repetimos o estilo do botão explicitamente
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ButtonStyle(
-          backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                (Set<MaterialState> states) {
-              if (states.contains(MaterialState.disabled)) {
-                // Um cinza mais escuro para botões desabilitados no modo escuro
-                return Colors.grey.shade800;
-              }
-              // AQUI: Força a cor primária exata (Azul) mesmo no modo escuro
-              return primaryColor;
-            },
-          ),
+          backgroundColor: MaterialStateProperty.resolveWith<Color>((
+            Set<MaterialState> states,
+          ) {
+            if (states.contains(MaterialState.disabled)) {
+              // Um cinza mais escuro para botões desabilitados no modo escuro
+              return Colors.grey.shade800;
+            }
+            // AQUI: Força a cor primária exata (Azul) mesmo no modo escuro
+            return primaryColor;
+          }),
           // Garante que o texto seja branco (para constraste com o azul)
           foregroundColor: MaterialStateProperty.all(Colors.white),
 

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:get/get.dart';
+import '../../home/controlles/home_controller.dart';
 
 class ModernHeader extends StatelessWidget {
   final String title;
@@ -31,20 +33,51 @@ class ModernHeader extends StatelessWidget {
     return SliverLayoutBuilder(
       builder: (context, constraints) {
         final isMobile = constraints.crossAxisExtent < 600;
-        // Aumentei a altura para acomodar o ícone grande
-        final double height = isMobile ? 140 : 110;
+        final bool hasAction = onActionPressed != null;
+        // Altura dinâmica baseada no conteúdo
+        // Base: ~80-90px para Mobile, ~100px para Desktop
+        // Se tiver ação: +50px
+        final double baseHeight = isMobile ? 80 : 100;
+        final double actionHeight = hasAction
+            ? (isMobile ? 60 : 0)
+            : 0; // No desktop action fica na row
+        final double finalHeight = baseHeight + actionHeight;
 
         return SliverAppBar(
           backgroundColor: surfaceColor.withOpacity(isDark ? 0.8 : 0.95),
           surfaceTintColor: Colors.transparent,
           elevation: 0,
-          pinned: true,
-          toolbarHeight: height,
+          pinned: false,
+          floating: true,
+          snap: true,
+          // Botão de Menu no Mobile para abrir o Drawer
+          leading: isMobile
+              ? IconButton(
+                  icon: const Icon(Icons.menu),
+                  onPressed: () {
+                    // Usa a chave global do HomeController para abrir o Drawer do Scaffold pai (HomeView)
+                    // Isso é necessário pois as Views internas possuem seus próprios Scaffolds
+                    if (Get.isRegistered<HomeController>()) {
+                      Get.find<HomeController>().scaffoldKey.currentState
+                          ?.openDrawer();
+                    } else {
+                      Scaffold.of(context).openDrawer();
+                    }
+                  },
+                  tooltip: 'Menu',
+                )
+              : null,
+          automaticallyImplyLeading: false,
+          toolbarHeight: finalHeight,
           titleSpacing: 0,
           title: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: isMobile ? 16 : 24,
-              vertical: 16,
+            padding: EdgeInsets.fromLTRB(
+              isMobile
+                  ? 0
+                  : 24, // Reduzi padding esquerdo no mobile pois já tem o leading
+              16,
+              isMobile ? 16 : 24,
+              16,
             ),
             child: isMobile
                 ? Column(
@@ -52,15 +85,12 @@ class ModernHeader extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          if (icon != null) ...[
-                            _buildMainIcon(accentColor),
-                            const SizedBox(width: 12),
-                          ],
+                          // Icon removed on mobile per user request
                           Expanded(
                             child: Text(
                               title,
                               style: GoogleFonts.outfit(
-                                fontSize: 24,
+                                fontSize: 20,
                                 fontWeight: FontWeight.bold,
                                 color: theme.colorScheme.onSurface,
                               ),

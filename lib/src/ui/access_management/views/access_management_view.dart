@@ -335,12 +335,15 @@ class _AccessManagementViewState extends State<AccessManagementView> {
                   appBar: AppBar(
                     title: const Text('Editar Usuário'),
                     leading: IconButton(
-                      icon: const Icon(Icons.close),
+                      icon: const Icon(Icons.close, color: Colors.white),
                       onPressed: () => Navigator.pop(context),
                     ),
                     actions: [
                       TextButton(
                         onPressed: submit,
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.white,
+                        ),
                         child: const Text('Salvar'),
                       ),
                     ],
@@ -583,11 +586,17 @@ class _AccessManagementViewState extends State<AccessManagementView> {
                   appBar: AppBar(
                     title: const Text('Novo Usuário'),
                     leading: IconButton(
-                      icon: const Icon(Icons.close),
+                      icon: const Icon(Icons.close, color: Colors.white),
                       onPressed: () => Navigator.pop(context),
                     ),
                     actions: [
-                      TextButton(onPressed: submit, child: const Text('Criar')),
+                      TextButton(
+                        onPressed: submit,
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.white,
+                        ),
+                        child: const Text('Criar'),
+                      ),
                     ],
                   ),
                   body: formContent,

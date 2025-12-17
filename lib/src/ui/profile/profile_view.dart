@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../routes/app_routes.dart';
+import '../core/widgets/modern_header.dart';
 import 'profile_controller.dart';
 
 class ProfileView extends StatelessWidget {
@@ -41,92 +42,14 @@ class ProfileView extends StatelessWidget {
   // LAYOUT DESKTOP (2 Colunas)
   // ==========================================================
   Widget _buildDesktopLayout(BuildContext context, ThemeData theme) {
-    final isDark = theme.brightness == Brightness.dark;
-    final surfaceColor = isDark ? const Color(0xFF1A1A1A) : Colors.white;
-    final borderColor = isDark
-        ? Colors.white.withOpacity(0.08)
-        : Colors.black.withOpacity(0.06);
-    final accentColor = theme.primaryColor;
-
     return CustomScrollView(
       physics: const BouncingScrollPhysics(),
       slivers: [
         // Modern App Bar
-        SliverAppBar(
-          expandedHeight: 160,
-          floating: false,
-          pinned: true,
-          backgroundColor: surfaceColor,
-          elevation: 0,
-          flexibleSpace: FlexibleSpaceBar(
-            background: Container(
-              decoration: BoxDecoration(
-                color: surfaceColor,
-                border: Border(
-                  bottom: BorderSide(color: borderColor, width: 1),
-                ),
-              ),
-              child: SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(40, 20, 40, 0),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [accentColor, accentColor.withOpacity(0.8)],
-                          ),
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: accentColor.withOpacity(0.3),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Icon(
-                          Icons.person_rounded,
-                          color: Colors.white,
-                          size: 28,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Meu Perfil',
-                              style: GoogleFonts.outfit(
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold,
-                                color: theme.colorScheme.onSurface,
-                                height: 1.2,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Gerencie suas informações pessoais',
-                              style: GoogleFonts.inter(
-                                fontSize: 14,
-                                color: theme.colorScheme.onSurface.withOpacity(
-                                  0.5,
-                                ),
-                                letterSpacing: -0.2,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
+        const ModernHeader(
+          title: 'Meu Perfil',
+          subtitle: 'Gerencie suas informações pessoais',
+          icon: Icons.person_rounded,
         ),
 
         // Content
@@ -164,92 +87,14 @@ class ProfileView extends StatelessWidget {
   // LAYOUT MOBILE (Vertical)
   // ==========================================================
   Widget _buildMobileLayout(BuildContext context, ThemeData theme) {
-    final isDark = theme.brightness == Brightness.dark;
-    final surfaceColor = isDark ? const Color(0xFF1A1A1A) : Colors.white;
-    final borderColor = isDark
-        ? Colors.white.withOpacity(0.08)
-        : Colors.black.withOpacity(0.06);
-    final accentColor = theme.primaryColor;
-
     return CustomScrollView(
       physics: const BouncingScrollPhysics(),
       slivers: [
         // Mobile App Bar
-        SliverAppBar(
-          expandedHeight: 140,
-          floating: false,
-          pinned: true,
-          backgroundColor: surfaceColor,
-          elevation: 0,
-          flexibleSpace: FlexibleSpaceBar(
-            background: Container(
-              decoration: BoxDecoration(
-                color: surfaceColor,
-                border: Border(
-                  bottom: BorderSide(color: borderColor, width: 1),
-                ),
-              ),
-              child: SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [accentColor, accentColor.withOpacity(0.8)],
-                          ),
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: accentColor.withOpacity(0.3),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Icon(
-                          Icons.person_rounded,
-                          color: Colors.white,
-                          size: 28,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Meu Perfil',
-                              style: GoogleFonts.outfit(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: theme.colorScheme.onSurface,
-                                height: 1.2,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Suas informações',
-                              style: GoogleFonts.inter(
-                                fontSize: 14,
-                                color: theme.colorScheme.onSurface.withOpacity(
-                                  0.5,
-                                ),
-                                letterSpacing: -0.2,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
+        const ModernHeader(
+          title: 'Meu Perfil',
+          subtitle: 'Suas informações',
+          icon: Icons.person_rounded,
         ),
 
         // Content

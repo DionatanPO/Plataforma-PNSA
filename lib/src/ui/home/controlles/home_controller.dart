@@ -1,11 +1,16 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class HomeController extends GetxController {
   /// Mensagem de boas-vindas observável
-  var welcomeMessage = "Bem-vindo ao Sistema de Dízimo da Paróquia NS Auxiliadora!".obs;
+  var welcomeMessage =
+      "Bem-vindo ao Sistema de Dízimo da Paróquia NS Auxiliadora!".obs;
 
   /// Índice da aba atualmente selecionada
   var selectedIndex = 0.obs;
+
+  /// GlobalKey para controlar o Scaffold principal (Drawer)
+  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
   /// Atualiza a mensagem de boas-vindas
   void changeMessage(String newMessage) {

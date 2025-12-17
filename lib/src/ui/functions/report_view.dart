@@ -1,6 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:get/get.dart';
+import '../home/controlles/home_controller.dart';
 
 class ReportView extends StatefulWidget {
   const ReportView({super.key});
@@ -75,8 +77,25 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
               pinned: true,
               floating: true,
               toolbarHeight: 80,
+              leading: !isDesktop
+                  ? IconButton(
+                      icon: const Icon(Icons.menu),
+                      onPressed: () {
+                        if (Get.isRegistered<HomeController>()) {
+                          Get.find<HomeController>().scaffoldKey.currentState
+                              ?.openDrawer();
+                        } else {
+                          Scaffold.of(context).openDrawer();
+                        }
+                      },
+                    )
+                  : null,
+              automaticallyImplyLeading: false,
               title: Padding(
-                padding: const EdgeInsets.only(top: 8),
+                padding: EdgeInsets.only(
+                  top: 8,
+                  left: isDesktop ? 0 : 0,
+                ), // Padding ajustado automaticamente pelo leading
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
