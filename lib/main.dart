@@ -11,19 +11,19 @@ import 'package:plataforma_pnsa/src/ui/contribuicoes/controllers/contribuicao_co
 import 'package:plataforma_pnsa/src/ui/dizimistas/controllers/dizimista_controller.dart';
 import 'package:plataforma_pnsa/src/ui/auth/password_reset/password_reset_controller.dart';
 
-
 import 'app.dart';
 import 'firebase_options.dart';
 import 'src/data/services/auth_service.dart';
 import 'src/data/services/session_service.dart';
 
+import 'package:intl/date_symbol_data_local.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('pt_BR', null);
 
   await GetStorage.init();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 

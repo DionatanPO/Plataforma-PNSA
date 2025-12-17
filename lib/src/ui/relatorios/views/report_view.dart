@@ -128,6 +128,7 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
               actions: [
                 IconButton(
                   icon: const Icon(Icons.calendar_today),
+                  color: theme.colorScheme.onSurface,
                   onPressed: () async {
                     final date = await showDatePicker(
                       context: context,
@@ -281,7 +282,6 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
                         headers: const ['Nome', 'Tipo', 'Método', 'Valor'],
                         rows: rows,
                         theme: theme,
-                        onPdfPressed: controller.generateDailyReportPdf,
                       );
                     }),
                   ),
@@ -292,6 +292,109 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
           ],
         ),
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          _showExportModal(context);
+        },
+        icon: const Icon(Icons.file_upload),
+        label: const Text('Exportar Relatório'),
+        backgroundColor: theme.primaryColor,
+        foregroundColor: theme.colorScheme.onPrimary,
+      ),
+    );
+  }
+
+  void _showExportModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        final theme = Theme.of(context);
+        final isDark = theme.brightness == Brightness.dark;
+
+        return Container(
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 12),
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: theme.dividerColor.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'Exportar Relatório',
+                  style: GoogleFonts.outfit(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                ListTile(
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.picture_as_pdf, color: Colors.red),
+                  ),
+                  title: Text(
+                    'Imprimir / Salvar PDF',
+                    style: GoogleFonts.inter(fontWeight: FontWeight.w500),
+                  ),
+                  subtitle: Text(
+                    'Gera um PDF pronto para impressão',
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: theme.colorScheme.onSurface.withOpacity(0.6),
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context); // Close modal
+                    controller.generateDailyReportPdf();
+                  },
+                ),
+                ListTile(
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.share, color: Colors.green),
+                  ),
+                  title: Text(
+                    'Compartilhar no WhatsApp',
+                    style: GoogleFonts.inter(fontWeight: FontWeight.w500),
+                  ),
+                  subtitle: Text(
+                    'Envia um resumo formatado via WhatsApp',
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: theme.colorScheme.onSurface.withOpacity(0.6),
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context); // Close modal
+                    controller.shareDailyReportWhatsApp();
+                  },
+                ),
+                const SizedBox(height: 32),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -514,14 +617,12 @@ class _ModernTableCard extends StatelessWidget {
   final List<String> headers;
   final List<List<String>> rows;
   final ThemeData theme;
-  final VoidCallback? onPdfPressed;
 
   const _ModernTableCard({
     required this.title,
     required this.headers,
     required this.rows,
     required this.theme,
-    this.onPdfPressed,
   });
 
   @override
@@ -555,26 +656,15 @@ class _ModernTableCard extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              Row(
-                children: [
-                  if (onPdfPressed != null)
-                    IconButton(
-                      onPressed: onPdfPressed,
-                      icon: const Icon(Icons.picture_as_pdf),
-                      tooltip: 'Gerar Relatório PDF',
-                      color: theme.primaryColor,
-                    ),
-                  TextButton(
-                    onPressed: () {},
-                    child: Text(
-                      'Ver tudo',
-                      style: GoogleFonts.inter(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+              TextButton(
+                onPressed: () {},
+                child: Text(
+                  'Ver tudo',
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
                   ),
-                ],
+                ),
               ),
             ],
           ),
@@ -599,7 +689,7 @@ class _ModernTableCard extends StatelessWidget {
           const SizedBox(height: 8),
           Divider(color: theme.dividerColor.withOpacity(0.1)),
           // Linhas com Hover Effect Interno
-          ...rows.map((row) => _TableRow(row: row, theme: theme)).toList(),
+          ...rows.map((row) => _TableRow(row: row, theme: theme)),
         ],
       ),
     );
