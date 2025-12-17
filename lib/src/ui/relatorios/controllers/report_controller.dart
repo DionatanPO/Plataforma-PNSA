@@ -145,90 +145,158 @@ class ReportController extends GetxController {
         build: (pw.Context context) {
           return [
             // Header
+            // Minimalist Header
             pw.Row(
-              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: pw.MainAxisAlignment.start,
+              crossAxisAlignment: pw.CrossAxisAlignment.center,
               children: [
                 if (logoImage != null)
                   pw.Container(
-                    width: 60,
-                    height: 60,
-                    child: pw.Image(logoImage),
+                    width: 45,
+                    height: 45,
+                    margin: const pw.EdgeInsets.only(right: 15),
+                    child: pw.ClipRRect(
+                      horizontalRadius: 8,
+                      verticalRadius: 8,
+                      child: pw.Image(logoImage),
+                    ),
                   ),
                 pw.Column(
-                  crossAxisAlignment: pw.CrossAxisAlignment.end,
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
                     pw.Text(
-                      'Paróquia Nossa Senhora Auxiliadora',
+                      'RELATÓRIO DIÁRIO',
                       style: pw.TextStyle(
-                        fontSize: 16,
+                        fontSize: 18,
                         fontWeight: pw.FontWeight.bold,
+                        letterSpacing: 1.2,
                       ),
                     ),
                     pw.Text(
-                      'Relatório Diário de Contribuições',
+                      'PARÓQUIA NOSSA SENHORA AUXILIADORA',
                       style: pw.TextStyle(
-                        fontSize: 14,
-                        color: PdfColors.grey700,
+                        color: PdfColors.grey600,
+                        fontSize: 9,
+                        letterSpacing: 2.0,
                       ),
-                    ),
-                    pw.Text(
-                      'Data: ${dateFormat.format(selectedDate.value)}',
-                      style: const pw.TextStyle(fontSize: 12),
                     ),
                   ],
                 ),
+                pw.Spacer(),
+                pw.Container(
+                  padding: const pw.EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: pw.BoxDecoration(
+                    color: PdfColors.grey100,
+                    borderRadius: pw.BorderRadius.circular(20),
+                  ),
+                  child: pw.Text(
+                    dateFormat.format(selectedDate.value),
+                    style: pw.TextStyle(
+                      fontWeight: pw.FontWeight.bold,
+                      color: PdfColors.grey800,
+                      fontSize: 10,
+                    ),
+                  ),
+                ),
               ],
             ),
-            pw.SizedBox(height: 20),
-            pw.Divider(),
-            pw.SizedBox(height: 10),
+            pw.SizedBox(height: 30),
 
-            // Summary Section
+            pw.SizedBox(height: 30),
+
+            // Summary Grid - Modern & Clean
             pw.Container(
-              padding: const pw.EdgeInsets.all(10),
-              decoration: pw.BoxDecoration(
-                border: pw.Border.all(color: PdfColors.grey300),
-                borderRadius: const pw.BorderRadius.all(pw.Radius.circular(5)),
-                color: PdfColors.grey100,
-              ),
               child: pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceAround,
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
-                  _buildPdfStat(
-                    'Total Arrecadado',
-                    currency.format(totalArrecadado.value),
-                    true,
+                  // Left: Main Totals
+                  pw.Expanded(
+                    flex: 4,
+                    child: pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      children: [
+                        pw.Text(
+                          'RESUMO GERAL',
+                          style: pw.TextStyle(
+                            color: PdfColors.grey500,
+                            fontSize: 9,
+                            fontWeight: pw.FontWeight.bold,
+                            letterSpacing: 1.5,
+                          ),
+                        ),
+                        pw.SizedBox(height: 10),
+                        _buildModernStatRow(
+                          'Total Arrecadado',
+                          currency.format(totalArrecadado.value),
+                          isTotal: true,
+                        ),
+                        pw.SizedBox(height: 6),
+                        _buildModernStatRow(
+                          'Total de Dízimos',
+                          currency.format(totalDizimos.value),
+                        ),
+                        pw.SizedBox(height: 6),
+                        _buildModernStatRow(
+                          'Total de Ofertas',
+                          currency.format(totalOfertas.value),
+                        ),
+                      ],
+                    ),
                   ),
-                  _buildPdfStat(
-                    'Dízimos',
-                    currency.format(totalDizimos.value),
-                    false,
-                  ),
-                  _buildPdfStat(
-                    'Ofertas',
-                    currency.format(totalOfertas.value),
-                    false,
+                  pw.SizedBox(width: 30),
+                  // Right: Payment Methods
+                  pw.Expanded(
+                    flex: 5,
+                    child: pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      children: [
+                        pw.Text(
+                          'FORMAS DE PAGAMENTO',
+                          style: pw.TextStyle(
+                            color: PdfColors.grey500,
+                            fontSize: 9,
+                            fontWeight: pw.FontWeight.bold,
+                            letterSpacing: 1.5,
+                          ),
+                        ),
+                        pw.SizedBox(height: 10),
+                        pw.Row(
+                          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                          children: [
+                            _buildModernSubStat(
+                              'DINHEIRO',
+                              currency.format(totalDinheiro.value),
+                            ),
+                            _buildModernSubStat(
+                              'PIX',
+                              currency.format(totalPix.value),
+                            ),
+                          ],
+                        ),
+                        pw.SizedBox(height: 10),
+                        pw.Row(
+                          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                          children: [
+                            _buildModernSubStat(
+                              'CARTÃO',
+                              currency.format(totalCartao.value),
+                            ),
+                            _buildModernSubStat(
+                              'TRANSF.',
+                              currency.format(totalTransferencia.value),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
-            pw.SizedBox(height: 10),
-            pw.Row(
-              mainAxisAlignment: pw.MainAxisAlignment.spaceAround,
-              children: [
-                _buildPdfSubStat(
-                  'Dinheiro',
-                  currency.format(totalDinheiro.value),
-                ),
-                _buildPdfSubStat('Pix', currency.format(totalPix.value)),
-                _buildPdfSubStat('Cartão', currency.format(totalCartao.value)),
-                _buildPdfSubStat(
-                  'Transferência',
-                  currency.format(totalTransferencia.value),
-                ),
-              ],
-            ),
-            pw.SizedBox(height: 20),
+            pw.SizedBox(height: 40),
 
             // Table
             pw.Table.fromTextArray(
@@ -243,18 +311,29 @@ class ReportController extends GetxController {
               }).toList(),
               headerStyle: pw.TextStyle(
                 fontWeight: pw.FontWeight.bold,
+                fontSize: 10,
                 color: PdfColors.white,
               ),
-              headerDecoration: const pw.BoxDecoration(
-                color: PdfColors.blue800,
-              ),
+              headerDecoration: const pw.BoxDecoration(color: PdfColors.black),
               rowDecoration: const pw.BoxDecoration(
                 border: pw.Border(
-                  bottom: pw.BorderSide(color: PdfColors.grey300, width: 0.5),
+                  bottom: pw.BorderSide(color: PdfColors.grey200, width: 0.5),
                 ),
               ),
-              cellAlignment: pw.Alignment.centerLeft,
-              cellAlignments: {3: pw.Alignment.centerRight},
+              cellStyle: const pw.TextStyle(
+                fontSize: 10,
+                color: PdfColors.grey800,
+              ),
+              cellPadding: const pw.EdgeInsets.symmetric(
+                vertical: 8,
+                horizontal: 5,
+              ),
+              cellAlignments: {
+                0: pw.Alignment.centerLeft,
+                1: pw.Alignment.centerLeft,
+                2: pw.Alignment.centerLeft,
+                3: pw.Alignment.centerRight,
+              },
             ),
 
             pw.SizedBox(height: 40),
@@ -297,33 +376,66 @@ class ReportController extends GetxController {
     );
   }
 
-  pw.Widget _buildPdfStat(String label, String value, bool isMain) {
-    return pw.Column(
+  pw.Widget _buildModernStatRow(
+    String label,
+    String value, {
+    bool isTotal = false,
+  }) {
+    return pw.Row(
+      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
       children: [
         pw.Text(
           label,
-          style: pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
+          style: pw.TextStyle(
+            color: isTotal ? PdfColors.black : PdfColors.grey700,
+            fontWeight: isTotal ? pw.FontWeight.bold : pw.FontWeight.normal,
+            fontSize: isTotal ? 12 : 10,
+          ),
         ),
         pw.Text(
           value,
           style: pw.TextStyle(
-            fontSize: isMain ? 16 : 14,
             fontWeight: pw.FontWeight.bold,
+            fontSize: isTotal ? 12 : 10,
+            color: isTotal ? PdfColors.green700 : PdfColors.black,
           ),
         ),
       ],
     );
   }
 
-  pw.Widget _buildPdfSubStat(String label, String value) {
-    return pw.Column(
-      children: [
-        pw.Text(
-          label,
-          style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey600),
-        ),
-        pw.Text(value, style: const pw.TextStyle(fontSize: 10)),
-      ],
+  pw.Widget _buildModernSubStat(String label, String value) {
+    return pw.Container(
+      width: 100,
+      padding: const pw.EdgeInsets.all(8),
+      decoration: pw.BoxDecoration(
+        color: PdfColors.grey50,
+        borderRadius: pw.BorderRadius.circular(5),
+        border: pw.Border.all(color: PdfColors.grey200),
+      ),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Text(
+            label,
+            style: pw.TextStyle(
+              fontSize: 7,
+              color: PdfColors.grey500,
+              fontWeight: pw.FontWeight.bold,
+              letterSpacing: 0.5,
+            ),
+          ),
+          pw.SizedBox(height: 2),
+          pw.Text(
+            value,
+            style: pw.TextStyle(
+              fontSize: 11,
+              fontWeight: pw.FontWeight.bold,
+              color: PdfColors.grey800,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
