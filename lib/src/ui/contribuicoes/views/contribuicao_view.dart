@@ -877,23 +877,43 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
 
     try {
       final novaContribuicao = controller.createContribuicaoFromForm();
-      await controller.addContribuicao(novaContribuicao);
+      final contribuicaoSalva = await controller.addContribuicao(
+        novaContribuicao,
+      );
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Row(
             children: [
-              Icon(Icons.check_circle_rounded, color: Colors.white),
+              const Icon(Icons.check_circle_rounded, color: Colors.white),
               const SizedBox(width: 12),
               Expanded(
-                child: Text(
-                  'Lançamento registrado com sucesso!',
-                  style: GoogleFonts.inter(fontWeight: FontWeight.w500),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Lançamento registrado com sucesso!',
+                      style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+                    ),
+                    Text(
+                      'O recibo já está disponível para download.',
+                      style: GoogleFonts.inter(fontSize: 12),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
+          action: SnackBarAction(
+            label: 'RECIBO',
+            textColor: Colors.white,
+            onPressed: () {
+              controller.downloadOrShareReceiptPdf(contribuicaoSalva);
+            },
+          ),
           backgroundColor: Colors.green,
+          duration: const Duration(seconds: 8),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),

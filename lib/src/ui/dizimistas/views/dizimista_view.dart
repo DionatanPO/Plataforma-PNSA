@@ -155,6 +155,7 @@ class _DizimistaViewState extends State<DizimistaView> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'dizimista_fab',
         onPressed: () => _showCadastroDialog(context),
         backgroundColor: accentColor,
         foregroundColor: Colors.white,

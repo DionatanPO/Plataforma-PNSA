@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import '../../home/controlles/home_controller.dart';
 import '../controllers/report_controller.dart';
+import '../../contribuicoes/models/contribuicao_model.dart';
 
 class ReportView extends StatefulWidget {
   const ReportView({super.key});
@@ -264,24 +265,14 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
                   _buildAnimatedSection(
                     index: 1,
                     child: Obx(() {
-                      final currency = NumberFormat.simpleCurrency(
-                        locale: 'pt_BR',
-                      );
-                      final rows = controller.contribuicoes.map((c) {
-                        return [
-                          c.dizimistaNome.isNotEmpty
-                              ? c.dizimistaNome
-                              : 'Anônimo',
-                          c.tipo,
-                          c.metodo,
-                          currency.format(c.valor),
-                        ];
-                      }).toList();
+                      // .toList() forces GetX to register dependency in the builder
+                      final lista = controller.contribuicoes.toList();
 
                       return _ModernTableCard(
                         title: 'Contribuições do Dia',
-                        headers: const ['Nome', 'Tipo', 'Método', 'Valor'],
-                        rows: rows,
+                        contribuicoes: lista,
+                        onReceiptPressed: (c) =>
+                            controller.downloadOrShareReceiptPdf(c),
                         theme: theme,
                       );
                     }),
@@ -294,6 +285,7 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'report_fab',
         onPressed: () {
           _showExportModal(context);
         },
@@ -620,14 +612,14 @@ class _HoverStatCardState extends State<_HoverStatCard> {
 
 class _ModernTableCard extends StatelessWidget {
   final String title;
-  final List<String> headers;
-  final List<List<String>> rows;
+  final List<Contribuicao> contribuicoes;
+  final Function(Contribuicao) onReceiptPressed;
   final ThemeData theme;
 
   const _ModernTableCard({
     required this.title,
-    required this.headers,
-    required this.rows,
+    required this.contribuicoes,
+    required this.onReceiptPressed,
     required this.theme,
   });
 
@@ -675,27 +667,76 @@ class _ModernTableCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          // Cabeçalho
+          // Cabeçalho alinhado com o corpo
           Row(
-            children: headers
-                .map(
-                  (h) => Expanded(
-                    child: Text(
-                      h,
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: theme.colorScheme.onSurface.withOpacity(0.5),
-                      ),
-                    ),
+            children: [
+              Expanded(
+                flex: 2,
+                child: Text(
+                  'Nome',
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: theme.colorScheme.onSurface.withOpacity(0.5),
                   ),
-                )
-                .toList(),
+                ),
+              ),
+              Expanded(
+                child: Text(
+                  'Tipo',
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: theme.colorScheme.onSurface.withOpacity(0.5),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Text(
+                  'Pagamento',
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: theme.colorScheme.onSurface.withOpacity(0.5),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Text(
+                  'Valor',
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: theme.colorScheme.onSurface.withOpacity(0.5),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 100), // Espaço para coluna de Ações
+            ],
           ),
           const SizedBox(height: 8),
           Divider(color: theme.dividerColor.withOpacity(0.1)),
           // Linhas com Hover Effect Interno
-          ...rows.map((row) => _TableRow(row: row, theme: theme)),
+          if (contribuicoes.isEmpty)
+            Padding(
+              padding: const EdgeInsets.all(32),
+              child: Center(
+                child: Text(
+                  'Nenhuma contribuição registrada para este dia.',
+                  style: GoogleFonts.inter(
+                    color: theme.colorScheme.onSurface.withOpacity(0.4),
+                  ),
+                ),
+              ),
+            )
+          else
+            ...contribuicoes.map(
+              (c) => _TableRow(
+                contribuicao: c,
+                onReceiptPressed: () => onReceiptPressed(c),
+                theme: theme,
+              ),
+            ),
         ],
       ),
     );
@@ -703,10 +744,15 @@ class _ModernTableCard extends StatelessWidget {
 }
 
 class _TableRow extends StatefulWidget {
-  final List<String> row;
+  final Contribuicao contribuicao;
+  final VoidCallback onReceiptPressed;
   final ThemeData theme;
 
-  const _TableRow({required this.row, required this.theme});
+  const _TableRow({
+    required this.contribuicao,
+    required this.onReceiptPressed,
+    required this.theme,
+  });
 
   @override
   State<_TableRow> createState() => _TableRowState();
@@ -717,54 +763,77 @@ class _TableRowState extends State<_TableRow> {
 
   @override
   Widget build(BuildContext context) {
+    final currency = NumberFormat.simpleCurrency(locale: 'pt_BR');
+
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovering = true),
       onExit: (_) => setState(() => _isHovering = false),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(vertical: 12),
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
         decoration: BoxDecoration(
           color: _isHovering
               ? widget.theme.primaryColor.withOpacity(0.04)
               : Colors.transparent,
-          borderRadius: BorderRadius.circular(4),
+          borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
-          children: widget.row.map((cell) {
-            // Lógica simples para detectar se é coluna de Status e renderizar Badge
-            if ([
-              'Dízimo',
-              'Oferta',
-              'Doação',
-              'Concluído',
-              'Pendente',
-              'Alimentação',
-              'Manutenção',
-              'Salários',
-              'Materiais',
-              'Serviços',
-              'Recebido',
-              'Processando',
-              'Estornado',
-            ].contains(cell)) {
-              return Expanded(
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: _StatusBadge(status: cell),
-                ),
-              );
-            }
-            return Expanded(
+          children: [
+            // Nome
+            Expanded(
+              flex: 2,
               child: Text(
-                cell,
+                widget.contribuicao.dizimistaNome.isNotEmpty
+                    ? widget.contribuicao.dizimistaNome
+                    : 'Anônimo',
                 style: GoogleFonts.inter(
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
-                  color: widget.theme.colorScheme.onSurface.withOpacity(0.9),
+                  color: widget.theme.colorScheme.onSurface,
                 ),
               ),
-            );
-          }).toList(),
+            ),
+            // Tipo
+            Expanded(
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: _StatusBadge(status: widget.contribuicao.tipo),
+              ),
+            ),
+            // Método
+            Expanded(
+              child: Text(
+                widget.contribuicao.metodo,
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  color: widget.theme.colorScheme.onSurface.withOpacity(0.7),
+                ),
+              ),
+            ),
+            // Valor
+            Expanded(
+              child: Text(
+                currency.format(widget.contribuicao.valor),
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: widget.theme.colorScheme.primary,
+                ),
+              ),
+            ),
+            // Ações
+            SizedBox(
+              width: 100,
+              child: IconButton(
+                onPressed: widget.onReceiptPressed,
+                icon: const Icon(Icons.receipt_long_rounded, size: 20),
+                tooltip: 'Gerar Recibo',
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                color: widget.theme.colorScheme.primary.withOpacity(0.7),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -780,6 +849,8 @@ class _StatusBadge extends StatelessWidget {
     Color color;
     switch (status) {
       case 'Dízimo':
+      case 'Dízimo Regular':
+      case 'Dízimo Atrasado':
       case 'Oferta':
       case 'Doação':
       case 'Concluído':
