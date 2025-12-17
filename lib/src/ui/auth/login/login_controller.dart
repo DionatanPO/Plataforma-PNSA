@@ -6,7 +6,6 @@ import '../../../data/services/auth_service.dart';
 import '../../../domain/models/login_model.dart';
 import '../../../routes/app_routes.dart';
 
-
 class LoginController extends GetxController {
   final AuthService _authService = Get.find<AuthService>();
 
@@ -62,18 +61,28 @@ class LoginController extends GetxController {
         if (success) {
           final user = _authService.currentUser;
           if (user != null) {
-                        // Salvar informações do usuário no Firestore
-                        await _authService.createUserInDatabase(user, user.email?.split('@')[0] ?? 'Usuário');
-            
-                        // A lógica de redirecionamento foi removida daqui.
-                        // O AuthGuard será responsável por redirecionar o usuário
-                        // para a tela correta (home ou redefinição de senha) após
-                        // a mudança de estado de autenticação ser detectada.
+            // Salvar informações do usuário no Firestore
+            await _authService.createUserInDatabase(
+              user,
+              user.email?.split('@')[0] ?? 'Usuário',
+            );
+
+            // Aguardar um breve momento para garantir que o AuthGuard
+            // processe a mudança de estado antes de desativar o loading
+            await Future.delayed(const Duration(milliseconds: 500));
+
+            // A lógica de redirecionamento foi removida daqui.
+            // O AuthGuard será responsável por redirecionar o usuário
+            // para a tela correta (home ou redefinição de senha) após
+            // a mudança de estado de autenticação ser detectada.
           } else {
             loginError.value = 'Não foi possível obter os dados do usuário.';
+            isLoading.value = false;
           }
         } else {
-          loginError.value = 'Credenciais inválidas. Verifique seu e-mail e senha.';
+          loginError.value =
+              'Credenciais inválidas. Verifique seu e-mail e senha.';
+          isLoading.value = false;
         }
       } on FirebaseAuthException catch (e) {
         // Mapear códigos de erro do Firebase para mensagens amigáveis
@@ -90,11 +99,13 @@ class LoginController extends GetxController {
             loginError.value = 'Este usuário foi desativado.';
             break;
           default:
-            loginError.value = 'Ocorreu um erro durante o login. Tente novamente.';
+            loginError.value =
+                'Ocorreu um erro durante o login. Tente novamente.';
         }
+        isLoading.value = false;
       } catch (e) {
-        loginError.value = 'Ocorreu um erro inesperado. Tente novamente mais tarde.';
-      } finally {
+        loginError.value =
+            'Ocorreu um erro inesperado. Tente novamente mais tarde.';
         isLoading.value = false;
       }
     }

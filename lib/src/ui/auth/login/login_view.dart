@@ -417,7 +417,10 @@ class LoginView extends StatelessWidget {
                                   }
                                   return Container(
                                     margin: const EdgeInsets.only(bottom: 16),
-                                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 12,
+                                      horizontal: 16,
+                                    ),
                                     decoration: BoxDecoration(
                                       color: Colors.red.withOpacity(0.08),
                                       borderRadius: BorderRadius.circular(12),
@@ -427,9 +430,14 @@ class LoginView extends StatelessWidget {
                                       ),
                                     ),
                                     child: Row(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
-                                        Icon(Icons.error_outline, color: Colors.red.shade600, size: 20),
+                                        Icon(
+                                          Icons.error_outline,
+                                          color: Colors.red.shade600,
+                                          size: 20,
+                                        ),
                                         const SizedBox(width: 12),
                                         Expanded(
                                           child: Text(
@@ -531,7 +539,9 @@ class _ModernInputState extends State<_ModernInput> {
             duration: const Duration(milliseconds: 200),
             decoration: BoxDecoration(
               color: _isFocused
-                  ? Colors.white
+                  ? (theme.brightness == Brightness.dark
+                        ? theme.colorScheme.surface
+                        : Colors.white)
                   : theme.colorScheme.surfaceVariant.withOpacity(0.2),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(

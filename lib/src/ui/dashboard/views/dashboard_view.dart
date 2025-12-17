@@ -38,8 +38,8 @@ class _DashboardViewState extends State<DashboardView> {
     final padding = isDesktop ? 32.0 : 24.0;
 
     // Cálculo do aspect ratio dinâmico
-    double cardHeightTarget = 200.0;
-    if (!isDesktop) cardHeightTarget = 180.0;
+    double cardHeightTarget = 220.0; // Aumentado de 200 para 220
+    if (!isDesktop) cardHeightTarget = 200.0; // Aumentado de 180 para 200
 
     final double availableWidth =
         width - (padding * 2) - ((crossAxisCount - 1) * 16);
@@ -254,12 +254,16 @@ class _DashboardViewState extends State<DashboardView> {
                                         .withOpacity(0.5),
                                   ),
                                   const SizedBox(width: 6),
-                                  Text(
-                                    'Iporá, GO',
-                                    style: GoogleFonts.inter(
-                                      fontSize: 14,
-                                      color: theme.colorScheme.onSurface
-                                          .withOpacity(0.6),
+                                  Flexible(
+                                    child: Text(
+                                      'Iporá, GO',
+                                      style: GoogleFonts.inter(
+                                        fontSize: 14,
+                                        color: theme.colorScheme.onSurface
+                                            .withOpacity(0.6),
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
                                     ),
                                   ),
                                 ],
@@ -269,31 +273,32 @@ class _DashboardViewState extends State<DashboardView> {
                         ),
 
                         // Badge Admin
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: accentColor,
-                            borderRadius: BorderRadius.circular(10),
-                            boxShadow: [
-                              BoxShadow(
-                                color: accentColor.withOpacity(0.3),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
+                        if (width > 400)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: accentColor,
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: accentColor.withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Text(
+                              'Admin',
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
                               ),
-                            ],
-                          ),
-                          child: Text(
-                            'Admin',
-                            style: GoogleFonts.inter(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
                             ),
                           ),
-                        ),
                       ],
                     ),
                     const SizedBox(height: 16),
@@ -320,6 +325,8 @@ class _DashboardViewState extends State<DashboardView> {
                                   0.7,
                                 ),
                               ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
                             ),
                           ),
                         ],
@@ -608,7 +615,7 @@ class _ResponsiveStatCardState extends State<_ResponsiveStatCard> {
       onExit: (_) => setState(() => _isHovering = false),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16), // Reduzido de 20 para 16
         decoration: BoxDecoration(
           color: widget.surfaceColor,
           borderRadius: BorderRadius.circular(20),
@@ -629,7 +636,7 @@ class _ResponsiveStatCardState extends State<_ResponsiveStatCard> {
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisSize: MainAxisSize.min,
           children: [
             // Parte Superior: Ícone e Badge
             Row(
@@ -688,42 +695,48 @@ class _ResponsiveStatCardState extends State<_ResponsiveStatCard> {
               ],
             ),
 
-            const Spacer(),
+            const SizedBox(height: 12),
 
             // Valor Principal
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerLeft,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    widget.value,
-                    style: GoogleFonts.outfit(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: widget.theme.colorScheme.onSurface,
-                      height: 1.2,
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      widget.value,
+                      style: GoogleFonts.outfit(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: widget.theme.colorScheme.onSurface,
+                        height: 1.2,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  if (widget.subtitle != null) ...[
-                    const SizedBox(width: 6),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 2),
-                      child: Text(
-                        widget.subtitle!,
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          color: widget.theme.colorScheme.onSurface.withOpacity(
-                            0.5,
-                          ),
-                          fontWeight: FontWeight.w500,
+                ),
+                if (widget.subtitle != null) ...[
+                  const SizedBox(width: 6),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 2),
+                    child: Text(
+                      widget.subtitle!,
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        color: widget.theme.colorScheme.onSurface.withOpacity(
+                          0.5,
                         ),
+                        fontWeight: FontWeight.w500,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ],
+                  ),
                 ],
-              ),
+              ],
             ),
 
             const SizedBox(height: 6),

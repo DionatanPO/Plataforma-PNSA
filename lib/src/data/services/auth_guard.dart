@@ -68,6 +68,7 @@ class AuthGuard extends GetxService {
         await _authService.logout();
         Get.find<LoginController>().loginError.value =
             'Sua conta foi desativada pelo administrador.';
+        Get.find<LoginController>().isLoading.value = false;
         Get.offAllNamed(AppRoutes.login);
         return;
       }
@@ -78,8 +79,16 @@ class AuthGuard extends GetxService {
       } else {
         Get.offAllNamed(AppRoutes.home);
       }
+
+      // Desativar loading após navegação bem-sucedida
+      if (Get.isRegistered<LoginController>()) {
+        Get.find<LoginController>().isLoading.value = false;
+      }
     } catch (e) {
       // Em caso de erro, redireciona para o login
+      if (Get.isRegistered<LoginController>()) {
+        Get.find<LoginController>().isLoading.value = false;
+      }
       Get.offAllNamed(AppRoutes.login);
     }
   }
