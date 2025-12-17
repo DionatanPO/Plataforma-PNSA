@@ -43,6 +43,8 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
   late Color borderColor;
   late Color accentColor;
 
+  bool get isMobile => MediaQuery.of(context).size.width < 600;
+
   @override
   void dispose() {
     _debounceTimer?.cancel();
@@ -78,7 +80,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
 
           // Content
           SliverPadding(
-            padding: const EdgeInsets.all(24),
+            padding: EdgeInsets.all(isMobile ? 12 : 24),
             sliver: SliverToBoxAdapter(child: _buildMainContent()),
           ),
         ],
@@ -105,7 +107,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
     return Container(
       decoration: BoxDecoration(
         color: surfaceColor,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
         border: Border.all(color: borderColor),
         boxShadow: [
           BoxShadow(
@@ -120,7 +122,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
         children: [
           // Header com gradiente sutil
           Container(
-            padding: const EdgeInsets.all(24),
+            padding: EdgeInsets.all(isMobile ? 16 : 24),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
@@ -130,9 +132,9 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
                   accentColor.withOpacity(0.02),
                 ],
               ),
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(20),
-                topRight: Radius.circular(20),
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(isMobile ? 16 : 20),
+                topRight: Radius.circular(isMobile ? 16 : 20),
               ),
               border: Border(bottom: BorderSide(color: borderColor)),
             ),
@@ -166,7 +168,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
 
           // Content
           Padding(
-            padding: const EdgeInsets.all(24),
+            padding: EdgeInsets.all(isMobile ? 16 : 24),
             child: Column(
               children: [
                 // Indicador de Etapas Melhorado
@@ -275,7 +277,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
         Container(
           decoration: BoxDecoration(
             color: backgroundColor,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
             border: Border.all(color: borderColor),
           ),
           child: TextField(
@@ -295,9 +297,9 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
                 ),
               ),
               border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 18,
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: isMobile ? 16 : 20,
+                vertical: isMobile ? 14 : 18,
               ),
             ),
             onChanged: (value) {
@@ -325,7 +327,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
     return Container(
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
         border: Border.all(color: borderColor),
       ),
       child: Obx(() {
@@ -472,7 +474,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
 
   Widget _buildSelectedDizimistaCard() {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(isMobile ? 16 : 24),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -482,7 +484,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
             Colors.green.withOpacity(0.05),
           ],
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
         border: Border.all(color: Colors.green.withOpacity(0.2)),
       ),
       child: Column(
@@ -523,10 +525,10 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
 
   Widget _buildEmptySearchState() {
     return Container(
-      padding: const EdgeInsets.all(40),
+      padding: EdgeInsets.all(isMobile ? 24 : 40),
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
         border: Border.all(color: borderColor),
       ),
       child: Column(
@@ -561,7 +563,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
 
   Widget _buildNoResultsState() {
     return Padding(
-      padding: const EdgeInsets.all(40),
+      padding: EdgeInsets.all(isMobile ? 24 : 40),
       child: Column(
         children: [
           Icon(
@@ -598,7 +600,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
       children: [
         // Card do dizimista selecionado
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(isMobile ? 12 : 16),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
@@ -606,7 +608,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
                 accentColor.withOpacity(0.04),
               ],
             ),
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
             border: Border.all(color: accentColor.withOpacity(0.2)),
           ),
           child: Row(
@@ -664,12 +666,12 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
         _label('Data do Recebimento'),
         InkWell(
           onTap: () => _pickDateTime(context),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
           child: Container(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(isMobile ? 12 : 16),
             decoration: BoxDecoration(
               color: backgroundColor,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
               border: Border.all(color: borderColor),
             ),
             child: Row(
@@ -989,7 +991,10 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
         borderRadius: BorderRadius.circular(12),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+          padding: EdgeInsets.symmetric(
+            horizontal: isMobile ? 12 : 18,
+            vertical: isMobile ? 10 : 14,
+          ),
           decoration: BoxDecoration(
             gradient: isSelected
                 ? LinearGradient(

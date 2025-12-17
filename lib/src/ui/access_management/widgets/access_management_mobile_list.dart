@@ -33,9 +33,9 @@ class AccessManagementMobileList extends StatelessWidget {
       itemBuilder: (context, index) {
         final acesso = acessos[index];
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: surfaceColor,
               borderRadius: BorderRadius.circular(16),
@@ -56,8 +56,8 @@ class AccessManagementMobileList extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        AvatarWidget(nome: acesso.nome, theme: theme, size: 40),
-                        const SizedBox(width: 12),
+                        AvatarWidget(nome: acesso.nome, theme: theme, size: 36),
+                        const SizedBox(width: 10),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -72,8 +72,9 @@ class AccessManagementMobileList extends StatelessWidget {
                               acesso.funcao,
                               style: GoogleFonts.inter(
                                 fontSize: 12,
-                                color: theme.colorScheme.onSurface
-                                    .withOpacity(0.6),
+                                color: theme.colorScheme.onSurface.withOpacity(
+                                  0.6,
+                                ),
                               ),
                             ),
                           ],
@@ -83,18 +84,21 @@ class AccessManagementMobileList extends StatelessWidget {
                     StatusBadge(status: acesso.status, compact: true),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 const Divider(height: 1),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
                   children: [
                     InfoBadge(Icons.email_outlined, acesso.email),
-                    InfoBadge(Icons.badge_outlined, (acesso as dynamic).cpf ?? 'CPF N/D'),
+                    InfoBadge(
+                      Icons.badge_outlined,
+                      (acesso as dynamic).cpf ?? 'CPF N/D',
+                    ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [

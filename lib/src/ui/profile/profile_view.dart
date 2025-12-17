@@ -20,7 +20,9 @@ class ProfileView extends StatelessWidget {
     );
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF0D0D0D) : const Color(0xFFF8F9FA),
+      backgroundColor: isDark
+          ? const Color(0xFF0D0D0D)
+          : const Color(0xFFF8F9FA),
       body: LayoutBuilder(
         builder: (context, constraints) {
           bool isDesktop = constraints.maxWidth > 900;
@@ -73,10 +75,7 @@ class ProfileView extends StatelessWidget {
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            colors: [
-                              accentColor,
-                              accentColor.withOpacity(0.8),
-                            ],
+                            colors: [accentColor, accentColor.withOpacity(0.8)],
                           ),
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
@@ -113,7 +112,9 @@ class ProfileView extends StatelessWidget {
                               'Gerencie suas informações pessoais',
                               style: GoogleFonts.inter(
                                 fontSize: 14,
-                                color: theme.colorScheme.onSurface.withOpacity(0.5),
+                                color: theme.colorScheme.onSurface.withOpacity(
+                                  0.5,
+                                ),
                                 letterSpacing: -0.2,
                               ),
                             ),
@@ -190,17 +191,14 @@ class ProfileView extends StatelessWidget {
               ),
               child: SafeArea(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+                  padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
                   child: Row(
                     children: [
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            colors: [
-                              accentColor,
-                              accentColor.withOpacity(0.8),
-                            ],
+                            colors: [accentColor, accentColor.withOpacity(0.8)],
                           ),
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
@@ -237,7 +235,9 @@ class ProfileView extends StatelessWidget {
                               'Suas informações',
                               style: GoogleFonts.inter(
                                 fontSize: 14,
-                                color: theme.colorScheme.onSurface.withOpacity(0.5),
+                                color: theme.colorScheme.onSurface.withOpacity(
+                                  0.5,
+                                ),
                                 letterSpacing: -0.2,
                               ),
                             ),
@@ -254,7 +254,7 @@ class ProfileView extends StatelessWidget {
 
         // Content
         SliverPadding(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(16),
           sliver: SliverToBoxAdapter(
             child: Column(
               children: [
@@ -270,7 +270,10 @@ class ProfileView extends StatelessWidget {
     );
   }
 
-  Widget _buildSettingsSection(BuildContext context, {required bool isDesktop}) {
+  Widget _buildSettingsSection(
+    BuildContext context, {
+    required bool isDesktop,
+  }) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final accentColor = theme.primaryColor;
@@ -279,7 +282,12 @@ class ProfileView extends StatelessWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _FluentSectionTitle(theme, "GERAL", Icons.settings_rounded, accentColor),
+          _FluentSectionTitle(
+            theme,
+            "GERAL",
+            Icons.settings_rounded,
+            accentColor,
+          ),
           const SizedBox(height: 12),
           _FluentSettingsGroup(
             children: [
@@ -302,7 +310,12 @@ class ProfileView extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 32),
-          _FluentSectionTitle(theme, "PREFERÊNCIAS", Icons.tune_rounded, accentColor),
+          _FluentSectionTitle(
+            theme,
+            "PREFERÊNCIAS",
+            Icons.tune_rounded,
+            accentColor,
+          ),
           const SizedBox(height: 12),
           _FluentSettingsGroup(
             children: [
@@ -315,7 +328,12 @@ class ProfileView extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 32),
-          _FluentSectionTitle(theme, "SISTEMA", Icons.help_outline_rounded, accentColor),
+          _FluentSectionTitle(
+            theme,
+            "SISTEMA",
+            Icons.help_outline_rounded,
+            accentColor,
+          ),
           const SizedBox(height: 12),
           _FluentSettingsGroup(
             children: [
@@ -339,11 +357,11 @@ class ProfileView extends StatelessWidget {
   }
 
   Widget _FluentSectionTitle(
-      ThemeData theme,
-      String title,
-      IconData icon,
-      Color accentColor,
-      ) {
+    ThemeData theme,
+    String title,
+    IconData icon,
+    Color accentColor,
+  ) {
     return Row(
       children: [
         Container(
@@ -352,11 +370,7 @@ class ProfileView extends StatelessWidget {
             color: accentColor.withOpacity(0.1),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(
-            icon,
-            size: 16,
-            color: accentColor,
-          ),
+          child: Icon(icon, size: 16, color: accentColor),
         ),
         const SizedBox(width: 10),
         Text(
@@ -393,206 +407,202 @@ class _ProfileCard extends StatelessWidget {
         : Colors.black.withOpacity(0.06);
     final accentColor = theme.primaryColor;
 
-    return Obx(() => Container(
-      padding: const EdgeInsets.all(28),
-      decoration: BoxDecoration(
-        color: surfaceColor,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: borderColor),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.2 : 0.03),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          // Avatar com gradiente
-          Container(
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(
-                colors: [
-                  accentColor,
-                  accentColor.withOpacity(0.7),
-                ],
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: accentColor.withOpacity(0.3),
-                  blurRadius: 16,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+    return Obx(
+      () => Container(
+        padding: EdgeInsets.all(isDesktop ? 28 : 16),
+        decoration: BoxDecoration(
+          color: surfaceColor,
+          borderRadius: BorderRadius.circular(isDesktop ? 20 : 16),
+          border: Border.all(color: borderColor),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(isDark ? 0.2 : 0.03),
+              blurRadius: 24,
+              offset: const Offset(0, 8),
             ),
-            child: Container(
-              padding: const EdgeInsets.all(3),
+          ],
+        ),
+        child: Column(
+          children: [
+            // Avatar com gradiente
+            Container(
+              padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: surfaceColor,
-              ),
-              child: CircleAvatar(
-                radius: 56,
-                backgroundImage: NetworkImage(
-                  controller.avatarUrl.value.isNotEmpty
-                      ? controller.avatarUrl.value
-                      : 'https://i.pravatar.cc/150?img=12',
-                ),
-                backgroundColor: theme.colorScheme.surfaceVariant,
-                child: controller.avatarUrl.value.isEmpty
-                    ? Icon(
-                  Icons.person,
-                  size: 56,
-                  color: theme.colorScheme.onSurface,
-                )
-                    : null,
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
-          Text(
-            controller.name.value.isNotEmpty
-                ? controller.name.value
-                : 'Carregando...',
-            style: GoogleFonts.outfit(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: theme.colorScheme.onSurface,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 6),
-          Text(
-            controller.email.value.isNotEmpty
-                ? controller.email.value
-                : 'Email não disponível',
-            style: GoogleFonts.inter(
-              fontSize: 14,
-              color: theme.colorScheme.onSurface.withOpacity(0.6),
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 24),
-
-          // Informações do usuário
-          if (controller.funcao.value.isNotEmpty ||
-              controller.status.value.isNotEmpty)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    accentColor.withOpacity(0.08),
-                    accentColor.withOpacity(0.04),
-                  ],
+                  colors: [accentColor, accentColor.withOpacity(0.7)],
                 ),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: accentColor.withOpacity(0.15)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (controller.funcao.value.isNotEmpty)
-                    _buildInfoRow(
-                      Icons.work_outline_rounded,
-                      'Função',
-                      controller.funcao.value,
-                      theme,
-                    ),
-                  if (controller.status.value.isNotEmpty)
-                    _buildInfoRow(
-                      Icons.verified_user_outlined,
-                      'Status',
-                      controller.status.value,
-                      theme,
-                    ),
-                  if (controller.telefone.value.isNotEmpty)
-                    _buildInfoRow(
-                      Icons.phone_outlined,
-                      'Telefone',
-                      controller.telefone.value,
-                      theme,
-                    ),
-                  if (controller.endereco.value.isNotEmpty)
-                    _buildInfoRow(
-                      Icons.location_on_outlined,
-                      'Endereço',
-                      controller.endereco.value,
-                      theme,
-                    ),
-                ],
-              ),
-            ),
-          const SizedBox(height: 24),
-
-          // Botão de editar
-          SizedBox(
-            width: double.infinity,
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    accentColor,
-                    accentColor.withOpacity(0.8),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(14),
                 boxShadow: [
                   BoxShadow(
                     color: accentColor.withOpacity(0.3),
-                    blurRadius: 12,
+                    blurRadius: 16,
                     offset: const Offset(0, 4),
                   ),
                 ],
               ),
-              child: ElevatedButton(
-                onPressed: () {
-                  // TODO: Implementar edição de perfil
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.transparent,
-                  foregroundColor: Colors.white,
-                  shadowColor: Colors.transparent,
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
+              child: Container(
+                padding: const EdgeInsets.all(3),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: surfaceColor,
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.edit_rounded, size: 18),
-                    const SizedBox(width: 8),
-                    Text(
-                      "Editar Perfil",
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
+                child: CircleAvatar(
+                  radius: 56,
+                  backgroundImage: NetworkImage(
+                    controller.avatarUrl.value.isNotEmpty
+                        ? controller.avatarUrl.value
+                        : 'https://i.pravatar.cc/150?img=12',
+                  ),
+                  backgroundColor: theme.colorScheme.surfaceVariant,
+                  child: controller.avatarUrl.value.isEmpty
+                      ? Icon(
+                          Icons.person,
+                          size: 56,
+                          color: theme.colorScheme.onSurface,
+                        )
+                      : null,
                 ),
               ),
             ),
-          ),
-        ],
+            const SizedBox(height: 20),
+            Text(
+              controller.name.value.isNotEmpty
+                  ? controller.name.value
+                  : 'Carregando...',
+              style: GoogleFonts.outfit(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurface,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              controller.email.value.isNotEmpty
+                  ? controller.email.value
+                  : 'Email não disponível',
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                color: theme.colorScheme.onSurface.withOpacity(0.6),
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+
+            // Informações do usuário
+            if (controller.funcao.value.isNotEmpty ||
+                controller.status.value.isNotEmpty)
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(isDesktop ? 16 : 12),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      accentColor.withOpacity(0.08),
+                      accentColor.withOpacity(0.04),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(isDesktop ? 16 : 12),
+                  border: Border.all(color: accentColor.withOpacity(0.15)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (controller.funcao.value.isNotEmpty)
+                      _buildInfoRow(
+                        Icons.work_outline_rounded,
+                        'Função',
+                        controller.funcao.value,
+                        theme,
+                      ),
+                    if (controller.status.value.isNotEmpty)
+                      _buildInfoRow(
+                        Icons.verified_user_outlined,
+                        'Status',
+                        controller.status.value,
+                        theme,
+                      ),
+                    if (controller.telefone.value.isNotEmpty)
+                      _buildInfoRow(
+                        Icons.phone_outlined,
+                        'Telefone',
+                        controller.telefone.value,
+                        theme,
+                      ),
+                    if (controller.endereco.value.isNotEmpty)
+                      _buildInfoRow(
+                        Icons.location_on_outlined,
+                        'Endereço',
+                        controller.endereco.value,
+                        theme,
+                      ),
+                  ],
+                ),
+              ),
+            const SizedBox(height: 24),
+
+            // Botão de editar
+            SizedBox(
+              width: double.infinity,
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [accentColor, accentColor.withOpacity(0.8)],
+                  ),
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: accentColor.withOpacity(0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: ElevatedButton(
+                  onPressed: () {
+                    // TODO: Implementar edição de perfil
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    foregroundColor: Colors.white,
+                    shadowColor: Colors.transparent,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.edit_rounded, size: 18),
+                      const SizedBox(width: 8),
+                      Text(
+                        "Editar Perfil",
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
-    ));
+    );
   }
 
   Widget _buildInfoRow(
-      IconData icon,
-      String label,
-      String value,
-      ThemeData theme,
-      ) {
+    IconData icon,
+    String label,
+    String value,
+    ThemeData theme,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
@@ -654,10 +664,12 @@ class _FluentSettingsGroup extends StatelessWidget {
         ? Colors.white.withOpacity(0.08)
         : Colors.black.withOpacity(0.06);
 
+    final bool isMobile = MediaQuery.of(context).size.width < 600;
+
     return Container(
       decoration: BoxDecoration(
         color: surfaceColor,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
         border: Border.all(color: borderColor),
         boxShadow: [
           BoxShadow(
@@ -743,17 +755,17 @@ class _DesktopHoverTileState extends State<_DesktopHoverTile> {
                 decoration: BoxDecoration(
                   gradient: widget.isDestructive
                       ? LinearGradient(
-                    colors: [
-                      Colors.redAccent.withOpacity(0.15),
-                      Colors.redAccent.withOpacity(0.08),
-                    ],
-                  )
+                          colors: [
+                            Colors.redAccent.withOpacity(0.15),
+                            Colors.redAccent.withOpacity(0.08),
+                          ],
+                        )
                       : LinearGradient(
-                    colors: [
-                      theme.colorScheme.onSurface.withOpacity(0.1),
-                      theme.colorScheme.onSurface.withOpacity(0.05),
-                    ],
-                  ),
+                          colors: [
+                            theme.colorScheme.onSurface.withOpacity(0.1),
+                            theme.colorScheme.onSurface.withOpacity(0.05),
+                          ],
+                        ),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(

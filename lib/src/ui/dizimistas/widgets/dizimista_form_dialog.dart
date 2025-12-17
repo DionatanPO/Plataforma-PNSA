@@ -53,34 +53,70 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
   @override
   void initState() {
     super.initState();
-    
-    // Inicializar controladores
-    numeroRegistroController = TextEditingController(text: widget.dizimista?.numeroRegistro ?? '');
-    nomeController = TextEditingController(text: widget.dizimista?.nome ?? '');
-    cpfController = TextEditingController(text: widget.dizimista?.cpf ?? '');
-    telefoneController = TextEditingController(text: widget.dizimista?.telefone ?? '');
-    emailController = TextEditingController(text: widget.dizimista?.email ?? '');
-    ruaController = TextEditingController(text: widget.dizimista?.rua ?? '');
-    numeroController = TextEditingController(text: widget.dizimista?.numero ?? '');
-    bairroController = TextEditingController(text: widget.dizimista?.bairro ?? '');
-    cidadeController = TextEditingController(text: widget.dizimista?.cidade ?? '');
-    estadoController = TextEditingController(text: widget.dizimista?.estado ?? '');
-    cepController = TextEditingController(text: widget.dizimista?.cep ?? '');
-    nomeConjugueController = TextEditingController(text: widget.dizimista?.nomeConjugue ?? '');
-    observacoesController = TextEditingController(text: widget.dizimista?.observacoes ?? '');
 
-    // Inicializar formatters
+    // Inicializar formatters PRIMEIRO
     cpfFormatter = MaskTextInputFormatter(
-        mask: '###.###.###-##',
-        filter: { "#": RegExp(r'[0-9]') }
+      mask: '###.###.###-##',
+      filter: {"#": RegExp(r'[0-9]')},
     );
     telefoneFormatter = MaskTextInputFormatter(
-        mask: '(##) #####-####',
-        filter: { "#": RegExp(r'[0-9]') }
+      mask: '(##) #####-####',
+      filter: {"#": RegExp(r'[0-9]')},
     );
     cepFormatter = MaskTextInputFormatter(
-        mask: '#####-###',
-        filter: { "#": RegExp(r'[0-9]') }
+      mask: '#####-###',
+      filter: {"#": RegExp(r'[0-9]')},
+    );
+
+    // Inicializar controladores com valores formatados
+    numeroRegistroController = TextEditingController(
+      text: widget.dizimista?.numeroRegistro ?? '',
+    );
+    nomeController = TextEditingController(text: widget.dizimista?.nome ?? '');
+
+    // Aplica máscara ao CPF se existir
+    cpfController = TextEditingController(
+      text: widget.dizimista?.cpf != null
+          ? cpfFormatter.maskText(widget.dizimista!.cpf)
+          : '',
+    );
+
+    // Aplica máscara ao Telefone se existir
+    telefoneController = TextEditingController(
+      text: widget.dizimista?.telefone != null
+          ? telefoneFormatter.maskText(widget.dizimista!.telefone)
+          : '',
+    );
+
+    emailController = TextEditingController(
+      text: widget.dizimista?.email ?? '',
+    );
+    ruaController = TextEditingController(text: widget.dizimista?.rua ?? '');
+    numeroController = TextEditingController(
+      text: widget.dizimista?.numero ?? '',
+    );
+    bairroController = TextEditingController(
+      text: widget.dizimista?.bairro ?? '',
+    );
+    cidadeController = TextEditingController(
+      text: widget.dizimista?.cidade ?? '',
+    );
+    estadoController = TextEditingController(
+      text: widget.dizimista?.estado ?? '',
+    );
+
+    // Aplica máscara ao CEP se existir
+    cepController = TextEditingController(
+      text: widget.dizimista?.cep != null
+          ? cepFormatter.maskText(widget.dizimista!.cep!)
+          : '',
+    );
+
+    nomeConjugueController = TextEditingController(
+      text: widget.dizimista?.nomeConjugue ?? '',
+    );
+    observacoesController = TextEditingController(
+      text: widget.dizimista?.observacoes ?? '',
     );
 
     // Carregar dados existentes se estiver editando
@@ -117,539 +153,459 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    final size = MediaQuery.of(context).size;
+    final isMobile = size.width < 600;
 
-    // Estilo dos Inputs
+    // inputDecoration seguindo padrão Material 3
     final inputDecoration = InputDecoration(
-      filled: true,
-      fillColor: isDark ? const Color(0xFF2C2C2C) : const Color(0xFFF8FAFC),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide.none,
-      ),
+      border: const OutlineInputBorder(),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: theme.dividerColor.withOpacity(0.1)),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: theme.primaryColor, width: 1.5),
-      ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      labelStyle: GoogleFonts.inter(color: theme.colorScheme.onSurface.withOpacity(0.6)),
-    );
-
-    return AlertDialog(
-      backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-      surfaceTintColor: Colors.transparent,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 10),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
-      actionsPadding: const EdgeInsets.all(24),
-
-      title: Text(
-        widget.title,
-        style: GoogleFonts.outfit(
-          fontSize: 22,
-          fontWeight: FontWeight.bold,
-          color: theme.colorScheme.onSurface,
+        borderSide: BorderSide(
+          color: theme.colorScheme.outline.withOpacity(0.5),
         ),
       ),
+      focusedBorder: OutlineInputBorder(
+        borderSide: BorderSide(color: theme.colorScheme.primary, width: 2.0),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderSide: BorderSide(color: theme.colorScheme.error),
+      ),
+      filled: true,
+      fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+      labelStyle: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+      floatingLabelStyle: TextStyle(color: theme.colorScheme.primary),
+      isDense: true, // Mantém compacto
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+    );
 
-      content: SizedBox(
-        width: 600, // Largura aumentada para acomodar todos os campos
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+    // Conteúdo do formulário extraído para reutilização
+    final formContent = SingleChildScrollView(
+      padding: isMobile ? const EdgeInsets.all(16) : EdgeInsets.zero,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Número de Registro Paroquial
+          TextField(
+            controller: numeroRegistroController,
+            decoration: inputDecoration.copyWith(
+              labelText: 'Nº de Registro Paroquial *',
+              hintText: 'Ex: 0001',
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Dados Pessoais
+          Text(
+            'Dados Pessoais',
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.primary,
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Nome Completo
+          TextField(
+            controller: nomeController,
+            decoration: inputDecoration.copyWith(
+              labelText: 'Nome Completo *',
+              hintText: 'Ex: João da Silva',
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // CPF
+          TextField(
+            controller: cpfController,
+            inputFormatters: [cpfFormatter],
+            keyboardType: TextInputType.number,
+            decoration: inputDecoration.copyWith(
+              labelText: 'CPF *',
+              hintText: '000.000.000-00',
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Data de Nascimento
+          GestureDetector(
+            onTap: () async {
+              final date = await showDatePicker(
+                context: context,
+                initialDate: dataNascimento ?? DateTime.now(),
+                firstDate: DateTime(1900),
+                lastDate: DateTime.now(),
+              );
+              if (date != null) {
+                setState(() => dataNascimento = date);
+              }
+            },
+            child: AbsorbPointer(
+              child: TextField(
+                controller: TextEditingController(
+                  text: dataNascimento != null
+                      ? '${dataNascimento!.day}/${dataNascimento!.month}/${dataNascimento!.year}'
+                      : '',
+                ),
+                decoration: inputDecoration.copyWith(
+                  labelText: 'Data de Nascimento',
+                  hintText: 'Selecione a data',
+                  suffixIcon: const Icon(Icons.calendar_today_rounded),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Sexo (Dropdown M3 Style)
+          DropdownButtonFormField<String>(
+            value: sexo,
+            decoration: inputDecoration.copyWith(labelText: 'Sexo'),
+            items: [
+              'Masculino',
+              'Feminino',
+            ].map((v) => DropdownMenuItem(value: v, child: Text(v))).toList(),
+            onChanged: (v) => setState(() => sexo = v),
+          ),
+          const SizedBox(height: 24),
+
+          // Contato
+          Text(
+            'Dados de Contato',
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.primary,
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          TextField(
+            controller: telefoneController,
+            inputFormatters: [telefoneFormatter],
+            keyboardType: TextInputType.phone,
+            decoration: inputDecoration.copyWith(
+              labelText: 'Telefone / WhatsApp *',
+              hintText: '(00) 00000-0000',
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          TextField(
+            controller: emailController,
+            keyboardType: TextInputType.emailAddress,
+            decoration: inputDecoration.copyWith(
+              labelText: 'E-mail',
+              hintText: 'exemplo@email.com',
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Endereço
+          Text(
+            'Endereço',
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.primary,
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          TextField(
+            controller: ruaController,
+            decoration: inputDecoration.copyWith(labelText: 'Rua'),
+          ),
+          const SizedBox(height: 16),
+
+          Row(
             children: [
-              // Número de Registro Paroquial
-              TextField(
-                controller: numeroRegistroController,
-                decoration: inputDecoration.copyWith(
-                  labelText: 'Nº de Registro Paroquial *',
-                  hintText: 'Ex: 0001',
+              Expanded(
+                flex: 1,
+                child: TextField(
+                  controller: numeroController,
+                  decoration: inputDecoration.copyWith(labelText: 'Número'),
                 ),
               ),
-              const SizedBox(height: 12),
-              // Dados Pessoais
-              Text(
-                'Dados Pessoais',
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: theme.primaryColor,
-                ),
-              ),
-              const SizedBox(height: 12),
-              // Nome Completo (obrigatório)
-              TextField(
-                controller: nomeController,
-                decoration: inputDecoration.copyWith(
-                  labelText: 'Nome Completo *',
-                  hintText: 'Ex: João da Silva',
-                ),
-              ),
-              const SizedBox(height: 12),
-              // CPF (obrigatório)
-              TextField(
-                controller: cpfController,
-                inputFormatters: [cpfFormatter],
-                decoration: inputDecoration.copyWith(
-                  labelText: 'CPF *',
-                  hintText: '000.000.000-00',
-                ),
-              ),
-              const SizedBox(height: 12),
-              // Data de Nascimento (opcional)
-              GestureDetector(
-                onTap: () async {
-                  final date = await showDatePicker(
-                    context: context,
-                    initialDate: dataNascimento ?? DateTime.now(),
-                    firstDate: DateTime(1900),
-                    lastDate: DateTime.now(),
-                  );
-                  if (date != null) {
-                    setState(() {
-                      dataNascimento = date;
-                    });
-                  }
-                },
-                child: AbsorbPointer(
-                  child: TextField(
-                    controller: TextEditingController(text: dataNascimento != null ? '${dataNascimento!.day}/${dataNascimento!.month}/${dataNascimento!.year}' : ''),
-                    decoration: inputDecoration.copyWith(
-                      labelText: 'Data de Nascimento',
-                      hintText: 'Selecione a data',
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              // Sexo (opcional)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF2C2C2C) : const Color(0xFFF8FAFC),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
-                ),
-                child: Row(
-                  children: [
-                    Text('Sexo', style: GoogleFonts.inter(color: theme.colorScheme.onSurface.withOpacity(0.6))),
-                    const Spacer(),
-                    DropdownButton<String>(
-                      value: sexo,
-                      underline: Container(),
-                      hint: Text('Selecione', style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6))),
-                      items: [
-                        DropdownMenuItem(value: 'Masculino', child: Text('Masculino')),
-                        DropdownMenuItem(value: 'Feminino', child: Text('Feminino')),
-                      ],
-                      onChanged: (value) {
-                        setState(() {
-                          sexo = value;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Dados de Contato
-              Text(
-                'Dados de Contato',
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: theme.primaryColor,
-                ),
-              ),
-              const SizedBox(height: 12),
-              // Telefone / WhatsApp (obrigatório)
-              TextField(
-                controller: telefoneController,
-                inputFormatters: [telefoneFormatter],
-                decoration: inputDecoration.copyWith(
-                  labelText: 'Telefone / WhatsApp *',
-                  hintText: '(00) 00000-0000',
-                ),
-              ),
-              const SizedBox(height: 12),
-              // E-mail (opcional)
-              TextField(
-                controller: emailController,
-                decoration: inputDecoration.copyWith(
-                  labelText: 'E-mail',
-                  hintText: 'exemplo@email.com',
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Endereço
-              Text(
-                'Endereço',
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: theme.primaryColor,
-                ),
-              ),
-              const SizedBox(height: 12),
-              // Rua
-              TextField(
-                controller: ruaController,
-                decoration: inputDecoration.copyWith(
-                  labelText: 'Rua',
-                  hintText: 'Nome da rua',
-                ),
-              ),
-              const SizedBox(height: 12),
-              // Número e Bairro em linha
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: numeroController,
-                      decoration: inputDecoration.copyWith(
-                        labelText: 'Número',
-                        hintText: 'Ex: 123',
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: TextField(
-                      controller: bairroController,
-                      decoration: inputDecoration.copyWith(
-                        labelText: 'Bairro *',
-                        hintText: 'Ex: Centro',
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              // Cidade, Estado e CEP em linha
-              Row(
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: TextField(
-                      controller: cidadeController,
-                      decoration: inputDecoration.copyWith(
-                        labelText: 'Cidade *',
-                        hintText: 'Ex: Iporá',
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: TextField(
-                      controller: estadoController,
-                      decoration: inputDecoration.copyWith(
-                        labelText: 'Estado *',
-                        hintText: 'Ex: GO',
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: TextField(
-                      controller: cepController,
-                      inputFormatters: [cepFormatter],
-                      decoration: inputDecoration.copyWith(
-                        labelText: 'CEP',
-                        hintText: '00000-000',
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              // Estado Civil
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF2C2C2C) : const Color(0xFFF8FAFC),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
-                ),
-                child: Row(
-                  children: [
-                    Text('Estado Civil', style: GoogleFonts.inter(color: theme.colorScheme.onSurface.withOpacity(0.6))),
-                    const Spacer(),
-                    DropdownButton<String>(
-                      value: estadoCivil,
-                      underline: Container(),
-                      hint: Text('Selecione', style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6))),
-                      items: [
-                        DropdownMenuItem(value: 'Solteiro', child: Text('Solteiro')),
-                        DropdownMenuItem(value: 'Casado', child: Text('Casado')),
-                        DropdownMenuItem(value: 'Viúvo', child: Text('Viúvo')),
-                        DropdownMenuItem(value: 'Separado', child: Text('Separado')),
-                      ],
-                      onChanged: (value) {
-                        setState(() {
-                          estadoCivil = value;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              // Se for casado, mostrar campos adicionais
-              if (estadoCivil == 'Casado') ...[
-                const SizedBox(height: 12),
-                Text(
-                  'Dados do Cônjuge',
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: theme.primaryColor,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: nomeConjugueController,
-                  decoration: inputDecoration.copyWith(
-                    labelText: 'Nome do Cônjuge',
-                    hintText: 'Ex: Maria da Silva',
-                  ),
-                ),
-                const SizedBox(height: 12),
-                // Data de Casamento
-                GestureDetector(
-                  onTap: () async {
-                    final date = await showDatePicker(
-                      context: context,
-                      initialDate: dataCasamento ?? DateTime.now(),
-                      firstDate: DateTime(1900),
-                      lastDate: DateTime.now(),
-                    );
-                    if (date != null) {
-                      setState(() {
-                        dataCasamento = date;
-                      });
-                    }
-                  },
-                  child: AbsorbPointer(
-                    child: TextField(
-                      controller: TextEditingController(text: dataCasamento != null ? '${dataCasamento!.day}/${dataCasamento!.month}/${dataCasamento!.year}' : ''),
-                      decoration: inputDecoration.copyWith(
-                        labelText: 'Data de Casamento',
-                        hintText: 'Selecione a data',
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                // Data de Nascimento do Cônjuge
-                GestureDetector(
-                  onTap: () async {
-                    final date = await showDatePicker(
-                      context: context,
-                      initialDate: dataNascimentoConjugue ?? DateTime.now(),
-                      firstDate: DateTime(1900),
-                      lastDate: DateTime.now(),
-                    );
-                    if (date != null) {
-                      setState(() {
-                        dataNascimentoConjugue = date;
-                      });
-                    }
-                  },
-                  child: AbsorbPointer(
-                    child: TextField(
-                      controller: TextEditingController(text: dataNascimentoConjugue != null ? '${dataNascimentoConjugue!.day}/${dataNascimentoConjugue!.month}/${dataNascimentoConjugue!.year}' : ''),
-                      decoration: inputDecoration.copyWith(
-                        labelText: 'Data de Nascimento do Cônjuge',
-                        hintText: 'Selecione a data',
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-              const SizedBox(height: 16),
-
-              // Observações
-              Text(
-                'Observações',
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: theme.primaryColor,
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: observacoesController,
-                maxLines: 3,
-                decoration: inputDecoration.copyWith(
-                  labelText: 'Observações',
-                  hintText: 'Informações adicionais...',
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Consentimento (LGPD)
-              Row(
-                children: [
-                  Checkbox(
-                    value: consentimento,
-                    onChanged: (value) {
-                      setState(() {
-                        consentimento = value ?? false;
-                      });
-                    },
-                  ),
-                  Expanded(
-                    child: Text(
-                      'Autorizo o uso dos meus dados para fins pastorais e administrativos da paróquia',
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        color: theme.colorScheme.onSurface,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 24),
-              Text(
-                'Status',
-                style: GoogleFonts.inter(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: theme.primaryColor,
-                    letterSpacing: 0.5
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Dropdown Customizado
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF2C2C2C) : const Color(0xFFF8FAFC),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
-                ),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    value: selectedStatus,
-                    isExpanded: true,
-                    icon: Icon(Icons.arrow_drop_down_rounded, color: theme.colorScheme.onSurface),
-                    style: GoogleFonts.inter(
-                      color: theme.colorScheme.onSurface,
-                      fontSize: 15,
-                    ),
-                    dropdownColor: isDark ? const Color(0xFF2C2C2C) : Colors.white,
-                    items: ['Ativo', 'Afastado', 'Inativo']
-                        .map((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                    onChanged: (String? newValue) {
-                      if (newValue != null) {
-                        setState(() {
-                          selectedStatus = newValue;
-                        });
-                      }
-                    },
-                  ),
+              const SizedBox(width: 16),
+              Expanded(
+                flex: 2,
+                child: TextField(
+                  controller: bairroController,
+                  decoration: inputDecoration.copyWith(labelText: 'Bairro *'),
                 ),
               ),
             ],
           ),
-        ),
-      ),
+          const SizedBox(height: 16),
 
+          Row(
+            children: [
+              Expanded(
+                flex: 2,
+                child: TextField(
+                  controller: cidadeController,
+                  decoration: inputDecoration.copyWith(labelText: 'Cidade *'),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: TextField(
+                  controller: estadoController,
+                  decoration: inputDecoration.copyWith(labelText: 'UF *'),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          TextField(
+            controller: cepController,
+            inputFormatters: [cepFormatter],
+            keyboardType: TextInputType.number,
+            decoration: inputDecoration.copyWith(labelText: 'CEP'),
+          ),
+          const SizedBox(height: 24),
+
+          // Estado Civil e Conjuge
+          DropdownButtonFormField<String>(
+            value: estadoCivil,
+            decoration: inputDecoration.copyWith(labelText: 'Estado Civil'),
+            items: [
+              'Solteiro',
+              'Casado',
+              'Viúvo',
+              'Separado',
+            ].map((v) => DropdownMenuItem(value: v, child: Text(v))).toList(),
+            onChanged: (v) => setState(() => estadoCivil = v),
+          ),
+
+          if (estadoCivil == 'Casado') ...[
+            const SizedBox(height: 16),
+            Text(
+              'Dados do Cônjuge',
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.primary,
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: nomeConjugueController,
+              decoration: inputDecoration.copyWith(
+                labelText: 'Nome do Cônjuge',
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Data de Casamento
+            GestureDetector(
+              onTap: () async {
+                final date = await showDatePicker(
+                  context: context,
+                  initialDate: dataCasamento ?? DateTime.now(),
+                  firstDate: DateTime(1900),
+                  lastDate: DateTime.now(),
+                );
+                if (date != null) {
+                  setState(() {
+                    dataCasamento = date;
+                  });
+                }
+              },
+              child: AbsorbPointer(
+                child: TextField(
+                  controller: TextEditingController(
+                    text: dataCasamento != null
+                        ? '${dataCasamento!.day}/${dataCasamento!.month}/${dataCasamento!.year}'
+                        : '',
+                  ),
+                  decoration: inputDecoration.copyWith(
+                    labelText: 'Data de Casamento',
+                    hintText: 'Selecione a data',
+                    suffixIcon: const Icon(Icons.calendar_today_rounded),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Data de Nascimento do Cônjuge
+            GestureDetector(
+              onTap: () async {
+                final date = await showDatePicker(
+                  context: context,
+                  initialDate: dataNascimentoConjugue ?? DateTime.now(),
+                  firstDate: DateTime(1900),
+                  lastDate: DateTime.now(),
+                );
+                if (date != null) {
+                  setState(() {
+                    dataNascimentoConjugue = date;
+                  });
+                }
+              },
+              child: AbsorbPointer(
+                child: TextField(
+                  controller: TextEditingController(
+                    text: dataNascimentoConjugue != null
+                        ? '${dataNascimentoConjugue!.day}/${dataNascimentoConjugue!.month}/${dataNascimentoConjugue!.year}'
+                        : '',
+                  ),
+                  decoration: inputDecoration.copyWith(
+                    labelText: 'Data de Nascimento do Cônjuge',
+                    hintText: 'Selecione a data',
+                    suffixIcon: const Icon(Icons.calendar_today_rounded),
+                  ),
+                ),
+              ),
+            ),
+          ],
+
+          const SizedBox(height: 24),
+          TextField(
+            controller: observacoesController,
+            maxLines: 3,
+            decoration: inputDecoration.copyWith(labelText: 'Observações'),
+          ),
+
+          const SizedBox(height: 16),
+          SwitchListTile(
+            title: Text(
+              'Autorizo o uso dos meus dados',
+              style: GoogleFonts.inter(fontSize: 14),
+            ),
+            subtitle: Text(
+              'Para fins pastorais e administrativos',
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            contentPadding: EdgeInsets.zero,
+            value: consentimento,
+            onChanged: (v) => setState(() => consentimento = v),
+          ),
+
+          const SizedBox(height: 16),
+          DropdownButtonFormField<String>(
+            value: selectedStatus,
+            decoration: inputDecoration.copyWith(labelText: 'Status'),
+            items: [
+              'Ativo',
+              'Afastado',
+              'Inativo',
+            ].map((v) => DropdownMenuItem(value: v, child: Text(v))).toList(),
+            onChanged: (v) {
+              if (v != null) setState(() => selectedStatus = v);
+            },
+          ),
+        ],
+      ),
+    );
+
+    // VERSÃO MOBILE: TELA CHEIA
+    if (isMobile) {
+      return Dialog.fullscreen(
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text(widget.title),
+            leading: IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            actions: [
+              TextButton(onPressed: _submitForm, child: const Text('Salvar')),
+            ],
+          ),
+          body: formContent,
+        ),
+      );
+    }
+
+    // VERSÃO DESKTOP: MODAL
+    return AlertDialog(
+      title: Text(
+        widget.title,
+        style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold),
+      ),
+      content: SizedBox(width: 600, child: formContent),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          style: TextButton.styleFrom(
-            foregroundColor: Colors.red,
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          ),
-          child: Text(
-            'Cancelar',
-            style: GoogleFonts.inter(fontWeight: FontWeight.w600),
-          ),
+          child: const Text('Cancelar'),
         ),
-        ElevatedButton(
-          onPressed: () {
-            // Validação dos campos obrigatórios
-            if (nomeController.text.isEmpty ||
-                cpfController.text.isEmpty ||
-                telefoneController.text.isEmpty ||
-                bairroController.text.isEmpty ||
-                cidadeController.text.isEmpty ||
-                estadoController.text.isEmpty) {
-              // Feedback visual de erro (Snackbar)
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Preencha os campos obrigatórios: Nome, CPF, Telefone, Bairro, Cidade e Estado'),
-                  backgroundColor: Colors.red,
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                  margin: const EdgeInsets.all(20),
-                ),
-              );
-              return;
-            }
-
-            // Remove as máscaras antes de salvar
-            final cpfSemMascara = cpfController.text.replaceAll(RegExp(r'[^\d]'), '');
-            final telefoneSemMascara = telefoneController.text.replaceAll(RegExp(r'[^\d]'), '');
-            final cepSemMascara = cepController.text.replaceAll(RegExp(r'[^\d]'), '');
-
-            final novoDizimista = Dizimista(
-              id: widget.dizimista?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
-              numeroRegistro: numeroRegistroController.text,
-              nome: nomeController.text,
-              cpf: cpfSemMascara,
-              dataNascimento: dataNascimento,
-              sexo: sexo,
-              telefone: telefoneSemMascara,
-              email: emailController.text.isNotEmpty ? emailController.text : null,
-              rua: ruaController.text.isNotEmpty ? ruaController.text : null,
-              numero: numeroController.text.isNotEmpty ? numeroController.text : null,
-              bairro: bairroController.text,
-              cidade: cidadeController.text,
-              estado: estadoController.text,
-              cep: cepSemMascara.isNotEmpty ? cepSemMascara : null,
-              estadoCivil: estadoCivil,
-              nomeConjugue: nomeConjugueController.text.isNotEmpty ? nomeConjugueController.text : null,
-              dataCasamento: dataCasamento,
-              dataNascimentoConjugue: dataNascimentoConjugue,
-              observacoes: observacoesController.text.isNotEmpty ? observacoesController.text : null,
-              consentimento: consentimento,
-              status: selectedStatus,
-              dataRegistro: widget.dizimista?.dataRegistro ?? DateTime.now(),
-            );
-
-            if (widget.onSave != null) {
-              widget.onSave!(novoDizimista);
-            }
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.green,
-            foregroundColor: Colors.white,
-            elevation: 0,
-            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ),
+        FilledButton(
+          onPressed: _submitForm,
           child: Text(
             widget.dizimista != null ? 'Salvar Alterações' : 'Salvar Fiel',
-            style: GoogleFonts.inter(fontWeight: FontWeight.bold),
           ),
         ),
       ],
     );
+  }
+
+  void _submitForm() {
+    // Validação dos campos obrigatórios
+    if (nomeController.text.isEmpty ||
+        cpfController.text.isEmpty ||
+        telefoneController.text.isEmpty ||
+        bairroController.text.isEmpty ||
+        cidadeController.text.isEmpty ||
+        estadoController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text(
+            'Preencha os campos obrigatórios: Nome, CPF, Telefone, Bairro, Cidade e Estado',
+          ),
+          backgroundColor: Theme.of(context).colorScheme.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    // Remove as máscaras antes de salvar
+    final cpfSemMascara = cpfController.text.replaceAll(RegExp(r'[^\d]'), '');
+    final telefoneSemMascara = telefoneController.text.replaceAll(
+      RegExp(r'[^\d]'),
+      '',
+    );
+    final cepSemMascara = cepController.text.replaceAll(RegExp(r'[^\d]'), '');
+
+    final novoDizimista = Dizimista(
+      id:
+          widget.dizimista?.id ??
+          DateTime.now().millisecondsSinceEpoch.toString(),
+      numeroRegistro: numeroRegistroController.text,
+      nome: nomeController.text,
+      cpf: cpfSemMascara,
+      dataNascimento: dataNascimento,
+      sexo: sexo,
+      telefone: telefoneSemMascara,
+      email: emailController.text.isNotEmpty ? emailController.text : null,
+      rua: ruaController.text.isNotEmpty ? ruaController.text : null,
+      numero: numeroController.text.isNotEmpty ? numeroController.text : null,
+      bairro: bairroController.text,
+      cidade: cidadeController.text,
+      estado: estadoController.text,
+      cep: cepSemMascara.isNotEmpty ? cepSemMascara : null,
+      estadoCivil: estadoCivil,
+      nomeConjugue: nomeConjugueController.text.isNotEmpty
+          ? nomeConjugueController.text
+          : null,
+      dataCasamento: dataCasamento,
+      dataNascimentoConjugue: dataNascimentoConjugue,
+      observacoes: observacoesController.text.isNotEmpty
+          ? observacoesController.text
+          : null,
+      consentimento: consentimento,
+      status: selectedStatus,
+      dataRegistro: widget.dizimista?.dataRegistro ?? DateTime.now(),
+    );
+
+    if (widget.onSave != null) {
+      widget.onSave!(novoDizimista);
+    }
   }
 }

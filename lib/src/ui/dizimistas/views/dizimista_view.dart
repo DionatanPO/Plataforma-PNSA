@@ -56,10 +56,6 @@ class _DizimistaViewState extends State<DizimistaView> {
             title: 'Fiéis',
             subtitle: 'Gerenciamento de cadastros',
             icon: Icons.people_rounded,
-            onActionPressed: () => _showCadastroDialog(context),
-            actionLabel: 'Novo Fiel',
-            actionIcon: Icons.add_rounded,
-            actionColor: accentColor,
           ),
 
           // =======================================================
@@ -157,6 +153,16 @@ class _DizimistaViewState extends State<DizimistaView> {
             );
           }),
         ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _showCadastroDialog(context),
+        backgroundColor: accentColor,
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.add_rounded),
+        label: Text(
+          'Novo Fiel',
+          style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+        ),
       ),
     );
   }

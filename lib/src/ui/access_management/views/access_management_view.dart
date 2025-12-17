@@ -34,13 +34,16 @@ class _AccessManagementViewState extends State<AccessManagementView> {
   late Color backgroundColor;
   late Color borderColor;
 
+  bool get isMobile => MediaQuery.of(context).size.width < 600;
+
   @override
   Widget build(BuildContext context) {
     theme = Theme.of(context);
     isDark = theme.brightness == Brightness.dark;
     surfaceColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
-    backgroundColor =
-        isDark ? const Color(0xFF121212) : const Color(0xFFF4F6F8);
+    backgroundColor = isDark
+        ? const Color(0xFF121212)
+        : const Color(0xFFF4F6F8);
     borderColor = theme.dividerColor.withOpacity(0.1);
 
     return Scaffold(
@@ -48,12 +51,15 @@ class _AccessManagementViewState extends State<AccessManagementView> {
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
-          AccessManagementHeader(
-            onAddUserPressed: _openAddUserDialog,
-          ),
+          const AccessManagementHeader(),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
+              padding: EdgeInsets.fromLTRB(
+                isMobile ? 16 : 24,
+                isMobile ? 16 : 24,
+                isMobile ? 16 : 24,
+                isMobile ? 16 : 24,
+              ),
               child: AccessManagementSearchBar(
                 controller: _searchController,
                 onChanged: (value) => controller.setSearchQuery(value),
@@ -68,39 +74,53 @@ class _AccessManagementViewState extends State<AccessManagementView> {
             }
             if (controller.filteredAcessos.isEmpty) {
               return SliverToBoxAdapter(
-                child: AccessManagementEmptyState(searchQuery: controller.searchQuery),
+                child: AccessManagementEmptyState(
+                  searchQuery: controller.searchQuery,
+                ),
               );
             }
-            return SliverLayoutBuilder(builder: (context, constraints) {
-              if (constraints.crossAxisExtent > 850) {
-                return AccessManagementDesktopList(
-                  acessos: controller.filteredAcessos,
-                  onEditUser: _openEditUserDialog,
-                  onResetPassword: _openResetPasswordDialog,
-                  theme: theme,
-                  isDark: isDark,
-                  surfaceColor: surfaceColor,
-                  borderColor: borderColor,
-                );
-              } else {
-                return AccessManagementMobileList(
-                  acessos: controller.filteredAcessos,
-                  onEditUser: _openEditUserDialog,
-                  onResetPassword: _openResetPasswordDialog,
-                  theme: theme,
-                  isDark: isDark,
-                  surfaceColor: surfaceColor,
-                  borderColor: borderColor,
-                );
-              }
-            });
+            return SliverLayoutBuilder(
+              builder: (context, constraints) {
+                if (constraints.crossAxisExtent > 850) {
+                  return AccessManagementDesktopList(
+                    acessos: controller.filteredAcessos,
+                    onEditUser: _openEditUserDialog,
+                    onResetPassword: _openResetPasswordDialog,
+                    theme: theme,
+                    isDark: isDark,
+                    surfaceColor: surfaceColor,
+                    borderColor: borderColor,
+                  );
+                } else {
+                  return AccessManagementMobileList(
+                    acessos: controller.filteredAcessos,
+                    onEditUser: _openEditUserDialog,
+                    onResetPassword: _openResetPasswordDialog,
+                    theme: theme,
+                    isDark: isDark,
+                    surfaceColor: surfaceColor,
+                    borderColor: borderColor,
+                  );
+                }
+              },
+            );
           }),
           _buildInfoSectionSliver(
-              'Definições de Funções', const AccessManagementFunctionCards()),
-          _buildInfoSectionSliver('Legenda de Status', const AccessManagementStatusCards()),
+            'Definições de Funções',
+            const AccessManagementFunctionCards(),
+          ),
+          _buildInfoSectionSliver(
+            'Legenda de Status',
+            const AccessManagementStatusCards(),
+          ),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 40, 24, 0),
+              padding: EdgeInsets.fromLTRB(
+                isMobile ? 16 : 24,
+                isMobile ? 24 : 40,
+                isMobile ? 16 : 24,
+                0,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -142,6 +162,16 @@ class _AccessManagementViewState extends State<AccessManagementView> {
           const SliverToBoxAdapter(child: SizedBox(height: 40)),
         ],
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _openAddUserDialog,
+        backgroundColor: theme.primaryColor,
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.add_rounded),
+        label: Text(
+          'Novo Usuário',
+          style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+        ),
+      ),
     );
   }
 
@@ -152,7 +182,12 @@ class _AccessManagementViewState extends State<AccessManagementView> {
   Widget _buildInfoSectionSliver(String title, Widget content) {
     return SliverToBoxAdapter(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 40, 24, 0),
+        padding: EdgeInsets.fromLTRB(
+          isMobile ? 16 : 24,
+          isMobile ? 24 : 40,
+          isMobile ? 16 : 24,
+          0,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -182,12 +217,14 @@ class _AccessManagementViewState extends State<AccessManagementView> {
     String status = acesso.status;
 
     final cpfFormatter = MaskTextInputFormatter(
-      mask: '###.###.###-##', filter: {"#": RegExp(r'[0-9]')},
+      mask: '###.###.###-##',
+      filter: {"#": RegExp(r'[0-9]')},
     );
     cpfController.text = cpfFormatter.maskText(acesso.cpf);
 
     final telefoneFormatter = MaskTextInputFormatter(
-      mask: '(##) #####-####', filter: {"#": RegExp(r'[0-9]')},
+      mask: '(##) #####-####',
+      filter: {"#": RegExp(r'[0-9]')},
     );
     telefoneController.text = telefoneFormatter.maskText(acesso.telefone);
 
@@ -196,86 +233,150 @@ class _AccessManagementViewState extends State<AccessManagementView> {
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (context, setState) {
+            Widget formContent = SingleChildScrollView(
+              padding: isMobile ? const EdgeInsets.all(16) : null,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (!isMobile) _label('Dados Pessoais'),
+                  _buildTextField(
+                    label: 'Nome Completo',
+                    controller: nomeController,
+                    keyboardType: TextInputType.text,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildTextField(
+                    label: 'E-mail Corporativo',
+                    controller: emailController,
+                    keyboardType: TextInputType.emailAddress,
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildTextField(
+                          label: 'CPF',
+                          controller: cpfController,
+                          inputFormatters: [cpfFormatter],
+                          keyboardType: TextInputType.number,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildTextField(
+                          label: 'Celular',
+                          controller: telefoneController,
+                          inputFormatters: [telefoneFormatter],
+                          keyboardType: TextInputType.phone,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  _buildTextField(
+                    label: 'Endereço',
+                    controller: enderecoController,
+                    keyboardType: TextInputType.text,
+                  ),
+                  const SizedBox(height: 24),
+                  if (!isMobile) _label('Permissões'),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildDropdown(
+                          label: 'Função',
+                          value: funcao,
+                          items: controller
+                              .getFuncoes()
+                              .map((f) => f.nome)
+                              .toList(),
+                          onChanged: (v) => setState(() => funcao = v!),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _buildDropdown(
+                          label: 'Status',
+                          value: status,
+                          items: ['Ativo', 'Inativo'],
+                          onChanged: (v) => setState(() => status = v!),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+
+            void submit() {
+              if (nomeController.text.isNotEmpty &&
+                  emailController.text.isNotEmpty) {
+                final acessoAtualizado = Acesso(
+                  id: acesso.id,
+                  nome: nomeController.text,
+                  email: emailController.text,
+                  cpf: cpfFormatter.getUnmaskedText(),
+                  telefone: telefoneFormatter.getUnmaskedText(),
+                  endereco: enderecoController.text,
+                  funcao: funcao,
+                  status: status,
+                  ultimoAcesso: acesso.ultimoAcesso,
+                  pendencia: acesso.pendencia,
+                );
+                controller.updateAcesso(acessoAtualizado);
+                Navigator.pop(context);
+              }
+            }
+
+            if (isMobile) {
+              return Dialog.fullscreen(
+                child: Scaffold(
+                  appBar: AppBar(
+                    title: const Text('Editar Usuário'),
+                    leading: IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: submit,
+                        child: const Text('Salvar'),
+                      ),
+                    ],
+                  ),
+                  body: formContent,
+                ),
+              );
+            }
+
             return AlertDialog(
               backgroundColor: surfaceColor,
               surfaceTintColor: Colors.transparent,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
-              title: Text('Editar Usuário', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
-              content: SizedBox(
-                width: 500,
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _label('Dados Pessoais'),
-                      _buildTextField(label: 'Nome Completo', controller: nomeController, keyboardType: TextInputType.text),
-                      const SizedBox(height: 16),
-                      _buildTextField(label: 'E-mail Corporativo', controller: emailController, keyboardType: TextInputType.emailAddress),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Expanded(child: _buildTextField(label: 'CPF', controller: cpfController, inputFormatters: [cpfFormatter], keyboardType: TextInputType.number)),
-                          const SizedBox(width: 12),
-                          Expanded(child: _buildTextField(label: 'Celular', controller: telefoneController, inputFormatters: [telefoneFormatter], keyboardType: TextInputType.phone)),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      _buildTextField(label: 'Endereço', controller: enderecoController, keyboardType: TextInputType.text),
-                      const SizedBox(height: 24),
-                      _label('Permissões'),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildDropdown(
-                              label: 'Função',
-                              value: funcao,
-                              items: controller.getFuncoes().map((f) => f.nome).toList(),
-                              onChanged: (v) => setState(() => funcao = v!),
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: _buildDropdown(
-                              label: 'Status',
-                              value: status,
-                              items: ['Ativo', 'Inativo'],
-                              onChanged: (v) => setState(() => status = v!),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+              title: Text(
+                'Editar Usuário',
+                style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+              ),
+              content: SizedBox(width: 500, child: formContent),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(
+                    'Cancelar',
+                    style: GoogleFonts.inter(color: Colors.red),
                   ),
                 ),
-              ),
-              actions: [
-                TextButton(onPressed: () => Navigator.pop(context), child: Text('Cancelar', style: GoogleFonts.inter(color: Colors.red))),
                 ElevatedButton(
-                  onPressed: () {
-                    if (nomeController.text.isNotEmpty && emailController.text.isNotEmpty) {
-                      final acessoAtualizado = Acesso(
-                        id: acesso.id,
-                        nome: nomeController.text,
-                        email: emailController.text,
-                        cpf: cpfFormatter.getUnmaskedText(),
-                        telefone: telefoneFormatter.getUnmaskedText(),
-                        endereco: enderecoController.text,
-                        funcao: funcao,
-                        status: status,
-                        ultimoAcesso: acesso.ultimoAcesso,
-                        pendencia: acesso.pendencia,
-                      );
-                      controller.updateAcesso(acessoAtualizado);
-                      Navigator.pop(context);
-                    }
-                  },
+                  onPressed: submit,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                   child: const Text('Salvar Alterações'),
                 ),
@@ -295,9 +396,12 @@ class _AccessManagementViewState extends State<AccessManagementView> {
           backgroundColor: surfaceColor,
           surfaceTintColor: Colors.transparent,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
           ),
-          title: Text('Redefinir Senha', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+          title: Text(
+            'Redefinir Senha',
+            style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+          ),
           content: Text(
             'Deseja redefinir a senha do usuário ${acesso.nome} para o padrão 123456? Esta ação definirá a pendência de troca de senha para este usuário.',
             style: GoogleFonts.inter(fontSize: 14),
@@ -305,7 +409,10 @@ class _AccessManagementViewState extends State<AccessManagementView> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text('Cancelar', style: GoogleFonts.inter(color: theme.colorScheme.onSurface)),
+              child: Text(
+                'Cancelar',
+                style: GoogleFonts.inter(color: theme.colorScheme.onSurface),
+              ),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -320,14 +427,17 @@ class _AccessManagementViewState extends State<AccessManagementView> {
                   funcao: acesso.funcao,
                   status: acesso.status,
                   ultimoAcesso: acesso.ultimoAcesso,
-                  pendencia: true, // Definir pendência como true para forçar troca de senha
+                  pendencia:
+                      true, // Definir pendência como true para forçar troca de senha
                 );
 
                 await controller.updateAcesso(acessoAtualizado);
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Senha do usuário ${acesso.nome} redefinida. A pendência de troca de senha foi ativada.'),
+                    content: Text(
+                      'Senha do usuário ${acesso.nome} redefinida. A pendência de troca de senha foi ativada.',
+                    ),
                     backgroundColor: Colors.green,
                   ),
                 );
@@ -335,7 +445,9 @@ class _AccessManagementViewState extends State<AccessManagementView> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
               child: const Text('Redefinir'),
             ),
@@ -344,7 +456,6 @@ class _AccessManagementViewState extends State<AccessManagementView> {
       },
     );
   }
-
 
   void _openAddUserDialog() {
     String nome = '';
@@ -355,81 +466,163 @@ class _AccessManagementViewState extends State<AccessManagementView> {
     String funcao = 'Administrador';
     String status = 'Ativo';
 
-    final cpfFormatter = MaskTextInputFormatter(mask: '###.###.###-##', filter: {"#": RegExp(r'[0-9]')});
-    final telefoneFormatter = MaskTextInputFormatter(mask: '(##) #####-####', filter: {"#": RegExp(r'[0-9]')});
+    final cpfFormatter = MaskTextInputFormatter(
+      mask: '###.###.###-##',
+      filter: {"#": RegExp(r'[0-9]')},
+    );
+    final telefoneFormatter = MaskTextInputFormatter(
+      mask: '(##) #####-####',
+      filter: {"#": RegExp(r'[0-9]')},
+    );
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (context, setState) {
-            return AlertDialog(
-              backgroundColor: surfaceColor,
-              surfaceTintColor: Colors.transparent,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-              title: Text('Novo Usuário', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
-              content: SizedBox(
-                width: 500,
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            Widget formContent = SingleChildScrollView(
+              padding: isMobile ? const EdgeInsets.all(16) : null,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (!isMobile) _label('Dados Pessoais'),
+                  _buildTextField(
+                    label: 'Nome Completo',
+                    onChanged: (v) => nome = v,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildTextField(
+                    label: 'E-mail Corporativo',
+                    onChanged: (v) => email = v,
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
                     children: [
-                      _label('Dados Pessoais'),
-                      _buildTextField(label: 'Nome Completo', onChanged: (v) => nome = v),
-                      const SizedBox(height: 16),
-                      _buildTextField(label: 'E-mail Corporativo', onChanged: (v) => email = v),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Expanded(child: _buildTextField(label: 'CPF', onChanged: (v) => cpf = v, inputFormatters: [cpfFormatter], keyboardType: TextInputType.number)),
-                          const SizedBox(width: 12),
-                          Expanded(child: _buildTextField(label: 'Celular', onChanged: (v) => telefone = v, inputFormatters: [telefoneFormatter], keyboardType: TextInputType.phone)),
-                        ],
+                      Expanded(
+                        child: _buildTextField(
+                          label: 'CPF',
+                          onChanged: (v) => cpf = v,
+                          inputFormatters: [cpfFormatter],
+                          keyboardType: TextInputType.number,
+                        ),
                       ),
-                      const SizedBox(height: 16),
-                      _buildTextField(label: 'Endereço', onChanged: (v) => endereco = v),
-                      const SizedBox(height: 24),
-                      _label('Permissões'),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildDropdown(label: 'Função', value: funcao, items: controller.getFuncoes().map((f) => f.nome).toList(), onChanged: (v) => setState(() => funcao = v!)),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: _buildDropdown(label: 'Status', value: status, items: ['Ativo', 'Inativo'], onChanged: (v) => setState(() => status = v!)),
-                          ),
-                        ],
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildTextField(
+                          label: 'Celular',
+                          onChanged: (v) => telefone = v,
+                          inputFormatters: [telefoneFormatter],
+                          keyboardType: TextInputType.phone,
+                        ),
                       ),
                     ],
                   ),
-                ),
+                  const SizedBox(height: 16),
+                  _buildTextField(
+                    label: 'Endereço',
+                    onChanged: (v) => endereco = v,
+                  ),
+                  const SizedBox(height: 24),
+                  if (!isMobile) _label('Permissões'),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildDropdown(
+                          label: 'Função',
+                          value: funcao,
+                          items: controller
+                              .getFuncoes()
+                              .map((f) => f.nome)
+                              .toList(),
+                          onChanged: (v) => setState(() => funcao = v!),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _buildDropdown(
+                          label: 'Status',
+                          value: status,
+                          items: ['Ativo', 'Inativo'],
+                          onChanged: (v) => setState(() => status = v!),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
+            );
+
+            void submit() {
+              if (nome.isNotEmpty && email.isNotEmpty) {
+                final cpfSemMascara = cpf.replaceAll(RegExp(r'[^\d]'), '');
+                final telefoneSemMascara = telefone.replaceAll(
+                  RegExp(r'[^\d]'),
+                  '',
+                );
+                final novoAcesso = Acesso(
+                  id: (controller.acessos.length + 1).toString(),
+                  nome: nome,
+                  email: email,
+                  cpf: cpfSemMascara,
+                  telefone: telefoneSemMascara,
+                  endereco: endereco,
+                  funcao: funcao,
+                  status: status,
+                  ultimoAcesso: DateTime.now(),
+                  pendencia: true,
+                );
+                controller.addAcesso(novoAcesso);
+                Navigator.pop(context);
+              }
+            }
+
+            if (isMobile) {
+              return Dialog.fullscreen(
+                child: Scaffold(
+                  appBar: AppBar(
+                    title: const Text('Novo Usuário'),
+                    leading: IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                    actions: [
+                      TextButton(onPressed: submit, child: const Text('Criar')),
+                    ],
+                  ),
+                  body: formContent,
+                ),
+              );
+            }
+
+            return AlertDialog(
+              backgroundColor: surfaceColor,
+              surfaceTintColor: Colors.transparent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              title: Text(
+                'Novo Usuário',
+                style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+              ),
+              content: SizedBox(width: 500, child: formContent),
               actions: [
-                TextButton(onPressed: () => Navigator.pop(context), child: Text('Cancelar', style: GoogleFonts.inter(color: Colors.red))),
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(
+                    'Cancelar',
+                    style: GoogleFonts.inter(color: Colors.red),
+                  ),
+                ),
                 ElevatedButton(
-                  onPressed: () {
-                    if (nome.isNotEmpty && email.isNotEmpty) {
-                      final cpfSemMascara = cpf.replaceAll(RegExp(r'[^\d]'), '');
-                      final telefoneSemMascara = telefone.replaceAll(RegExp(r'[^\d]'), '');
-                      final novoAcesso = Acesso(
-                        id: (controller.acessos.length + 1).toString(),
-                        nome: nome,
-                        email: email,
-                        cpf: cpfSemMascara,
-                        telefone: telefoneSemMascara,
-                        endereco: endereco,
-                        funcao: funcao,
-                        status: status,
-                        ultimoAcesso: DateTime.now(),
-                        pendencia: true,
-                      );
-                      controller.addAcesso(novoAcesso);
-                      Navigator.pop(context);
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                  onPressed: submit,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
                   child: const Text('Criar Acesso'),
                 ),
               ],
@@ -442,7 +635,14 @@ class _AccessManagementViewState extends State<AccessManagementView> {
 
   Widget _label(String text) => Padding(
     padding: const EdgeInsets.only(bottom: 12),
-    child: Text(text, style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: theme.primaryColor)),
+    child: Text(
+      text,
+      style: GoogleFonts.inter(
+        fontSize: 12,
+        fontWeight: FontWeight.bold,
+        color: theme.primaryColor,
+      ),
+    ),
   );
 
   Widget _buildTextField({
@@ -451,48 +651,74 @@ class _AccessManagementViewState extends State<AccessManagementView> {
     Function(String)? onChanged,
     List<TextInputFormatter>? inputFormatters,
     TextInputType? keyboardType,
-  }) =>
-      TextField(
-        controller: controller,
-        decoration: InputDecoration(
-          labelText: label,
-          filled: true,
-          fillColor: backgroundColor,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+  }) => TextField(
+    controller: controller,
+    decoration: InputDecoration(
+      labelText: label,
+      border: const OutlineInputBorder(),
+      enabledBorder: OutlineInputBorder(
+        borderSide: BorderSide(
+          color: theme.colorScheme.outline.withOpacity(0.5),
         ),
-        style: GoogleFonts.inter(fontSize: 14),
-        onChanged: onChanged,
-        inputFormatters: inputFormatters,
-        keyboardType: keyboardType,
-      );
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderSide: BorderSide(color: theme.colorScheme.primary, width: 2.0),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderSide: BorderSide(color: theme.colorScheme.error),
+      ),
+      filled: true,
+      fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+      labelStyle: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+      floatingLabelStyle: TextStyle(color: theme.colorScheme.primary),
+      isDense: true,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+    ),
+    style: GoogleFonts.inter(fontSize: 14),
+    onChanged: onChanged,
+    inputFormatters: inputFormatters,
+    keyboardType: keyboardType,
+  );
 
   Widget _buildDropdown({
     required String label,
     required String value,
     required List<String> items,
     required Function(String?) onChanged,
-  }) =>
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: GoogleFonts.inter(fontSize: 11, color: theme.colorScheme.onSurface.withOpacity(0.6)),
+  }) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        label,
+        style: GoogleFonts.inter(
+          fontSize: 11,
+          color: theme.colorScheme.onSurface.withOpacity(0.6),
+        ),
+      ),
+      const SizedBox(height: 6),
+      Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(color: theme.colorScheme.outline.withOpacity(0.5)),
+        ),
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<String>(
+            isExpanded: true,
+            value: value,
+            items: items
+                .map(
+                  (s) => DropdownMenuItem(
+                    value: s,
+                    child: Text(s, style: GoogleFonts.inter(fontSize: 14)),
+                  ),
+                )
+                .toList(),
+            onChanged: onChanged,
           ),
-          const SizedBox(height: 6),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: BoxDecoration(color: backgroundColor, borderRadius: BorderRadius.circular(12)),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                isExpanded: true,
-                value: value,
-                items: items.map((s) => DropdownMenuItem(value: s, child: Text(s, style: GoogleFonts.inter(fontSize: 14)))).toList(),
-                onChanged: onChanged,
-              ),
-            ),
-          ),
-        ],
-      );
+        ),
+      ),
+    ],
+  );
 }
