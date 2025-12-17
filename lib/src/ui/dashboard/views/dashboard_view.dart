@@ -38,8 +38,12 @@ class _DashboardViewState extends State<DashboardView> {
     final padding = isDesktop ? 32.0 : 24.0;
 
     // Cálculo do aspect ratio dinâmico
-    double cardHeightTarget = 220.0; // Aumentado de 200 para 220
-    if (!isDesktop) cardHeightTarget = 200.0; // Aumentado de 180 para 200
+    double cardHeightTarget = 220.0; // Desktop: 3 colunas
+    if (isTablet) {
+      cardHeightTarget = 240.0; // Tablet: 2 colunas - precisa de mais altura
+    } else if (!isDesktop) {
+      cardHeightTarget = 210.0; // Mobile: 1 coluna
+    }
 
     final double availableWidth =
         width - (padding * 2) - ((crossAxisCount - 1) * 16);
@@ -163,24 +167,6 @@ class _DashboardViewState extends State<DashboardView> {
                           ],
                         ),
                       ),
-
-                      // Botões de ação (apenas desktop)
-                      if (width > 600) ...[
-                        _HeaderAction(
-                          icon: Icons.calendar_month_rounded,
-                          label: "Mês",
-                          theme: theme,
-                          borderColor: borderColor,
-                        ),
-                        const SizedBox(width: 8),
-                        _HeaderAction(
-                          icon: Icons.file_download_rounded,
-                          label: "Exportar",
-                          theme: theme,
-                          isPrimary: true,
-                          accentColor: accentColor,
-                        ),
-                      ],
                     ],
                   ),
                 ],
@@ -495,87 +481,6 @@ class _DashboardViewState extends State<DashboardView> {
 // COMPONENTES
 // =============================================================================
 
-class _HeaderAction extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final ThemeData theme;
-  final bool isPrimary;
-  final Color? accentColor;
-  final Color? borderColor;
-
-  const _HeaderAction({
-    required this.icon,
-    required this.label,
-    required this.theme,
-    this.isPrimary = false,
-    this.accentColor,
-    this.borderColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () {},
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          decoration: BoxDecoration(
-            gradient: isPrimary
-                ? LinearGradient(
-                    colors: [
-                      accentColor ?? theme.primaryColor,
-                      (accentColor ?? theme.primaryColor).withOpacity(0.8),
-                    ],
-                  )
-                : null,
-            color: isPrimary ? null : Colors.transparent,
-            border: isPrimary
-                ? null
-                : Border.all(color: borderColor ?? theme.dividerColor),
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: isPrimary
-                ? [
-                    BoxShadow(
-                      color: (accentColor ?? theme.primaryColor).withOpacity(
-                        0.3,
-                      ),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ]
-                : null,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                icon,
-                size: 18,
-                color: isPrimary
-                    ? Colors.white
-                    : theme.colorScheme.onSurface.withOpacity(0.6),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: GoogleFonts.inter(
-                  fontWeight: FontWeight.w600,
-                  color: isPrimary
-                      ? Colors.white
-                      : theme.colorScheme.onSurface.withOpacity(0.7),
-                  fontSize: 13,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _ResponsiveStatCard extends StatefulWidget {
   final String title;
   final String value;
@@ -695,8 +600,7 @@ class _ResponsiveStatCardState extends State<_ResponsiveStatCard> {
               ],
             ),
 
-            const SizedBox(height: 12),
-
+            const SizedBox(height: 8), // Reduzido de 12 para 8
             // Valor Principal
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -708,7 +612,7 @@ class _ResponsiveStatCardState extends State<_ResponsiveStatCard> {
                     child: Text(
                       widget.value,
                       style: GoogleFonts.outfit(
-                        fontSize: 28,
+                        fontSize: 26, // Reduzido de 28 para 26
                         fontWeight: FontWeight.bold,
                         color: widget.theme.colorScheme.onSurface,
                         height: 1.2,
@@ -725,7 +629,7 @@ class _ResponsiveStatCardState extends State<_ResponsiveStatCard> {
                     child: Text(
                       widget.subtitle!,
                       style: GoogleFonts.inter(
-                        fontSize: 14,
+                        fontSize: 13, // Reduzido de 14 para 13
                         color: widget.theme.colorScheme.onSurface.withOpacity(
                           0.5,
                         ),
@@ -739,13 +643,12 @@ class _ResponsiveStatCardState extends State<_ResponsiveStatCard> {
               ],
             ),
 
-            const SizedBox(height: 6),
-
+            const SizedBox(height: 4), // Reduzido de 6 para 4
             // Título
             Text(
               widget.title,
               style: GoogleFonts.inter(
-                fontSize: 13,
+                fontSize: 12, // Reduzido de 13 para 12
                 color: widget.theme.colorScheme.onSurface.withOpacity(0.6),
                 fontWeight: FontWeight.w500,
               ),

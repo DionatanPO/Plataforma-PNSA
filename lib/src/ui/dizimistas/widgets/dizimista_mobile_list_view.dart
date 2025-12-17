@@ -4,6 +4,25 @@ import '../models/dizimista_model.dart';
 import 'dizimista_avatar.dart';
 import 'status_badge.dart';
 
+// Funções de formatação
+String formatCPF(String cpf) {
+  if (cpf.isEmpty) return 'CPF não informado';
+  final numbers = cpf.replaceAll(RegExp(r'[^0-9]'), '');
+  if (numbers.length != 11) return cpf;
+  return '${numbers.substring(0, 3)}.${numbers.substring(3, 6)}.${numbers.substring(6, 9)}-${numbers.substring(9)}';
+}
+
+String formatPhone(String phone) {
+  if (phone.isEmpty) return '';
+  final numbers = phone.replaceAll(RegExp(r'[^0-9]'), '');
+  if (numbers.length == 11) {
+    return '(${numbers.substring(0, 2)}) ${numbers.substring(2, 7)}-${numbers.substring(7)}';
+  } else if (numbers.length == 10) {
+    return '(${numbers.substring(0, 2)}) ${numbers.substring(2, 6)}-${numbers.substring(6)}';
+  }
+  return phone;
+}
+
 class DizimistaMobileListView extends StatelessWidget {
   final List<Dizimista> lista;
   final ThemeData theme;
@@ -108,9 +127,7 @@ class DizimistaMobileListView extends StatelessWidget {
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    d.cpf.isNotEmpty
-                                        ? d.cpf
-                                        : 'CPF não informado',
+                                    formatCPF(d.cpf),
                                     style: GoogleFonts.inter(
                                       fontSize: 12,
                                       color: theme.colorScheme.onSurface
@@ -139,7 +156,7 @@ class DizimistaMobileListView extends StatelessWidget {
                             ),
                             const SizedBox(width: 6),
                             Text(
-                              d.telefone,
+                              formatPhone(d.telefone),
                               style: GoogleFonts.inter(
                                 fontSize: 13,
                                 color: theme.colorScheme.onSurface.withOpacity(

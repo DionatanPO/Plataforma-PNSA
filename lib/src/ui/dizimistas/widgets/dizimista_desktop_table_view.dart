@@ -6,6 +6,30 @@ import 'status_badge.dart';
 import 'table_header_cell.dart';
 import 'action_button.dart';
 
+// Funções de formatação
+String formatCPF(String cpf) {
+  if (cpf.isEmpty) return '';
+  // Remove qualquer caractere que não seja número
+  final numbers = cpf.replaceAll(RegExp(r'[^0-9]'), '');
+  if (numbers.length != 11)
+    return cpf; // Retorna original se não tiver 11 dígitos
+  return '${numbers.substring(0, 3)}.${numbers.substring(3, 6)}.${numbers.substring(6, 9)}-${numbers.substring(9)}';
+}
+
+String formatPhone(String phone) {
+  if (phone.isEmpty) return '';
+  // Remove qualquer caractere que não seja número
+  final numbers = phone.replaceAll(RegExp(r'[^0-9]'), '');
+  if (numbers.length == 11) {
+    // Celular: (XX) XXXXX-XXXX
+    return '(${numbers.substring(0, 2)}) ${numbers.substring(2, 7)}-${numbers.substring(7)}';
+  } else if (numbers.length == 10) {
+    // Fixo: (XX) XXXX-XXXX
+    return '(${numbers.substring(0, 2)}) ${numbers.substring(2, 6)}-${numbers.substring(6)}';
+  }
+  return phone; // Retorna original se não tiver formato esperado
+}
+
 class DizimistaDesktopTableView extends StatelessWidget {
   final List<Dizimista> lista;
   final ThemeData theme;
@@ -237,7 +261,7 @@ class _TableRowState extends State<_TableRow> {
                             ),
                             const SizedBox(width: 6),
                             Text(
-                              d.cpf,
+                              formatCPF(d.cpf),
                               style: GoogleFonts.inter(
                                 fontSize: 11,
                                 color: theme.colorScheme.onSurface.withOpacity(
@@ -272,7 +296,7 @@ class _TableRowState extends State<_TableRow> {
                       const SizedBox(width: 6),
                       Flexible(
                         child: Text(
-                          d.telefone,
+                          formatPhone(d.telefone),
                           style: GoogleFonts.inter(
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
