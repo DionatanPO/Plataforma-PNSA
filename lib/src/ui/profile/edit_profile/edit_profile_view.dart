@@ -30,10 +30,12 @@ class EditProfileView extends StatelessWidget {
       extendBodyBehindAppBar: true,
       // ADICIONADO: Scrollbar é essencial para Desktop
       body: Scrollbar(
+        controller: controller.scrollController,
         thumbVisibility: true,
         thickness: 8,
         radius: const Radius.circular(4),
         child: CustomScrollView(
+          controller: controller.scrollController,
           physics: const BouncingScrollPhysics(),
           slivers: [
             // 1. APP BAR CUSTOMIZADA
@@ -46,16 +48,22 @@ class EditProfileView extends StatelessWidget {
               actions: [
                 Padding(
                   padding: const EdgeInsets.only(right: 16),
-                  child: Obx(() => FilledButton.icon(
-                    onPressed: controller.isLoading.value ? null : controller.saveProfile,
-                    icon: const Icon(Icons.save_outlined, size: 18),
-                    label: const Text("Salvar"),
-                    style: FilledButton.styleFrom(
-                      visualDensity: VisualDensity.compact,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  child: Obx(
+                    () => FilledButton.icon(
+                      onPressed: controller.isLoading.value
+                          ? null
+                          : controller.saveProfile,
+                      icon: const Icon(Icons.save_outlined, size: 18),
+                      label: const Text("Salvar"),
+                      style: FilledButton.styleFrom(
+                        visualDensity: VisualDensity.compact,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
                     ),
-                  )),
-                )
+                  ),
+                ),
               ],
             ),
 
@@ -66,10 +74,10 @@ class EditProfileView extends StatelessWidget {
                   constraints: const BoxConstraints(maxWidth: 800),
                   child: Padding(
                     padding: EdgeInsets.only(
-                        top: isDesktop ? 100 : 20,
-                        left: 24,
-                        right: 24,
-                        bottom: 40
+                      top: isDesktop ? 100 : 20,
+                      left: 24,
+                      right: 24,
+                      bottom: 40,
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -78,7 +86,10 @@ class EditProfileView extends StatelessWidget {
                         Center(
                           child: Column(
                             children: [
-                              _ProfileAvatar(controller: controller, theme: theme),
+                              _ProfileAvatar(
+                                controller: controller,
+                                theme: theme,
+                              ),
                               const SizedBox(height: 16),
                               Text(
                                 controller.nameController.text.isEmpty
@@ -94,7 +105,8 @@ class EditProfileView extends StatelessWidget {
                                 "Product Designer",
                                 style: GoogleFonts.inter(
                                   fontSize: 14,
-                                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                                  color: theme.colorScheme.onSurface
+                                      .withOpacity(0.6),
                                 ),
                               ),
                             ],
@@ -120,14 +132,17 @@ class EditProfileView extends StatelessWidget {
                                         label: "Nome Completo",
                                         controller: controller.nameController,
                                         icon: Icons.person_outline,
-                                        validator: (v) => v!.isEmpty ? "Obrigatório" : null,
+                                        validator: (v) =>
+                                            v!.isEmpty ? "Obrigatório" : null,
                                       ),
                                     ),
                                     const SizedBox(width: 24),
                                     Expanded(
                                       child: _ModernInput(
                                         label: "Cargo / Função",
-                                        controller: TextEditingController(text: "Product Designer"),
+                                        controller: TextEditingController(
+                                          text: "Product Designer",
+                                        ),
                                         icon: Icons.work_outline,
                                       ),
                                     ),
@@ -138,12 +153,15 @@ class EditProfileView extends StatelessWidget {
                                   label: "Nome Completo",
                                   controller: controller.nameController,
                                   icon: Icons.person_outline,
-                                  validator: (v) => v!.isEmpty ? "Obrigatório" : null,
+                                  validator: (v) =>
+                                      v!.isEmpty ? "Obrigatório" : null,
                                 ),
                                 const SizedBox(height: 20),
                                 _ModernInput(
                                   label: "Cargo / Função",
-                                  controller: TextEditingController(text: "Product Designer"),
+                                  controller: TextEditingController(
+                                    text: "Product Designer",
+                                  ),
                                   icon: Icons.work_outline,
                                 ),
                               ],
@@ -153,13 +171,16 @@ class EditProfileView extends StatelessWidget {
                               _ModernInput(
                                 label: "Bio / Sobre",
                                 controller: TextEditingController(),
-                                hint: "Escreva uma breve descrição sobre você...",
+                                hint:
+                                    "Escreva uma breve descrição sobre você...",
                                 icon: Icons.edit_note,
                                 maxLines: 4,
                               ),
 
                               const SizedBox(height: 40),
-                              Divider(color: theme.dividerColor.withOpacity(0.1)),
+                              Divider(
+                                color: theme.dividerColor.withOpacity(0.1),
+                              ),
                               const SizedBox(height: 40),
 
                               _SectionHeader(title: "Contato e Segurança"),
@@ -173,7 +194,9 @@ class EditProfileView extends StatelessWidget {
                                         label: "E-mail Corporativo",
                                         controller: controller.emailController,
                                         icon: Icons.email_outlined,
-                                        validator: (v) => !GetUtils.isEmail(v!) ? "Inválido" : null,
+                                        validator: (v) => !GetUtils.isEmail(v!)
+                                            ? "Inválido"
+                                            : null,
                                       ),
                                     ),
                                     const SizedBox(width: 24),
@@ -192,7 +215,8 @@ class EditProfileView extends StatelessWidget {
                                   label: "E-mail Corporativo",
                                   controller: controller.emailController,
                                   icon: Icons.email_outlined,
-                                  validator: (v) => !GetUtils.isEmail(v!) ? "Inválido" : null,
+                                  validator: (v) =>
+                                      !GetUtils.isEmail(v!) ? "Inválido" : null,
                                 ),
                                 const SizedBox(height: 20),
                                 _ModernInput(
@@ -234,25 +258,30 @@ class _ProfileAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        Obx(() => Container(
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: theme.dividerColor.withOpacity(0.1), width: 1),
-            // Sombra suave para destacar do fundo mais claro
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 10,
-                offset: const Offset(0, 5),
-              )
-            ],
+        Obx(
+          () => Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: theme.dividerColor.withOpacity(0.1),
+                width: 1,
+              ),
+              // Sombra suave para destacar do fundo mais claro
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 5),
+                ),
+              ],
+            ),
+            child: CircleAvatar(
+              radius: 50,
+              backgroundColor: theme.colorScheme.surfaceContainerHighest,
+              backgroundImage: NetworkImage(controller.avatarUrl.value),
+            ),
           ),
-          child: CircleAvatar(
-            radius: 50,
-            backgroundColor: theme.colorScheme.surfaceContainerHighest,
-            backgroundImage: NetworkImage(controller.avatarUrl.value),
-          ),
-        )),
+        ),
         Positioned(
           bottom: 0,
           right: 0,
@@ -265,11 +294,15 @@ class _ProfileAvatar extends StatelessWidget {
               customBorder: const CircleBorder(),
               child: const Padding(
                 padding: EdgeInsets.all(8),
-                child: Icon(Icons.camera_alt_outlined, color: Colors.white, size: 18),
+                child: Icon(
+                  Icons.camera_alt_outlined,
+                  color: Colors.white,
+                  size: 18,
+                ),
               ),
             ),
           ),
-        )
+        ),
       ],
     );
   }
@@ -347,14 +380,23 @@ class _ModernInput extends StatelessWidget {
           cursorColor: theme.primaryColor,
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: GoogleFonts.inter(color: theme.colorScheme.onSurface.withOpacity(0.3)),
+            hintStyle: GoogleFonts.inter(
+              color: theme.colorScheme.onSurface.withOpacity(0.3),
+            ),
             prefixIcon: Padding(
               padding: const EdgeInsets.only(bottom: 2),
-              child: Icon(icon, size: 20, color: theme.colorScheme.onSurface.withOpacity(0.5)),
+              child: Icon(
+                icon,
+                size: 20,
+                color: theme.colorScheme.onSurface.withOpacity(0.5),
+              ),
             ),
             filled: true,
             fillColor: fillColor,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: BorderSide(color: borderColor),

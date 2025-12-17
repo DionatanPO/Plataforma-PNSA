@@ -25,7 +25,7 @@ class DizimistaMobileListView extends StatelessWidget {
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.zero,
       itemCount: lista.length,
       itemBuilder: (context, index) {
         final d = lista[index];
@@ -71,6 +71,8 @@ class DizimistaMobileListView extends StatelessWidget {
                             StatusBadge(status: d.status, compact: true),
                           ],
                         ),
+                        const SizedBox(height: 8),
+                        // NOVA LINHA: Nº Registro e CPF
                         Row(
                           children: [
                             Container(
@@ -85,30 +87,51 @@ class DizimistaMobileListView extends StatelessWidget {
                               child: Text(
                                 'Nº Reg: ${d.numeroRegistro}',
                                 style: GoogleFonts.inter(
-                                  fontSize: 11,
+                                  fontSize:
+                                      12, // Leve aumento para legibilidade
+                                  fontWeight: FontWeight.w600, // Destaque sutil
                                   color: theme.colorScheme.onSurface
-                                      .withOpacity(0.8),
+                                      .withOpacity(0.9),
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'ID: ${d.id.toString().padLeft(4, '0')}',
-                              style: GoogleFonts.inter(
-                                fontSize: 11,
-                                color: theme.colorScheme.onSurface.withOpacity(
-                                  0.4,
-                                ),
+                            const SizedBox(width: 12),
+                            // CPF
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.badge_outlined,
+                                    size: 14,
+                                    color: theme.colorScheme.onSurface
+                                        .withOpacity(0.5),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    d.cpf.isNotEmpty
+                                        ? d.cpf
+                                        : 'CPF não informado',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 12,
+                                      color: theme.colorScheme.onSurface
+                                          .withOpacity(0.7),
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow
+                                        .ellipsis, // Previne quebra de linha visualmente feia
+                                  ),
+                                ],
                               ),
                             ),
                           ],
                         ),
                         const SizedBox(height: 8),
-                        const SizedBox(height: 8),
+                        // TELEFONE
                         Row(
                           children: [
                             Icon(
-                              Icons.phone,
+                              Icons
+                                  .phone_rounded, // Ícone arredondado mais moderno
                               size: 14,
                               color: theme.colorScheme.onSurface.withOpacity(
                                 0.5,
@@ -120,33 +143,8 @@ class DizimistaMobileListView extends StatelessWidget {
                               style: GoogleFonts.inter(
                                 fontSize: 13,
                                 color: theme.colorScheme.onSurface.withOpacity(
-                                  0.7,
+                                  0.8,
                                 ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.location_on_outlined,
-                              size: 14,
-                              color: theme.colorScheme.onSurface.withOpacity(
-                                0.5,
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            Expanded(
-                              child: Text(
-                                d.endereco,
-                                style: GoogleFonts.inter(
-                                  fontSize: 13,
-                                  color: theme.colorScheme.onSurface
-                                      .withOpacity(0.7),
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ],

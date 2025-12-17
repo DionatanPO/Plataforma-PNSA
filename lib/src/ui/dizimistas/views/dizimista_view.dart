@@ -37,6 +37,11 @@ class _DizimistaViewState extends State<DizimistaView> {
         : Colors.black.withOpacity(0.06);
     final accentColor = theme.primaryColor;
 
+    // Medidas responsivas
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isDesktop = screenWidth > 800;
+    final double horizontalPadding = isDesktop ? 24.0 : 12.0;
+
     return Scaffold(
       backgroundColor: backgroundColor,
       body: CustomScrollView(
@@ -62,7 +67,12 @@ class _DizimistaViewState extends State<DizimistaView> {
           // =======================================================
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
+              padding: EdgeInsets.fromLTRB(
+                horizontalPadding,
+                isDesktop ? 24 : 16,
+                horizontalPadding,
+                isDesktop ? 24 : 16,
+              ),
               child: _buildModernSearchBar(
                 theme,
                 backgroundColor,
@@ -108,12 +118,19 @@ class _DizimistaViewState extends State<DizimistaView> {
             }
 
             return SliverPadding(
-              padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+              padding: EdgeInsets.fromLTRB(
+                horizontalPadding,
+                0,
+                horizontalPadding,
+                24,
+              ),
               sliver: SliverLayoutBuilder(
                 builder: (context, constraints) {
-                  final isDesktop = constraints.crossAxisExtent > 800;
+                  // Reutilizando lógica de desktop se quiser, mas já temos isDesktop no escopo acima
+                  // Porém constraints aqui é mais preciso para o Sliver
+                  final bool isWide = constraints.crossAxisExtent > 800;
 
-                  if (isDesktop) {
+                  if (isWide) {
                     return SliverToBoxAdapter(
                       child: DizimistaDesktopTableView(
                         lista: controller.filteredDizimistas,

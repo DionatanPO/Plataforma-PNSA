@@ -5,8 +5,10 @@ class EditProfileController extends GetxController {
   final formKey = GlobalKey<FormState>();
   final nameController = TextEditingController();
   final emailController = TextEditingController();
+  final scrollController = ScrollController();
 
-  final avatarUrl = 'https://i.pravatar.cc/150?img=12'.obs; // Fictional avatar URL
+  final avatarUrl =
+      'https://i.pravatar.cc/150?img=12'.obs; // Fictional avatar URL
   final isLoading = false.obs;
 
   @override
@@ -42,6 +44,7 @@ class EditProfileController extends GetxController {
   void onClose() {
     nameController.dispose();
     emailController.dispose();
+    scrollController.dispose();
     super.onClose();
   }
 }

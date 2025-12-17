@@ -19,6 +19,13 @@ class AuthService extends GetxService {
   @override
   void onInit() {
     super.onInit();
+    // Configura persistência local explicitamente para Web
+    try {
+      _auth.setPersistence(Persistence.LOCAL);
+    } catch (e) {
+      print('Erro ao definir persistência: $e');
+    }
+
     // Escuta as mudanças no estado de autenticação
     // NOTA: Com a nova implementação usando instância secundária do Firebase para criar usuários,
     // a criação de novos usuários NUNCA afeta a sessão do admin principal.

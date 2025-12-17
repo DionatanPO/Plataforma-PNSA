@@ -735,6 +735,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
               color: theme.colorScheme.onSurface,
               height: 1.2,
             ),
+            onChanged: (value) => controller.valor.value = value,
             decoration: InputDecoration(
               border: InputBorder.none,
               hintText: 'R\$ 0,00',
@@ -900,6 +901,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
       );
 
       _valorController.clear();
+      controller.valor.value = '';
       controller.dizimistaSelecionado.value = null;
       controller.dataSelecionada.value = DateTime.now();
       setState(() {

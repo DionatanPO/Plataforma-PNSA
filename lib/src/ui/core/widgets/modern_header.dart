@@ -42,7 +42,10 @@ class ModernHeader extends StatelessWidget {
           toolbarHeight: height,
           titleSpacing: 0,
           title: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            padding: EdgeInsets.symmetric(
+              horizontal: isMobile ? 16 : 24,
+              vertical: 16,
+            ),
             child: isMobile
                 ? Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,

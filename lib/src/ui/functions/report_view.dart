@@ -12,10 +12,18 @@ class ReportView extends StatefulWidget {
 class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
   late AnimationController _animationController;
   String _period = 'Este Mês';
-  final List<String> _periods = ['Esta Semana', 'Este Mês', 'Este Trimestre', 'Este Ano'];
+  final List<String> _periods = [
+    'Esta Semana',
+    'Este Mês',
+    'Este Trimestre',
+    'Este Ano',
+  ];
 
   // Controle de Hover para os cards (simples gerenciamento de estado)
   int _hoveredCardIndex = -1;
+
+  final ScrollController _scrollController =
+      ScrollController(); // Controller adicionado
 
   @override
   void initState() {
@@ -30,6 +38,7 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
   @override
   void dispose() {
     _animationController.dispose();
+    _scrollController.dispose(); // Dispose do controller
     super.dispose();
   }
 
@@ -42,15 +51,20 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
     final primaryColor = theme.primaryColor;
 
     // Fundo refinado
-    final backgroundColor = isDark ? const Color(0xFF181818) : const Color(0xFFFAFAFA);
+    final backgroundColor = isDark
+        ? const Color(0xFF181818)
+        : const Color(0xFFFAFAFA);
 
     return Scaffold(
       backgroundColor: backgroundColor,
-      body: Scrollbar( // Item essencial para Desktop
+      body: Scrollbar(
+        // Item essencial para Desktop
+        controller: _scrollController, // Controller vinculado
         thumbVisibility: true,
         thickness: 8,
         radius: const Radius.circular(4),
         child: CustomScrollView(
+          controller: _scrollController, // Controller vinculado
           physics: const BouncingScrollPhysics(),
           slivers: [
             // HEADER FLUTUANTE ESTILO MACOS/WINDOWS
@@ -68,7 +82,8 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
                   children: [
                     Text(
                       'Relatório',
-                      style: GoogleFonts.outfit( // Fonte mais moderna para títulos
+                      style: GoogleFonts.outfit(
+                        // Fonte mais moderna para títulos
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
                         color: theme.colorScheme.onSurface,
@@ -90,20 +105,37 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
                 // Date Picker simulado (Estilo botão segmentado)
                 Container(
                   margin: const EdgeInsets.only(right: 24, top: 12),
-                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 4,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                    color: theme.colorScheme.surfaceContainerHighest
+                        .withOpacity(0.3),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
+                    border: Border.all(
+                      color: theme.dividerColor.withOpacity(0.1),
+                    ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      _HeaderActionButton(icon: Icons.calendar_today_outlined, label: _period, onTap: () {}),
+                      _HeaderActionButton(
+                        icon: Icons.calendar_today_outlined,
+                        label: _period,
+                        onTap: () {},
+                      ),
                       const SizedBox(width: 8),
-                      Container(width: 1, height: 20, color: theme.dividerColor.withOpacity(0.2)),
+                      Container(
+                        width: 1,
+                        height: 20,
+                        color: theme.dividerColor.withOpacity(0.2),
+                      ),
                       const SizedBox(width: 8),
-                      _HeaderIconOnly(icon: Icons.cloud_download_outlined, theme: theme),
+                      _HeaderIconOnly(
+                        icon: Icons.cloud_download_outlined,
+                        theme: theme,
+                      ),
                       _HeaderIconOnly(icon: Icons.print_outlined, theme: theme),
                     ],
                   ),
@@ -123,41 +155,79 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
                     index: 0,
                     child: isDesktop
                         ? Row(
-                      children: [
-                        Expanded(child: _HoverStatCard(
-                            title: 'Total Arrecadado', value: 'R\$ 45.2k', change: '+8.3%',
-                            isPositive: true, icon: Icons.attach_money, color: Colors.green, theme: theme
-                        )),
-                        const SizedBox(width: 16),
-                        Expanded(child: _HoverStatCard(
-                            title: 'Dízimos', value: 'R\$ 28.5k', change: '+5.2%',
-                            isPositive: true, icon: Icons.money_outlined, color: Colors.blue, theme: theme
-                        )),
-                        const SizedBox(width: 16),
-                        Expanded(child: _HoverStatCard(
-                            title: 'Ofertas', value: 'R\$ 12.3k', change: '+15.7%',
-                            isPositive: true, icon: Icons.volunteer_activism_outlined, color: Colors.purple, theme: theme
-                        )),
-                        const SizedBox(width: 16),
-                        Expanded(child: _HoverStatCard(
-                            title: 'Despesas', value: 'R\$ 23.1k', change: '-3.2%',
-                            isPositive: false, icon: Icons.money_off_outlined, color: Colors.red, theme: theme
-                        )),
-                      ],
-                    )
+                            children: [
+                              Expanded(
+                                child: _HoverStatCard(
+                                  title: 'Total Arrecadado',
+                                  value: 'R\$ 45.2k',
+                                  change: '+8.3%',
+                                  isPositive: true,
+                                  icon: Icons.attach_money,
+                                  color: Colors.green,
+                                  theme: theme,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: _HoverStatCard(
+                                  title: 'Dízimos',
+                                  value: 'R\$ 28.5k',
+                                  change: '+5.2%',
+                                  isPositive: true,
+                                  icon: Icons.money_outlined,
+                                  color: Colors.blue,
+                                  theme: theme,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: _HoverStatCard(
+                                  title: 'Ofertas',
+                                  value: 'R\$ 12.3k',
+                                  change: '+15.7%',
+                                  isPositive: true,
+                                  icon: Icons.volunteer_activism_outlined,
+                                  color: Colors.purple,
+                                  theme: theme,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: _HoverStatCard(
+                                  title: 'Despesas',
+                                  value: 'R\$ 23.1k',
+                                  change: '-3.2%',
+                                  isPositive: false,
+                                  icon: Icons.money_off_outlined,
+                                  color: Colors.red,
+                                  theme: theme,
+                                ),
+                              ),
+                            ],
+                          )
                         : Column(
-                      children: [
-                        _HoverStatCard(
-                            title: 'Total Arrecadado', value: 'R\$ 45.2k', change: '+8.3%',
-                            isPositive: true, icon: Icons.attach_money, color: Colors.green, theme: theme
-                        ),
-                        const SizedBox(height: 16),
-                        _HoverStatCard(
-                            title: 'Dízimos', value: 'R\$ 28.5k', change: '+5.2%',
-                            isPositive: true, icon: Icons.money_outlined, color: Colors.blue, theme: theme
-                        ),
-                      ],
-                    ),
+                            children: [
+                              _HoverStatCard(
+                                title: 'Total Arrecadado',
+                                value: 'R\$ 45.2k',
+                                change: '+8.3%',
+                                isPositive: true,
+                                icon: Icons.attach_money,
+                                color: Colors.green,
+                                theme: theme,
+                              ),
+                              const SizedBox(height: 16),
+                              _HoverStatCard(
+                                title: 'Dízimos',
+                                value: 'R\$ 28.5k',
+                                change: '+5.2%',
+                                isPositive: true,
+                                icon: Icons.money_outlined,
+                                color: Colors.blue,
+                                theme: theme,
+                              ),
+                            ],
+                          ),
                   ),
 
                   const SizedBox(height: 32),
@@ -170,13 +240,15 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
                       decoration: BoxDecoration(
                         color: isDark ? const Color(0xFF202020) : Colors.white,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
+                        border: Border.all(
+                          color: theme.dividerColor.withOpacity(0.1),
+                        ),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withOpacity(0.04),
                             blurRadius: 16,
                             offset: const Offset(0, 4),
-                          )
+                          ),
                         ],
                       ),
                       padding: const EdgeInsets.all(24),
@@ -191,28 +263,40 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
                                 children: [
                                   Text(
                                     'Evolução Financeira',
-                                    style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
+                                    style: GoogleFonts.inter(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                   Text(
                                     'Receitas e despesas mensais',
-                                    style: GoogleFonts.inter(fontSize: 13, color: theme.colorScheme.onSurface.withOpacity(0.5)),
+                                    style: GoogleFonts.inter(
+                                      fontSize: 13,
+                                      color: theme.colorScheme.onSurface
+                                          .withOpacity(0.5),
+                                    ),
                                   ),
                                 ],
                               ),
                               // Legenda simples
                               Row(
                                 children: [
-                                  _ChartLegend(label: "Receitas", color: primaryColor),
+                                  _ChartLegend(
+                                    label: "Receitas",
+                                    color: primaryColor,
+                                  ),
                                   const SizedBox(width: 16),
-                                  _ChartLegend(label: "Despesas", color: Colors.grey.withOpacity(0.3), isDashed: true),
+                                  _ChartLegend(
+                                    label: "Despesas",
+                                    color: Colors.grey.withOpacity(0.3),
+                                    isDashed: true,
+                                  ),
                                 ],
-                              )
+                              ),
                             ],
                           ),
                           const SizedBox(height: 32),
-                          Expanded(
-                            child: _SmoothLineChart(theme: theme),
-                          ),
+                          Expanded(child: _SmoothLineChart(theme: theme)),
                         ],
                       ),
                     ),
@@ -225,44 +309,83 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
                     index: 2,
                     child: isDesktop
                         ? Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(child: _ModernTableCard(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: _ModernTableCard(
+                                  title: 'Receitas Recentais',
+                                  headers: const [
+                                    'ID',
+                                    'Fiéis',
+                                    'Tipo',
+                                    'Valor',
+                                  ],
+                                  rows: const [
+                                    [
+                                      '#REC-001',
+                                      'Maria Santos',
+                                      'Dízimo',
+                                      'R\$ 300',
+                                    ],
+                                    [
+                                      '#REC-002',
+                                      'Carlos Oliveira',
+                                      'Oferta',
+                                      'R\$ 150',
+                                    ],
+                                    [
+                                      '#REC-003',
+                                      'Ana Costa',
+                                      'Dízimo',
+                                      'R\$ 200',
+                                    ],
+                                    [
+                                      '#REC-004',
+                                      'Pedro Silva',
+                                      'Doação',
+                                      'R\$ 500',
+                                    ],
+                                    [
+                                      '#REC-005',
+                                      'Lucia Ferreira',
+                                      'Dízimo',
+                                      'R\$ 180',
+                                    ],
+                                  ],
+                                  theme: theme,
+                                ),
+                              ),
+                              const SizedBox(width: 24),
+                              Expanded(
+                                child: _ModernTableCard(
+                                  title: 'Despesas Recentes',
+                                  headers: const ['ID', 'Categoria', 'Valor'],
+                                  rows: const [
+                                    ['#DES-001', 'Alimentação', 'R\$ 2.500'],
+                                    ['#DES-002', 'Manutenção', 'R\$ 1.800'],
+                                    ['#DES-003', 'Salários', 'R\$ 8.500'],
+                                    ['#DES-004', 'Materiais', 'R\$ 950'],
+                                    ['#DES-005', 'Serviços', 'R\$ 1.200'],
+                                  ],
+                                  theme: theme,
+                                ),
+                              ),
+                            ],
+                          )
+                        : _ModernTableCard(
                             title: 'Receitas Recentais',
                             headers: const ['ID', 'Fiéis', 'Tipo', 'Valor'],
                             rows: const [
                               ['#REC-001', 'Maria Santos', 'Dízimo', 'R\$ 300'],
-                              ['#REC-002', 'Carlos Oliveira', 'Oferta', 'R\$ 150'],
-                              ['#REC-003', 'Ana Costa', 'Dízimo', 'R\$ 200'],
-                              ['#REC-004', 'Pedro Silva', 'Doação', 'R\$ 500'],
-                              ['#REC-005', 'Lucia Ferreira', 'Dízimo', 'R\$ 180'],
+                              [
+                                '#REC-002',
+                                'Carlos Oliveira',
+                                'Oferta',
+                                'R\$ 150',
+                              ],
                             ],
-                            theme: theme
-                        )),
-                        const SizedBox(width: 24),
-                        Expanded(child: _ModernTableCard(
-                            title: 'Despesas Recentes',
-                            headers: const ['ID', 'Categoria', 'Valor'],
-                            rows: const [
-                              ['#DES-001', 'Alimentação', 'R\$ 2.500'],
-                              ['#DES-002', 'Manutenção', 'R\$ 1.800'],
-                              ['#DES-003', 'Salários', 'R\$ 8.500'],
-                              ['#DES-004', 'Materiais', 'R\$ 950'],
-                              ['#DES-005', 'Serviços', 'R\$ 1.200'],
-                            ],
-                            theme: theme
-                        )),
-                      ],
-                    )
-                        : _ModernTableCard(
-                        title: 'Receitas Recentais',
-                        headers: const ['ID', 'Fiéis', 'Tipo', 'Valor'],
-                        rows: const [
-                          ['#REC-001', 'Maria Santos', 'Dízimo', 'R\$ 300'],
-                          ['#REC-002', 'Carlos Oliveira', 'Oferta', 'R\$ 150'],
-                        ],
-                        theme: theme
-                    ),
+                            theme: theme,
+                          ),
                   ),
                   const SizedBox(height: 60),
                 ]),
@@ -277,12 +400,13 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
   // Helper para animação em cascata
   Widget _buildAnimatedSection({required int index, required Widget child}) {
     return SlideTransition(
-      position: Tween<Offset>(begin: const Offset(0, 0.1), end: Offset.zero).animate(
-        CurvedAnimation(
-          parent: _animationController,
-          curve: Interval(index * 0.1, 1.0, curve: Curves.easeOutQuart),
-        ),
-      ),
+      position: Tween<Offset>(begin: const Offset(0, 0.1), end: Offset.zero)
+          .animate(
+            CurvedAnimation(
+              parent: _animationController,
+              curve: Interval(index * 0.1, 1.0, curve: Curves.easeOutQuart),
+            ),
+          ),
       child: FadeTransition(
         opacity: Tween<double>(begin: 0, end: 1).animate(
           CurvedAnimation(
@@ -305,7 +429,11 @@ class _HeaderActionButton extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
 
-  const _HeaderActionButton({required this.icon, required this.label, required this.onTap});
+  const _HeaderActionButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -316,11 +444,25 @@ class _HeaderActionButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: Row(
           children: [
-            Icon(icon, size: 16, color: Theme.of(context).colorScheme.onSurface),
+            Icon(
+              icon,
+              size: 16,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
             const SizedBox(width: 8),
-            Text(label, style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600)),
+            Text(
+              label,
+              style: GoogleFonts.inter(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
             const SizedBox(width: 4),
-            Icon(Icons.keyboard_arrow_down, size: 14, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5)),
+            Icon(
+              Icons.keyboard_arrow_down,
+              size: 14,
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+            ),
           ],
         ),
       ),
@@ -337,7 +479,11 @@ class _HeaderIconOnly extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      icon: Icon(icon, size: 20, color: theme.colorScheme.onSurface.withOpacity(0.7)),
+      icon: Icon(
+        icon,
+        size: 20,
+        color: theme.colorScheme.onSurface.withOpacity(0.7),
+      ),
       onPressed: () {},
       splashRadius: 20,
       tooltip: 'Ação',
@@ -423,7 +569,10 @@ class _HoverStatCardState extends State<_HoverStatCard> {
                   child: Icon(widget.icon, color: widget.color, size: 20),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: statusColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(20),
@@ -431,14 +580,19 @@ class _HoverStatCardState extends State<_HoverStatCard> {
                   child: Row(
                     children: [
                       Icon(
-                        widget.isPositive ? Icons.arrow_upward : Icons.arrow_downward,
-                        size: 12, color: statusColor,
+                        widget.isPositive
+                            ? Icons.arrow_upward
+                            : Icons.arrow_downward,
+                        size: 12,
+                        color: statusColor,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         widget.change,
                         style: GoogleFonts.inter(
-                          fontSize: 11, fontWeight: FontWeight.bold, color: statusColor,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: statusColor,
                         ),
                       ),
                     ],
@@ -450,14 +604,17 @@ class _HoverStatCardState extends State<_HoverStatCard> {
             Text(
               widget.value,
               style: GoogleFonts.outfit(
-                fontSize: 26, fontWeight: FontWeight.bold, color: widget.theme.colorScheme.onSurface,
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+                color: widget.theme.colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 4),
             Text(
               widget.title,
               style: GoogleFonts.inter(
-                fontSize: 13, color: widget.theme.colorScheme.onSurface.withOpacity(0.6),
+                fontSize: 13,
+                color: widget.theme.colorScheme.onSurface.withOpacity(0.6),
               ),
             ),
           ],
@@ -472,14 +629,19 @@ class _ChartLegend extends StatelessWidget {
   final Color color;
   final bool isDashed;
 
-  const _ChartLegend({required this.label, required this.color, this.isDashed = false});
+  const _ChartLegend({
+    required this.label,
+    required this.color,
+    this.isDashed = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
         Container(
-          width: 12, height: 12,
+          width: 12,
+          height: 12,
           decoration: BoxDecoration(
             color: isDashed ? Colors.transparent : color,
             border: isDashed ? Border.all(color: Colors.grey, width: 2) : null,
@@ -488,7 +650,10 @@ class _ChartLegend extends StatelessWidget {
           child: isDashed ? const Center(child: SizedBox()) : null,
         ),
         const SizedBox(width: 8),
-        Text(label, style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500)),
+        Text(
+          label,
+          style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500),
+        ),
       ],
     );
   }
@@ -517,7 +682,11 @@ class _ModernTableCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 16, offset: const Offset(0, 4))
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
         ],
       ),
       padding: const EdgeInsets.all(24),
@@ -527,21 +696,42 @@ class _ModernTableCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(title, style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600)),
+              Text(
+                title,
+                style: GoogleFonts.inter(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               TextButton(
-                  onPressed: () {},
-                  child: Text('Ver tudo', style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600))
+                onPressed: () {},
+                child: Text(
+                  'Ver tudo',
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
             ],
           ),
           const SizedBox(height: 16),
           // Cabeçalho
           Row(
-            children: headers.map((h) => Expanded(
-              child: Text(h, style: GoogleFonts.inter(
-                  fontSize: 12, fontWeight: FontWeight.w600, color: theme.colorScheme.onSurface.withOpacity(0.5)
-              )),
-            )).toList(),
+            children: headers
+                .map(
+                  (h) => Expanded(
+                    child: Text(
+                      h,
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: theme.colorScheme.onSurface.withOpacity(0.5),
+                      ),
+                    ),
+                  ),
+                )
+                .toList(),
           ),
           const SizedBox(height: 8),
           Divider(color: theme.dividerColor.withOpacity(0.1)),
@@ -583,20 +773,36 @@ class _TableRowState extends State<_TableRow> {
         child: Row(
           children: widget.row.map((cell) {
             // Lógica simples para detectar se é coluna de Status e renderizar Badge
-            if (['Dízimo', 'Oferta', 'Doação', 'Concluído', 'Pendente', 'Alimentação', 'Manutenção', 'Salários', 'Materiais', 'Serviços', 'Recebido', 'Processando', 'Estornado'].contains(cell)) {
-              return Expanded(child: Align(
+            if ([
+              'Dízimo',
+              'Oferta',
+              'Doação',
+              'Concluído',
+              'Pendente',
+              'Alimentação',
+              'Manutenção',
+              'Salários',
+              'Materiais',
+              'Serviços',
+              'Recebido',
+              'Processando',
+              'Estornado',
+            ].contains(cell)) {
+              return Expanded(
+                child: Align(
                   alignment: Alignment.centerLeft,
-                  child: _StatusBadge(status: cell)
-              ));
+                  child: _StatusBadge(status: cell),
+                ),
+              );
             }
             return Expanded(
               child: Text(
-                  cell,
-                  style: GoogleFonts.inter(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: widget.theme.colorScheme.onSurface.withOpacity(0.9)
-                  )
+                cell,
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: widget.theme.colorScheme.onSurface.withOpacity(0.9),
+                ),
               ),
             );
           }).toList(),
@@ -648,7 +854,11 @@ class _StatusBadge extends StatelessWidget {
       ),
       child: Text(
         status,
-        style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w600, color: color),
+        style: GoogleFonts.inter(
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          color: color,
+        ),
       ),
     );
   }
@@ -692,7 +902,9 @@ class _SmoothChartPainter extends CustomPainter {
       ..style = PaintingStyle.fill;
 
     // Grid Lines (Minimalistas)
-    final gridPaint = Paint()..color = theme.dividerColor.withOpacity(0.1)..strokeWidth = 1;
+    final gridPaint = Paint()
+      ..color = theme.dividerColor.withOpacity(0.1)
+      ..strokeWidth = 1;
     for (int i = 0; i <= 4; i++) {
       double y = i * (size.height / 4);
       canvas.drawLine(Offset(0, y), Offset(size.width, y), gridPaint);
@@ -734,8 +946,16 @@ class _SmoothChartPainter extends CustomPainter {
     final lastX = size.width;
     final lastY = size.height * (1 - values.last);
 
-    canvas.drawCircle(Offset(lastX, lastY), 5, Paint()..color = theme.primaryColor);
-    canvas.drawCircle(Offset(lastX, lastY), 10, Paint()..color = theme.primaryColor.withOpacity(0.2));
+    canvas.drawCircle(
+      Offset(lastX, lastY),
+      5,
+      Paint()..color = theme.primaryColor,
+    );
+    canvas.drawCircle(
+      Offset(lastX, lastY),
+      10,
+      Paint()..color = theme.primaryColor.withOpacity(0.2),
+    );
   }
 
   @override

@@ -12,7 +12,8 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
@@ -49,9 +50,27 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   void _checkAuthState() async {
     final sessionService = Get.find<SessionService>();
     try {
-      await Future.delayed(const Duration(seconds: 3));
+      // Aguarda a animação mínima para uma boa UX
+      await Future.delayed(const Duration(seconds: 2));
 
       final auth = FirebaseAuth.instance;
+      User? user = auth.currentUser;
+
+      // Se não houver usuário logado imediatamente, aguarda um pouco mais para ver se o Firebase restaura a sessão
+      // Isso é crucial para Web onde a persistência pode demorar alguns milissegundos para carregar
+      if (user == null) {
+        try {
+          print('Aguardando restauração de sessão...');
+          user = await auth
+              .authStateChanges()
+              .firstWhere((u) => u != null)
+              .timeout(const Duration(seconds: 3));
+          print('Sessão restaurada: ${user?.email}');
+        } catch (_) {
+          print('Nenhuma sessão restaurada após timeout.');
+          // Timeout: realmente não há usuário logado ou persistência falhou
+        }
+      }
 
       AuthService authService;
       try {
@@ -60,24 +79,24 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
         authService = Get.put(AuthService());
       }
 
-      if (auth.currentUser != null) {
+      if (user != null) {
         // Verificar se o token de autenticação é válido
         try {
           // Forçar a renovação do token de ID para verificar sua validade
-          await auth.currentUser!.getIdToken(true); // Força a renovação se necessário
+          await user!.getIdToken(true); // Força a renovação se necessário
 
-          final userData =
-          await authService.getUserDataWithRetry(auth.currentUser!.uid);
+          final userData = await authService.getUserDataWithRetry(user.uid);
           if (userData != null) {
             // Verificar se o usuário está ativo
-            final isActive =
-            await authService.isUserActiveWithRetry(auth.currentUser!.uid);
+            final isActive = await authService.isUserActiveWithRetry(user.uid);
             if (!isActive) {
               // Deslogar o usuário e redirecionar para login com mensagem
               await authService.logout();
               Get.offAllNamed(AppRoutes.login);
-              Get.snackbar('Acesso Negado',
-                  'Sua conta foi desativada pelo administrador.');
+              Get.snackbar(
+                'Acesso Negado',
+                'Sua conta foi desativada pelo administrador.',
+              );
               return;
             }
 
@@ -183,7 +202,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     child: CircularProgressIndicator(
                       strokeWidth: 3,
                       // Loader: Cor Secundária (Dourado/Verde Médio do seu tema)
-                      valueColor: AlwaysStoppedAnimation<Color>(colorScheme.secondary),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        colorScheme.secondary,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
