@@ -28,7 +28,7 @@ class LoginController extends GetxController {
     super.onInit();
     _loginModel = LoginModel(
       email: 'test@example.com',
-      password: 'password123',
+      password: '123456',
     );
     emailController.text = _loginModel.email;
     passwordController.text = _loginModel.password;

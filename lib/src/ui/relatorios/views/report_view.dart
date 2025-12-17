@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -368,17 +369,22 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
                   leading: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.green.withOpacity(0.1),
+                      color: Colors.blue.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Icon(Icons.share, color: Colors.green),
+                    child: Icon(
+                      kIsWeb ? Icons.download : Icons.share,
+                      color: Colors.blue,
+                    ),
                   ),
                   title: Text(
-                    'Compartilhar no WhatsApp',
+                    kIsWeb ? 'Baixar PDF' : 'Compartilhar PDF',
                     style: GoogleFonts.inter(fontWeight: FontWeight.w500),
                   ),
                   subtitle: Text(
-                    'Envia um resumo formatado via WhatsApp',
+                    kIsWeb
+                        ? 'Faz o download do arquivo para seu dispositivo'
+                        : 'Envia o arquivo PDF para outros apps',
                     style: GoogleFonts.inter(
                       fontSize: 12,
                       color: theme.colorScheme.onSurface.withOpacity(0.6),
@@ -386,7 +392,7 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
                   ),
                   onTap: () {
                     Navigator.pop(context); // Close modal
-                    controller.shareDailyReportWhatsApp();
+                    controller.downloadOrShareDailyReportPdf();
                   },
                 ),
                 const SizedBox(height: 32),
