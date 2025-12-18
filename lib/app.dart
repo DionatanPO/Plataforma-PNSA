@@ -8,6 +8,8 @@ import 'package:plataforma_pnsa/src/ui/core/theme/app_theme.dart';
 
 
 
+import 'package:plataforma_pnsa/src/utils/keyboard_dismisser.dart';
+
 class App extends StatefulWidget {
   const App({super.key});
 
@@ -44,6 +46,12 @@ class _AppState extends State<App> {
         const Locale('pt', 'BR'), // Português do Brasil
         const Locale('en', 'US'), // Inglês dos Estados Unidos
       ],
+      builder: (context, child) {
+        // Envolvemos o app inteiro no nosso fiscal de teclado
+        return KeyboardDismissOnCollapse(
+          child: child ?? const SizedBox(),
+        );
+      },
     );
   }
 }
