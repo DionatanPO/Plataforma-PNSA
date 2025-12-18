@@ -14,10 +14,9 @@ class AuthGuard extends GetxService {
     super.onInit();
 
     // Ouvinte de estado de autenticação do Firebase
-    // Usamos skip(1) para ignorar o primeiro evento, que é o estado de autenticação em cache.
-    // Isso evita o redirecionamento antes que o app esteja pronto, deixando a tela de Splash
-    // gerenciar a rota inicial, conforme pretendido.
-    _auth.authStateChanges().skip(1).listen(_onAuthStateChanged);
+    // Removido o skip(1) para garantir que logins em navegadores com persistência
+    // não sejam ignorados. A flag isInitialCheckComplete já protege o splash.
+    _auth.authStateChanges().listen(_onAuthStateChanged);
 
     // Executar verificação inicial imediatamente
     _checkInitialAuthState();

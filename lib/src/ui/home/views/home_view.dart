@@ -102,7 +102,9 @@ class HomeView extends StatelessWidget {
                             const SizedBox(width: 12),
                             Text(
                               "PNSA",
-                              style: Theme.of(context).textTheme.titleMedium
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
                                   ?.copyWith(fontWeight: FontWeight.bold),
                             ),
                           ],
@@ -175,6 +177,7 @@ class HomeView extends StatelessWidget {
       // -------------------------------------------------------------
       return Scaffold(
         key: controller.scaffoldKey,
+        resizeToAvoidBottomInset: true,
         // AppBar removida para evitar duplicação com ModernHeader
         // O Drawer será aberto pelo botão de menu no ModernHeader das páginas internas
         drawer: NavigationDrawer(

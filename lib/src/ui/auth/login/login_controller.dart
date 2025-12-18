@@ -67,23 +67,30 @@ class LoginController extends GetxController {
               user.email?.split('@')[0] ?? 'Usuário',
             );
 
-            // Aguardar um breve momento para garantir que o AuthGuard
-            // processe a mudança de estado antes de desativar o loading
-            await Future.delayed(const Duration(milliseconds: 500));
+            // Verificação de status e redirecionamento explícito
+            // Isso resolve falhas de navegação em navegadores com persistência ativa
+            final isActive = await _authService.isUserActiveWithRetry(user.uid);
+            if (!isActive) {
+              await _authService.logout();
+              loginError.value = 'Sua conta foi desativada pelo administrador.';
+              isLoading.value = false;
+              return;
+            }
 
-            // A lógica de redirecionamento foi removida daqui.
-            // O AuthGuard será responsável por redirecionar o usuário
-            // para a tela correta (home ou redefinição de senha) após
-            // a mudança de estado de autenticação ser detectada.
+            final userData = await _authService.getUserDataWithRetry(user.uid);
+            if (userData != null && userData.pendencia) {
+              Get.offAllNamed(AppRoutes.password_reset);
+            } else {
+              Get.offAllNamed(AppRoutes.home);
+            }
           } else {
             loginError.value = 'Não foi possível obter os dados do usuário.';
-            isLoading.value = false;
           }
         } else {
           loginError.value =
               'Credenciais inválidas. Verifique seu e-mail e senha.';
-          isLoading.value = false;
         }
+        isLoading.value = false;
       } on FirebaseAuthException catch (e) {
         // Mapear códigos de erro do Firebase para mensagens amigáveis
         switch (e.code) {
