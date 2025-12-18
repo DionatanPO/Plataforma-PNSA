@@ -22,6 +22,8 @@ import '../ui/web/parish/parish_view.dart';
 import '../ui/web/events/events_view.dart';
 import '../ui/web/tithe/tithe_view.dart';
 import '../ui/support/theme_settings_view.dart';
+import '../ui/dizimistas/views/cadastro/cadastro_dizimista_view.dart';
+import '../ui/dizimistas/views/editar/editar_dizimista_view.dart';
 import '../ui/auth/password_reset/password_reset_view.dart';
 import 'app_routes.dart';
 
@@ -45,6 +47,16 @@ class AppPages {
     GetPage(
       name: AppRoutes.dizimista,
       page: () => const DizimistaView(),
+      binding: DizimistaBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.dizimista_cadastro,
+      page: () => CadastroDizimistaView(dizimista: Get.arguments),
+      binding: DizimistaBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.dizimista_editar,
+      page: () => EditarDizimistaView(dizimista: Get.arguments),
       binding: DizimistaBinding(),
     ),
     GetPage(

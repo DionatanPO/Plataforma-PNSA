@@ -12,6 +12,7 @@ import '../widgets/contribution_form_widget.dart';
 import '../widgets/dizimista_selection_widget.dart';
 import '../widgets/step_navigation_buttons.dart';
 import '../../core/widgets/modern_header.dart';
+import '../../../routes/app_routes.dart';
 
 class ContribuicaoView extends StatefulWidget {
   const ContribuicaoView({Key? key}) : super(key: key);
@@ -460,7 +461,20 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
                 ),
               ),
 
-              // Checkmark
+              // Edit button (only shown when not selected)
+              if (!isSelected)
+                IconButton(
+                  icon: Icon(Icons.edit_rounded, size: 20, color: theme.colorScheme.onSurfaceVariant),
+                  onPressed: () {
+                    // Navigate to edit dizimista view
+                    Get.toNamed(AppRoutes.dizimista_editar, arguments: dizimista);
+                  },
+                  padding: EdgeInsets.zero,
+                  constraints: BoxConstraints.tight(const Size(32, 32)),
+                  visualDensity: VisualDensity.compact,
+                ),
+
+              // Checkmark (only shown when selected)
               if (isSelected)
                 Container(
                   padding: const EdgeInsets.all(6),
@@ -504,7 +518,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
               color: Colors.green.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
-            child: const Icon(
+            child: Icon(
               Icons.check_circle_rounded,
               size: 40,
               color: Colors.green,
@@ -525,6 +539,20 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
             style: GoogleFonts.inter(
               fontSize: 14,
               color: theme.colorScheme.onSurface.withOpacity(0.7),
+            ),
+          ),
+          const SizedBox(height: 16),
+          FilledButton.icon(
+            onPressed: () {
+              // Navigate to edit dizimista view
+              Get.toNamed(AppRoutes.dizimista_editar, arguments: controller.dizimistaSelecionado.value);
+            },
+            icon: Icon(Icons.edit_rounded, size: 16),
+            label: Text('Editar Dados'),
+            style: FilledButton.styleFrom(
+              backgroundColor: accentColor,
+              foregroundColor: Colors.white,
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             ),
           ),
         ],
@@ -654,6 +682,16 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
                     ),
                   ],
                 ),
+              ),
+              IconButton(
+                icon: Icon(Icons.edit_rounded, size: 20, color: accentColor),
+                onPressed: () {
+                  // Navigate to edit dizimista view
+                  Get.toNamed(AppRoutes.dizimista_editar, arguments: controller.dizimistaSelecionado.value);
+                },
+                padding: EdgeInsets.zero,
+                constraints: BoxConstraints.tight(const Size(32, 32)),
+                visualDensity: VisualDensity.compact,
               ),
             ],
           ),

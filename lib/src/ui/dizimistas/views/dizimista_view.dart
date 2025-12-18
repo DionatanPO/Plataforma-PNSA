@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../routes/app_routes.dart';
 import '../controllers/dizimista_controller.dart';
 import '../models/dizimista_model.dart';
 import '../widgets/dizimista_empty_state_view.dart';
 import '../widgets/dizimista_mobile_list_view.dart';
 import '../widgets/dizimista_desktop_table_view.dart';
-import '../widgets/dizimista_form_dialog.dart';
 import '../widgets/dizimista_search_bar_view.dart';
 import '../../core/widgets/modern_header.dart';
 
@@ -45,7 +45,7 @@ class _DizimistaViewState extends State<DizimistaView> {
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
         backgroundColor: backgroundColor,
-        resizeToAvoidBottomInset: true,
+        resizeToAvoidBottomInset: false,
         body: CustomScrollView(
           slivers: [
             // =======================================================
@@ -137,7 +137,7 @@ class _DizimistaViewState extends State<DizimistaView> {
                           theme: theme,
                           surfaceColor: surfaceColor,
                           onEditPressed: (dizimista) =>
-                              _showEditarDialog(context, dizimista),
+                              Get.toNamed(AppRoutes.dizimista_editar, arguments: dizimista),
                         ),
                       );
                     } else {
@@ -147,7 +147,7 @@ class _DizimistaViewState extends State<DizimistaView> {
                           theme: theme,
                           surfaceColor: surfaceColor,
                           onEditPressed: (dizimista) =>
-                              _showEditarDialog(context, dizimista),
+                              Get.toNamed(AppRoutes.dizimista_editar, arguments: dizimista),
                           onViewHistoryPressed: (dizimista) {},
                         ),
                       );
@@ -164,7 +164,7 @@ class _DizimistaViewState extends State<DizimistaView> {
         ),
         floatingActionButton: FloatingActionButton.extended(
           heroTag: 'dizimista_fab',
-          onPressed: () => _showCadastroDialog(context),
+          onPressed: () => Get.toNamed(AppRoutes.dizimista_cadastro),
           backgroundColor: accentColor,
           foregroundColor: Colors.white,
           icon: const Icon(Icons.add_rounded),
@@ -194,171 +194,6 @@ class _DizimistaViewState extends State<DizimistaView> {
     );
   }
 
-  // ===========================================================================
-  // MÉTODOS DE AÇÃO
-  // ===========================================================================
-
-  void _showCadastroDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierColor: Colors.black.withOpacity(0.5),
-      builder: (BuildContext context) {
-        return DizimistaFormDialog(
-          title: 'Novo Fiel',
-          onSave: (dizimista) {
-            controller.addDizimista(dizimista);
-            Navigator.of(context).pop();
-
-            // Feedback visual moderno
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.check_rounded,
-                        color: Colors.white,
-                        size: 16,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'Fiel cadastrado!',
-                            style: GoogleFonts.inter(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
-                            ),
-                          ),
-                          Text(
-                            dizimista.nome,
-                            style: GoogleFonts.inter(
-                              fontSize: 12,
-                              color: Colors.white.withOpacity(0.9),
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                backgroundColor: Colors.green,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                margin: const EdgeInsets.all(20),
-                duration: const Duration(seconds: 3),
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  void _showEditarDialog(BuildContext context, Dizimista dizimista) {
-    showDialog(
-      context: context,
-      barrierColor: Colors.black.withOpacity(0.5),
-      builder: (BuildContext context) {
-        return DizimistaFormDialog(
-          dizimista: dizimista,
-          title: 'Editar Fiel',
-          onSave: (dizimistaAtualizado) {
-            controller.updateDizimista(dizimistaAtualizado);
-            Navigator.of(context).pop();
-
-            // Feedback visual moderno
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.check_rounded,
-                        color: Colors.white,
-                        size: 16,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'Fiel atualizado!',
-                            style: GoogleFonts.inter(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
-                            ),
-                          ),
-                          Text(
-                            dizimistaAtualizado.nome,
-                            style: GoogleFonts.inter(
-                              fontSize: 12,
-                              color: Colors.white.withOpacity(0.9),
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                backgroundColor: Colors.green,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                margin: const EdgeInsets.all(20),
-                duration: const Duration(seconds: 3),
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  // ===========================================================================
-  // FUNÇÕES AUXILIARES DE FORMATAÇÃO
-  // ===========================================================================
-
-  String _formatarCPF(String cpf) {
-    String cpfNumerico = cpf.replaceAll(RegExp(r'[^\d]'), '');
-    if (cpfNumerico.length != 11) return cpf;
-    return "${cpfNumerico.substring(0, 3)}.${cpfNumerico.substring(3, 6)}.${cpfNumerico.substring(6, 9)}-${cpfNumerico.substring(9, 11)}";
-  }
-
-  String _formatarTelefone(String telefone) {
-    String telefoneNumerico = telefone.replaceAll(RegExp(r'[^\d]'), '');
-    if (telefoneNumerico.length < 10) return telefone;
-
-    if (telefoneNumerico.length == 10) {
-      return "(${telefoneNumerico.substring(0, 2)}) ${telefoneNumerico.substring(2, 6)}-${telefoneNumerico.substring(6, 10)}";
-    } else {
-      return "(${telefoneNumerico.substring(0, 2)}) ${telefoneNumerico.substring(2, 7)}-${telefoneNumerico.substring(7, 11)}";
-    }
-  }
 }
 
 // =======================================================

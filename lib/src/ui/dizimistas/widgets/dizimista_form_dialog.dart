@@ -181,13 +181,13 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
     final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
 
     final formContent = SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
+      physics: const ClampingScrollPhysics(),
       padding: EdgeInsets.only(
         left: 20,
         right: 20,
         top: 20,
-        // No mobile, o Scaffold já redimensiona. No Desktop, o Dialog não, então somamos o padding.
-        bottom: 40 + (isMobile ? 0 : bottomPadding),
+        // Adiciona padding na parte inferior para compensar o teclado.
+        bottom: 40 + bottomPadding,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -520,8 +520,8 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
         child: Dialog.fullscreen(
           child: Scaffold(
             backgroundColor: theme.colorScheme.surface,
-            // Permitir que o Scaffold redimensione o corpo para evitar o teclado
-            resizeToAvoidBottomInset: true,
+            // Impede o Scaffold de redimensionar, a rolagem é controlada manualmente.
+            resizeToAvoidBottomInset: false,
             appBar: AppBar(
               title: Text(widget.title),
               leading: IconButton(
@@ -535,7 +535,7 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
                 ),
               ],
             ),
-            body: SafeArea(child: formContent),
+            body: formContent,
           ),
         ),
       );

@@ -3,6 +3,8 @@ abstract class AppRoutes {
   static const home = '/home';
   static const web_home = '/home_web';
   static const dizimista = '/dizimista';
+  static const dizimista_cadastro = '/dizimista/cadastro';
+  static const dizimista_editar = '/dizimista/editar';
   static const contribuicao = '/contribuicao';
   static const access_management = '/access_management';
   static const view = '/view';
