@@ -1,4 +1,4 @@
-import 'dart:ui'; // Necessário para ImageFilter
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -9,473 +9,318 @@ class LoginView extends StatelessWidget {
 
   final controller = Get.find<LoginController>();
 
-  // Imagem de fundo local
-  final String heroImage = 'assets/images/paroquia.png';
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.maxWidth > 900) {
+            return _DesktopLayout(controller: controller);
+          }
+          return _MobileLayout(controller: controller);
+        },
+      ),
+    );
+  }
+}
+
+// =================================================
+// LAYOUT MOBILE (Clean & Full Width)
+// =================================================
+class _MobileLayout extends StatelessWidget {
+  final LoginController controller;
+  const _MobileLayout({required this.controller});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final size = MediaQuery.of(context).size;
-    final isDesktop = size.width > 900;
+    final isDark = theme.brightness == Brightness.dark;
+
+    // No mobile, usamos o fundo puro (branco ou preto) para maximizar espaço
+    // em vez de cinza, dando uma aparência de "App Nativo".
+    final bgColor = isDark ? const Color(0xFF121212) : Colors.white;
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      body: Row(
-        children: [
-          // =================================================
-          // LADO ESQUERDO: BRANDING & INSPIRAÇÃO
-          // =================================================
-          if (isDesktop)
-            Expanded(
-              flex: 5, // 5/12 da tela
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  // 1. Imagem de Fundo
-                  Image.asset(
-                    heroImage,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        Container(color: const Color(0xFF1B4B29)),
-                  ),
-
-                  // 2. Overlay Escuro (Gradiente)
-                  Container(
+      backgroundColor: bgColor,
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            // Reduzi o padding lateral para 20. Antes somava com o do card e ficava +40.
+            // Agora o formulário vai quase até a borda, ficando muito mais legível.
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment:
+                  CrossAxisAlignment.stretch, // Força ocupar largura total
+              children: [
+                const SizedBox(height: 20),
+                // Logo
+                Center(
+                  child: Container(
+                    width: 64,
+                    height: 64,
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          const Color(0xFF1B4B29).withOpacity(0.3),
-                          Colors.black.withOpacity(0.8),
-                        ],
-                      ),
+                      color: theme.colorScheme.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Icon(Icons.church,
+                        size: 32, color: theme.colorScheme.primary),
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Textos de Boas-vindas (Centralizados)
+                Text(
+                  'Bem-vindo',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.outfit(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onSurface,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Faça login para continuar',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.inter(
+                    fontSize: 15,
+                    color: theme.colorScheme.onSurface.withOpacity(0.6),
+                  ),
+                ),
+
+                const SizedBox(height: 40),
+
+                // Formulário direto na tela (Sem Card/BoxDecoration)
+                // Isso remove a sensação de "apertado"
+                _LoginFormBody(controller: controller),
+
+                const SizedBox(height: 40),
+
+                // Footer
+                Center(
+                  child: Text(
+                    "© 2025 Paróquia Nossa Sra. Auxiliadora",
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: theme.colorScheme.onSurface.withOpacity(0.4),
                     ),
                   ),
-
-                  // 3. Conteúdo Sobreposto (Vidro)
-                  Padding(
-                    padding: const EdgeInsets.all(60.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Logo / Nome
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Circular logo image centered above the name
-                            Align(
-                              alignment: Alignment.center,
-                              child: Container(
-                                width: 100,
-                                height: 100,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: Colors.white.withOpacity(0.3),
-                                    width: 2,
-                                  ),
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(50),
-                                  child: Image.asset(
-                                    'assets/images/logo.jpg',
-                                    fit: BoxFit.cover,
-                                    errorBuilder:
-                                        (
-                                          context,
-                                          error,
-                                          stackTrace,
-                                        ) => Container(
-                                          color: Colors.grey,
-                                          child: const Icon(
-                                            Icons.image_not_supported_outlined,
-                                            color: Colors.white,
-                                            size: 28,
-                                          ),
-                                        ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 24),
-                            TweenAnimationBuilder<double>(
-                              tween: Tween(begin: 0.0, end: 1.0),
-                              duration: const Duration(milliseconds: 1200),
-                              curve: Curves.elasticOut,
-                              builder: (context, value, child) {
-                                return Transform.scale(
-                                  scale: value,
-                                  child: Align(
-                                    alignment: Alignment.center,
-                                    child: Text(
-                                      "PARÓQUIA\nN. S. AUXILIADORA",
-                                      textAlign: TextAlign.center,
-                                      style: GoogleFonts.outfit(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w900,
-                                        fontSize: 32,
-                                        letterSpacing: 1.2,
-                                        shadows: [
-                                          Shadow(
-                                            color: Colors.black.withOpacity(
-                                              0.7,
-                                            ),
-                                            offset: const Offset(2, 2),
-                                            blurRadius: 4,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ],
-                        ),
-
-                        const Spacer(),
-
-                        // Card de Citação com Glassmorphism
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(20),
-                          child: BackdropFilter(
-                            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                            child: Container(
-                              padding: const EdgeInsets.all(32),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.1),
-                                border: Border.all(
-                                  color: Colors.white.withOpacity(0.2),
-                                ),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    '"Cada ato de generosidade é um degrau rumo ao céu."',
-                                    style: GoogleFonts.outfit(
-                                      color: Colors.white,
-                                      fontSize: 28,
-                                      height: 1.2,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  Row(
-                                    children: [
-                                      Container(
-                                        height: 2,
-                                        width: 40,
-                                        color: Colors.white.withOpacity(0.5),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 40),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 10),
+              ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
 
-          // =================================================
-          // LADO DIREITO: LOGIN FORM
-          // =================================================
-          Expanded(
-            flex: 7, // 7/12 da tela
-            child: Container(
-              color: theme.colorScheme.surface,
+// =================================================
+// LAYOUT DESKTOP (Split Screen - Mantido igual)
+// =================================================
+class _DesktopLayout extends StatelessWidget {
+  final LoginController controller;
+  const _DesktopLayout({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Row(
+      children: [
+        // Lado Esquerdo (Branding)
+        Expanded(
+          flex: 5,
+          child: Container(
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF0A0A0A) : colorScheme.primary,
+              image: !isDark
+                  ? DecorationImage(
+                      image: const NetworkImage(
+                          "https://images.unsplash.com/photo-1548625361-e877477d94c9?q=80&w=1920&auto=format&fit=crop"),
+                      fit: BoxFit.cover,
+                      colorFilter: ColorFilter.mode(
+                        colorScheme.primary.withOpacity(0.85),
+                        BlendMode.multiply,
+                      ),
+                    )
+                  : null,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(60.0),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Header Mobile (Só aparece se tela for pequena)
-                  if (!isDesktop)
-                    Container(
-                      height: 200,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF1B4B29),
-                        image: DecorationImage(
-                          image: AssetImage(heroImage),
-                          fit: BoxFit.cover,
-                          colorFilter: ColorFilter.mode(
-                            Colors.black.withOpacity(0.6),
-                            BlendMode.darken,
-                          ),
-                        ),
-                      ),
-                      child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            // Circular logo image for mobile
-                            Container(
-                              width: 60,
-                              height: 60,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: Colors.white.withOpacity(0.3),
-                                  width: 2,
-                                ),
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(30),
-                                child: Image.asset(
-                                  'assets/images/logo.jpg',
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) =>
-                                      Container(
-                                        color: Colors.grey,
-                                        child: const Icon(
-                                          Icons.image_not_supported_outlined,
-                                          color: Colors.white,
-                                          size: 24,
-                                        ),
-                                      ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              "Paróquia NS Auxiliadora",
-                              style: GoogleFonts.outfit(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                  // Área do Form
-                  Expanded(
-                    child: Center(
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 40,
-                          vertical: 24,
-                        ),
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 420),
-                          child: TweenAnimationBuilder<double>(
-                            tween: Tween(begin: 0.0, end: 1.0),
-                            duration: const Duration(milliseconds: 800),
-                            curve: Curves.easeOutQuart,
-                            builder: (context, value, child) {
-                              return Transform.translate(
-                                offset: Offset(0, 30 * (1 - value)), // Slide Up
-                                child: Opacity(
-                                  opacity: value, // Fade In
-                                  child: child,
-                                ),
-                              );
-                            },
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  'Bem-vindo de volta',
-                                  style: GoogleFonts.outfit(
-                                    fontSize: 32,
-                                    fontWeight: FontWeight.bold,
-                                    color: theme.colorScheme.onSurface,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'Digite seus dados para acessar o painel administrativo.',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 15,
-                                    color: theme.colorScheme.onSurface
-                                        .withOpacity(0.6),
-                                    height: 1.5,
-                                  ),
-                                ),
-                                const SizedBox(height: 40),
-
-                                // Inputs
-                                Form(
-                                  key: controller.formKey,
-                                  child: Column(
-                                    children: [
-                                      Obx(
-                                        () => _ModernInput(
-                                          label: "E-mail",
-                                          controller:
-                                              controller.emailController,
-                                          hint: "ex: tesouraria@paroquia.com",
-                                          icon: Icons.email_outlined,
-                                          errorText:
-                                              controller.emailError.value,
-                                          validator: controller.validateEmail,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 24),
-                                      Obx(
-                                        () => _ModernInput(
-                                          label: "Senha",
-                                          controller:
-                                              controller.passwordController,
-                                          hint: "Digite sua senha",
-                                          icon: Icons.lock_outline,
-                                          isPassword: true,
-                                          obscureText:
-                                              controller.obscurePassword.value,
-                                          onToggleVisibility: controller
-                                              .togglePasswordVisibility,
-                                          errorText:
-                                              controller.passwordError.value,
-                                          validator:
-                                              controller.validatePassword,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-
-                                const SizedBox(height: 32),
-
-                                // Botão Principal
-                                Obx(
-                                  () => SizedBox(
-                                    width: double.infinity,
-                                    height: 56,
-                                    child: ElevatedButton(
-                                      onPressed: controller.isLoading.value
-                                          ? null
-                                          : controller.login,
-                                      style:
-                                          ElevatedButton.styleFrom(
-                                            backgroundColor:
-                                                controller.isLoading.value
-                                                ? theme.colorScheme.onSurface
-                                                      .withOpacity(
-                                                        0.4,
-                                                      ) // Gray state when loading
-                                                : theme.colorScheme.primary,
-                                            // Use theme primary color when not loading
-                                            foregroundColor: Colors.white,
-                                            elevation: 0,
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                            ),
-                                            shadowColor: theme
-                                                .colorScheme
-                                                .primary
-                                                .withOpacity(0.4),
-                                          ).copyWith(
-                                            elevation:
-                                                MaterialStateProperty.resolveWith(
-                                                  (states) {
-                                                    if (states.contains(
-                                                      MaterialState.hovered,
-                                                    ))
-                                                      return 10;
-                                                    return 0;
-                                                  },
-                                                ),
-                                          ),
-                                      child: controller.isLoading.value
-                                          ? const SizedBox(
-                                              height: 24,
-                                              width: 24,
-                                              child: CircularProgressIndicator(
-                                                color: Colors.white,
-                                                strokeWidth: 2.5,
-                                              ),
-                                            )
-                                          : Text(
-                                              'Acessar Sistema',
-                                              style: GoogleFonts.outfit(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w600,
-                                                letterSpacing: 0.5,
-                                              ),
-                                            ),
-                                    ),
-                                  ),
-                                ),
-
-                                const SizedBox(height: 24),
-
-                                // Área de Mensagem de Erro
-                                Obx(() {
-                                  if (controller.loginError.value == null) {
-                                    return const SizedBox.shrink();
-                                  }
-                                  return Container(
-                                    margin: const EdgeInsets.only(bottom: 16),
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 12,
-                                      horizontal: 16,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.red.withOpacity(0.08),
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(
-                                        color: Colors.red.withOpacity(0.3),
-                                        width: 1.5,
-                                      ),
-                                    ),
-                                    child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Icon(
-                                          Icons.error_outline,
-                                          color: Colors.red.shade600,
-                                          size: 20,
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Expanded(
-                                          child: Text(
-                                            controller.loginError.value!,
-                                            style: GoogleFonts.inter(
-                                              color: Colors.red.shade800,
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                }),
-
-                                // Rodapé
-                                Center(
-                                  child: Text(
-                                    "© 2025 - Paroquia Nossa Senhora Auxiliadora",
-                                    style: GoogleFonts.inter(
-                                      fontSize: 12,
-                                      color: theme.colorScheme.onSurface
-                                          .withOpacity(0.4),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
+                  Row(
+                    children: [
+                      const Icon(Icons.church_rounded,
+                          color: Colors.white, size: 32),
+                      const SizedBox(width: 12),
+                      Text("PNSA Digital",
+                          style: GoogleFonts.outfit(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white)),
+                    ],
                   ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Gestão Paroquial\nSimplificada.",
+                          style: GoogleFonts.outfit(
+                              fontSize: 48,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              height: 1.1)),
+                      const SizedBox(height: 20),
+                      Text("Acesse o painel administrativo.",
+                          style: GoogleFonts.inter(
+                              fontSize: 18,
+                              color: Colors.white.withOpacity(0.8))),
+                    ],
+                  ),
+                  Text("© 2025 Sistema PNSA",
+                      style: GoogleFonts.inter(
+                          color: Colors.white.withOpacity(0.5))),
                 ],
               ),
             ),
           ),
+        ),
+        // Lado Direito (Formulário)
+        Expanded(
+          flex: 4,
+          child: Container(
+            color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+            alignment: Alignment.center,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(48),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 420),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Acessar Sistema',
+                        style: GoogleFonts.outfit(
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.onSurface)),
+                    const SizedBox(height: 12),
+                    Text('Insira suas credenciais abaixo.',
+                        style: GoogleFonts.inter(
+                            fontSize: 15,
+                            color:
+                                theme.colorScheme.onSurface.withOpacity(0.6))),
+                    const SizedBox(height: 40),
+                    _LoginFormBody(controller: controller),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// =================================================
+// FORMULÁRIO (Componente Comum)
+// =================================================
+class _LoginFormBody extends StatelessWidget {
+  final LoginController controller;
+  const _LoginFormBody({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Form(
+      key: controller.formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Obx(() => _ModernInput(
+                label: "E-mail",
+                controller: controller.emailController,
+                hint: "seu@email.com",
+                icon: Icons.alternate_email_rounded,
+                errorText: controller.emailError.value,
+                validator: controller.validateEmail,
+                inputType: TextInputType.emailAddress,
+              )),
+          const SizedBox(height: 20),
+          Obx(() => _ModernInput(
+                label: "Senha",
+                controller: controller.passwordController,
+                hint: "Sua senha",
+                icon: Icons.lock_outline_rounded,
+                isPassword: true,
+                obscureText: controller.obscurePassword.value,
+                onToggleVisibility: controller.togglePasswordVisibility,
+                errorText: controller.passwordError.value,
+                validator: controller.validatePassword,
+              )),
+
+          const SizedBox(height: 24),
+
+          Obx(() => SizedBox(
+                width: double.infinity,
+                height: 54, // Altura confortável para o dedo
+                child: ElevatedButton(
+                  onPressed:
+                      controller.isLoading.value ? null : controller.login,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: theme.colorScheme.primary,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  child: controller.isLoading.value
+                      ? const SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(
+                              color: Colors.white, strokeWidth: 2.5))
+                      : Text('Entrar',
+                          style: GoogleFonts.inter(
+                              fontSize: 16, fontWeight: FontWeight.w600)),
+                ),
+              )),
+
+          // Erro
+          Obx(() {
+            if (controller.loginError.value == null)
+              return const SizedBox.shrink();
+            return Container(
+              margin: const EdgeInsets.only(top: 20),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.warning_amber_rounded,
+                      color: Colors.red[700], size: 20),
+                  const SizedBox(width: 12),
+                  Expanded(
+                      child: Text(controller.loginError.value!,
+                          style: GoogleFonts.inter(
+                              color: Colors.red[800], fontSize: 13))),
+                ],
+              ),
+            );
+          }),
         ],
       ),
     );
@@ -483,7 +328,7 @@ class LoginView extends StatelessWidget {
 }
 
 // =================================================
-// INPUT MODERNO (Com animação de foco)
+// INPUT MODERNO (Refinado para Mobile)
 // =================================================
 class _ModernInput extends StatefulWidget {
   final String label;
@@ -495,6 +340,7 @@ class _ModernInput extends StatefulWidget {
   final VoidCallback? onToggleVisibility;
   final String? errorText;
   final String? Function(String?)? validator;
+  final TextInputType inputType;
 
   const _ModernInput({
     required this.label,
@@ -506,6 +352,7 @@ class _ModernInput extends StatefulWidget {
     this.onToggleVisibility,
     this.errorText,
     this.validator,
+    this.inputType = TextInputType.text,
   });
 
   @override
@@ -518,8 +365,13 @@ class _ModernInputState extends State<_ModernInput> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
     final hasError = widget.errorText != null;
-    final primaryColor = const Color(0xFF1B4B29);
+
+    // Ajuste de cores para contraste melhor sem o card branco
+    final fillColor =
+        isDark ? const Color(0xFF1F1F1F) : const Color(0xFFF3F4F6);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -529,93 +381,67 @@ class _ModernInputState extends State<_ModernInput> {
           style: GoogleFonts.inter(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: theme.colorScheme.onSurface.withOpacity(0.8),
+            color: colorScheme.onSurface.withOpacity(0.8),
           ),
         ),
         const SizedBox(height: 8),
         Focus(
-          onFocusChange: (hasFocus) => setState(() => _isFocused = hasFocus),
+          onFocusChange: (focus) => setState(() => _isFocused = focus),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             decoration: BoxDecoration(
-              color: _isFocused
-                  ? (theme.brightness == Brightness.dark
-                        ? theme.colorScheme.surface
-                        : Colors.white)
-                  : theme.colorScheme.surfaceVariant.withOpacity(0.2),
+              color: fillColor,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: hasError
                     ? Colors.red
-                    : (_isFocused ? primaryColor : Colors.transparent),
+                    : (_isFocused ? colorScheme.primary : Colors.transparent),
                 width: 1.5,
               ),
-              boxShadow: _isFocused && !hasError
-                  ? [
-                      BoxShadow(
-                        color: primaryColor.withOpacity(0.1),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
-                      ),
-                    ]
-                  : [],
             ),
             child: TextFormField(
               controller: widget.controller,
               obscureText: widget.obscureText,
-              validator: widget.validator,
-              style: GoogleFonts.inter(
-                fontSize: 15,
-                color: theme.colorScheme.onSurface,
-              ),
-              cursorColor: primaryColor,
+              keyboardType: widget.inputType,
+              style: GoogleFonts.inter(fontSize: 16), // Fonte maior para mobile
               decoration: InputDecoration(
+                isDense: true,
                 hintText: widget.hint,
                 hintStyle: GoogleFonts.inter(
-                  color: theme.colorScheme.onSurface.withOpacity(0.3),
-                ),
-                prefixIcon: Icon(
-                  widget.icon,
-                  size: 20,
-                  color: hasError
-                      ? Colors.red
-                      : (_isFocused
-                            ? primaryColor
-                            : theme.colorScheme.onSurface.withOpacity(0.4)),
-                ),
+                    color: colorScheme.onSurface.withOpacity(0.35),
+                    fontSize: 15),
+                prefixIcon: Icon(widget.icon,
+                    size: 22,
+                    color: _isFocused
+                        ? colorScheme.primary
+                        : colorScheme.onSurface.withOpacity(0.4)),
                 suffixIcon: widget.isPassword
                     ? IconButton(
                         icon: Icon(
                           widget.obscureText
                               ? Icons.visibility_off_outlined
                               : Icons.visibility_outlined,
-                          size: 20,
-                          color: theme.colorScheme.onSurface.withOpacity(0.5),
+                          size: 22,
                         ),
                         onPressed: widget.onToggleVisibility,
+                        color: colorScheme.onSurface.withOpacity(0.5),
                       )
                     : null,
                 border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(
-                  vertical: 16,
-                  horizontal: 16,
-                ),
+                contentPadding:
+                    const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
               ),
             ),
           ),
         ),
-        // Espaço para mensagem de erro (animação opcional)
         if (hasError)
           Padding(
             padding: const EdgeInsets.only(top: 6, left: 4),
-            child: Text(
-              widget.errorText!,
-              style: GoogleFonts.inter(
-                color: Colors.red,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
+            child: Text(widget.errorText!,
+                style: GoogleFonts.inter(
+                    color: Colors.red,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500)),
           ),
       ],
     );

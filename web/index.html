@@ -42,91 +42,199 @@
 
   <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
   <style id="splash-screen-style">
-    html {
-      height: 100%
+    :root {
+      --primary-color: #4f84f0;
+      --secondary-color: #c8a755;
+      --bg-light: #F8F9FB;
+      --bg-dark: #1A1A1A;
+      --text-light: #444444;
+      --text-dark: #f0f0f0;
     }
 
+    html,
     body {
+      height: 100%;
       margin: 0;
-      min-height: 100%;
-      background-color: #ffffff;
-      background-size: 100% 100%;
-    }
-
-    .center {
-      margin: 0;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      -ms-transform: translate(-50%, -50%);
-      transform: translate(-50%, -50%);
-    }
-
-    .contain {
-      display: block;
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-    }
-
-    .stretch {
-      display: block;
-      width: 100%;
-      height: 100%;
-    }
-
-    .cover {
-      display: block;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .bottom {
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      -ms-transform: translate(-50%, 0);
-      transform: translate(-50%, 0);
-    }
-
-    .bottomLeft {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-    }
-
-    .bottomRight {
-      position: absolute;
-      bottom: 0;
-      right: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: var(--bg-light);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
     @media (prefers-color-scheme: dark) {
       body {
-        background-color: #181818;
+        background-color: var(--bg-dark);
+      }
+    }
+
+    .splash-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      width: 100%;
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    .logo-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 140px;
+      height: 140px;
+      margin-bottom: 30px;
+    }
+
+    .logo-bg {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-color: var(--primary-color);
+      opacity: 0.1;
+      border-radius: 50%;
+      animation: pulse 2s infinite ease-in-out;
+    }
+
+    .logo-icon {
+      z-index: 1;
+      color: var(--primary-color);
+      width: 80px;
+      height: 80px;
+    }
+
+    .title {
+      font-size: 26px;
+      font-weight: 600;
+      color: var(--text-dark);
+      margin: 15px 0 8px 0;
+      letter-spacing: -0.5px;
+    }
+
+    @media (prefers-color-scheme: light) {
+      .title {
+        color: #1A1A1A;
+      }
+    }
+
+    .subtitle {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--text-dark);
+      opacity: 0.5;
+      text-align: center;
+      max-width: 80%;
+      letter-spacing: 0.2px;
+      text-transform: uppercase;
+    }
+
+    @media (prefers-color-scheme: light) {
+      .subtitle {
+        color: #666666;
+      }
+    }
+
+    .loader-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .loader {
+      width: 24px;
+      height: 24px;
+      border: 3px solid rgba(200, 167, 85, 0.2);
+      border-top: 3px solid var(--secondary-color);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    .loader-text {
+      font-size: 12px;
+      color: var(--text-light);
+      opacity: 0.5;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .loader-text {
+        color: var(--text-dark);
+      }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+        opacity: 0.1;
+      }
+
+      50% {
+        transform: scale(1.1);
+        opacity: 0.15;
+      }
+
+      100% {
+        transform: scale(1);
+        opacity: 0.1;
+      }
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
       }
     }
   </style>
   <script id="splash-screen-script">
     function removeSplashFromWeb() {
-      document.getElementById("splash")?.remove();
-      document.getElementById("splash-branding")?.remove();
-      document.body.style.background = "transparent";
+      const splash = document.getElementById("splash-overlay");
+      if (splash) {
+        // Remover INSTANTANEAMENTE sem fade
+        splash.remove();
+      }
     }
   </script>
 </head>
 
 <body>
-  <picture id="splash">
-    <source
-      srcset="splash/img/light-1x.png 1x, splash/img/light-2x.png 2x, splash/img/light-3x.png 3x, splash/img/light-4x.png 4x"
-      media="(prefers-color-scheme: light)">
-    <source
-      srcset="splash/img/dark-1x.png 1x, splash/img/dark-2x.png 2x, splash/img/dark-3x.png 3x, splash/img/dark-4x.png 4x"
-      media="(prefers-color-scheme: dark)">
-    <img class="center" aria-hidden="true" src="splash/img/light-1x.png" alt="">
-  </picture>
+  <div id="splash-overlay"
+    style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; background: inherit;">
+    <div class="splash-container">
+      <div class="loader-container">
+        <div class="loader"></div>
+        <div class="loader-text">Iniciando...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Remover o splash após 5 segundos como fallback de segurança
+    setTimeout(() => {
+      const splash = document.getElementById("splash-overlay");
+      if (splash) {
+        splash.style.opacity = '0';
+        splash.style.transition = 'opacity 0.8s ease-out';
+        setTimeout(() => splash.remove(), 800);
+      }
+    }, 5000);
+  </script>
 
 
   <script src="flutter_bootstrap.js" async=""></script>
