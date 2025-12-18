@@ -154,7 +154,8 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final size = MediaQuery.of(context).size;
-    final isMobile = size.width < 600;
+    final isMobile =
+        size.width < 700; // Aumentado para cobrir mais dispositivos/tablets
 
     // inputDecoration seguindo padrão Material 3
     final inputDecoration = InputDecoration(
@@ -185,6 +186,7 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ... (todos os campos de antes)
           // Número de Registro Paroquial
           TextField(
             controller: numeroRegistroController,
@@ -500,6 +502,9 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
               if (v != null) setState(() => selectedStatus = v);
             },
           ),
+          // ADICIONADO: Espaço extra no final para permitir que o teclado não "suba" a tela inteira
+          // mas sim apenas role o conteúdo.
+          const SizedBox(height: 300),
         ],
       ),
     );
@@ -508,6 +513,7 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
     if (isMobile) {
       return Dialog.fullscreen(
         child: Scaffold(
+          resizeToAvoidBottomInset: true,
           appBar: AppBar(
             title: Text(widget.title),
             leading: IconButton(
@@ -578,8 +584,7 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
     final cepSemMascara = cepController.text.replaceAll(RegExp(r'[^\d]'), '');
 
     final novoDizimista = Dizimista(
-      id:
-          widget.dizimista?.id ??
+      id: widget.dizimista?.id ??
           DateTime.now().millisecondsSinceEpoch.toString(),
       numeroRegistro: numeroRegistroController.text,
       nome: nomeController.text,

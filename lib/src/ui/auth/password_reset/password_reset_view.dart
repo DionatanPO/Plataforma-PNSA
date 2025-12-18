@@ -13,6 +13,7 @@ class PasswordResetView extends GetView<PasswordResetController> {
 
     return Scaffold(
       backgroundColor: backgroundColor,
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -92,7 +93,8 @@ class PasswordResetView extends GetView<PasswordResetController> {
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.check_circle_outline, color: Colors.green[700], size: 18),
+                          Icon(Icons.check_circle_outline,
+                              color: Colors.green[700], size: 18),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
@@ -142,40 +144,41 @@ class PasswordResetView extends GetView<PasswordResetController> {
 
                   // Botão de Ação
                   Obx(() => SizedBox(
-                    width: double.infinity,
-                    height: 56,
-                    child: ElevatedButton(
-                      onPressed: controller.isLoading.value
-                          ? null
-                          : controller.resetPassword,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: primaryColor,
-                        foregroundColor: Colors.white,
-                        elevation: 2,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
+                        width: double.infinity,
+                        height: 56,
+                        child: ElevatedButton(
+                          onPressed: controller.isLoading.value
+                              ? null
+                              : controller.resetPassword,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: primaryColor,
+                            foregroundColor: Colors.white,
+                            elevation: 2,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            disabledBackgroundColor:
+                                primaryColor.withOpacity(0.6),
+                          ),
+                          child: controller.isLoading.value
+                              ? const SizedBox(
+                                  height: 24,
+                                  width: 24,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.5,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Text(
+                                  'DEFINIR NOVA SENHA',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 1,
+                                  ),
+                                ),
                         ),
-                        disabledBackgroundColor: primaryColor.withOpacity(0.6),
-                      ),
-                      child: controller.isLoading.value
-                          ? const SizedBox(
-                        height: 24,
-                        width: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          color: Colors.white,
-                        ),
-                      )
-                          : const Text(
-                        'DEFINIR NOVA SENHA',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1,
-                        ),
-                      ),
-                    ),
-                  )),
+                      )),
 
                   // Mensagem de erro
                   Obx(() => controller.errorMessage.value != null
@@ -189,7 +192,8 @@ class PasswordResetView extends GetView<PasswordResetController> {
                           ),
                           child: Row(
                             children: [
-                              Icon(Icons.error_outline, color: Colors.red[700], size: 16),
+                              Icon(Icons.error_outline,
+                                  color: Colors.red[700], size: 16),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
@@ -246,14 +250,19 @@ class PasswordResetView extends GetView<PasswordResetController> {
             decoration: InputDecoration(
               labelText: label,
               labelStyle: TextStyle(color: Colors.grey[600], fontSize: 14),
-              floatingLabelStyle: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
+              floatingLabelStyle:
+                  TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
               filled: true,
               fillColor: Colors.grey[50],
-              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-              prefixIcon: Icon(Icons.lock_outline_rounded, color: Colors.grey[400]),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+              prefixIcon:
+                  Icon(Icons.lock_outline_rounded, color: Colors.grey[400]),
               suffixIcon: IconButton(
                 icon: Icon(
-                  isObscure ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                  isObscure
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
                   color: Colors.grey[500],
                 ),
                 onPressed: onToggle,

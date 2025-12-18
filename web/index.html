@@ -2,19 +2,6 @@
 <html>
 
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
   <base href="$FLUTTER_BASE_HREF">
 
   <meta charset="UTF-8">
@@ -40,7 +27,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Material+Icons+Sharp" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Icons+Two+Tone" rel="stylesheet">
 
-  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+  <!-- MUDANÇA 1: 'resizes-content' para o Flutter saber que tem que subir o campo, 
+       mas vamos travar o scroll no CSS abaixo -->
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=overlays-content">
+
   <style id="splash-screen-style">
     :root {
       --primary-color: #4f84f0;
@@ -51,14 +42,23 @@
       --text-dark: #f0f0f0;
     }
 
+    /* MUDANÇA 2: A TRAVA ABSOLUTA */
     html,
     body {
+      position: fixed;
+      /* O segredo: Impede que o Android empurre a tela pra cima */
+      top: 0;
+      left: 0;
+      width: 100%;
       height: 100%;
+      overflow: hidden;
+      /* Remove barras de rolagem */
       margin: 0;
       padding: 0;
-      overflow: hidden;
       background-color: var(--bg-light);
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      touch-action: none;
+      /* Bloqueia zoom e scroll manual no container */
     }
 
     @media (prefers-color-scheme: dark) {
@@ -67,6 +67,7 @@
       }
     }
 
+    /* --- SPLASH SCREEN (Mantido igual) --- */
     .splash-container {
       display: flex;
       flex-direction: column;
@@ -202,13 +203,11 @@
       }
     }
   </style>
+
   <script id="splash-screen-script">
     function removeSplashFromWeb() {
       const splash = document.getElementById("splash-overlay");
-      if (splash) {
-        // Remover INSTANTANEAMENTE sem fade
-        splash.remove();
-      }
+      if (splash) { splash.remove(); }
     }
   </script>
 </head>
@@ -225,7 +224,6 @@
   </div>
 
   <script>
-    // Remover o splash após 5 segundos como fallback de segurança
     setTimeout(() => {
       const splash = document.getElementById("splash-overlay");
       if (splash) {
@@ -236,9 +234,38 @@
     }, 5000);
   </script>
 
+  <!-- MUDANÇA 3: Script Guarda-Costas -->
+  <script>
+    // Esse script impede que o navegador role o body para cima
+    window.addEventListener('scroll', function () {
+      if (window.scrollY !== 0) {
+        window.scrollTo(0, 0);
+      }
+    });
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('scroll', function () {
+        if (window.visualViewport.offsetTop > 0) {
+          window.scrollTo(0, 0);
+        }
+      });
+
+      // Quando o teclado abre (resize), apenas garantimos que estamos no topo
+      window.visualViewport.addEventListener('resize', function () {
+        window.scrollTo(0, 0);
+      });
+    }
+
+    // MUDANÇA 4: Impede o navegador de rolar o corpo ao focar em inputs
+    document.addEventListener('focusin', function (e) {
+      setTimeout(function () {
+        window.scrollTo(0, 0);
+        document.body.scrollTop = 0;
+      }, 50);
+    });
+  </script>
 
   <script src="flutter_bootstrap.js" async=""></script>
-
 
 </body>
 

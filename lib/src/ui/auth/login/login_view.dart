@@ -12,6 +12,7 @@ class LoginView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       body: LayoutBuilder(
         builder: (context, constraints) {
           if (constraints.maxWidth > 900) {
@@ -42,6 +43,7 @@ class _MobileLayout extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: bgColor,
+      resizeToAvoidBottomInset: true,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(

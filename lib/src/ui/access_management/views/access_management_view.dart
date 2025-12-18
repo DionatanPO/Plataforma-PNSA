@@ -41,13 +41,13 @@ class _AccessManagementViewState extends State<AccessManagementView> {
     theme = Theme.of(context);
     isDark = theme.brightness == Brightness.dark;
     surfaceColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
-    backgroundColor = isDark
-        ? const Color(0xFF121212)
-        : const Color(0xFFF4F6F8);
+    backgroundColor =
+        isDark ? const Color(0xFF121212) : const Color(0xFFF4F6F8);
     borderColor = theme.dividerColor.withOpacity(0.1);
 
     return Scaffold(
       backgroundColor: backgroundColor,
+      resizeToAvoidBottomInset: true,
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
@@ -332,6 +332,7 @@ class _AccessManagementViewState extends State<AccessManagementView> {
             if (isMobile) {
               return Dialog.fullscreen(
                 child: Scaffold(
+                  resizeToAvoidBottomInset: true,
                   appBar: AppBar(
                     title: const Text('Editar Usuário'),
                     leading: IconButton(
@@ -643,16 +644,16 @@ class _AccessManagementViewState extends State<AccessManagementView> {
   }
 
   Widget _label(String text) => Padding(
-    padding: const EdgeInsets.only(bottom: 12),
-    child: Text(
-      text,
-      style: GoogleFonts.inter(
-        fontSize: 12,
-        fontWeight: FontWeight.bold,
-        color: theme.primaryColor,
-      ),
-    ),
-  );
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Text(
+          text,
+          style: GoogleFonts.inter(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: theme.primaryColor,
+          ),
+        ),
+      );
 
   Widget _buildTextField({
     required String label,
@@ -660,74 +661,79 @@ class _AccessManagementViewState extends State<AccessManagementView> {
     Function(String)? onChanged,
     List<TextInputFormatter>? inputFormatters,
     TextInputType? keyboardType,
-  }) => TextField(
-    controller: controller,
-    decoration: InputDecoration(
-      labelText: label,
-      border: const OutlineInputBorder(),
-      enabledBorder: OutlineInputBorder(
-        borderSide: BorderSide(
-          color: theme.colorScheme.outline.withOpacity(0.5),
+  }) =>
+      TextField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+          enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(
+              color: theme.colorScheme.outline.withOpacity(0.5),
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderSide:
+                BorderSide(color: theme.colorScheme.primary, width: 2.0),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: theme.colorScheme.error),
+          ),
+          filled: true,
+          fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+          labelStyle: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+          floatingLabelStyle: TextStyle(color: theme.colorScheme.primary),
+          isDense: true,
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         ),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: theme.colorScheme.primary, width: 2.0),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: theme.colorScheme.error),
-      ),
-      filled: true,
-      fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
-      labelStyle: TextStyle(color: theme.colorScheme.onSurfaceVariant),
-      floatingLabelStyle: TextStyle(color: theme.colorScheme.primary),
-      isDense: true,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-    ),
-    style: GoogleFonts.inter(fontSize: 14),
-    onChanged: onChanged,
-    inputFormatters: inputFormatters,
-    keyboardType: keyboardType,
-  );
+        style: GoogleFonts.inter(fontSize: 14),
+        onChanged: onChanged,
+        inputFormatters: inputFormatters,
+        keyboardType: keyboardType,
+      );
 
   Widget _buildDropdown({
     required String label,
     required String value,
     required List<String> items,
     required Function(String?) onChanged,
-  }) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(
-        label,
-        style: GoogleFonts.inter(
-          fontSize: 11,
-          color: theme.colorScheme.onSurface.withOpacity(0.6),
-        ),
-      ),
-      const SizedBox(height: 6),
-      Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
-          borderRadius: BorderRadius.circular(4),
-          border: Border.all(color: theme.colorScheme.outline.withOpacity(0.5)),
-        ),
-        child: DropdownButtonHideUnderline(
-          child: DropdownButton<String>(
-            isExpanded: true,
-            value: value,
-            items: items
-                .map(
-                  (s) => DropdownMenuItem(
-                    value: s,
-                    child: Text(s, style: GoogleFonts.inter(fontSize: 14)),
-                  ),
-                )
-                .toList(),
-            onChanged: onChanged,
+  }) =>
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: GoogleFonts.inter(
+              fontSize: 11,
+              color: theme.colorScheme.onSurface.withOpacity(0.6),
+            ),
           ),
-        ),
-      ),
-    ],
-  );
+          const SizedBox(height: 6),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(4),
+              border:
+                  Border.all(color: theme.colorScheme.outline.withOpacity(0.5)),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                isExpanded: true,
+                value: value,
+                items: items
+                    .map(
+                      (s) => DropdownMenuItem(
+                        value: s,
+                        child: Text(s, style: GoogleFonts.inter(fontSize: 14)),
+                      ),
+                    )
+                    .toList(),
+                onChanged: onChanged,
+              ),
+            ),
+          ),
+        ],
+      );
 }

@@ -27,6 +27,7 @@ class EditProfileView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: bgColor,
+      resizeToAvoidBottomInset: true,
       extendBodyBehindAppBar: true,
       // ADICIONADO: Scrollbar é essencial para Desktop
       body: Scrollbar(
@@ -122,7 +123,6 @@ class EditProfileView extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               _SectionHeader(title: "Informações Básicas"),
-
                               if (isDesktop)
                                 Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -165,9 +165,7 @@ class EditProfileView extends StatelessWidget {
                                   icon: Icons.work_outline,
                                 ),
                               ],
-
                               const SizedBox(height: 20),
-
                               _ModernInput(
                                 label: "Bio / Sobre",
                                 controller: TextEditingController(),
@@ -176,15 +174,12 @@ class EditProfileView extends StatelessWidget {
                                 icon: Icons.edit_note,
                                 maxLines: 4,
                               ),
-
                               const SizedBox(height: 40),
                               Divider(
                                 color: theme.dividerColor.withOpacity(0.1),
                               ),
                               const SizedBox(height: 40),
-
                               _SectionHeader(title: "Contato e Segurança"),
-
                               if (isDesktop)
                                 Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -226,7 +221,6 @@ class EditProfileView extends StatelessWidget {
                                   icon: Icons.phone_outlined,
                                 ),
                               ],
-
                               const SizedBox(height: 60),
                             ],
                           ),

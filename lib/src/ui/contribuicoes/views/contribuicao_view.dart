@@ -31,10 +31,10 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
 
   final CurrencyTextInputFormatter _currencyFormatter =
       CurrencyTextInputFormatter.currency(
-        locale: 'pt_BR',
-        symbol: 'R\$',
-        decimalDigits: 2,
-      );
+    locale: 'pt_BR',
+    symbol: 'R\$',
+    decimalDigits: 2,
+  );
 
   late ThemeData theme;
   late bool isDark;
@@ -58,9 +58,8 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
     theme = Theme.of(context);
     isDark = theme.brightness == Brightness.dark;
     surfaceColor = isDark ? const Color(0xFF1A1A1A) : Colors.white;
-    backgroundColor = isDark
-        ? const Color(0xFF0D0D0D)
-        : const Color(0xFFF8F9FA);
+    backgroundColor =
+        isDark ? const Color(0xFF0D0D0D) : const Color(0xFFF8F9FA);
     borderColor = isDark
         ? Colors.white.withOpacity(0.08)
         : Colors.black.withOpacity(0.06);
@@ -68,6 +67,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
 
     return Scaffold(
       backgroundColor: backgroundColor,
+      resizeToAvoidBottomInset: true,
       body: CustomScrollView(
         slivers: [
           // Modern App Bar
@@ -248,8 +248,8 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
               color: isActive
                   ? Colors.white
                   : isCompleted
-                  ? Colors.green
-                  : theme.colorScheme.onSurface.withOpacity(0.4),
+                      ? Colors.green
+                      : theme.colorScheme.onSurface.withOpacity(0.4),
             ),
             const SizedBox(width: 8),
             Text(
@@ -412,10 +412,10 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
                     dizimista.nome.isNotEmpty &&
                             dizimista.nome.split(' ').length > 1
                         ? '${dizimista.nome.split(' ')[0][0]}${dizimista.nome.split(' ').last[0]}'
-                              .toUpperCase()
+                            .toUpperCase()
                         : dizimista.nome.isNotEmpty
-                        ? dizimista.nome[0].toUpperCase()
-                        : '?',
+                            ? dizimista.nome[0].toUpperCase()
+                            : '?',
                     style: GoogleFonts.outfit(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,

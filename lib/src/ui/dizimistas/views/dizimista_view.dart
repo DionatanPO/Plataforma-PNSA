@@ -29,9 +29,8 @@ class _DizimistaViewState extends State<DizimistaView> {
 
     // Cores modernas e refinadas
     final surfaceColor = isDark ? const Color(0xFF1A1A1A) : Colors.white;
-    final backgroundColor = isDark
-        ? const Color(0xFF0D0D0D)
-        : const Color(0xFFF8F9FA);
+    final backgroundColor =
+        isDark ? const Color(0xFF0D0D0D) : const Color(0xFFF8F9FA);
     final borderColor = isDark
         ? Colors.white.withOpacity(0.08)
         : Colors.black.withOpacity(0.06);
@@ -44,6 +43,7 @@ class _DizimistaViewState extends State<DizimistaView> {
 
     return Scaffold(
       backgroundColor: backgroundColor,
+      resizeToAvoidBottomInset: true,
       body: CustomScrollView(
         slivers: [
           // =======================================================
@@ -387,21 +387,19 @@ class _ModernSearchBarState extends State<_ModernSearchBar> {
 
     // Cores modernas e refinadas
     final surfaceColor = isDark ? const Color(0xFF1A1A1A) : Colors.white;
-    final inputBgColor = isDark
-        ? const Color(0xFF252525)
-        : const Color(0xFFF8FAFC);
+    final inputBgColor =
+        isDark ? const Color(0xFF252525) : const Color(0xFFF8FAFC);
     final accentColor = widget.accentColor;
 
     // Cores de estado
     final borderColor = _isFocused
         ? accentColor.withOpacity(0.5)
         : (_isHovering
-              ? theme.dividerColor.withOpacity(0.2)
-              : theme.dividerColor.withOpacity(0.1));
+            ? theme.dividerColor.withOpacity(0.2)
+            : theme.dividerColor.withOpacity(0.1));
 
-    final iconColor = _isFocused
-        ? accentColor
-        : theme.colorScheme.onSurface.withOpacity(0.4);
+    final iconColor =
+        _isFocused ? accentColor : theme.colorScheme.onSurface.withOpacity(0.4);
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovering = true),
