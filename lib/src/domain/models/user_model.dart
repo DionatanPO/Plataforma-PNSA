@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class UserModel {
   final String uid;
   final String email;
@@ -32,6 +34,13 @@ class UserModel {
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
+    DateTime parseUltimoAcesso(dynamic value) {
+      if (value == null) return DateTime.now();
+      if (value is int) return DateTime.fromMillisecondsSinceEpoch(value);
+      if (value is Timestamp) return value.toDate();
+      return DateTime.now();
+    }
+
     return UserModel(
       uid: json['uid'] ?? '',
       email: json['email'] ?? '',
@@ -45,7 +54,7 @@ class UserModel {
       endereco: json['endereco'] ?? '',
       funcao: json['funcao'] ?? '',
       status: json['status'] ?? '',
-      ultimoAcesso: DateTime.fromMillisecondsSinceEpoch(json['ultimoAcesso'] ?? DateTime.now().millisecondsSinceEpoch),
+      ultimoAcesso: parseUltimoAcesso(json['ultimoAcesso']),
       pendencia: json['pendencia'] ?? false,
     );
   }
