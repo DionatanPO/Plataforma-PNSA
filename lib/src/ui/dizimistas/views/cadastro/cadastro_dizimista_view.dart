@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import '../../models/dizimista_model.dart';
 import '../../controllers/dizimista_controller.dart';
+import './cadastro_dizimista_desktop_view.dart';
 
 class CadastroDizimistaView extends StatefulWidget {
   final Dizimista? dizimista;
@@ -17,7 +18,9 @@ class CadastroDizimistaView extends StatefulWidget {
 
 class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
   final _formKey = GlobalKey<FormState>();
-  final DizimistaController _dizimistaController = Get.find();
+
+  final DizimistaController _dizimistaController =
+      Get.find<DizimistaController>();
 
   late TextEditingController numeroRegistroController;
   late TextEditingController nomeController;
@@ -29,13 +32,10 @@ class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
   late TextEditingController bairroController;
   late TextEditingController cidadeController;
   late TextEditingController estadoController;
-  late TextEditingController cepController;
   late TextEditingController nomeConjugueController;
   late TextEditingController observacoesController;
-
   late MaskTextInputFormatter cpfFormatter;
   late MaskTextInputFormatter telefoneFormatter;
-  late MaskTextInputFormatter cepFormatter;
 
   DateTime? dataNascimento;
   String? sexo;
@@ -43,7 +43,6 @@ class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
   DateTime? dataCasamento;
   DateTime? dataNascimentoConjugue;
   bool consentimento = false;
-  String selectedStatus = 'Ativo';
 
   bool get isEditing => widget.dizimista != null;
 
@@ -53,30 +52,35 @@ class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
 
     cpfFormatter = MaskTextInputFormatter(mask: '###.###.###-##');
     telefoneFormatter = MaskTextInputFormatter(mask: '(##) #####-####');
-    cepFormatter = MaskTextInputFormatter(mask: '#####-###');
 
-    numeroRegistroController = TextEditingController(text: widget.dizimista?.numeroRegistro ?? '');
-    nomeController = TextEditingController(text: widget.dizimista?.nome ?? '');
-    cpfController = TextEditingController(text: widget.dizimista != null ? cpfFormatter.maskText(widget.dizimista!.cpf) : '');
-    telefoneController = TextEditingController(text: widget.dizimista != null ? telefoneFormatter.maskText(widget.dizimista!.telefone) : '');
-    emailController = TextEditingController(text: widget.dizimista?.email ?? '');
-    ruaController = TextEditingController(text: widget.dizimista?.rua ?? '');
-    numeroController = TextEditingController(text: widget.dizimista?.numero ?? '');
-    bairroController = TextEditingController(text: widget.dizimista?.bairro ?? '');
-    cidadeController = TextEditingController(text: widget.dizimista?.cidade ?? '');
-    estadoController = TextEditingController(text: widget.dizimista?.estado ?? '');
-    cepController = TextEditingController(text: widget.dizimista?.cep != null ? cepFormatter.maskText(widget.dizimista!.cep!) : '');
-    nomeConjugueController = TextEditingController(text: widget.dizimista?.nomeConjugue ?? '');
-    observacoesController = TextEditingController(text: widget.dizimista?.observacoes ?? '');
+    _initializeControllers();
+  }
+
+  void _initializeControllers() {
+    final d = widget.dizimista;
+    numeroRegistroController =
+        TextEditingController(text: d?.numeroRegistro ?? '');
+    nomeController = TextEditingController(text: d?.nome ?? '');
+    cpfController = TextEditingController(
+        text: d != null ? cpfFormatter.maskText(d.cpf) : '');
+    telefoneController = TextEditingController(
+        text: d != null ? telefoneFormatter.maskText(d.telefone) : '');
+    emailController = TextEditingController(text: d?.email ?? '');
+    ruaController = TextEditingController(text: d?.rua ?? '');
+    numeroController = TextEditingController(text: d?.numero ?? '');
+    bairroController = TextEditingController(text: d?.bairro ?? '');
+    cidadeController = TextEditingController(text: d?.cidade ?? '');
+    estadoController = TextEditingController(text: d?.estado ?? '');
+    nomeConjugueController = TextEditingController(text: d?.nomeConjugue ?? '');
+    observacoesController = TextEditingController(text: d?.observacoes ?? '');
 
     if (isEditing) {
-      dataNascimento = widget.dizimista?.dataNascimento;
-      sexo = widget.dizimista?.sexo;
-      estadoCivil = widget.dizimista?.estadoCivil;
-      dataCasamento = widget.dizimista?.dataCasamento;
-      dataNascimentoConjugue = widget.dizimista?.dataNascimentoConjugue;
-      consentimento = widget.dizimista?.consentimento ?? false;
-      selectedStatus = widget.dizimista?.status ?? 'Ativo';
+      dataNascimento = d?.dataNascimento;
+      sexo = d?.sexo;
+      estadoCivil = d?.estadoCivil;
+      dataCasamento = d?.dataCasamento;
+      dataNascimentoConjugue = d?.dataNascimentoConjugue;
+      consentimento = d?.consentimento ?? false;
     }
   }
 
@@ -92,7 +96,6 @@ class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
     bairroController.dispose();
     cidadeController.dispose();
     estadoController.dispose();
-    cepController.dispose();
     nomeConjugueController.dispose();
     observacoesController.dispose();
     super.dispose();
@@ -100,12 +103,13 @@ class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
 
   void _submitForm() async {
     if (_formKey.currentState?.validate() ?? false) {
-      final cpfSemMascara = cpfController.text.replaceAll(RegExp(r'[^\d]'), '');
-      final telefoneSemMascara = telefoneController.text.replaceAll(RegExp(r'[^\d]'), '');
-      final cepSemMascara = cepController.text.replaceAll(RegExp(r'[^\d]'), '');
+      final cpfSemMascara = cpfFormatter.unmaskText(cpfController.text);
+      final telefoneSemMascara =
+          telefoneFormatter.unmaskText(telefoneController.text);
 
       final dizimista = Dizimista(
-        id: widget.dizimista?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        id: widget.dizimista?.id ??
+            DateTime.now().millisecondsSinceEpoch.toString(),
         numeroRegistro: numeroRegistroController.text,
         nome: nomeController.text,
         cpf: cpfSemMascara,
@@ -118,14 +122,18 @@ class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
         bairro: bairroController.text,
         cidade: cidadeController.text,
         estado: estadoController.text,
-        cep: cepSemMascara.isNotEmpty ? cepSemMascara : null,
+        cep: null,
         estadoCivil: estadoCivil,
-        nomeConjugue: nomeConjugueController.text.isNotEmpty ? nomeConjugueController.text : null,
+        nomeConjugue: nomeConjugueController.text.isNotEmpty
+            ? nomeConjugueController.text
+            : null,
         dataCasamento: dataCasamento,
         dataNascimentoConjugue: dataNascimentoConjugue,
-        observacoes: observacoesController.text.isNotEmpty ? observacoesController.text : null,
+        observacoes: observacoesController.text.isNotEmpty
+            ? observacoesController.text
+            : null,
         consentimento: consentimento,
-        status: selectedStatus,
+        status: widget.dizimista?.status ?? 'Ativo',
         dataRegistro: widget.dizimista?.dataRegistro ?? DateTime.now(),
       );
 
@@ -137,210 +145,666 @@ class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
         }
         Get.back();
         Get.snackbar(
-          'Sucesso!',
-          isEditing ? 'Fiel atualizado com sucesso.' : 'Fiel cadastrado com sucesso.',
+          'Sucesso',
+          isEditing ? 'Dados atualizados.' : 'Novo fiel registrado.',
           snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
+          backgroundColor: Colors.green.shade600,
           colorText: Colors.white,
+          margin: const EdgeInsets.all(16),
+          borderRadius: 12,
         );
       } catch (e) {
         Get.snackbar(
           'Erro',
-          'Ocorreu um erro ao salvar o fiel: $e',
+          'Falha ao salvar: $e',
           snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
+          backgroundColor: Colors.red.shade700,
           colorText: Colors.white,
         );
       }
     }
   }
 
+  String _formatDate(DateTime? date) {
+    if (date == null) return '';
+    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+  }
+
+  Future<void> _pickDate(BuildContext context, DateTime? initial,
+      Function(DateTime) onConfirm) async {
+    final date = await showDatePicker(
+      context: context,
+      initialDate: initial ?? DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+                primary: Theme.of(context).colorScheme.primary),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (date != null) onConfirm(date);
+  }
+
+  int _currentMobileStep = 0;
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final inputDecoration = InputDecoration(
-      border: const OutlineInputBorder(),
-      enabledBorder: OutlineInputBorder(
-        borderSide: BorderSide(
-          color: theme.colorScheme.outline.withOpacity(0.5),
-        ),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: theme.colorScheme.primary, width: 2.0),
-      ),
-      filled: true,
-      fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
-      labelStyle: TextStyle(color: theme.colorScheme.onSurfaceVariant),
-      isDense: true,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth > 1100) {
+          return CadastroDizimistaDesktopView(dizimista: widget.dizimista);
+        }
+        return _buildMobileView(context);
+      },
     );
+  }
+
+  Widget _buildMobileView(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final screenWidth = MediaQuery.of(context).size.width;
+    bool isWide = screenWidth > 700;
+
+    // Altura do teclado
+    final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
 
     return Scaffold(
-      // resizeToAvoidBottomInset: true, // Já é true por padrão
+      backgroundColor: isDark ? null : const Color(0xFFF8F9FC),
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: Text(isEditing ? 'Editar Fiel' : 'Novo Fiel'),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: FilledButton(
-              onPressed: _submitForm,
-              child: const Text('Salvar'),
+        title: Text(
+          isEditing ? 'Editar Registro' : 'Novo Registro',
+          style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+        ),
+        centerTitle: false,
+        elevation: 0,
+        scrolledUnderElevation: 2,
+      ),
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Column(
+          children: [
+            // Indicador de Etapas
+            _buildMobileStepIndicator(theme),
+
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.fromLTRB(12, 12, 12, 40 + bottomPadding),
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 800),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        children: [
+                          AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 300),
+                            child: _buildCurrentMobileStep(theme, isWide),
+                          ),
+                          const SizedBox(height: 24),
+                          _buildWebFlowButtons(theme),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMobileStepIndicator(ThemeData theme) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      color: theme.scaffoldBackgroundColor,
+      child: Row(
+        children: [
+          _stepDot(0, 'Pessoal'),
+          _stepLine(0),
+          _stepDot(1, 'Endereço'),
+          _stepLine(1),
+          _stepDot(2, 'Adicional'),
+        ],
+      ),
+    );
+  }
+
+  Widget _stepDot(int index, String label) {
+    bool isActive = _currentMobileStep == index;
+    bool isDone = _currentMobileStep > index;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    Color color = isActive || isDone
+        ? theme.primaryColor
+        : (isDark
+            ? Colors.white.withOpacity(0.3)
+            : theme.colorScheme.onSurface.withOpacity(0.15));
+
+    return Expanded(
+      child: Column(
+        children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              color: (isActive || isDone) ? color : Colors.transparent,
+              border: Border.all(color: color, width: 2),
+              shape: BoxShape.circle,
+              boxShadow: isActive
+                  ? [
+                      BoxShadow(
+                        color: color.withOpacity(0.3),
+                        blurRadius: 8,
+                        spreadRadius: 1,
+                      )
+                    ]
+                  : null,
+            ),
+            child: Center(
+              child: isDone
+                  ? const Icon(Icons.check, size: 16, color: Colors.white)
+                  : Text(
+                      '${index + 1}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: (isActive || isDone)
+                            ? Colors.white
+                            : (isDark
+                                ? Colors.white70
+                                : theme.colorScheme.onSurface.withOpacity(0.4)),
+                      ),
+                    ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            label,
+            style: GoogleFonts.inter(
+              fontSize: 10,
+              fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+              color: isActive
+                  ? (isDark ? Colors.white : color)
+                  : (isDark
+                      ? Colors.white.withOpacity(0.5)
+                      : theme.colorScheme.onSurface.withOpacity(0.5)),
             ),
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        // FECHA O TECLADO AO ARRASTAR A TELA
-        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextFormField(
-                controller: numeroRegistroController,
-                decoration: inputDecoration.copyWith(
-                  labelText: 'Nº de Registro Paroquial',
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text('Dados Pessoais', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: theme.colorScheme.primary)),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: nomeController,
-                decoration: inputDecoration.copyWith(labelText: 'Nome Completo *'),
-                validator: (v) => (v == null || v.isEmpty) ? 'Campo obrigatório' : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: cpfController,
-                inputFormatters: [cpfFormatter],
-                keyboardType: TextInputType.number,
-                decoration: inputDecoration.copyWith(labelText: 'CPF *'),
-                validator: (v) => (v == null || v.isEmpty) ? 'Campo obrigatório' : null,
-              ),
-              const SizedBox(height: 16),
-              GestureDetector(
-                onTap: () async {
-                  final date = await showDatePicker(context: context, initialDate: dataNascimento ?? DateTime.now(), firstDate: DateTime(1900), lastDate: DateTime.now());
-                  if (date != null) setState(() => dataNascimento = date);
-                },
-                child: AbsorbPointer(
-                  child: TextFormField(
-                    controller: TextEditingController(text: dataNascimento != null ? '${dataNascimento!.day.toString().padLeft(2, '0')}/${dataNascimento!.month.toString().padLeft(2, '0')}/${dataNascimento!.year}' : ''),
-                    decoration: inputDecoration.copyWith(labelText: 'Data de Nascimento', suffixIcon: const Icon(Icons.calendar_today_rounded)),
+    );
+  }
+
+  Widget _stepLine(int index) {
+    bool isDone = _currentMobileStep > index;
+    return Container(
+      width: 20,
+      height: 2,
+      margin: const EdgeInsets.only(bottom: 14),
+      color: isDone
+          ? Theme.of(context).primaryColor
+          : Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
+    );
+  }
+
+  Widget _buildCurrentMobileStep(ThemeData theme, bool isWide) {
+    switch (_currentMobileStep) {
+      case 0:
+        return Column(
+          key: const ValueKey(0),
+          children: [
+            _buildSectionCard(
+              theme,
+              title: 'Identificação',
+              icon: Icons.badge_outlined,
+              children: [
+                _ResponsiveField(
+                  isWide: isWide,
+                  flex: 1,
+                  child: _buildTextField(
+                    controller: numeroRegistroController,
+                    label: 'Nº Registro Paroquial',
+                    icon: Icons.numbers,
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                value: sexo,
-                decoration: inputDecoration.copyWith(labelText: 'Sexo'),
-                items: ['Masculino', 'Feminino'].map((v) => DropdownMenuItem(value: v, child: Text(v))).toList(),
-                onChanged: (v) => setState(() => sexo = v),
-              ),
-              const SizedBox(height: 24),
-              Text('Dados de Contato', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: theme.colorScheme.primary)),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: telefoneController,
-                inputFormatters: [telefoneFormatter],
-                keyboardType: TextInputType.phone,
-                decoration: inputDecoration.copyWith(labelText: 'Telefone / WhatsApp *'),
-                validator: (v) => (v == null || v.isEmpty) ? 'Campo obrigatório' : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: emailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: inputDecoration.copyWith(labelText: 'E-mail'),
-              ),
-              const SizedBox(height: 24),
-              Text('Endereço', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: theme.colorScheme.primary)),
-              const SizedBox(height: 16),
-              TextFormField(controller: ruaController, decoration: inputDecoration.copyWith(labelText: 'Rua')),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(flex: 1, child: TextFormField(controller: numeroController, decoration: inputDecoration.copyWith(labelText: 'Número'))),
-                  const SizedBox(width: 16),
-                  Expanded(flex: 2, child: TextFormField(controller: bairroController, decoration: inputDecoration.copyWith(labelText: 'Bairro *'), validator: (v) => (v == null || v.isEmpty) ? 'Campo obrigatório' : null)),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(flex: 2, child: TextFormField(controller: cidadeController, decoration: inputDecoration.copyWith(labelText: 'Cidade *'), validator: (v) => (v == null || v.isEmpty) ? 'Campo obrigatório' : null)),
-                  const SizedBox(width: 16),
-                  Expanded(child: TextFormField(controller: estadoController, decoration: inputDecoration.copyWith(labelText: 'UF *'), validator: (v) => (v == null || v.isEmpty) ? 'Campo obrigatório' : null)),
-                ],
-              ),
-              const SizedBox(height: 16),
-              TextFormField(controller: cepController, inputFormatters: [cepFormatter], keyboardType: TextInputType.number, decoration: inputDecoration.copyWith(labelText: 'CEP')),
-              const SizedBox(height: 24),
-              DropdownButtonFormField<String>(
-                value: estadoCivil,
-                decoration: inputDecoration.copyWith(labelText: 'Estado Civil'),
-                items: ['Solteiro', 'Casado', 'Viúvo', 'Separado'].map((v) => DropdownMenuItem(value: v, child: Text(v))).toList(),
-                onChanged: (v) => setState(() => estadoCivil = v),
-              ),
-              if (estadoCivil == 'Casado') ...[
-                const SizedBox(height: 16),
-                Text('Dados do Cônjuge', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: theme.colorScheme.primary)),
-                const SizedBox(height: 16),
-                TextFormField(controller: nomeConjugueController, decoration: inputDecoration.copyWith(labelText: 'Nome do Cônjuge')),
-                const SizedBox(height: 16),
-                GestureDetector(
-                  onTap: () async {
-                    final date = await showDatePicker(context: context, initialDate: dataCasamento ?? DateTime.now(), firstDate: DateTime(1900), lastDate: DateTime.now());
-                    if (date != null) setState(() => dataCasamento = date);
-                  },
-                  child: AbsorbPointer(child: TextFormField(controller: TextEditingController(text: dataCasamento != null ? '${dataCasamento!.day.toString().padLeft(2, '0')}/${dataCasamento!.month.toString().padLeft(2, '0')}/${dataCasamento!.year}' : ''), decoration: inputDecoration.copyWith(labelText: 'Data de Casamento', suffixIcon: const Icon(Icons.calendar_today_rounded)))),
+              ],
+            ),
+            const SizedBox(height: 12),
+            _buildSectionCard(
+              theme,
+              title: 'Dados Pessoais',
+              icon: Icons.person_outline,
+              children: [
+                _ResponsiveField(
+                  isWide: isWide,
+                  flex: 2,
+                  child: _buildTextField(
+                    controller: nomeController,
+                    label: 'Nome Completo',
+                    icon: Icons.person,
+                    validator: (v) => v!.isEmpty ? 'Obrigatório' : null,
+                  ),
                 ),
-                const SizedBox(height: 16),
-                GestureDetector(
-                  onTap: () async {
-                    final date = await showDatePicker(context: context, initialDate: dataNascimentoConjugue ?? DateTime.now(), firstDate: DateTime(1900), lastDate: DateTime.now());
-                    if (date != null) setState(() => dataNascimentoConjugue = date);
-                  },
-                  child: AbsorbPointer(child: TextFormField(controller: TextEditingController(text: dataNascimentoConjugue != null ? '${dataNascimentoConjugue!.day.toString().padLeft(2, '0')}/${dataNascimentoConjugue!.month.toString().padLeft(2, '0')}/${dataNascimentoConjugue!.year}' : ''), decoration: inputDecoration.copyWith(labelText: 'Data de Nascimento do Cônjuge', suffixIcon: const Icon(Icons.calendar_today_rounded)))),
+                _ResponsiveField(
+                  isWide: isWide,
+                  flex: 1,
+                  child: _buildTextField(
+                    controller: cpfController,
+                    label: 'CPF',
+                    icon: Icons.fingerprint,
+                    formatter: cpfFormatter,
+                    inputType: TextInputType.number,
+                    validator: (v) => v!.isEmpty ? 'Obrigatório' : null,
+                  ),
+                ),
+                _ResponsiveField(
+                  isWide: isWide,
+                  flex: 1,
+                  child: _buildDatePath(
+                    label: 'Data de Nascimento',
+                    date: dataNascimento,
+                    onTap: () => _pickDate(context, dataNascimento,
+                        (d) => setState(() => dataNascimento = d)),
+                    theme: theme,
+                  ),
+                ),
+                _ResponsiveField(
+                  isWide: isWide,
+                  flex: 1,
+                  child: DropdownButtonFormField<String>(
+                    value: sexo,
+                    decoration: _buildInputDecoration(theme, 'Sexo', Icons.wc),
+                    items: ['Masculino', 'Feminino']
+                        .map((v) => DropdownMenuItem(value: v, child: Text(v)))
+                        .toList(),
+                    onChanged: (v) => setState(() => sexo = v),
+                  ),
                 ),
               ],
-              const SizedBox(height: 24),
-
-              // CAMPO DE OBSERVAÇÕES AJUSTADO
-              TextFormField(
-                controller: observacoesController,
-                maxLines: 3,
-                scrollPadding: const EdgeInsets.only(bottom: 150), // Garante espaço acima do teclado
-                decoration: inputDecoration.copyWith(labelText: 'Observações'),
+            ),
+          ],
+        );
+      case 1:
+        return Column(
+          key: const ValueKey(1),
+          children: [
+            _buildSectionCard(
+              theme,
+              title: 'Contatos',
+              icon: Icons.contact_phone_outlined,
+              children: [
+                _ResponsiveField(
+                  isWide: isWide,
+                  flex: 1,
+                  child: _buildTextField(
+                    controller: telefoneController,
+                    label: 'Celular / WhatsApp',
+                    icon: Icons.phone_android,
+                    formatter: telefoneFormatter,
+                    inputType: TextInputType.phone,
+                    validator: (v) => v!.isEmpty ? 'Obrigatório' : null,
+                  ),
+                ),
+                _ResponsiveField(
+                  isWide: isWide,
+                  flex: 2,
+                  child: _buildTextField(
+                    controller: emailController,
+                    label: 'E-mail',
+                    icon: Icons.email_outlined,
+                    inputType: TextInputType.emailAddress,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            _buildSectionCard(
+              theme,
+              title: 'Endereço',
+              icon: Icons.location_on_outlined,
+              children: [
+                _ResponsiveField(
+                  isWide: isWide,
+                  flex: 2,
+                  child: _buildTextField(
+                      controller: ruaController,
+                      label: 'Rua / Logradouro',
+                      icon: Icons.add_road),
+                ),
+                _ResponsiveField(
+                  isWide: isWide,
+                  flex: 1,
+                  child: _buildTextField(
+                      controller: numeroController,
+                      label: 'Número',
+                      icon: Icons.home_mini),
+                ),
+                _ResponsiveField(
+                  isWide: isWide,
+                  flex: 2,
+                  child: _buildTextField(
+                      controller: bairroController,
+                      label: 'Bairro',
+                      icon: Icons.location_city,
+                      validator: (v) => v!.isEmpty ? 'Obrigatório' : null),
+                ),
+                _ResponsiveField(
+                  isWide: isWide,
+                  flex: 2,
+                  child: _buildTextField(
+                      controller: cidadeController,
+                      label: 'Cidade',
+                      icon: Icons.location_city,
+                      validator: (v) => v!.isEmpty ? 'Obrigatório' : null),
+                ),
+                _ResponsiveField(
+                  isWide: isWide,
+                  flex: 1,
+                  child: _buildTextField(
+                      controller: estadoController,
+                      label: 'UF',
+                      icon: Icons.flag,
+                      validator: (v) => v!.isEmpty ? 'Obrigatório' : null),
+                ),
+              ],
+            ),
+          ],
+        );
+      case 2:
+        return Column(
+          key: const ValueKey(2),
+          children: [
+            _buildSectionCard(
+              theme,
+              title: 'Dados Matrimoniais',
+              icon: Icons.favorite_border,
+              children: [
+                _ResponsiveField(
+                  isWide: isWide,
+                  flex: 1,
+                  child: DropdownButtonFormField<String>(
+                    value: estadoCivil,
+                    decoration: _buildInputDecoration(
+                        theme, 'Estado Civil', Icons.people_outline),
+                    items: ['Solteiro', 'Casado', 'Viúvo', 'Separado']
+                        .map((v) => DropdownMenuItem(value: v, child: Text(v)))
+                        .toList(),
+                    onChanged: (v) => setState(() => estadoCivil = v),
+                  ),
+                ),
+                if (estadoCivil == 'Casado') ...[
+                  _ResponsiveField(
+                    isWide: isWide,
+                    flex: 2,
+                    child: _buildTextField(
+                        controller: nomeConjugueController,
+                        label: 'Nome do Cônjuge',
+                        icon: Icons.person_add_alt),
+                  ),
+                  _ResponsiveField(
+                    isWide: isWide,
+                    flex: 1,
+                    child: _buildDatePath(
+                      label: 'Data Casamento',
+                      date: dataCasamento,
+                      onTap: () => _pickDate(context, dataCasamento,
+                          (d) => setState(() => dataCasamento = d)),
+                      theme: theme,
+                    ),
+                  ),
+                  _ResponsiveField(
+                    isWide: isWide,
+                    flex: 1,
+                    child: _buildDatePath(
+                      label: 'Nasc. Cônjuge',
+                      date: dataNascimentoConjugue,
+                      onTap: () => _pickDate(context, dataNascimentoConjugue,
+                          (d) => setState(() => dataNascimentoConjugue = d)),
+                      theme: theme,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            const SizedBox(height: 16),
+            Card(
+              elevation: 0,
+              color: theme.colorScheme.surfaceContainerLow,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  side: BorderSide(
+                      color:
+                          theme.colorScheme.outlineVariant.withOpacity(0.5))),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Outras Informações',
+                        style: GoogleFonts.inter(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.primary)),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: observacoesController,
+                      maxLines: 3,
+                      decoration: _buildInputDecoration(
+                              theme, 'Observações', Icons.notes)
+                          .copyWith(alignLabelWithHint: true),
+                    ),
+                    const SizedBox(height: 16),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      activeColor: theme.colorScheme.primary,
+                      title: Text('Consentimento de Dados',
+                          style:
+                              GoogleFonts.inter(fontWeight: FontWeight.w600)),
+                      subtitle: Text(
+                        'Autorizo o uso dos dados para fins pastorais e administrativos da paróquia.',
+                        style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: theme.colorScheme.onSurfaceVariant),
+                      ),
+                      value: consentimento,
+                      onChanged: (v) => setState(() => consentimento = v),
+                    ),
+                  ],
+                ),
               ),
+            ),
+          ],
+        );
+      default:
+        return Container();
+    }
+  }
 
-              const SizedBox(height: 16),
-              SwitchListTile(
-                title: Text('Autorizo o uso dos meus dados', style: GoogleFonts.inter(fontSize: 14)),
-                subtitle: Text('Para fins pastorais e administrativos', style: GoogleFonts.inter(fontSize: 12, color: theme.colorScheme.onSurfaceVariant)),
-                contentPadding: EdgeInsets.zero,
-                value: consentimento,
-                onChanged: (v) => setState(() => consentimento = v),
-              ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                value: selectedStatus,
-                decoration: inputDecoration.copyWith(labelText: 'Status'),
-                items: ['Ativo', 'Afastado', 'Inativo'].map((v) => DropdownMenuItem(value: v, child: Text(v))).toList(),
-                onChanged: (v) {
-                  if (v != null) setState(() => selectedStatus = v);
-                },
-              ),
+  Widget _buildWebFlowButtons(ThemeData theme) {
+    bool isLastStep = _currentMobileStep == 2;
 
-              // ESPAÇO EXTRA NO FIM PARA O SCROLL FUNCIONAR BEM COM O TECLADO
-              const SizedBox(height: 100),
-            ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 24),
+      child: Row(
+        children: [
+          if (_currentMobileStep > 0)
+            Expanded(
+              child: OutlinedButton(
+                onPressed: () => setState(() => _currentMobileStep--),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+                child: const Text('Anterior'),
+              ),
+            ),
+          if (_currentMobileStep > 0) const SizedBox(width: 12),
+          Expanded(
+            flex: 2,
+            child: FilledButton(
+              onPressed: () {
+                if (isLastStep) {
+                  _submitForm();
+                } else {
+                  setState(() => _currentMobileStep++);
+                }
+              },
+              style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+              ),
+              child: Text(isLastStep ? 'Concluir Cadastro' : 'Próximo Passo'),
+            ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionCard(ThemeData theme,
+      {required String title,
+      required IconData icon,
+      required List<Widget> children}) {
+    return Card(
+      elevation: 0,
+      color: theme.colorScheme.surfaceContainerLowest,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+            color: theme.colorScheme.outlineVariant.withOpacity(0.6)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(icon, size: 18, color: theme.colorScheme.primary),
+                const SizedBox(width: 8),
+                Text(title,
+                    style: GoogleFonts.inter(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.onSurface)),
+              ],
+            ),
+            const Divider(height: 16, thickness: 0.5),
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: children,
+            ),
+          ],
         ),
       ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    TextInputType? inputType,
+    MaskTextInputFormatter? formatter,
+    String? Function(String?)? validator,
+  }) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: inputType,
+      inputFormatters: formatter != null ? [formatter] : [],
+      validator: validator,
+      decoration: _buildInputDecoration(Theme.of(context), label, icon),
+    );
+  }
+
+  Widget _buildDatePath(
+      {required String label,
+      required DateTime? date,
+      required VoidCallback onTap,
+      required ThemeData theme}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AbsorbPointer(
+        child: TextFormField(
+          controller: TextEditingController(text: _formatDate(date)),
+          decoration:
+              _buildInputDecoration(theme, label, Icons.calendar_today_rounded),
+        ),
+      ),
+    );
+  }
+
+  InputDecoration _buildInputDecoration(
+      ThemeData theme, String label, IconData icon) {
+    return InputDecoration(
+      labelText: label,
+      prefixIcon: Icon(icon, size: 20, color: theme.colorScheme.primary),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: theme.colorScheme.outline),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide:
+            BorderSide(color: theme.colorScheme.outline.withOpacity(0.5)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
+      ),
+      filled: true,
+      fillColor: theme.brightness == Brightness.dark
+          ? theme.colorScheme.surfaceContainerHigh
+          : theme.colorScheme.surfaceContainer,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      isDense: true,
+      labelStyle: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+    );
+  }
+}
+
+class _ResponsiveField extends StatelessWidget {
+  final bool isWide;
+  final int flex;
+  final Widget child;
+
+  const _ResponsiveField({
+    required this.isWide,
+    required this.child,
+    this.flex = 1,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (!isWide) return SizedBox(width: double.infinity, child: child);
+        double parentWidth = constraints.maxWidth;
+        if (parentWidth == double.infinity) parentWidth = 600;
+        double width;
+        if (flex == 2) {
+          width = (parentWidth / 2) - 9;
+        } else {
+          width = (parentWidth / 3) - 12;
+          if (width < 180) width = (parentWidth / 2) - 9;
+        }
+        return SizedBox(width: width.clamp(150.0, parentWidth), child: child);
+      },
     );
   }
 }

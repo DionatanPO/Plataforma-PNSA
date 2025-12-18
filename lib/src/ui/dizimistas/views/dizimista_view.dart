@@ -58,6 +58,12 @@ class _DizimistaViewState extends State<DizimistaView> {
               title: 'Fiéis',
               subtitle: 'Gerenciamento de cadastros',
               icon: Icons.people_rounded,
+              onActionPressed: isDesktop
+                  ? () => Get.toNamed(AppRoutes.dizimista_cadastro)
+                  : null,
+              actionLabel: 'Novo Fiel',
+              actionIcon: Icons.person_add_rounded,
+              actionColor: accentColor,
             ),
 
             // =======================================================
@@ -136,8 +142,9 @@ class _DizimistaViewState extends State<DizimistaView> {
                           lista: controller.filteredDizimistas,
                           theme: theme,
                           surfaceColor: surfaceColor,
-                          onEditPressed: (dizimista) =>
-                              Get.toNamed(AppRoutes.dizimista_editar, arguments: dizimista),
+                          onEditPressed: (dizimista) => Get.toNamed(
+                              AppRoutes.dizimista_editar,
+                              arguments: dizimista),
                         ),
                       );
                     } else {
@@ -146,8 +153,9 @@ class _DizimistaViewState extends State<DizimistaView> {
                           lista: controller.filteredDizimistas,
                           theme: theme,
                           surfaceColor: surfaceColor,
-                          onEditPressed: (dizimista) =>
-                              Get.toNamed(AppRoutes.dizimista_editar, arguments: dizimista),
+                          onEditPressed: (dizimista) => Get.toNamed(
+                              AppRoutes.dizimista_editar,
+                              arguments: dizimista),
                           onViewHistoryPressed: (dizimista) {},
                         ),
                       );
@@ -162,17 +170,19 @@ class _DizimistaViewState extends State<DizimistaView> {
             ),
           ],
         ),
-        floatingActionButton: FloatingActionButton.extended(
-          heroTag: 'dizimista_fab',
-          onPressed: () => Get.toNamed(AppRoutes.dizimista_cadastro),
-          backgroundColor: accentColor,
-          foregroundColor: Colors.white,
-          icon: const Icon(Icons.add_rounded),
-          label: Text(
-            'Novo Fiel',
-            style: GoogleFonts.inter(fontWeight: FontWeight.w600),
-          ),
-        ),
+        floatingActionButton: !isDesktop
+            ? FloatingActionButton.extended(
+                heroTag: 'dizimista_fab',
+                onPressed: () => Get.toNamed(AppRoutes.dizimista_cadastro),
+                backgroundColor: accentColor,
+                foregroundColor: Colors.white,
+                icon: const Icon(Icons.add_rounded),
+                label: Text(
+                  'Novo Fiel',
+                  style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+                ),
+              )
+            : null,
       ),
     );
   }
@@ -193,7 +203,6 @@ class _DizimistaViewState extends State<DizimistaView> {
       },
     );
   }
-
 }
 
 // =======================================================
