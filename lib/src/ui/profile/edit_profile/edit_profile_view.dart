@@ -25,219 +25,225 @@ class EditProfileView extends StatelessWidget {
         ? const Color(0xFF202020)
         : const Color(0xFFF3F3F3);
 
-    return Scaffold(
-      backgroundColor: bgColor,
-      extendBodyBehindAppBar: true,
-      // ADICIONADO: Scrollbar é essencial para Desktop
-      body: Scrollbar(
-        controller: controller.scrollController,
-        thumbVisibility: true,
-        thickness: 8,
-        radius: const Radius.circular(4),
-        child: CustomScrollView(
+    final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
+
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        backgroundColor: bgColor,
+        resizeToAvoidBottomInset: false,
+        extendBodyBehindAppBar: true,
+        // ADICIONADO: Scrollbar é essencial para Desktop
+        body: Scrollbar(
           controller: controller.scrollController,
-          physics: const BouncingScrollPhysics(),
-          slivers: [
-            // 1. APP BAR CUSTOMIZADA
-            CustomSliverAppBar(
-              title: 'Editar Perfil',
-              subtitle: 'Gerencie suas informações pessoais e segurança',
-              centerTitle: false,
-              // Para garantir que o blur funcione bem com a nova cor de fundo
-              backgroundColor: bgColor.withOpacity(0.8),
-              actions: [
-                Padding(
-                  padding: const EdgeInsets.only(right: 16),
-                  child: Obx(
-                    () => FilledButton.icon(
-                      onPressed: controller.isLoading.value
-                          ? null
-                          : controller.saveProfile,
-                      icon: const Icon(Icons.save_outlined, size: 18),
-                      label: const Text("Salvar"),
-                      style: FilledButton.styleFrom(
-                        visualDensity: VisualDensity.compact,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+          thumbVisibility: true,
+          thickness: 8,
+          radius: const Radius.circular(4),
+          child: CustomScrollView(
+            controller: controller.scrollController,
+            physics: const BouncingScrollPhysics(),
+            slivers: [
+              // 1. APP BAR CUSTOMIZADA
+              CustomSliverAppBar(
+                title: 'Editar Perfil',
+                subtitle: 'Gerencie suas informações pessoais e segurança',
+                centerTitle: false,
+                // Para garantir que o blur funcione bem com a nova cor de fundo
+                backgroundColor: bgColor.withOpacity(0.8),
+                actions: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 16),
+                    child: Obx(
+                      () => FilledButton.icon(
+                        onPressed: controller.isLoading.value
+                            ? null
+                            : controller.saveProfile,
+                        icon: const Icon(Icons.save_outlined, size: 18),
+                        label: const Text("Salvar"),
+                        style: FilledButton.styleFrom(
+                          visualDensity: VisualDensity.compact,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
 
-            // 2. CONTEÚDO
-            SliverToBoxAdapter(
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 800),
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      top: isDesktop ? 100 : 20,
-                      left: 24,
-                      right: 24,
-                      bottom: 40,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Cabeçalho Visual com Avatar
-                        Center(
-                          child: Column(
-                            children: [
-                              _ProfileAvatar(
-                                controller: controller,
-                                theme: theme,
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                controller.nameController.text.isEmpty
-                                    ? "Nome do Usuário"
-                                    : controller.nameController.text,
-                                style: GoogleFonts.outfit(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  color: theme.colorScheme.onSurface,
+              // 2. CONTEÚDO
+              SliverToBoxAdapter(
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 800),
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        top: isDesktop ? 100 : 20,
+                        left: 24,
+                        right: 24,
+                        bottom: 40,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Cabeçalho Visual com Avatar
+                          Center(
+                            child: Column(
+                              children: [
+                                _ProfileAvatar(
+                                  controller: controller,
+                                  theme: theme,
                                 ),
-                              ),
-                              Text(
-                                "Product Designer",
-                                style: GoogleFonts.inter(
-                                  fontSize: 14,
-                                  color: theme.colorScheme.onSurface
-                                      .withOpacity(0.6),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        const SizedBox(height: 40),
-
-                        // FORMULÁRIO
-                        Form(
-                          key: controller.formKey,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _SectionHeader(title: "Informações Básicas"),
-
-                              if (isDesktop)
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Expanded(
-                                      child: _ModernInput(
-                                        label: "Nome Completo",
-                                        controller: controller.nameController,
-                                        icon: Icons.person_outline,
-                                        validator: (v) =>
-                                            v!.isEmpty ? "Obrigatório" : null,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 24),
-                                    Expanded(
-                                      child: _ModernInput(
-                                        label: "Cargo / Função",
-                                        controller: TextEditingController(
-                                          text: "Product Designer",
-                                        ),
-                                        icon: Icons.work_outline,
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              else ...[
-                                _ModernInput(
-                                  label: "Nome Completo",
-                                  controller: controller.nameController,
-                                  icon: Icons.person_outline,
-                                  validator: (v) =>
-                                      v!.isEmpty ? "Obrigatório" : null,
-                                ),
-                                const SizedBox(height: 20),
-                                _ModernInput(
-                                  label: "Cargo / Função",
-                                  controller: TextEditingController(
-                                    text: "Product Designer",
+                                const SizedBox(height: 16),
+                                Text(
+                                  controller.nameController.text.isEmpty
+                                      ? "Nome do Usuário"
+                                      : controller.nameController.text,
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: theme.colorScheme.onSurface,
                                   ),
-                                  icon: Icons.work_outline,
+                                ),
+                                Text(
+                                  "Product Designer",
+                                  style: GoogleFonts.inter(
+                                    fontSize: 14,
+                                    color: theme.colorScheme.onSurface
+                                        .withOpacity(0.6),
+                                  ),
                                 ),
                               ],
+                            ),
+                          ),
 
-                              const SizedBox(height: 20),
+                          const SizedBox(height: 40),
 
-                              _ModernInput(
-                                label: "Bio / Sobre",
-                                controller: TextEditingController(),
-                                hint:
-                                    "Escreva uma breve descrição sobre você...",
-                                icon: Icons.edit_note,
-                                maxLines: 4,
-                              ),
-
-                              const SizedBox(height: 40),
-                              Divider(
-                                color: theme.dividerColor.withOpacity(0.1),
-                              ),
-                              const SizedBox(height: 40),
-
-                              _SectionHeader(title: "Contato e Segurança"),
-
-                              if (isDesktop)
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Expanded(
-                                      child: _ModernInput(
-                                        label: "E-mail Corporativo",
-                                        controller: controller.emailController,
-                                        icon: Icons.email_outlined,
-                                        validator: (v) => !GetUtils.isEmail(v!)
-                                            ? "Inválido"
-                                            : null,
+                          // FORMULÁRIO
+                          Form(
+                            key: controller.formKey,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _SectionHeader(title: "Informações Básicas"),
+                                if (isDesktop)
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: _ModernInput(
+                                          label: "Nome Completo",
+                                          controller: controller.nameController,
+                                          icon: Icons.person_outline,
+                                          validator: (v) =>
+                                              v!.isEmpty ? "Obrigatório" : null,
+                                        ),
                                       ),
-                                    ),
-                                    const SizedBox(width: 24),
-                                    Expanded(
-                                      child: _ModernInput(
-                                        label: "Telefone",
-                                        controller: TextEditingController(),
-                                        hint: "(00) 00000-0000",
-                                        icon: Icons.phone_outlined,
+                                      const SizedBox(width: 24),
+                                      Expanded(
+                                        child: _ModernInput(
+                                          label: "Cargo / Função",
+                                          controller:
+                                              controller.cargoController,
+                                          icon: Icons.work_outline,
+                                        ),
                                       ),
-                                    ),
-                                  ],
-                                )
-                              else ...[
-                                _ModernInput(
-                                  label: "E-mail Corporativo",
-                                  controller: controller.emailController,
-                                  icon: Icons.email_outlined,
-                                  validator: (v) =>
-                                      !GetUtils.isEmail(v!) ? "Inválido" : null,
-                                ),
+                                    ],
+                                  )
+                                else ...[
+                                  _ModernInput(
+                                    label: "Nome Completo",
+                                    controller: controller.nameController,
+                                    icon: Icons.person_outline,
+                                    validator: (v) =>
+                                        v!.isEmpty ? "Obrigatório" : null,
+                                  ),
+                                  const SizedBox(height: 20),
+                                  _ModernInput(
+                                    label: "Cargo / Função",
+                                    controller: controller.cargoController,
+                                    icon: Icons.work_outline,
+                                  ),
+                                ],
                                 const SizedBox(height: 20),
                                 _ModernInput(
-                                  label: "Telefone",
-                                  controller: TextEditingController(),
-                                  hint: "(00) 00000-0000",
-                                  icon: Icons.phone_outlined,
+                                  label: "Bio / Sobre",
+                                  controller: controller.bioController,
+                                  hint:
+                                      "Escreva uma breve descrição sobre você...",
+                                  icon: Icons.edit_note,
+                                  maxLines: 4,
                                 ),
+                                const SizedBox(height: 40),
+                                Divider(
+                                  color: theme.dividerColor.withOpacity(0.1),
+                                ),
+                                const SizedBox(height: 40),
+                                _SectionHeader(title: "Contato e Segurança"),
+                                if (isDesktop)
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: _ModernInput(
+                                          label: "E-mail Corporativo",
+                                          controller:
+                                              controller.emailController,
+                                          icon: Icons.email_outlined,
+                                          validator: (v) =>
+                                              !GetUtils.isEmail(v!)
+                                                  ? "Inválido"
+                                                  : null,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 24),
+                                      Expanded(
+                                        child: _ModernInput(
+                                          label: "Telefone",
+                                          controller:
+                                              controller.telefoneController,
+                                          hint: "(00) 00000-0000",
+                                          icon: Icons.phone_outlined,
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                else ...[
+                                  _ModernInput(
+                                    label: "E-mail Corporativo",
+                                    controller: controller.emailController,
+                                    icon: Icons.email_outlined,
+                                    validator: (v) => !GetUtils.isEmail(v!)
+                                        ? "Inválido"
+                                        : null,
+                                  ),
+                                  const SizedBox(height: 20),
+                                  _ModernInput(
+                                    label: "Telefone",
+                                    controller: controller.telefoneController,
+                                    hint: "(00) 00000-0000",
+                                    icon: Icons.phone_outlined,
+                                  ),
+                                ],
+                                const SizedBox(height: 60),
                               ],
-
-                              const SizedBox(height: 60),
-                            ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+              // Espaço adicional para o teclado
+              SliverToBoxAdapter(
+                child: SizedBox(height: bottomPadding + 20),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -178,9 +178,17 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
     );
 
-    // Conteúdo do formulário extraído para reutilização
+    final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
+
     final formContent = SingleChildScrollView(
-      padding: isMobile ? const EdgeInsets.all(16) : EdgeInsets.zero,
+      physics: const BouncingScrollPhysics(),
+      padding: EdgeInsets.only(
+        left: 20,
+        right: 20,
+        top: 20,
+        // No mobile, o Scaffold já redimensiona. No Desktop, o Dialog não, então somamos o padding.
+        bottom: 40 + (isMobile ? 0 : bottomPadding),
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -245,7 +253,7 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
               child: TextField(
                 controller: TextEditingController(
                   text: dataNascimento != null
-                      ? '${dataNascimento!.day}/${dataNascimento!.month}/${dataNascimento!.year}'
+                      ? '${dataNascimento!.day.toString().padLeft(2, '0')}/${dataNascimento!.month.toString().padLeft(2, '0')}/${dataNascimento!.year}'
                       : '',
                 ),
                 decoration: inputDecoration.copyWith(
@@ -418,7 +426,7 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
                 child: TextField(
                   controller: TextEditingController(
                     text: dataCasamento != null
-                        ? '${dataCasamento!.day}/${dataCasamento!.month}/${dataCasamento!.year}'
+                        ? '${dataCasamento!.day.toString().padLeft(2, '0')}/${dataCasamento!.month.toString().padLeft(2, '0')}/${dataCasamento!.year}'
                         : '',
                   ),
                   decoration: inputDecoration.copyWith(
@@ -449,7 +457,7 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
                 child: TextField(
                   controller: TextEditingController(
                     text: dataNascimentoConjugue != null
-                        ? '${dataNascimentoConjugue!.day}/${dataNascimentoConjugue!.month}/${dataNascimentoConjugue!.year}'
+                        ? '${dataNascimentoConjugue!.day.toString().padLeft(2, '0')}/${dataNascimentoConjugue!.month.toString().padLeft(2, '0')}/${dataNascimentoConjugue!.year}'
                         : '',
                   ),
                   decoration: inputDecoration.copyWith(
@@ -500,52 +508,92 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
               if (v != null) setState(() => selectedStatus = v);
             },
           ),
+          if (!isMobile && bottomPadding > 0) const SizedBox(height: 20),
         ],
       ),
     );
 
     // VERSÃO MOBILE: TELA CHEIA
     if (isMobile) {
-      return Dialog.fullscreen(
-        child: Scaffold(
-          appBar: AppBar(
-            title: Text(widget.title),
-            leading: IconButton(
-              icon: const Icon(Icons.close, color: Colors.white),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            actions: [
-              TextButton(
-                onPressed: _submitForm,
-                style: TextButton.styleFrom(foregroundColor: Colors.white),
-                child: const Text('Salvar'),
+      return GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Dialog.fullscreen(
+          child: Scaffold(
+            backgroundColor: theme.colorScheme.surface,
+            // Permitir que o Scaffold redimensione o corpo para evitar o teclado
+            resizeToAvoidBottomInset: true,
+            appBar: AppBar(
+              title: Text(widget.title),
+              leading: IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.of(context).pop(),
               ),
-            ],
+              actions: [
+                TextButton(
+                  onPressed: _submitForm,
+                  child: const Text('Salvar'),
+                ),
+              ],
+            ),
+            body: SafeArea(child: formContent),
           ),
-          body: formContent,
         ),
       );
     }
 
     // VERSÃO DESKTOP: MODAL
-    return AlertDialog(
-      title: Text(
-        widget.title,
-        style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold),
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Container(
+        width: 600,
+        constraints: BoxConstraints(maxHeight: size.height * 0.9),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: Row(
+                children: [
+                  Text(
+                    widget.title,
+                    style: GoogleFonts.outfit(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close),
+                  )
+                ],
+              ),
+            ),
+            Expanded(child: formContent),
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Cancelar'),
+                  ),
+                  const SizedBox(width: 12),
+                  FilledButton(
+                    onPressed: _submitForm,
+                    child: Text(
+                      widget.dizimista != null
+                          ? 'Salvar Alterações'
+                          : 'Salvar Fiel',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
-      content: SizedBox(width: 600, child: formContent),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancelar'),
-        ),
-        FilledButton(
-          onPressed: _submitForm,
-          child: Text(
-            widget.dizimista != null ? 'Salvar Alterações' : 'Salvar Fiel',
-          ),
-        ),
-      ],
     );
   }
 
@@ -578,8 +626,7 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
     final cepSemMascara = cepController.text.replaceAll(RegExp(r'[^\d]'), '');
 
     final novoDizimista = Dizimista(
-      id:
-          widget.dizimista?.id ??
+      id: widget.dizimista?.id ??
           DateTime.now().millisecondsSinceEpoch.toString(),
       numeroRegistro: numeroRegistroController.text,
       nome: nomeController.text,

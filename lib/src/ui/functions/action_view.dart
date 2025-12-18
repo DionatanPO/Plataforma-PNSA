@@ -103,14 +103,18 @@ class _DesktopComponentsViewState extends State<DesktopComponentsView> {
       bgColor: sidebarColor,
     );
 
-    return Scaffold(
-      key: _scaffoldKey,
-      backgroundColor: bgColor,
-      // 1. APP BAR (Apenas no Mobile)
-      appBar:
-          isDesktop
-              ? null
-              : AppBar(
+    final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
+
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        key: _scaffoldKey,
+        backgroundColor: bgColor,
+        resizeToAvoidBottomInset: false,
+        // 1. APP BAR (Apenas no Mobile)
+        appBar: isDesktop
+            ? null
+            : AppBar(
                 backgroundColor: bgColor,
                 elevation: 0,
                 leading: IconButton(
@@ -125,59 +129,64 @@ class _DesktopComponentsViewState extends State<DesktopComponentsView> {
                   ),
                 ),
               ),
-      // 2. DRAWER (Apenas no Mobile)
-      drawer:
-          isDesktop
-              ? null
-              : Drawer(backgroundColor: sidebarColor, child: sidebarContent),
-      body: Row(
-        children: [
-          // 3. SIDEBAR FIXA (Apenas no Desktop)
-          if (isDesktop) SizedBox(width: 260, child: sidebarContent),
+        // 2. DRAWER (Apenas no Mobile)
+        drawer: isDesktop
+            ? null
+            : Drawer(backgroundColor: sidebarColor, child: sidebarContent),
+        body: Row(
+          children: [
+            // 3. SIDEBAR FIXA (Apenas no Desktop)
+            if (isDesktop) SizedBox(width: 260, child: sidebarContent),
 
-          // 4. ÁREA DE CONTEÚDO
-          Expanded(
-            child: Scrollbar(
-              thumbVisibility: true,
-              child: SingleChildScrollView(
-                // Padding dinâmico
-                padding: EdgeInsets.all(isDesktop ? 60 : 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _categories[_selectedIndex]['label'],
-                      style: GoogleFonts.outfit(
-                        fontSize: isDesktop ? 32 : 24,
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.onSurface,
+            // 4. ÁREA DE CONTEÚDO
+            Expanded(
+              child: Scrollbar(
+                thumbVisibility: true,
+                child: SingleChildScrollView(
+                  // Padding dinâmico
+                  padding: EdgeInsets.only(
+                    left: isDesktop ? 60 : 20,
+                    right: isDesktop ? 60 : 20,
+                    top: isDesktop ? 60 : 20,
+                    bottom: (isDesktop ? 60 : 20) + bottomPadding,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _categories[_selectedIndex]['label'],
+                        style: GoogleFonts.outfit(
+                          fontSize: isDesktop ? 32 : 24,
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.onSurface,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      "Exemplos de componentes e seus estados.",
-                      style: GoogleFonts.inter(
-                        fontSize: 16,
-                        color: theme.colorScheme.onSurface.withOpacity(0.6),
+                      const SizedBox(height: 8),
+                      Text(
+                        "Exemplos de componentes e seus estados.",
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          color: theme.colorScheme.onSurface.withOpacity(0.6),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 40),
+                      const SizedBox(height: 40),
 
-                    // Renderiza conteúdo passando isDesktop para ajustes finos
-                    _buildCategoryContent(
-                      index: _selectedIndex,
-                      theme: theme,
-                      context: context,
-                      isDesktop: isDesktop,
-                    ),
+                      // Renderiza conteúdo passando isDesktop para ajustes finos
+                      _buildCategoryContent(
+                        index: _selectedIndex,
+                        theme: theme,
+                        context: context,
+                        isDesktop: isDesktop,
+                      ),
 
-                    const SizedBox(height: 100),
-                  ],
+                      const SizedBox(height: 100),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -271,10 +280,8 @@ class _SidebarContent extends StatelessWidget {
               ],
             ),
           ),
-
           Divider(color: theme.dividerColor.withOpacity(0.1), height: 1),
           const SizedBox(height: 16),
-
           Expanded(
             child: ListView.builder(
               itemCount: categories.length,
@@ -294,10 +301,9 @@ class _SidebarContent extends StatelessWidget {
                     ),
                     leading: Icon(
                       item['icon'],
-                      color:
-                          isSelected
-                              ? theme.primaryColor
-                              : theme.colorScheme.onSurface.withOpacity(0.7),
+                      color: isSelected
+                          ? theme.primaryColor
+                          : theme.colorScheme.onSurface.withOpacity(0.7),
                       size: 20,
                     ),
                     title: Text(
@@ -306,10 +312,9 @@ class _SidebarContent extends StatelessWidget {
                         fontSize: 14,
                         fontWeight:
                             isSelected ? FontWeight.w600 : FontWeight.w500,
-                        color:
-                            isSelected
-                                ? theme.primaryColor
-                                : theme.colorScheme.onSurface.withOpacity(0.8),
+                        color: isSelected
+                            ? theme.primaryColor
+                            : theme.colorScheme.onSurface.withOpacity(0.8),
                       ),
                     ),
                     dense: true,
@@ -318,7 +323,6 @@ class _SidebarContent extends StatelessWidget {
               },
             ),
           ),
-
           Padding(
             padding: const EdgeInsets.all(24),
             child: Text(
@@ -730,19 +734,19 @@ class _FeedbackStatusSection extends StatelessWidget {
         // Layout Responsivo para Skeletons
         isDesktop
             ? const Row(
-              children: [
-                Expanded(child: DesktopSkeletonCard()),
-                SizedBox(width: 24),
-                Expanded(child: DesktopSkeletonCard()),
-              ],
-            )
+                children: [
+                  Expanded(child: DesktopSkeletonCard()),
+                  SizedBox(width: 24),
+                  Expanded(child: DesktopSkeletonCard()),
+                ],
+              )
             : const Column(
-              children: [
-                DesktopSkeletonCard(),
-                SizedBox(height: 16),
-                DesktopSkeletonCard(),
-              ],
-            ),
+                children: [
+                  DesktopSkeletonCard(),
+                  SizedBox(height: 16),
+                  DesktopSkeletonCard(),
+                ],
+              ),
         const SizedBox(height: 40),
         Text(
           "Alertas & Diálogos",
@@ -754,26 +758,24 @@ class _FeedbackStatusSection extends StatelessWidget {
           runSpacing: 16,
           children: [
             FilledButton(
-              onPressed:
-                  () => showDesktopDialog(
-                    context: context,
-                    title: "Excluir Arquivo?",
-                    content: "Esta ação não pode ser desfeita.",
-                    type: DialogType.danger,
-                    onConfirm: () {},
-                  ),
+              onPressed: () => showDesktopDialog(
+                context: context,
+                title: "Excluir Arquivo?",
+                content: "Esta ação não pode ser desfeita.",
+                type: DialogType.danger,
+                onConfirm: () {},
+              ),
               style: FilledButton.styleFrom(backgroundColor: Colors.red),
               child: const Text("Alerta Perigo"),
             ),
             FilledButton(
-              onPressed:
-                  () => showDesktopDialog(
-                    context: context,
-                    title: "Atualização",
-                    content: "Nova versão disponível.",
-                    type: DialogType.success,
-                    onConfirm: () {},
-                  ),
+              onPressed: () => showDesktopDialog(
+                context: context,
+                title: "Atualização",
+                content: "Nova versão disponível.",
+                type: DialogType.success,
+                onConfirm: () {},
+              ),
               style: FilledButton.styleFrom(backgroundColor: Colors.green),
               child: const Text("Alerta Sucesso"),
             ),
@@ -854,46 +856,44 @@ class DesktopBreadcrumb extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Row(
-      children:
-          items.asMap().entries.map((entry) {
-            final index = entry.key;
-            final text = entry.value;
-            final isLast = index == items.length - 1;
-            return Row(
-              children: [
-                InkWell(
-                  onTap: isLast ? null : () {},
-                  borderRadius: BorderRadius.circular(4),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 4,
-                      vertical: 2,
-                    ),
-                    child: Text(
-                      text,
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        fontWeight: isLast ? FontWeight.w600 : FontWeight.w400,
-                        color:
-                            isLast
-                                ? theme.colorScheme.onSurface
-                                : theme.colorScheme.onSurface.withOpacity(0.5),
-                      ),
-                    ),
+      children: items.asMap().entries.map((entry) {
+        final index = entry.key;
+        final text = entry.value;
+        final isLast = index == items.length - 1;
+        return Row(
+          children: [
+            InkWell(
+              onTap: isLast ? null : () {},
+              borderRadius: BorderRadius.circular(4),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 4,
+                  vertical: 2,
+                ),
+                child: Text(
+                  text,
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: isLast ? FontWeight.w600 : FontWeight.w400,
+                    color: isLast
+                        ? theme.colorScheme.onSurface
+                        : theme.colorScheme.onSurface.withOpacity(0.5),
                   ),
                 ),
-                if (!isLast)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: Icon(
-                      Icons.chevron_right_rounded,
-                      size: 16,
-                      color: theme.colorScheme.onSurface.withOpacity(0.3),
-                    ),
-                  ),
-              ],
-            );
-          }).toList(),
+              ),
+            ),
+            if (!isLast)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: Icon(
+                  Icons.chevron_right_rounded,
+                  size: 16,
+                  color: theme.colorScheme.onSurface.withOpacity(0.3),
+                ),
+              ),
+          ],
+        );
+      }).toList(),
     );
   }
 }
@@ -937,19 +937,17 @@ class _DesktopFileUploadZoneState extends State<DesktopFileUploadZone> {
               duration: const Duration(milliseconds: 200),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color:
-                    _isHovering
-                        ? color.withOpacity(0.1)
-                        : theme.dividerColor.withOpacity(0.1),
+                color: _isHovering
+                    ? color.withOpacity(0.1)
+                    : theme.dividerColor.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.cloud_upload_outlined,
                 size: 32,
-                color:
-                    _isHovering
-                        ? color
-                        : theme.colorScheme.onSurface.withOpacity(0.5),
+                color: _isHovering
+                    ? color
+                    : theme.colorScheme.onSurface.withOpacity(0.5),
               ),
             ),
             const SizedBox(height: 16),
@@ -1037,10 +1035,9 @@ class _DesktopSwitchTileState extends State<DesktopSwitchTile> {
             height: 28,
             padding: const EdgeInsets.all(2),
             decoration: BoxDecoration(
-              color:
-                  value
-                      ? theme.primaryColor
-                      : theme.dividerColor.withOpacity(0.3),
+              color: value
+                  ? theme.primaryColor
+                  : theme.dividerColor.withOpacity(0.3),
               borderRadius: BorderRadius.circular(20),
             ),
             child: AnimatedAlign(
@@ -1100,10 +1097,9 @@ class _DesktopSkeletonCardState extends State<DesktopSkeletonCard>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final baseColor =
-        isDark
-            ? Colors.white.withOpacity(0.05)
-            : Colors.black.withOpacity(0.04);
+    final baseColor = isDark
+        ? Colors.white.withOpacity(0.05)
+        : Colors.black.withOpacity(0.04);
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
@@ -1332,8 +1328,8 @@ class _DesktopDialogWidget extends StatelessWidget {
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(),
                       style: TextButton.styleFrom(
-                        foregroundColor: theme.colorScheme.onSurface
-                            .withOpacity(0.7),
+                        foregroundColor:
+                            theme.colorScheme.onSurface.withOpacity(0.7),
                         padding: const EdgeInsets.symmetric(
                           horizontal: 20,
                           vertical: 18,
@@ -1410,26 +1406,22 @@ class _DesktopButtonState extends State<DesktopButton> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
-          color:
-              widget.isOutlined
-                  ? (_isHovering
-                      ? widget.color.withOpacity(0.1)
-                      : Colors.transparent)
-                  : (_isHovering
-                      ? widget.color.withOpacity(0.9)
-                      : widget.color),
+          color: widget.isOutlined
+              ? (_isHovering
+                  ? widget.color.withOpacity(0.1)
+                  : Colors.transparent)
+              : (_isHovering ? widget.color.withOpacity(0.9) : widget.color),
           borderRadius: BorderRadius.circular(8),
           border: widget.isOutlined ? Border.all(color: widget.color) : null,
-          boxShadow:
-              (!widget.isOutlined && _isHovering)
-                  ? [
-                    BoxShadow(
-                      color: widget.color.withOpacity(0.3),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ]
-                  : [],
+          boxShadow: (!widget.isOutlined && _isHovering)
+              ? [
+                  BoxShadow(
+                    color: widget.color.withOpacity(0.3),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : [],
         ),
         child: Material(
           color: Colors.transparent,
@@ -1585,31 +1577,28 @@ class _DesktopSegmentedTabsState extends State<DesktopSegmentedTabs> {
               curve: Curves.easeOut,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
               decoration: BoxDecoration(
-                color:
-                    isSelected
-                        ? (isDark ? const Color(0xFF3E3E3E) : Colors.white)
-                        : Colors.transparent,
+                color: isSelected
+                    ? (isDark ? const Color(0xFF3E3E3E) : Colors.white)
+                    : Colors.transparent,
                 borderRadius: BorderRadius.circular(8),
-                boxShadow:
-                    isSelected
-                        ? [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          ),
-                        ]
-                        : [],
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ]
+                    : [],
               ),
               child: Text(
                 widget.tabs[index],
                 style: GoogleFonts.inter(
                   fontSize: 13,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                  color:
-                      isSelected
-                          ? theme.colorScheme.onSurface
-                          : theme.colorScheme.onSurface.withOpacity(0.6),
+                  color: isSelected
+                      ? theme.colorScheme.onSurface
+                      : theme.colorScheme.onSurface.withOpacity(0.6),
                 ),
               ),
             ),
@@ -1648,24 +1637,23 @@ class DesktopTable extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             child: Row(
-              children:
-                  headers
-                      .map(
-                        (h) => Expanded(
-                          child: Text(
-                            h.toUpperCase(),
-                            style: GoogleFonts.inter(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 1.0,
-                              color: theme.colorScheme.onSurface.withOpacity(
-                                0.5,
-                              ),
-                            ),
+              children: headers
+                  .map(
+                    (h) => Expanded(
+                      child: Text(
+                        h.toUpperCase(),
+                        style: GoogleFonts.inter(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 1.0,
+                          color: theme.colorScheme.onSurface.withOpacity(
+                            0.5,
                           ),
                         ),
-                      )
-                      .toList(),
+                      ),
+                    ),
+                  )
+                  .toList(),
             ),
           ),
           Divider(height: 1, color: theme.dividerColor.withOpacity(0.1)),
@@ -1707,56 +1695,54 @@ class _DesktopTableRowState extends State<_DesktopTableRow> {
       onExit: (_) => setState(() => _isHovering = false),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 100),
-        color:
-            _isHovering
-                ? widget.theme.primaryColor.withOpacity(0.04)
-                : Colors.transparent,
+        color: _isHovering
+            ? widget.theme.primaryColor.withOpacity(0.04)
+            : Colors.transparent,
         child: Column(
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               child: Row(
-                children:
-                    widget.cells.map((cell) {
-                      if (cell == 'actions') {
-                        return Expanded(
-                          child: Row(
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.edit, size: 18),
-                                onPressed: () {},
-                                color: Colors.blue,
-                                tooltip: "Editar",
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.delete, size: 18),
-                                onPressed: () {},
-                                color: Colors.red,
-                                tooltip: "Excluir",
-                              ),
-                            ],
+                children: widget.cells.map((cell) {
+                  if (cell == 'actions') {
+                    return Expanded(
+                      child: Row(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.edit, size: 18),
+                            onPressed: () {},
+                            color: Colors.blue,
+                            tooltip: "Editar",
                           ),
-                        );
-                      }
-                      if (['Ativo', 'Inativo', 'Pendente'].contains(cell)) {
-                        return Expanded(
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: _StatusBadge(status: cell),
+                          IconButton(
+                            icon: const Icon(Icons.delete, size: 18),
+                            onPressed: () {},
+                            color: Colors.red,
+                            tooltip: "Excluir",
                           ),
-                        );
-                      }
-                      return Expanded(
-                        child: Text(
-                          cell,
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            color: widget.theme.colorScheme.onSurface
-                                .withOpacity(0.8),
-                          ),
-                        ),
-                      );
-                    }).toList(),
+                        ],
+                      ),
+                    );
+                  }
+                  if (['Ativo', 'Inativo', 'Pendente'].contains(cell)) {
+                    return Expanded(
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: _StatusBadge(status: cell),
+                      ),
+                    );
+                  }
+                  return Expanded(
+                    child: Text(
+                      cell,
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        color:
+                            widget.theme.colorScheme.onSurface.withOpacity(0.8),
+                      ),
+                    ),
+                  );
+                }).toList(),
               ),
             ),
             if (!widget.isLast)
@@ -1844,14 +1830,12 @@ class _DesktopCardState extends State<DesktopCard> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final borderColor =
-        _isHovering
-            ? theme.primaryColor.withOpacity(0.5)
-            : theme.dividerColor.withOpacity(0.1);
-    final shadowColor =
-        _isHovering
-            ? theme.primaryColor.withOpacity(0.1)
-            : Colors.black.withOpacity(0.05);
+    final borderColor = _isHovering
+        ? theme.primaryColor.withOpacity(0.5)
+        : theme.dividerColor.withOpacity(0.1);
+    final shadowColor = _isHovering
+        ? theme.primaryColor.withOpacity(0.1)
+        : Colors.black.withOpacity(0.05);
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovering = true),
       onExit: (_) => setState(() => _isHovering = false),
@@ -1970,9 +1954,7 @@ class _AnimationsSection extends StatelessWidget {
             ),
           ],
         ),
-
         const SizedBox(height: 40),
-
         Text(
           "Painéis Expansíveis (Accordion)",
           style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
@@ -2004,9 +1986,7 @@ class _AnimationsSection extends StatelessWidget {
             ],
           ),
         ),
-
         const SizedBox(height: 40),
-
         Text(
           "Indicadores Pulsantes (Alertas)",
           style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
@@ -2062,12 +2042,11 @@ class _DesktopTiltCardState extends State<DesktopTiltCard>
 
     return MouseRegion(
       onEnter: (_) {},
-      onExit:
-          (_) => setState(() {
-            // Reseta a posição quando o mouse sai
-            x = 0;
-            y = 0;
-          }),
+      onExit: (_) => setState(() {
+        // Reseta a posição quando o mouse sai
+        x = 0;
+        y = 0;
+      }),
       onHover: (hoverEvent) {
         // Calcula a posição do mouse relativa ao centro do card
         // Tamanho fixo do card definido abaixo é 260x180
@@ -2081,11 +2060,10 @@ class _DesktopTiltCardState extends State<DesktopTiltCard>
         });
       },
       child: Transform(
-        transform:
-            Matrix4.identity()
-              ..setEntry(3, 2, 0.001) // Perspectiva
-              ..rotateX(x)
-              ..rotateY(y),
+        transform: Matrix4.identity()
+          ..setEntry(3, 2, 0.001) // Perspectiva
+          ..rotateX(x)
+          ..rotateY(y),
         alignment: FractionalOffset.center,
         child: Container(
           width: 260,
@@ -2356,9 +2334,8 @@ class _DesktopPulseBadgeState extends State<DesktopPulseBadge>
                   1.0 - _controller.value,
                 ), // Fade out
               ),
-              transform:
-                  Matrix4.identity()
-                    ..scale(_controller.value * 1.5), // Scale up
+              transform: Matrix4.identity()
+                ..scale(_controller.value * 1.5), // Scale up
             );
           },
         ),
@@ -2417,9 +2394,7 @@ class _ButtonAnimationsSection extends StatelessWidget {
             ),
           ],
         ),
-
         const SizedBox(height: 40),
-
         Text(
           "2. Morphing Loading (Transformação)",
           style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
@@ -2440,9 +2415,7 @@ class _ButtonAnimationsSection extends StatelessWidget {
             ),
           ],
         ),
-
         const SizedBox(height: 40),
-
         Text(
           "3. Slide Icon (Hover Reveal)",
           style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
@@ -2465,9 +2438,7 @@ class _ButtonAnimationsSection extends StatelessWidget {
             ),
           ],
         ),
-
         const SizedBox(height: 40),
-
         Text(
           "4. 3D Push (Efeito Físico)",
           style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
@@ -2580,12 +2551,11 @@ class _DesktopShineButtonState extends State<DesktopShineButton>
                   builder: (context, child) {
                     return FractionallySizedBox(
                       widthFactor: 0.2, // Largura do brilho
-                      alignment:
-                          AlignmentGeometry.lerp(
-                            const Alignment(-2.0, 0),
-                            const Alignment(2.0, 0),
-                            _controller.value,
-                          )!,
+                      alignment: AlignmentGeometry.lerp(
+                        const Alignment(-2.0, 0),
+                        const Alignment(2.0, 0),
+                        _controller.value,
+                      )!,
                       child: Container(
                         // CORREÇÃO AQUI: O transform fica no Container, não no decoration
                         transform: Matrix4.skewX(-0.3),
@@ -2666,33 +2636,32 @@ class _DesktopLoadingButtonState extends State<DesktopLoadingButton> {
           ],
         ),
         alignment: Alignment.center,
-        child:
-            _isLoading
-                ? const SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(
-                    color: Colors.white,
-                    strokeWidth: 3,
-                  ),
-                )
-                : Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(widget.icon, color: Colors.white, size: 20),
-                    const SizedBox(width: 12),
-                    Text(
-                      widget.label,
-                      style: GoogleFonts.inter(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 15,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.clip,
-                    ),
-                  ],
+        child: _isLoading
+            ? const SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 3,
                 ),
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(widget.icon, color: Colors.white, size: 20),
+                  const SizedBox(width: 12),
+                  Text(
+                    widget.label,
+                    style: GoogleFonts.inter(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 15,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.clip,
+                  ),
+                ],
+              ),
       ),
     );
   }
@@ -2911,9 +2880,7 @@ class _ColorsTypographySection extends StatelessWidget {
             ),
           ],
         ),
-
         const SizedBox(height: 40),
-
         Text(
           "Cores Semânticas (Status)",
           style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
@@ -2937,9 +2904,7 @@ class _ColorsTypographySection extends StatelessWidget {
             _ColorSwatch(color: Colors.blue, label: "Info", hex: "#2196F3"),
           ],
         ),
-
         const SizedBox(height: 40),
-
         Text(
           "Tipografia (Hierarquia)",
           style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
@@ -3049,10 +3014,9 @@ class _ColorSwatch extends StatelessWidget {
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(12),
-        border:
-            hasBorder
-                ? Border.all(color: theme.dividerColor.withOpacity(0.2))
-                : null,
+        border: hasBorder
+            ? Border.all(color: theme.dividerColor.withOpacity(0.2))
+            : null,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -3071,10 +3035,9 @@ class _ColorSwatch extends StatelessWidget {
               style: GoogleFonts.inter(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
-                color:
-                    isLightContent
-                        ? Colors.black.withOpacity(0.7)
-                        : Colors.white.withOpacity(0.9),
+                color: isLightContent
+                    ? Colors.black.withOpacity(0.7)
+                    : Colors.white.withOpacity(0.9),
               ),
             ),
           ),
@@ -3084,10 +3047,9 @@ class _ColorSwatch extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color:
-                    isLightContent
-                        ? Colors.black.withOpacity(0.1)
-                        : Colors.white.withOpacity(0.2),
+                color: isLightContent
+                    ? Colors.black.withOpacity(0.1)
+                    : Colors.white.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
@@ -3137,9 +3099,7 @@ class _FlowsAndStatesSection extends StatelessWidget {
             currentStep: 2, // Índice 2 = "Plano"
           ),
         ),
-
         const SizedBox(height: 40),
-
         Text(
           "Linha do Tempo (Audit Log)",
           style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
@@ -3173,9 +3133,7 @@ class _FlowsAndStatesSection extends StatelessWidget {
             ),
           ],
         ),
-
         const SizedBox(height: 40),
-
         Text(
           "Estado Vazio (Empty State)",
           style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
@@ -3189,9 +3147,7 @@ class _FlowsAndStatesSection extends StatelessWidget {
           actionLabel: "Fazer Upload",
           onAction: () {},
         ),
-
         const SizedBox(height: 40),
-
         Text(
           "Tag Input (Filtros)",
           style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
@@ -3223,107 +3179,100 @@ class DesktopStepper extends StatelessWidget {
     final inactive = theme.disabledColor.withOpacity(0.3);
 
     return Row(
-      children:
-          steps.asMap().entries.map((entry) {
-            final index = entry.key;
-            final label = entry.value;
-            final isActive = index == currentStep;
-            final isCompleted = index < currentStep;
-            final isLast = index == steps.length - 1;
+      children: steps.asMap().entries.map((entry) {
+        final index = entry.key;
+        final label = entry.value;
+        final isActive = index == currentStep;
+        final isCompleted = index < currentStep;
+        final isLast = index == steps.length - 1;
 
-            Color color =
-                isCompleted ? primary : (isActive ? primary : inactive);
-            Color textColor =
-                isActive || isCompleted
-                    ? theme.colorScheme.onSurface
-                    : theme.disabledColor;
+        Color color = isCompleted ? primary : (isActive ? primary : inactive);
+        Color textColor = isActive || isCompleted
+            ? theme.colorScheme.onSurface
+            : theme.disabledColor;
 
-            return Expanded(
-              child: Row(
+        return Expanded(
+          child: Row(
+            children: [
+              // Círculo com Número ou Check
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: isCompleted
+                      ? primary
+                      : (isActive
+                          ? theme.colorScheme.surface
+                          : Colors.transparent),
+                  border: Border.all(color: color, width: 2),
+                  shape: BoxShape.circle,
+                  boxShadow: isActive
+                      ? [
+                          BoxShadow(
+                            color: primary.withOpacity(0.2),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
+                      : [],
+                ),
+                child: Center(
+                  child: isCompleted
+                      ? const Icon(
+                          Icons.check,
+                          size: 16,
+                          color: Colors.white,
+                        )
+                      : Text(
+                          "${index + 1}",
+                          style: GoogleFonts.inter(
+                            fontWeight: FontWeight.bold,
+                            color: isActive ? primary : inactive,
+                          ),
+                        ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              // Texto
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Círculo com Número ou Check
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color:
-                          isCompleted
-                              ? primary
-                              : (isActive
-                                  ? theme.colorScheme.surface
-                                  : Colors.transparent),
-                      border: Border.all(color: color, width: 2),
-                      shape: BoxShape.circle,
-                      boxShadow:
-                          isActive
-                              ? [
-                                BoxShadow(
-                                  color: primary.withOpacity(0.2),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ]
-                              : [],
-                    ),
-                    child: Center(
-                      child:
-                          isCompleted
-                              ? const Icon(
-                                Icons.check,
-                                size: 16,
-                                color: Colors.white,
-                              )
-                              : Text(
-                                "${index + 1}",
-                                style: GoogleFonts.inter(
-                                  fontWeight: FontWeight.bold,
-                                  color: isActive ? primary : inactive,
-                                ),
-                              ),
+                  Text(
+                    "PASSO ${index + 1}",
+                    style: GoogleFonts.inter(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: color.withOpacity(0.8),
+                      letterSpacing: 0.5,
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  // Texto
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        "PASSO ${index + 1}",
-                        style: GoogleFonts.inter(
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          color: color.withOpacity(0.8),
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                      Text(
-                        label,
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: textColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(width: 12),
-                  // Linha Conectora
-                  if (!isLast)
-                    Expanded(
-                      child: Container(
-                        height: 2,
-                        color:
-                            isCompleted
-                                ? primary.withOpacity(0.3)
-                                : inactive.withOpacity(0.2),
-                      ),
+                  Text(
+                    label,
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: textColor,
                     ),
+                  ),
                 ],
               ),
-            );
-          }).toList(),
+              const SizedBox(width: 12),
+              // Linha Conectora
+              if (!isLast)
+                Expanded(
+                  child: Container(
+                    height: 2,
+                    color: isCompleted
+                        ? primary.withOpacity(0.3)
+                        : inactive.withOpacity(0.2),
+                  ),
+                ),
+            ],
+          ),
+        );
+      }).toList(),
     );
   }
 }
@@ -3355,96 +3304,93 @@ class DesktopTimeline extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Column(
-      children:
-          events.asMap().entries.map((entry) {
-            final index = entry.key;
-            final event = entry.value;
-            final isLast = index == events.length - 1;
-            final color =
-                event.isActive
-                    ? theme.primaryColor
-                    : theme.disabledColor.withOpacity(0.3);
+      children: events.asMap().entries.map((entry) {
+        final index = entry.key;
+        final event = entry.value;
+        final isLast = index == events.length - 1;
+        final color = event.isActive
+            ? theme.primaryColor
+            : theme.disabledColor.withOpacity(0.3);
 
-            return IntrinsicHeight(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        return IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Coluna da Esquerda (Tempo)
+              SizedBox(
+                width: 60,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 2),
+                  child: Text(
+                    event.time,
+                    textAlign: TextAlign.right,
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: theme.colorScheme.onSurface.withOpacity(0.5),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              // Coluna do Meio (Linha e Bolinha)
+              Column(
                 children: [
-                  // Coluna da Esquerda (Tempo)
-                  SizedBox(
-                    width: 60,
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 2),
-                      child: Text(
-                        event.time,
-                        textAlign: TextAlign.right,
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: theme.colorScheme.onSurface.withOpacity(0.5),
-                        ),
-                      ),
+                  Container(
+                    width: 12,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: event.isActive ? color : Colors.transparent,
+                      border: Border.all(color: color, width: 2),
+                      shape: BoxShape.circle,
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  // Coluna do Meio (Linha e Bolinha)
-                  Column(
-                    children: [
-                      Container(
-                        width: 12,
-                        height: 12,
-                        decoration: BoxDecoration(
-                          color: event.isActive ? color : Colors.transparent,
-                          border: Border.all(color: color, width: 2),
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      if (!isLast)
-                        Expanded(
-                          child: Container(
-                            width: 2,
-                            margin: const EdgeInsets.symmetric(vertical: 4),
-                            color: theme.dividerColor.withOpacity(0.1),
-                          ),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(width: 16),
-                  // Coluna da Direita (Conteúdo)
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 32),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            event.title,
-                            style: GoogleFonts.inter(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              color:
-                                  event.isActive
-                                      ? theme.colorScheme.onSurface
-                                      : theme.disabledColor,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            event.description,
-                            style: GoogleFonts.inter(
-                              fontSize: 13,
-                              color: theme.colorScheme.onSurface.withOpacity(
-                                event.isActive ? 0.6 : 0.3,
-                              ),
-                            ),
-                          ),
-                        ],
+                  if (!isLast)
+                    Expanded(
+                      child: Container(
+                        width: 2,
+                        margin: const EdgeInsets.symmetric(vertical: 4),
+                        color: theme.dividerColor.withOpacity(0.1),
                       ),
                     ),
-                  ),
                 ],
               ),
-            );
-          }).toList(),
+              const SizedBox(width: 16),
+              // Coluna da Direita (Conteúdo)
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 32),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        event.title,
+                        style: GoogleFonts.inter(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: event.isActive
+                              ? theme.colorScheme.onSurface
+                              : theme.disabledColor,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        event.description,
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          color: theme.colorScheme.onSurface.withOpacity(
+                            event.isActive ? 0.6 : 0.3,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
     );
   }
 }
@@ -3852,27 +3798,25 @@ class _AdvancedUISection extends StatelessWidget {
           children: [
             DesktopButton(
               label: "Show Success",
-              onPressed:
-                  () => _showToast(
-                    context,
-                    "Arquivo Salvo",
-                    "As alterações foram sincronizadas.",
-                    Colors.green,
-                    Icons.check_circle,
-                  ),
+              onPressed: () => _showToast(
+                context,
+                "Arquivo Salvo",
+                "As alterações foram sincronizadas.",
+                Colors.green,
+                Icons.check_circle,
+              ),
               color: Colors.green,
             ),
             const SizedBox(width: 16),
             DesktopButton(
               label: "Show Error",
-              onPressed:
-                  () => _showToast(
-                    context,
-                    "Erro de Conexão",
-                    "Verifique sua internet e tente novamente.",
-                    Colors.red,
-                    Icons.wifi_off,
-                  ),
+              onPressed: () => _showToast(
+                context,
+                "Erro de Conexão",
+                "Verifique sua internet e tente novamente.",
+                Colors.red,
+                Icons.wifi_off,
+              ),
               color: Colors.red,
             ),
           ],
@@ -3899,10 +3843,9 @@ class _AdvancedUISection extends StatelessWidget {
         content: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color:
-                Theme.of(context).brightness == Brightness.dark
-                    ? const Color(0xFF2C2C2C)
-                    : Colors.white,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? const Color(0xFF2C2C2C)
+                : Colors.white,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: Theme.of(context).dividerColor.withOpacity(0.1),
@@ -4033,10 +3976,9 @@ class _DesktopTreeItemState extends State<DesktopTreeItem> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color:
-                    _isHovering
-                        ? theme.colorScheme.onSurface.withOpacity(0.05)
-                        : Colors.transparent,
+                color: _isHovering
+                    ? theme.colorScheme.onSurface.withOpacity(0.05)
+                    : Colors.transparent,
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Row(
@@ -4044,26 +3986,24 @@ class _DesktopTreeItemState extends State<DesktopTreeItem> {
                   // Seta de expansão (invisível se não tiver filhos para manter alinhamento)
                   SizedBox(
                     width: 20,
-                    child:
-                        hasChildren
-                            ? Icon(
-                              _isExpanded
-                                  ? Icons.arrow_drop_down
-                                  : Icons.arrow_right,
-                              size: 18,
-                              color: theme.colorScheme.onSurface.withOpacity(
-                                0.5,
-                              ),
-                            )
-                            : null,
+                    child: hasChildren
+                        ? Icon(
+                            _isExpanded
+                                ? Icons.arrow_drop_down
+                                : Icons.arrow_right,
+                            size: 18,
+                            color: theme.colorScheme.onSurface.withOpacity(
+                              0.5,
+                            ),
+                          )
+                        : null,
                   ),
                   Icon(
                     widget.icon,
                     size: 16,
-                    color:
-                        _isExpanded
-                            ? theme.primaryColor
-                            : theme.colorScheme.onSurface.withOpacity(0.7),
+                    color: _isExpanded
+                        ? theme.primaryColor
+                        : theme.colorScheme.onSurface.withOpacity(0.7),
                   ),
                   const SizedBox(width: 8),
                   Text(
@@ -4072,10 +4012,9 @@ class _DesktopTreeItemState extends State<DesktopTreeItem> {
                       fontSize: 13,
                       fontWeight:
                           _isExpanded ? FontWeight.w600 : FontWeight.w400,
-                      color:
-                          _isExpanded
-                              ? theme.primaryColor
-                              : theme.colorScheme.onSurface.withOpacity(0.9),
+                      color: _isExpanded
+                          ? theme.primaryColor
+                          : theme.colorScheme.onSurface.withOpacity(0.9),
                     ),
                   ),
                 ],
@@ -4315,14 +4254,13 @@ class _SideSheetWidget extends StatelessWidget {
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
-                      children:
-                          actions!.map((widget) {
-                            // Adiciona espaçamento entre os botões automaticamente
-                            return Padding(
-                              padding: const EdgeInsets.only(left: 12),
-                              child: widget,
-                            );
-                          }).toList(),
+                      children: actions!.map((widget) {
+                        // Adiciona espaçamento entre os botões automaticamente
+                        return Padding(
+                          padding: const EdgeInsets.only(left: 12),
+                          child: widget,
+                        );
+                      }).toList(),
                     ),
                   ),
               ],
@@ -4380,10 +4318,9 @@ class _DesktopImageCardState extends State<DesktopImageCard> {
             color: theme.colorScheme.surface,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color:
-                  _isHovering
-                      ? theme.primaryColor.withOpacity(0.3)
-                      : theme.dividerColor.withOpacity(0.1),
+              color: _isHovering
+                  ? theme.primaryColor.withOpacity(0.3)
+                  : theme.dividerColor.withOpacity(0.1),
             ),
             boxShadow: [
               BoxShadow(
@@ -4656,28 +4593,27 @@ class DesktopProfileCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children:
-                  stats.entries.map((entry) {
-                    return Column(
-                      children: [
-                        Text(
-                          entry.value,
-                          style: GoogleFonts.outfit(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: theme.primaryColor,
-                          ),
-                        ),
-                        Text(
-                          entry.key,
-                          style: GoogleFonts.inter(
-                            fontSize: 11,
-                            color: theme.colorScheme.onSurface.withOpacity(0.5),
-                          ),
-                        ),
-                      ],
-                    );
-                  }).toList(),
+              children: stats.entries.map((entry) {
+                return Column(
+                  children: [
+                    Text(
+                      entry.value,
+                      style: GoogleFonts.outfit(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: theme.primaryColor,
+                      ),
+                    ),
+                    Text(
+                      entry.key,
+                      style: GoogleFonts.inter(
+                        fontSize: 11,
+                        color: theme.colorScheme.onSurface.withOpacity(0.5),
+                      ),
+                    ),
+                  ],
+                );
+              }).toList(),
             ),
           ),
           Padding(
@@ -4749,18 +4685,14 @@ class _DatePickersSection extends StatelessWidget {
             ),
           ],
         ),
-
         const SizedBox(height: 40),
-
         Text(
           "Seleção de Período (Range)",
           style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 16),
         const DesktopRangeSelector(),
-
         const SizedBox(height: 40),
-
         Text(
           "Input de Hora (Digital)",
           style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
@@ -4781,9 +4713,7 @@ class _DatePickersSection extends StatelessWidget {
             ),
           ],
         ),
-
         const SizedBox(height: 40),
-
         Text(
           "Mini Calendário (Widget)",
           style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
@@ -4849,8 +4779,8 @@ class _DesktopDatePickerInputState extends State<DesktopDatePickerInput> {
           data: Theme.of(context).copyWith(
             dialogBackgroundColor: Theme.of(context).colorScheme.surface,
             colorScheme: Theme.of(context).colorScheme.copyWith(
-              surface: Theme.of(context).colorScheme.surface,
-            ),
+                  surface: Theme.of(context).colorScheme.surface,
+                ),
           ),
           child: child!,
         );
@@ -4900,22 +4830,20 @@ class _DesktopDatePickerInputState extends State<DesktopDatePickerInput> {
                 color: theme.colorScheme.surface,
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color:
-                      _isHovering
-                          ? theme.primaryColor
-                          : theme.dividerColor.withOpacity(0.3),
+                  color: _isHovering
+                      ? theme.primaryColor
+                      : theme.dividerColor.withOpacity(0.3),
                   width: _isHovering ? 1.5 : 1,
                 ),
-                boxShadow:
-                    _isHovering
-                        ? [
-                          BoxShadow(
-                            color: theme.primaryColor.withOpacity(0.1),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ]
-                        : [],
+                boxShadow: _isHovering
+                    ? [
+                        BoxShadow(
+                          color: theme.primaryColor.withOpacity(0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ]
+                    : [],
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -4924,19 +4852,17 @@ class _DesktopDatePickerInputState extends State<DesktopDatePickerInput> {
                     dateText,
                     style: GoogleFonts.inter(
                       fontSize: 14,
-                      color:
-                          _selectedDate != null
-                              ? theme.colorScheme.onSurface
-                              : theme.colorScheme.onSurface.withOpacity(0.4),
+                      color: _selectedDate != null
+                          ? theme.colorScheme.onSurface
+                          : theme.colorScheme.onSurface.withOpacity(0.4),
                     ),
                   ),
                   Icon(
                     widget.icon,
                     size: 18,
-                    color:
-                        _isHovering
-                            ? theme.primaryColor
-                            : theme.colorScheme.onSurface.withOpacity(0.5),
+                    color: _isHovering
+                        ? theme.primaryColor
+                        : theme.colorScheme.onSurface.withOpacity(0.5),
                   ),
                 ],
               ),
@@ -4990,10 +4916,9 @@ class _DesktopRangeSelectorState extends State<DesktopRangeSelector> {
               duration: const Duration(milliseconds: 200),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color:
-                    isSelected
-                        ? theme.primaryColor.withOpacity(0.1)
-                        : Colors.transparent,
+                color: isSelected
+                    ? theme.primaryColor.withOpacity(0.1)
+                    : Colors.transparent,
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Text(
@@ -5001,10 +4926,9 @@ class _DesktopRangeSelectorState extends State<DesktopRangeSelector> {
                 style: GoogleFonts.inter(
                   fontSize: 13,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                  color:
-                      isSelected
-                          ? theme.primaryColor
-                          : theme.colorScheme.onSurface.withOpacity(0.6),
+                  color: isSelected
+                      ? theme.primaryColor
+                      : theme.colorScheme.onSurface.withOpacity(0.6),
                 ),
               ),
             ),
@@ -5174,23 +5098,22 @@ class DesktopMiniCalendar extends StatelessWidget {
           // Days Header
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children:
-                ["D", "S", "T", "Q", "Q", "S", "S"]
-                    .map(
-                      (d) => SizedBox(
-                        width: 32,
-                        child: Center(
-                          child: Text(
-                            d,
-                            style: GoogleFonts.inter(
-                              fontSize: 12,
-                              color: theme.disabledColor,
-                            ),
-                          ),
+            children: ["D", "S", "T", "Q", "Q", "S", "S"]
+                .map(
+                  (d) => SizedBox(
+                    width: 32,
+                    child: Center(
+                      child: Text(
+                        d,
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: theme.disabledColor,
                         ),
                       ),
-                    )
-                    .toList(),
+                    ),
+                  ),
+                )
+                .toList(),
           ),
           const SizedBox(height: 12),
           // Calendar Grid (Simulado)
@@ -5211,12 +5134,11 @@ class DesktopMiniCalendar extends StatelessWidget {
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
-                  color:
-                      isSelected
-                          ? theme.primaryColor
-                          : (isToday
-                              ? theme.primaryColor.withOpacity(0.1)
-                              : Colors.transparent),
+                  color: isSelected
+                      ? theme.primaryColor
+                      : (isToday
+                          ? theme.primaryColor.withOpacity(0.1)
+                          : Colors.transparent),
                   shape: BoxShape.circle,
                   border:
                       isToday ? Border.all(color: theme.primaryColor) : null,
@@ -5226,16 +5148,14 @@ class DesktopMiniCalendar extends StatelessWidget {
                     "$day",
                     style: GoogleFonts.inter(
                       fontSize: 13,
-                      fontWeight:
-                          (isSelected || isToday)
-                              ? FontWeight.bold
-                              : FontWeight.normal,
-                      color:
-                          isSelected
-                              ? Colors.white
-                              : (isPast
-                                  ? theme.disabledColor
-                                  : theme.colorScheme.onSurface),
+                      fontWeight: (isSelected || isToday)
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                      color: isSelected
+                          ? Colors.white
+                          : (isPast
+                              ? theme.disabledColor
+                              : theme.colorScheme.onSurface),
                     ),
                   ),
                 ),
@@ -5340,19 +5260,18 @@ class DesktopEventCard extends StatelessWidget {
                 const SizedBox(height: 8),
                 // Avatares
                 Row(
-                  children:
-                      participants
-                          .map(
-                            (url) => Padding(
-                              padding: const EdgeInsets.only(right: 4),
-                              child: CircleAvatar(
-                                radius: 10,
-                                backgroundColor: theme.disabledColor,
-                                backgroundImage: NetworkImage(url),
-                              ),
-                            ),
-                          )
-                          .toList(),
+                  children: participants
+                      .map(
+                        (url) => Padding(
+                          padding: const EdgeInsets.only(right: 4),
+                          child: CircleAvatar(
+                            radius: 10,
+                            backgroundColor: theme.disabledColor,
+                            backgroundImage: NetworkImage(url),
+                          ),
+                        ),
+                      )
+                      .toList(),
                 ),
               ],
             ),

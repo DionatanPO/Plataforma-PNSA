@@ -11,15 +11,13 @@ class LoginView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          if (constraints.maxWidth > 900) {
-            return _DesktopLayout(controller: controller);
-          }
-          return _MobileLayout(controller: controller);
-        },
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth > 900) {
+          return _DesktopLayout(controller: controller);
+        }
+        return _MobileLayout(controller: controller);
+      },
     );
   }
 }
@@ -40,76 +38,88 @@ class _MobileLayout extends StatelessWidget {
     // em vez de cinza, dando uma aparência de "App Nativo".
     final bgColor = isDark ? const Color(0xFF121212) : Colors.white;
 
-    return Scaffold(
-      backgroundColor: bgColor,
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            // Reduzi o padding lateral para 20. Antes somava com o do card e ficava +40.
-            // Agora o formulário vai quase até a borda, ficando muito mais legível.
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment:
-                  CrossAxisAlignment.stretch, // Força ocupar largura total
-              children: [
-                const SizedBox(height: 20),
-                // Logo
-                Center(
-                  child: Container(
-                    width: 64,
-                    height: 64,
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(16),
+    // Obtém a altura do teclado
+    final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
+
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        backgroundColor: bgColor,
+        // Impede que o Scaffold seja espremido/empurrado para cima
+        resizeToAvoidBottomInset: false,
+        body: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              // Adiciona padding na parte inferior igual à altura do teclado
+              padding: EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 24,
+                bottom: 24 + bottomPadding,
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment:
+                    CrossAxisAlignment.stretch, // Força ocupar largura total
+                children: [
+                  const SizedBox(height: 20),
+                  // Logo
+                  Center(
+                    child: Container(
+                      width: 64,
+                      height: 64,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Icon(Icons.church,
+                          size: 32, color: theme.colorScheme.primary),
                     ),
-                    child: Icon(Icons.church,
-                        size: 32, color: theme.colorScheme.primary),
                   ),
-                ),
-                const SizedBox(height: 24),
+                  const SizedBox(height: 24),
 
-                // Textos de Boas-vindas (Centralizados)
-                Text(
-                  'Bem-vindo',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.outfit(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.onSurface,
-                    letterSpacing: -0.5,
+                  // Textos de Boas-vindas (Centralizados)
+                  Text(
+                    'Bem-vindo',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.outfit(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.onSurface,
+                      letterSpacing: -0.5,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Faça login para continuar',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.inter(
-                    fontSize: 15,
-                    color: theme.colorScheme.onSurface.withOpacity(0.6),
-                  ),
-                ),
-
-                const SizedBox(height: 40),
-
-                // Formulário direto na tela (Sem Card/BoxDecoration)
-                // Isso remove a sensação de "apertado"
-                _LoginFormBody(controller: controller),
-
-                const SizedBox(height: 40),
-
-                // Footer
-                Center(
-                  child: Text(
-                    "© 2025 Paróquia Nossa Sra. Auxiliadora",
+                  const SizedBox(height: 8),
+                  Text(
+                    'Faça login para continuar',
+                    textAlign: TextAlign.center,
                     style: GoogleFonts.inter(
-                      fontSize: 12,
-                      color: theme.colorScheme.onSurface.withOpacity(0.4),
+                      fontSize: 15,
+                      color: theme.colorScheme.onSurface.withOpacity(0.6),
                     ),
                   ),
-                ),
-                const SizedBox(height: 10),
-              ],
+
+                  const SizedBox(height: 40),
+
+                  // Formulário direto na tela (Sem Card/BoxDecoration)
+                  // Isso remove a sensação de "apertado"
+                  _LoginFormBody(controller: controller),
+
+                  const SizedBox(height: 40),
+
+                  // Footer
+                  Center(
+                    child: Text(
+                      "© 2025 Paróquia Nossa Sra. Auxiliadora",
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: theme.colorScheme.onSurface.withOpacity(0.4),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                ],
+              ),
             ),
           ),
         ),
@@ -131,102 +141,105 @@ class _DesktopLayout extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
 
-    return Row(
-      children: [
-        // Lado Esquerdo (Branding)
-        Expanded(
-          flex: 5,
-          child: Container(
-            decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF0A0A0A) : colorScheme.primary,
-              image: !isDark
-                  ? DecorationImage(
-                      image: const NetworkImage(
-                          "https://images.unsplash.com/photo-1548625361-e877477d94c9?q=80&w=1920&auto=format&fit=crop"),
-                      fit: BoxFit.cover,
-                      colorFilter: ColorFilter.mode(
-                        colorScheme.primary.withOpacity(0.85),
-                        BlendMode.multiply,
-                      ),
-                    )
-                  : null,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(60.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.church_rounded,
-                          color: Colors.white, size: 32),
-                      const SizedBox(width: 12),
-                      Text("PNSA Digital",
-                          style: GoogleFonts.outfit(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white)),
-                    ],
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text("Gestão Paroquial\nSimplificada.",
-                          style: GoogleFonts.outfit(
-                              fontSize: 48,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              height: 1.1)),
-                      const SizedBox(height: 20),
-                      Text("Acesse o painel administrativo.",
-                          style: GoogleFonts.inter(
-                              fontSize: 18,
-                              color: Colors.white.withOpacity(0.8))),
-                    ],
-                  ),
-                  Text("© 2025 Sistema PNSA",
-                      style: GoogleFonts.inter(
-                          color: Colors.white.withOpacity(0.5))),
-                ],
+    return Scaffold(
+      backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+      body: Row(
+        children: [
+          // Lado Esquerdo (Branding)
+          Expanded(
+            flex: 5,
+            child: Container(
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF0A0A0A) : colorScheme.primary,
+                image: !isDark
+                    ? DecorationImage(
+                        image: const NetworkImage(
+                            "https://images.unsplash.com/photo-1548625361-e877477d94c9?q=80&w=1920&auto=format&fit=crop"),
+                        fit: BoxFit.cover,
+                        colorFilter: ColorFilter.mode(
+                          colorScheme.primary.withOpacity(0.85),
+                          BlendMode.multiply,
+                        ),
+                      )
+                    : null,
               ),
-            ),
-          ),
-        ),
-        // Lado Direito (Formulário)
-        Expanded(
-          flex: 4,
-          child: Container(
-            color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-            alignment: Alignment.center,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(48),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 420),
+              child: Padding(
+                padding: const EdgeInsets.all(60.0),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Acessar Sistema',
-                        style: GoogleFonts.outfit(
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                            color: theme.colorScheme.onSurface)),
-                    const SizedBox(height: 12),
-                    Text('Insira suas credenciais abaixo.',
+                    Row(
+                      children: [
+                        const Icon(Icons.church_rounded,
+                            color: Colors.white, size: 32),
+                        const SizedBox(width: 12),
+                        Text("PNSA Digital",
+                            style: GoogleFonts.outfit(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white)),
+                      ],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("Gestão Paroquial\nSimplificada.",
+                            style: GoogleFonts.outfit(
+                                fontSize: 48,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                height: 1.1)),
+                        const SizedBox(height: 20),
+                        Text("Acesse o painel administrativo.",
+                            style: GoogleFonts.inter(
+                                fontSize: 18,
+                                color: Colors.white.withOpacity(0.8))),
+                      ],
+                    ),
+                    Text("© 2025 Sistema PNSA",
                         style: GoogleFonts.inter(
-                            fontSize: 15,
-                            color:
-                                theme.colorScheme.onSurface.withOpacity(0.6))),
-                    const SizedBox(height: 40),
-                    _LoginFormBody(controller: controller),
+                            color: Colors.white.withOpacity(0.5))),
                   ],
                 ),
               ),
             ),
           ),
-        ),
-      ],
+          // Lado Direito (Formulário)
+          Expanded(
+            flex: 4,
+            child: Container(
+              color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+              alignment: Alignment.center,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(48),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 420),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Acessar Sistema',
+                          style: GoogleFonts.outfit(
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                              color: theme.colorScheme.onSurface)),
+                      const SizedBox(height: 12),
+                      Text('Insira suas credenciais abaixo.',
+                          style: GoogleFonts.inter(
+                              fontSize: 15,
+                              color: theme.colorScheme.onSurface
+                                  .withOpacity(0.6))),
+                      const SizedBox(height: 40),
+                      _LoginFormBody(controller: controller),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

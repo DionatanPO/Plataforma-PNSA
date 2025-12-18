@@ -29,9 +29,8 @@ class _DizimistaViewState extends State<DizimistaView> {
 
     // Cores modernas e refinadas
     final surfaceColor = isDark ? const Color(0xFF1A1A1A) : Colors.white;
-    final backgroundColor = isDark
-        ? const Color(0xFF0D0D0D)
-        : const Color(0xFFF8F9FA);
+    final backgroundColor =
+        isDark ? const Color(0xFF0D0D0D) : const Color(0xFFF8F9FA);
     final borderColor = isDark
         ? Colors.white.withOpacity(0.08)
         : Colors.black.withOpacity(0.06);
@@ -42,127 +41,137 @@ class _DizimistaViewState extends State<DizimistaView> {
     final isDesktop = screenWidth > 800;
     final double horizontalPadding = isDesktop ? 24.0 : 12.0;
 
-    return Scaffold(
-      backgroundColor: backgroundColor,
-      body: CustomScrollView(
-        slivers: [
-          // =======================================================
-          // MODERN APP BAR COM GRADIENTE
-          // =======================================================
-          // =======================================================
-          // MODERN HEADER
-          // =======================================================
-          ModernHeader(
-            title: 'Fiéis',
-            subtitle: 'Gerenciamento de cadastros',
-            icon: Icons.people_rounded,
-          ),
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        backgroundColor: backgroundColor,
+        resizeToAvoidBottomInset: true,
+        body: CustomScrollView(
+          slivers: [
+            // =======================================================
+            // MODERN APP BAR COM GRADIENTE
+            // =======================================================
+            // =======================================================
+            // MODERN HEADER
+            // =======================================================
+            ModernHeader(
+              title: 'Fiéis',
+              subtitle: 'Gerenciamento de cadastros',
+              icon: Icons.people_rounded,
+            ),
 
-          // =======================================================
-          // SEARCH BAR
-          // =======================================================
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(
-                horizontalPadding,
-                isDesktop ? 24 : 16,
-                horizontalPadding,
-                isDesktop ? 24 : 16,
-              ),
-              child: _buildModernSearchBar(
-                theme,
-                backgroundColor,
-                borderColor,
-                accentColor,
+            // =======================================================
+            // SEARCH BAR
+            // =======================================================
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  horizontalPadding,
+                  isDesktop ? 24 : 16,
+                  horizontalPadding,
+                  isDesktop ? 24 : 16,
+                ),
+                child: _buildModernSearchBar(
+                  theme,
+                  backgroundColor,
+                  borderColor,
+                  accentColor,
+                ),
               ),
             ),
-          ),
-          // =======================================================
-          // LISTA DE DADOS (RESPONSIVA)
-          // =======================================================
-          Obx(() {
-            if (controller.isLoading) {
-              return SliverFillRemaining(
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: accentColor,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Carregando fiéis...',
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          color: theme.colorScheme.onSurface.withOpacity(0.5),
+            // =======================================================
+            // LISTA DE DADOS (RESPONSIVA)
+            // =======================================================
+            Obx(() {
+              if (controller.isLoading) {
+                return SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: accentColor,
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 16),
+                        Text(
+                          'Carregando fiéis...',
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            color: theme.colorScheme.onSurface.withOpacity(0.5),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
+                );
+              }
+
+              if (controller.filteredDizimistas.isEmpty) {
+                return SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: DizimistaEmptyStateView(
+                    searchQuery: controller.searchQuery.value,
+                  ),
+                );
+              }
+
+              return SliverPadding(
+                padding: EdgeInsets.fromLTRB(
+                  horizontalPadding,
+                  0,
+                  horizontalPadding,
+                  24,
+                ),
+                sliver: SliverLayoutBuilder(
+                  builder: (context, constraints) {
+                    // Reutilizando lógica de desktop se quiser, mas já temos isDesktop no escopo acima
+                    // Porém constraints aqui é mais preciso para o Sliver
+                    final bool isWide = constraints.crossAxisExtent > 800;
+
+                    if (isWide) {
+                      return SliverToBoxAdapter(
+                        child: DizimistaDesktopTableView(
+                          lista: controller.filteredDizimistas,
+                          theme: theme,
+                          surfaceColor: surfaceColor,
+                          onEditPressed: (dizimista) =>
+                              _showEditarDialog(context, dizimista),
+                        ),
+                      );
+                    } else {
+                      return SliverToBoxAdapter(
+                        child: DizimistaMobileListView(
+                          lista: controller.filteredDizimistas,
+                          theme: theme,
+                          surfaceColor: surfaceColor,
+                          onEditPressed: (dizimista) =>
+                              _showEditarDialog(context, dizimista),
+                          onViewHistoryPressed: (dizimista) {},
+                        ),
+                      );
+                    }
+                  },
                 ),
               );
-            }
-
-            if (controller.filteredDizimistas.isEmpty) {
-              return SliverFillRemaining(
-                child: DizimistaEmptyStateView(
-                  searchQuery: controller.searchQuery.value,
-                ),
-              );
-            }
-
-            return SliverPadding(
-              padding: EdgeInsets.fromLTRB(
-                horizontalPadding,
-                0,
-                horizontalPadding,
-                24,
-              ),
-              sliver: SliverLayoutBuilder(
-                builder: (context, constraints) {
-                  // Reutilizando lógica de desktop se quiser, mas já temos isDesktop no escopo acima
-                  // Porém constraints aqui é mais preciso para o Sliver
-                  final bool isWide = constraints.crossAxisExtent > 800;
-
-                  if (isWide) {
-                    return SliverToBoxAdapter(
-                      child: DizimistaDesktopTableView(
-                        lista: controller.filteredDizimistas,
-                        theme: theme,
-                        surfaceColor: surfaceColor,
-                        onEditPressed: (dizimista) =>
-                            _showEditarDialog(context, dizimista),
-                      ),
-                    );
-                  } else {
-                    return SliverToBoxAdapter(
-                      child: DizimistaMobileListView(
-                        lista: controller.filteredDizimistas,
-                        theme: theme,
-                        surfaceColor: surfaceColor,
-                        onEditPressed: (dizimista) =>
-                            _showEditarDialog(context, dizimista),
-                        onViewHistoryPressed: (dizimista) {},
-                      ),
-                    );
-                  }
-                },
-              ),
-            );
-          }),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        heroTag: 'dizimista_fab',
-        onPressed: () => _showCadastroDialog(context),
-        backgroundColor: accentColor,
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.add_rounded),
-        label: Text(
-          'Novo Fiel',
-          style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+            }),
+            // Espaço fixo no final para o FAB não cobrir o último item
+            const SliverToBoxAdapter(
+              child: SizedBox(height: 100),
+            ),
+          ],
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          heroTag: 'dizimista_fab',
+          onPressed: () => _showCadastroDialog(context),
+          backgroundColor: accentColor,
+          foregroundColor: Colors.white,
+          icon: const Icon(Icons.add_rounded),
+          label: Text(
+            'Novo Fiel',
+            style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+          ),
         ),
       ),
     );
@@ -387,21 +396,19 @@ class _ModernSearchBarState extends State<_ModernSearchBar> {
 
     // Cores modernas e refinadas
     final surfaceColor = isDark ? const Color(0xFF1A1A1A) : Colors.white;
-    final inputBgColor = isDark
-        ? const Color(0xFF252525)
-        : const Color(0xFFF8FAFC);
+    final inputBgColor =
+        isDark ? const Color(0xFF252525) : const Color(0xFFF8FAFC);
     final accentColor = widget.accentColor;
 
     // Cores de estado
     final borderColor = _isFocused
         ? accentColor.withOpacity(0.5)
         : (_isHovering
-              ? theme.dividerColor.withOpacity(0.2)
-              : theme.dividerColor.withOpacity(0.1));
+            ? theme.dividerColor.withOpacity(0.2)
+            : theme.dividerColor.withOpacity(0.1));
 
-    final iconColor = _isFocused
-        ? accentColor
-        : theme.colorScheme.onSurface.withOpacity(0.4);
+    final iconColor =
+        _isFocused ? accentColor : theme.colorScheme.onSurface.withOpacity(0.4);
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovering = true),

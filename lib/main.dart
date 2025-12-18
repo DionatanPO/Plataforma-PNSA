@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart'; // Para kIsWeb
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -18,8 +19,12 @@ import 'src/data/services/session_service.dart';
 
 import 'package:intl/date_symbol_data_local.dart';
 
+
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+
   await initializeDateFormatting('pt_BR', null);
 
   await GetStorage.init();
@@ -41,3 +46,4 @@ Future<void> main() async {
 
   runApp(App());
 }
+

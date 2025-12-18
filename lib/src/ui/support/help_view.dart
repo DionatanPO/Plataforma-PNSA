@@ -6,7 +6,6 @@ import 'dart:ui';
 import '../../routes/app_routes.dart';
 import '../core/widgets/custom_sliver_app_bar.dart';
 
-
 class HelpView extends StatelessWidget {
   const HelpView({super.key});
 
@@ -24,88 +23,99 @@ class HelpView extends StatelessWidget {
         isDark ? const Color(0xFF1C1C1C) : const Color(0xFFFFFBFE);
     final cardColor = isDark ? const Color(0xFF2B2B2B) : Colors.white;
 
-    return Scaffold(
-      backgroundColor: surfaceColor,
-      body: CustomScrollView(
-        physics: const BouncingScrollPhysics(),
-        slivers: [
-          CustomSliverAppBar(
-            title: 'Ajuda',
-            subtitle: 'Sistema de Gestão da Paróquia Nossa Senhora Auxiliadora',
-            actions: [],
-          ),
-          SliverPadding(
-            padding: EdgeInsets.symmetric(
-              horizontal: isDesktop ? 120 : (isTablet ? 60 : 24),
-              vertical: 40,
+    final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
+
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        backgroundColor: surfaceColor,
+        resizeToAvoidBottomInset: false,
+        body: CustomScrollView(
+          physics: const BouncingScrollPhysics(),
+          slivers: [
+            CustomSliverAppBar(
+              title: 'Ajuda',
+              subtitle:
+                  'Sistema de Gestão da Paróquia Nossa Senhora Auxiliadora',
+              actions: [],
             ),
-            sliver: SliverToBoxAdapter(
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxWidth: isDesktop ? 900 : double.infinity,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Search Bar
-                      _buildSearchBar(theme, primaryColor, isDark, cardColor),
+            SliverPadding(
+              padding: EdgeInsets.symmetric(
+                horizontal: isDesktop ? 120 : (isTablet ? 60 : 24),
+                vertical: 40,
+              ),
+              sliver: SliverToBoxAdapter(
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: isDesktop ? 900 : double.infinity,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Search Bar
+                        _buildSearchBar(theme, primaryColor, isDark, cardColor),
 
-                      const SizedBox(height: 48),
+                        const SizedBox(height: 48),
 
-                      // Quick Access / Topics
-                      Text(
-                        'Tópicos Populares',
-                        style: GoogleFonts.outfit(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w600,
-                          color: theme.colorScheme.onSurface,
-                          letterSpacing: -0.5,
+                        // Quick Access / Topics
+                        Text(
+                          'Tópicos Populares',
+                          style: GoogleFonts.outfit(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w600,
+                            color: theme.colorScheme.onSurface,
+                            letterSpacing: -0.5,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 20),
-                      _buildTopicsGrid(
-                        theme,
-                        primaryColor,
-                        isDark,
-                        cardColor,
-                        isDesktop,
-                      ),
-
-                      const SizedBox(height: 48),
-
-                      // Support Options
-                      Text(
-                        'Ainda precisa de ajuda?',
-                        style: GoogleFonts.outfit(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w600,
-                          color: theme.colorScheme.onSurface,
-                          letterSpacing: -0.5,
+                        const SizedBox(height: 20),
+                        _buildTopicsGrid(
+                          theme,
+                          primaryColor,
+                          isDark,
+                          cardColor,
+                          isDesktop,
                         ),
-                      ),
-                      const SizedBox(height: 20),
-                      _buildSupportOptions(
-                        theme,
-                        primaryColor,
-                        isDark,
-                        cardColor,
-                        isDesktop,
-                      ),
 
-                      const SizedBox(height: 48),
+                        const SizedBox(height: 48),
 
-                      // About Link
-                      _buildAboutLink(theme, primaryColor, isDark, cardColor),
+                        // Support Options
+                        Text(
+                          'Ainda precisa de ajuda?',
+                          style: GoogleFonts.outfit(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w600,
+                            color: theme.colorScheme.onSurface,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        _buildSupportOptions(
+                          theme,
+                          primaryColor,
+                          isDark,
+                          cardColor,
+                          isDesktop,
+                        ),
 
-                      const SizedBox(height: 32),
-                    ],
+                        const SizedBox(height: 48),
+
+                        // About Link
+                        _buildAboutLink(theme, primaryColor, isDark, cardColor),
+
+                        const SizedBox(height: 32),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+            // Espaço adicional para o teclado
+            SliverToBoxAdapter(
+              child: SizedBox(height: bottomPadding + 20),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -123,18 +133,16 @@ class HelpView extends StatelessWidget {
         color: cardColor,
         borderRadius: BorderRadius.circular(28), // Pill shape for modern feel
         border: Border.all(
-          color:
-              isDark
-                  ? Colors.white.withOpacity(0.08)
-                  : Colors.black.withOpacity(0.08),
+          color: isDark
+              ? Colors.white.withOpacity(0.08)
+              : Colors.black.withOpacity(0.08),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color:
-                isDark
-                    ? Colors.black.withOpacity(0.2)
-                    : Colors.black.withOpacity(0.05),
+            color: isDark
+                ? Colors.black.withOpacity(0.2)
+                : Colors.black.withOpacity(0.05),
             blurRadius: 20,
             offset: const Offset(0, 4),
           ),
@@ -217,26 +225,25 @@ class HelpView extends StatelessWidget {
         final spacing = 16.0;
         final width =
             (constraints.maxWidth - (spacing * (crossAxisCount - 1))) /
-            crossAxisCount;
+                crossAxisCount;
 
         return Wrap(
           spacing: spacing,
           runSpacing: spacing,
-          children:
-              topics.map((topic) {
-                return SizedBox(
-                  width: width,
-                  child: _buildTopicCard(
-                    theme,
-                    primaryColor,
-                    isDark,
-                    cardColor,
-                    topic['icon'] as IconData,
-                    topic['title'] as String,
-                    topic['desc'] as String,
-                  ),
-                );
-              }).toList(),
+          children: topics.map((topic) {
+            return SizedBox(
+              width: width,
+              child: _buildTopicCard(
+                theme,
+                primaryColor,
+                isDark,
+                cardColor,
+                topic['icon'] as IconData,
+                topic['title'] as String,
+                topic['desc'] as String,
+              ),
+            );
+          }).toList(),
         );
       },
     );
@@ -265,18 +272,16 @@ class HelpView extends StatelessWidget {
                 color: cardColor,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color:
-                      isDark
-                          ? Colors.white.withOpacity(0.08)
-                          : Colors.black.withOpacity(0.08),
+                  color: isDark
+                      ? Colors.white.withOpacity(0.08)
+                      : Colors.black.withOpacity(0.08),
                   width: 1,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color:
-                        isDark
-                            ? Colors.black.withOpacity(0.2)
-                            : Colors.black.withOpacity(0.04),
+                    color: isDark
+                        ? Colors.black.withOpacity(0.2)
+                        : Colors.black.withOpacity(0.04),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -296,10 +301,9 @@ class HelpView extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color:
-                                isDark
-                                    ? Colors.white.withOpacity(0.05)
-                                    : Colors.black.withOpacity(0.04),
+                            color: isDark
+                                ? Colors.white.withOpacity(0.05)
+                                : Colors.black.withOpacity(0.04),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Icon(icon, color: primaryColor, size: 26),
@@ -354,7 +358,8 @@ class HelpView extends StatelessWidget {
             Icons.church_outlined,
             'Secretaria Paroquial',
             'Presencial ou telefone',
-            () => Get.snackbar('Contato', 'Entre em contato com a secretaria: (64) 3674-1540'),
+            () => Get.snackbar(
+                'Contato', 'Entre em contato com a secretaria: (64) 3674-1540'),
           ),
         ),
         SizedBox(width: isDesktop ? 16 : 0, height: isDesktop ? 0 : 16),
@@ -390,18 +395,16 @@ class HelpView extends StatelessWidget {
         color: cardColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color:
-              isDark
-                  ? Colors.white.withOpacity(0.08)
-                  : Colors.black.withOpacity(0.08),
+          color: isDark
+              ? Colors.white.withOpacity(0.08)
+              : Colors.black.withOpacity(0.08),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color:
-                isDark
-                    ? Colors.black.withOpacity(0.2)
-                    : Colors.black.withOpacity(0.04),
+            color: isDark
+                ? Colors.black.withOpacity(0.2)
+                : Colors.black.withOpacity(0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -476,10 +479,9 @@ class HelpView extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30),
             side: BorderSide(
-              color:
-                  isDark
-                      ? Colors.white.withOpacity(0.1)
-                      : Colors.black.withOpacity(0.1),
+              color: isDark
+                  ? Colors.white.withOpacity(0.1)
+                  : Colors.black.withOpacity(0.1),
             ),
           ),
           backgroundColor: Colors.transparent,

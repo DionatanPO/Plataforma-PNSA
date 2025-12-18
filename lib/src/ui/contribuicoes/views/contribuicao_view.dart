@@ -31,10 +31,10 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
 
   final CurrencyTextInputFormatter _currencyFormatter =
       CurrencyTextInputFormatter.currency(
-        locale: 'pt_BR',
-        symbol: 'R\$',
-        decimalDigits: 2,
-      );
+    locale: 'pt_BR',
+    symbol: 'R\$',
+    decimalDigits: 2,
+  );
 
   late ThemeData theme;
   late bool isDark;
@@ -58,32 +58,41 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
     theme = Theme.of(context);
     isDark = theme.brightness == Brightness.dark;
     surfaceColor = isDark ? const Color(0xFF1A1A1A) : Colors.white;
-    backgroundColor = isDark
-        ? const Color(0xFF0D0D0D)
-        : const Color(0xFFF8F9FA);
+    backgroundColor =
+        isDark ? const Color(0xFF0D0D0D) : const Color(0xFFF8F9FA);
     borderColor = isDark
         ? Colors.white.withOpacity(0.08)
         : Colors.black.withOpacity(0.06);
     accentColor = theme.primaryColor;
 
-    return Scaffold(
-      backgroundColor: backgroundColor,
-      body: CustomScrollView(
-        slivers: [
-          // Modern App Bar
-          // Modern Header
-          ModernHeader(
-            title: 'Contribuição',
-            subtitle: 'Registro de entradas e dízimos',
-            icon: Icons.payment_rounded,
-          ),
+    final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
 
-          // Content
-          SliverPadding(
-            padding: EdgeInsets.all(isMobile ? 12 : 24),
-            sliver: SliverToBoxAdapter(child: _buildMainContent()),
-          ),
-        ],
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        backgroundColor: backgroundColor,
+        resizeToAvoidBottomInset: false,
+        body: CustomScrollView(
+          slivers: [
+            // Modern Header
+            ModernHeader(
+              title: 'Contribuição',
+              subtitle: 'Registro de entradas e dízimos',
+              icon: Icons.payment_rounded,
+            ),
+
+            // Content
+            SliverPadding(
+              padding: EdgeInsets.all(isMobile ? 12 : 24),
+              sliver: SliverToBoxAdapter(child: _buildMainContent()),
+            ),
+
+            // Espaço adicional para o teclado
+            SliverToBoxAdapter(
+              child: SizedBox(height: bottomPadding + 20),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -248,8 +257,8 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
               color: isActive
                   ? Colors.white
                   : isCompleted
-                  ? Colors.green
-                  : theme.colorScheme.onSurface.withOpacity(0.4),
+                      ? Colors.green
+                      : theme.colorScheme.onSurface.withOpacity(0.4),
             ),
             const SizedBox(width: 8),
             Text(
@@ -412,10 +421,10 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
                     dizimista.nome.isNotEmpty &&
                             dizimista.nome.split(' ').length > 1
                         ? '${dizimista.nome.split(' ')[0][0]}${dizimista.nome.split(' ').last[0]}'
-                              .toUpperCase()
+                            .toUpperCase()
                         : dizimista.nome.isNotEmpty
-                        ? dizimista.nome[0].toUpperCase()
-                        : '?',
+                            ? dizimista.nome[0].toUpperCase()
+                            : '?',
                     style: GoogleFonts.outfit(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,

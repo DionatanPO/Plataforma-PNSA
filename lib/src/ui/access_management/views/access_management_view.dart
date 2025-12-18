@@ -41,135 +41,144 @@ class _AccessManagementViewState extends State<AccessManagementView> {
     theme = Theme.of(context);
     isDark = theme.brightness == Brightness.dark;
     surfaceColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
-    backgroundColor = isDark
-        ? const Color(0xFF121212)
-        : const Color(0xFFF4F6F8);
+    backgroundColor =
+        isDark ? const Color(0xFF121212) : const Color(0xFFF4F6F8);
     borderColor = theme.dividerColor.withOpacity(0.1);
 
-    return Scaffold(
-      backgroundColor: backgroundColor,
-      body: CustomScrollView(
-        physics: const BouncingScrollPhysics(),
-        slivers: [
-          const AccessManagementHeader(),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(
-                isMobile ? 16 : 24,
-                isMobile ? 16 : 24,
-                isMobile ? 16 : 24,
-                isMobile ? 16 : 24,
-              ),
-              child: AccessManagementSearchBar(
-                controller: _searchController,
-                onChanged: (value) => controller.setSearchQuery(value),
-              ),
-            ),
-          ),
-          Obx(() {
-            if (controller.isLoading) {
-              return const SliverFillRemaining(
-                child: Center(child: CircularProgressIndicator()),
-              );
-            }
-            if (controller.filteredAcessos.isEmpty) {
-              return SliverToBoxAdapter(
-                child: AccessManagementEmptyState(
-                  searchQuery: controller.searchQuery,
+    final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
+
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        backgroundColor: backgroundColor,
+        resizeToAvoidBottomInset: false,
+        body: CustomScrollView(
+          physics: const BouncingScrollPhysics(),
+          slivers: [
+            const AccessManagementHeader(),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  isMobile ? 16 : 24,
+                  isMobile ? 16 : 24,
+                  isMobile ? 16 : 24,
+                  isMobile ? 16 : 24,
                 ),
-              );
-            }
-            return SliverLayoutBuilder(
-              builder: (context, constraints) {
-                if (constraints.crossAxisExtent > 850) {
-                  return AccessManagementDesktopList(
-                    acessos: controller.filteredAcessos,
-                    onEditUser: _openEditUserDialog,
-                    onResetPassword: _openResetPasswordDialog,
-                    theme: theme,
-                    isDark: isDark,
-                    surfaceColor: surfaceColor,
-                    borderColor: borderColor,
-                  );
-                } else {
-                  return AccessManagementMobileList(
-                    acessos: controller.filteredAcessos,
-                    onEditUser: _openEditUserDialog,
-                    onResetPassword: _openResetPasswordDialog,
-                    theme: theme,
-                    isDark: isDark,
-                    surfaceColor: surfaceColor,
-                    borderColor: borderColor,
-                  );
-                }
-              },
-            );
-          }),
-          _buildInfoSectionSliver(
-            'Definições de Funções',
-            const AccessManagementFunctionCards(),
-          ),
-          _buildInfoSectionSliver(
-            'Legenda de Status',
-            const AccessManagementStatusCards(),
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(
-                isMobile ? 16 : 24,
-                isMobile ? 24 : 40,
-                isMobile ? 16 : 24,
-                0,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Como Funciona o Sistema de Senhas',
-                    style: GoogleFonts.outfit(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      if (constraints.maxWidth > 700) {
-                        return Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(child: const PasswordResetInfoCard()),
-                            const SizedBox(width: 16),
-                            Expanded(child: const FirstAccessInfoCard()),
-                          ],
-                        );
-                      } else {
-                        return Column(
-                          children: [
-                            const PasswordResetInfoCard(),
-                            const SizedBox(height: 12),
-                            const FirstAccessInfoCard(),
-                          ],
-                        );
-                      }
-                    },
-                  ),
-                ],
+                child: AccessManagementSearchBar(
+                  controller: _searchController,
+                  onChanged: (value) => controller.setSearchQuery(value),
+                ),
               ),
             ),
+            Obx(() {
+              if (controller.isLoading) {
+                return const SliverFillRemaining(
+                  child: Center(child: CircularProgressIndicator()),
+                );
+              }
+              if (controller.filteredAcessos.isEmpty) {
+                return SliverToBoxAdapter(
+                  child: AccessManagementEmptyState(
+                    searchQuery: controller.searchQuery,
+                  ),
+                );
+              }
+              return SliverLayoutBuilder(
+                builder: (context, constraints) {
+                  if (constraints.crossAxisExtent > 850) {
+                    return AccessManagementDesktopList(
+                      acessos: controller.filteredAcessos,
+                      onEditUser: _openEditUserDialog,
+                      onResetPassword: _openResetPasswordDialog,
+                      theme: theme,
+                      isDark: isDark,
+                      surfaceColor: surfaceColor,
+                      borderColor: borderColor,
+                    );
+                  } else {
+                    return AccessManagementMobileList(
+                      acessos: controller.filteredAcessos,
+                      onEditUser: _openEditUserDialog,
+                      onResetPassword: _openResetPasswordDialog,
+                      theme: theme,
+                      isDark: isDark,
+                      surfaceColor: surfaceColor,
+                      borderColor: borderColor,
+                    );
+                  }
+                },
+              );
+            }),
+            _buildInfoSectionSliver(
+              'Definições de Funções',
+              const AccessManagementFunctionCards(),
+            ),
+            _buildInfoSectionSliver(
+              'Legenda de Status',
+              const AccessManagementStatusCards(),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  isMobile ? 16 : 24,
+                  isMobile ? 24 : 40,
+                  isMobile ? 16 : 24,
+                  0,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Como Funciona o Sistema de Senhas',
+                      style: GoogleFonts.outfit(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        if (constraints.maxWidth > 700) {
+                          return Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(child: const PasswordResetInfoCard()),
+                              const SizedBox(width: 16),
+                              Expanded(child: const FirstAccessInfoCard()),
+                            ],
+                          );
+                        } else {
+                          return Column(
+                            children: [
+                              const PasswordResetInfoCard(),
+                              const SizedBox(height: 12),
+                              const FirstAccessInfoCard(),
+                            ],
+                          );
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SliverToBoxAdapter(child: SizedBox(height: 40)),
+            // Espaço adicional para o teclado
+            SliverToBoxAdapter(
+              child: SizedBox(height: bottomPadding + 20),
+            ),
+          ],
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: _openAddUserDialog,
+          backgroundColor: theme.primaryColor,
+          foregroundColor: Colors.white,
+          icon: const Icon(Icons.add_rounded),
+          label: Text(
+            'Novo Usuário',
+            style: GoogleFonts.inter(fontWeight: FontWeight.w600),
           ),
-          const SliverToBoxAdapter(child: SizedBox(height: 40)),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _openAddUserDialog,
-        backgroundColor: theme.primaryColor,
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.add_rounded),
-        label: Text(
-          'Novo Usuário',
-          style: GoogleFonts.inter(fontWeight: FontWeight.w600),
         ),
       ),
     );
@@ -643,16 +652,16 @@ class _AccessManagementViewState extends State<AccessManagementView> {
   }
 
   Widget _label(String text) => Padding(
-    padding: const EdgeInsets.only(bottom: 12),
-    child: Text(
-      text,
-      style: GoogleFonts.inter(
-        fontSize: 12,
-        fontWeight: FontWeight.bold,
-        color: theme.primaryColor,
-      ),
-    ),
-  );
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Text(
+          text,
+          style: GoogleFonts.inter(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: theme.primaryColor,
+          ),
+        ),
+      );
 
   Widget _buildTextField({
     required String label,
@@ -660,74 +669,79 @@ class _AccessManagementViewState extends State<AccessManagementView> {
     Function(String)? onChanged,
     List<TextInputFormatter>? inputFormatters,
     TextInputType? keyboardType,
-  }) => TextField(
-    controller: controller,
-    decoration: InputDecoration(
-      labelText: label,
-      border: const OutlineInputBorder(),
-      enabledBorder: OutlineInputBorder(
-        borderSide: BorderSide(
-          color: theme.colorScheme.outline.withOpacity(0.5),
+  }) =>
+      TextField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+          enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(
+              color: theme.colorScheme.outline.withOpacity(0.5),
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderSide:
+                BorderSide(color: theme.colorScheme.primary, width: 2.0),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: theme.colorScheme.error),
+          ),
+          filled: true,
+          fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+          labelStyle: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+          floatingLabelStyle: TextStyle(color: theme.colorScheme.primary),
+          isDense: true,
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         ),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: theme.colorScheme.primary, width: 2.0),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: theme.colorScheme.error),
-      ),
-      filled: true,
-      fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
-      labelStyle: TextStyle(color: theme.colorScheme.onSurfaceVariant),
-      floatingLabelStyle: TextStyle(color: theme.colorScheme.primary),
-      isDense: true,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-    ),
-    style: GoogleFonts.inter(fontSize: 14),
-    onChanged: onChanged,
-    inputFormatters: inputFormatters,
-    keyboardType: keyboardType,
-  );
+        style: GoogleFonts.inter(fontSize: 14),
+        onChanged: onChanged,
+        inputFormatters: inputFormatters,
+        keyboardType: keyboardType,
+      );
 
   Widget _buildDropdown({
     required String label,
     required String value,
     required List<String> items,
     required Function(String?) onChanged,
-  }) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(
-        label,
-        style: GoogleFonts.inter(
-          fontSize: 11,
-          color: theme.colorScheme.onSurface.withOpacity(0.6),
-        ),
-      ),
-      const SizedBox(height: 6),
-      Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
-          borderRadius: BorderRadius.circular(4),
-          border: Border.all(color: theme.colorScheme.outline.withOpacity(0.5)),
-        ),
-        child: DropdownButtonHideUnderline(
-          child: DropdownButton<String>(
-            isExpanded: true,
-            value: value,
-            items: items
-                .map(
-                  (s) => DropdownMenuItem(
-                    value: s,
-                    child: Text(s, style: GoogleFonts.inter(fontSize: 14)),
-                  ),
-                )
-                .toList(),
-            onChanged: onChanged,
+  }) =>
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: GoogleFonts.inter(
+              fontSize: 11,
+              color: theme.colorScheme.onSurface.withOpacity(0.6),
+            ),
           ),
-        ),
-      ),
-    ],
-  );
+          const SizedBox(height: 6),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(4),
+              border:
+                  Border.all(color: theme.colorScheme.outline.withOpacity(0.5)),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                isExpanded: true,
+                value: value,
+                items: items
+                    .map(
+                      (s) => DropdownMenuItem(
+                        value: s,
+                        child: Text(s, style: GoogleFonts.inter(fontSize: 14)),
+                      ),
+                    )
+                    .toList(),
+                onChanged: onChanged,
+              ),
+            ),
+          ),
+        ],
+      );
 }

@@ -5,6 +5,9 @@ class EditProfileController extends GetxController {
   final formKey = GlobalKey<FormState>();
   final nameController = TextEditingController();
   final emailController = TextEditingController();
+  final cargoController = TextEditingController();
+  final bioController = TextEditingController();
+  final telefoneController = TextEditingController();
   final scrollController = ScrollController();
 
   final avatarUrl =
@@ -16,6 +19,9 @@ class EditProfileController extends GetxController {
     // Load initial user data
     nameController.text = 'Dionatan Oliveira';
     emailController.text = 'dionatan@email.com';
+    cargoController.text = 'Product Designer';
+    bioController.text = '';
+    telefoneController.text = '(00) 00000-0000';
     super.onInit();
   }
 
@@ -44,6 +50,9 @@ class EditProfileController extends GetxController {
   void onClose() {
     nameController.dispose();
     emailController.dispose();
+    cargoController.dispose();
+    bioController.dispose();
+    telefoneController.dispose();
     scrollController.dispose();
     super.onClose();
   }
