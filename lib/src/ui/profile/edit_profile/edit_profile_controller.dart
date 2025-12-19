@@ -10,8 +10,7 @@ class EditProfileController extends GetxController {
   final telefoneController = TextEditingController();
   final scrollController = ScrollController();
 
-  final avatarUrl =
-      'https://i.pravatar.cc/150?img=12'.obs; // Fictional avatar URL
+  final avatarUrl = ''.obs; // Fictional avatar URL
   final isLoading = false.obs;
 
   @override
@@ -29,7 +28,8 @@ class EditProfileController extends GetxController {
     // Simulate image picking
     // In a real app, you would use an image picker package
     Get.snackbar('Em Breve', 'Seleção de imagem ainda não implementada.');
-    avatarUrl.value = 'https://i.pravatar.cc/150?img=${DateTime.now().second}';
+    // Simular troca de avatar removendo a url
+    avatarUrl.value = '';
   }
 
   Future<void> saveProfile() async {

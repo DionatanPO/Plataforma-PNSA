@@ -4,15 +4,13 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:get/get.dart';
 import '../../home/controlles/home_controller.dart';
+import '../controllers/dashboard_controller.dart';
 
-class DashboardView extends StatefulWidget {
-  const DashboardView({Key? key}) : super(key: key);
+class DashboardView extends StatelessWidget {
+  DashboardView({Key? key}) : super(key: key);
 
-  @override
-  State<DashboardView> createState() => _DashboardViewState();
-}
+  final controller = Get.put(DashboardController());
 
-class _DashboardViewState extends State<DashboardView> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -37,11 +35,11 @@ class _DashboardViewState extends State<DashboardView> {
     final padding = isDesktop ? 32.0 : 24.0;
 
     // Cálculo do aspect ratio dinâmico
-    double cardHeightTarget = 220.0; // Desktop: 3 colunas
+    double cardHeightTarget = 180.0;
     if (isTablet) {
-      cardHeightTarget = 240.0; // Tablet: 2 colunas - precisa de mais altura
+      cardHeightTarget = 200.0;
     } else if (!isDesktop) {
-      cardHeightTarget = 210.0; // Mobile: 1 coluna
+      cardHeightTarget = 160.0;
     }
 
     final double availableWidth =
@@ -49,272 +47,101 @@ class _DashboardViewState extends State<DashboardView> {
     final double cardWidth = availableWidth / crossAxisCount;
     final double dynamicAspectRatio = cardWidth / cardHeightTarget;
 
-    // Formatação de data
-    String formattedDate;
-    try {
-      final now = DateTime.now();
-      final formatter = DateFormat('EEEE, dd MMMM', 'pt_BR');
-      formattedDate = formatter.format(now);
-    } catch (e) {
-      formattedDate = 'Hoje';
-    }
-
     return Scaffold(
       backgroundColor: backgroundColor,
-      body: CustomScrollView(
-        physics: const BouncingScrollPhysics(),
-        slivers: [
-          // =======================================================
-          // MODERN APP BAR
-          // =======================================================
-          SliverAppBar(
-            toolbarHeight: width < 600 ? 80 : 120,
-            titleSpacing: 0,
-            floating: true,
-            pinned: false,
-            snap: true,
-            leading: width < 600
-                ? IconButton(
-                    icon: Icon(Icons.menu, color: theme.colorScheme.onSurface),
-                    onPressed: () {
-                      if (Get.isRegistered<HomeController>()) {
-                        Get.find<HomeController>()
-                            .scaffoldKey
-                            .currentState
-                            ?.openDrawer();
-                      } else {
-                        Scaffold.of(context).openDrawer();
-                      }
-                    },
-                  )
-                : null,
-            automaticallyImplyLeading: false,
-            backgroundColor: surfaceColor,
-            elevation: 0,
-            title: Padding(
-              padding: EdgeInsets.fromLTRB(
-                width < 600
-                    ? 0
-                    : padding, // No mobile padding esquerdo é 0 pois tem o leading
-                16,
-                padding,
-                16,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Row(
-                    children: [
-                      // Ícone com gradiente (Apenas Desktop/Tablet)
-                      if (width >= 600) ...[
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                accentColor,
-                                accentColor.withOpacity(0.8),
-                              ],
-                            ),
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(
-                                color: accentColor.withOpacity(0.3),
-                                blurRadius: 12,
-                                offset: const Offset(0, 4),
-                              ),
+      body: Obx(() {
+        if (controller.isLoading.value && controller.totalDizimistas == 0) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        return CustomScrollView(
+          physics: const BouncingScrollPhysics(),
+          slivers: [
+            SliverAppBar(
+              toolbarHeight: width < 600 ? 80 : 120,
+              titleSpacing: 0,
+              floating: true,
+              pinned: false,
+              snap: true,
+              leading: width < 600
+                  ? IconButton(
+                      icon:
+                          Icon(Icons.menu, color: theme.colorScheme.onSurface),
+                      onPressed: () {
+                        if (Get.isRegistered<HomeController>()) {
+                          Get.find<HomeController>()
+                              .scaffoldKey
+                              .currentState
+                              ?.openDrawer();
+                        } else {
+                          Scaffold.of(context).openDrawer();
+                        }
+                      },
+                    )
+                  : null,
+              automaticallyImplyLeading: false,
+              backgroundColor: surfaceColor,
+              elevation: 0,
+              title: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  width < 600 ? 16 : padding,
+                  16,
+                  padding,
+                  16,
+                ),
+                child: Row(
+                  children: [
+                    if (width >= 600) ...[
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              accentColor,
+                              accentColor.withOpacity(0.8),
                             ],
                           ),
-                          child: Icon(
-                            Icons.dashboard_rounded,
-                            color: Colors.white,
-                            size: 28,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                      ],
-
-                      // Título e Subtítulo
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Dashboard',
-                              style: GoogleFonts.outfit(
-                                fontSize: width < 600
-                                    ? 20
-                                    : 28, // Tamanho ajustado para mobile
-                                fontWeight: FontWeight.bold,
-                                color: theme.colorScheme.onSurface,
-                                height: 1.2,
-                              ),
-                            ),
-                            // Subtítulo sempre visível
-                            const SizedBox(height: 4),
-                            Text(
-                              'Visão geral das atividades',
-                              style: GoogleFonts.inter(
-                                fontSize: 14,
-                                color: theme.colorScheme.onSurface.withOpacity(
-                                  0.5,
-                                ),
-                                letterSpacing: -0.2,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: accentColor.withOpacity(0.3),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
                             ),
                           ],
                         ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          // =======================================================
-          // CARD DE INFORMAÇÕES DA PARÓQUIA
-          // =======================================================
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(padding, 24, padding, 0),
-              child: Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      accentColor.withOpacity(0.08),
-                      accentColor.withOpacity(0.04),
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: accentColor.withOpacity(0.2)),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Ícone da paróquia
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: accentColor.withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          child: Icon(
-                            Icons.church_rounded,
-                            color: accentColor,
-                            size: 24,
-                          ),
+                        child: const Icon(
+                          Icons.dashboard_rounded,
+                          color: Colors.white,
+                          size: 28,
                         ),
-                        const SizedBox(width: 16),
-
-                        // Informações
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Paróquia N. Sra. Auxiliadora',
-                                style: GoogleFonts.outfit(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: theme.colorScheme.onSurface,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                              ),
-                              const SizedBox(height: 6),
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.location_on_rounded,
-                                    size: 16,
-                                    color: theme.colorScheme.onSurface
-                                        .withOpacity(0.5),
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Flexible(
-                                    child: Text(
-                                      'Iporá, GO',
-                                      style: GoogleFonts.inter(
-                                        fontSize: 14,
-                                        color: theme.colorScheme.onSurface
-                                            .withOpacity(0.6),
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 1,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        // Badge Admin
-                        if (width > 400)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: accentColor,
-                              borderRadius: BorderRadius.circular(10),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: accentColor.withOpacity(0.3),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: Text(
-                              'Admin',
-                              style: GoogleFonts.inter(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: surfaceColor.withOpacity(0.5),
-                        borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Row(
+                      const SizedBox(width: 16),
+                    ],
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(
-                            Icons.info_outline_rounded,
-                            size: 16,
-                            color: theme.colorScheme.onSurface.withOpacity(0.5),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'Resumo financeiro e atividades recentes',
-                              style: GoogleFonts.inter(
-                                fontSize: 13,
-                                color: theme.colorScheme.onSurface.withOpacity(
-                                  0.7,
-                                ),
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
+                          Text(
+                            'Dashboard',
+                            style: GoogleFonts.outfit(
+                              fontSize: width < 600 ? 20 : 28,
+                              fontWeight: FontWeight.bold,
+                              color: theme.colorScheme.onSurface,
+                              height: 1.2,
                             ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Visão geral das atividades',
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              color:
+                                  theme.colorScheme.onSurface.withOpacity(0.5),
+                              letterSpacing: -0.2,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ],
                       ),
@@ -323,164 +150,378 @@ class _DashboardViewState extends State<DashboardView> {
                 ),
               ),
             ),
-          ),
 
-          // =======================================================
-          // GRID DE CARDS (KPIs)
-          // =======================================================
-          SliverPadding(
-            padding: EdgeInsets.fromLTRB(padding, 24, padding, 24),
-            sliver: SliverGrid(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: crossAxisCount,
-                mainAxisSpacing: 16,
-                crossAxisSpacing: 16,
-                childAspectRatio: dynamicAspectRatio,
-              ),
-              delegate: SliverChildListDelegate([
-                _ResponsiveStatCard(
-                  title: 'Arrecadação',
-                  value: 'R\$ 12.450,00',
-                  change: '+12.5%',
-                  icon: Icons.trending_up_rounded,
-                  color: Colors.green,
-                  theme: theme,
-                  surfaceColor: surfaceColor,
-                  borderColor: borderColor,
-                ),
-                _ResponsiveStatCard(
-                  title: 'Dizimistas',
-                  value: '350',
-                  subtitle: 'Ativos',
-                  change: '',
-                  icon: Icons.people_rounded,
-                  color: Colors.blue,
-                  theme: theme,
-                  surfaceColor: surfaceColor,
-                  borderColor: borderColor,
-                ),
-                _ResponsiveStatCard(
-                  title: 'Ticket Médio',
-                  value: 'R\$ 35,50',
-                  change: '-2.0%',
-                  isNegative: true,
-                  icon: Icons.analytics_rounded,
-                  color: Colors.purple,
-                  theme: theme,
-                  surfaceColor: surfaceColor,
-                  borderColor: borderColor,
-                ),
-              ]),
-            ),
-          ),
-
-          // =======================================================
-          // GRÁFICO DE HISTÓRICO
-          // =======================================================
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(padding, 0, padding, 60),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: accentColor.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(
-                          Icons.show_chart_rounded,
-                          color: accentColor,
-                          size: 20,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        'Histórico de Movimentações',
-                        style: GoogleFonts.outfit(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: theme.colorScheme.onSurface,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  Container(
-                    height: 350,
-                    decoration: BoxDecoration(
-                      color: surfaceColor,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: borderColor),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(isDark ? 0.2 : 0.03),
-                          blurRadius: 24,
-                          offset: const Offset(0, 8),
-                        ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(padding, 24, padding, 0),
+                child: Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        accentColor.withOpacity(0.08),
+                        accentColor.withOpacity(0.04),
                       ],
                     ),
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: accentColor.withOpacity(0.2)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Container(
-                            padding: const EdgeInsets.all(20),
+                            padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: theme.colorScheme.onSurface.withOpacity(
-                                0.05,
-                              ),
-                              shape: BoxShape.circle,
+                              color: accentColor.withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(14),
                             ),
                             child: Icon(
-                              Icons.bar_chart_rounded,
-                              size: 48,
-                              color: theme.colorScheme.onSurface.withOpacity(
-                                0.2,
-                              ),
+                              Icons.church_rounded,
+                              color: accentColor,
+                              size: 24,
                             ),
                           ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Gráfico em Desenvolvimento',
-                            style: GoogleFonts.outfit(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: theme.colorScheme.onSurface.withOpacity(
-                                0.4,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Visualização de dados em breve',
-                            style: GoogleFonts.inter(
-                              fontSize: 13,
-                              color: theme.colorScheme.onSurface.withOpacity(
-                                0.3,
-                              ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Paróquia N. Sra. Auxiliadora',
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: theme.colorScheme.onSurface,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
+                                const SizedBox(height: 6),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.location_on_rounded,
+                                      size: 16,
+                                      color: theme.colorScheme.onSurface
+                                          .withOpacity(0.5),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Flexible(
+                                      child: Text(
+                                        'Iporá, GO',
+                                        style: GoogleFonts.inter(
+                                          fontSize: 14,
+                                          color: theme.colorScheme.onSurface
+                                              .withOpacity(0.6),
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 1,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
                           ),
                         ],
                       ),
-                    ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
-          ),
-        ],
-      ),
+
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(padding, 24, padding, 0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // =======================================================
+                    // RESUMO FINANCEIRO (DIA, MÊS, ANO)
+                    // =======================================================
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.green.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.account_balance_wallet_rounded,
+                            color: Colors.green,
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Resumo Financeiro',
+                          style: GoogleFonts.outfit(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    LayoutBuilder(builder: (context, constraints) {
+                      return GridView.count(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        crossAxisCount: crossAxisCount,
+                        mainAxisSpacing: 16,
+                        crossAxisSpacing: 16,
+                        childAspectRatio: dynamicAspectRatio,
+                        children: [
+                          _ResponsiveStatCard(
+                            title: 'Arrecadação Hoje',
+                            value: controller
+                                .formatCurrency(controller.arrecadacaoDia),
+                            change: '',
+                            icon: Icons.today_rounded,
+                            color: Colors.teal,
+                            theme: theme,
+                            surfaceColor: surfaceColor,
+                            borderColor: borderColor,
+                          ),
+                          _ResponsiveStatCard(
+                            title: 'Arrecadação Mês',
+                            value: controller
+                                .formatCurrency(controller.arrecadacaoMesAtual),
+                            change: controller
+                                .formatPercent(controller.variacaoArrecadacao),
+                            isNegative: controller.variacaoArrecadacao < 0,
+                            icon: Icons.calendar_month_rounded,
+                            color: Colors.green,
+                            theme: theme,
+                            surfaceColor: surfaceColor,
+                            borderColor: borderColor,
+                          ),
+                          _ResponsiveStatCard(
+                            title: 'Arrecadação Ano',
+                            value: controller
+                                .formatCurrency(controller.arrecadacaoAno),
+                            change: '',
+                            icon: Icons.event_note_rounded,
+                            color: Colors.blueAccent,
+                            theme: theme,
+                            surfaceColor: surfaceColor,
+                            borderColor: borderColor,
+                          ),
+                        ],
+                      );
+                    }),
+
+                    const SizedBox(height: 32),
+
+                    // =======================================================
+                    // STATUS DOS FIÉIS
+                    // =======================================================
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.people_alt_rounded,
+                            color: Colors.blue,
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Status dos Fiéis',
+                          style: GoogleFonts.outfit(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    LayoutBuilder(builder: (context, constraints) {
+                      return GridView.count(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        crossAxisCount: crossAxisCount,
+                        mainAxisSpacing: 16,
+                        crossAxisSpacing: 16,
+                        childAspectRatio: dynamicAspectRatio,
+                        children: [
+                          _ResponsiveStatCard(
+                            title: 'Fiéis Ativos',
+                            value: controller.ativosDizimistas.toString(),
+                            subtitle: '${controller.totalDizimistas} Total',
+                            change: '',
+                            icon: Icons.check_circle_outline_rounded,
+                            color: Colors.blue,
+                            theme: theme,
+                            surfaceColor: surfaceColor,
+                            borderColor: borderColor,
+                          ),
+                          _ResponsiveStatCard(
+                            title: 'Fiéis Inativos',
+                            value: controller.inativosDizimistas.toString(),
+                            change: '',
+                            icon: Icons.pause_circle_outline_rounded,
+                            color: Colors.orange,
+                            theme: theme,
+                            surfaceColor: surfaceColor,
+                            borderColor: borderColor,
+                          ),
+                          _ResponsiveStatCard(
+                            title: 'Fiéis Afastados',
+                            value: controller.afastadosDizimistas.toString(),
+                            change: '',
+                            icon: Icons.error_outline_rounded,
+                            color: Colors.redAccent,
+                            theme: theme,
+                            surfaceColor: surfaceColor,
+                            borderColor: borderColor,
+                          ),
+                        ],
+                      );
+                    }),
+                  ],
+                ),
+              ),
+            ),
+
+            // =======================================================
+            // ATIVIDADES RECENTES
+            // =======================================================
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(padding, 0, padding, 60),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: accentColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            Icons.history_rounded,
+                            color: accentColor,
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Contribuições Recentes',
+                          style: GoogleFonts.outfit(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: surfaceColor,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: borderColor),
+                        boxShadow: [
+                          BoxShadow(
+                            color:
+                                Colors.black.withOpacity(isDark ? 0.2 : 0.03),
+                            blurRadius: 24,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: controller.ultimasContribuicoes.isEmpty
+                          ? Padding(
+                              padding: const EdgeInsets.all(40),
+                              child: Center(
+                                child: Text(
+                                  'Nenhuma contribuição registrada recentemente.',
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: theme.colorScheme.onSurface
+                                        .withOpacity(0.5),
+                                  ),
+                                ),
+                              ),
+                            )
+                          : ListView.separated(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: controller.ultimasContribuicoes.length,
+                              separatorBuilder: (context, index) => Divider(
+                                color: borderColor,
+                                height: 1,
+                              ),
+                              itemBuilder: (context, index) {
+                                final c =
+                                    controller.ultimasContribuicoes[index];
+                                return ListTile(
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 20,
+                                    vertical: 8,
+                                  ),
+                                  leading: CircleAvatar(
+                                    backgroundColor:
+                                        accentColor.withOpacity(0.1),
+                                    child: Icon(
+                                      Icons.person_outline,
+                                      color: accentColor,
+                                      size: 20,
+                                    ),
+                                  ),
+                                  title: Text(
+                                    c.dizimistaNome,
+                                    style: GoogleFonts.inter(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  subtitle: Text(
+                                    '${c.tipo} • ${DateFormat('dd/MM/yyyy HH:mm').format(c.dataRegistro)}',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 12,
+                                      color: theme.colorScheme.onSurface
+                                          .withOpacity(0.5),
+                                    ),
+                                  ),
+                                  trailing: Text(
+                                    controller.formatCurrency(c.valor),
+                                    style: GoogleFonts.outfit(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.green,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        );
+      }),
     );
   }
 }
-
-// =============================================================================
-// COMPONENTES
-// =============================================================================
 
 class _ResponsiveStatCard extends StatefulWidget {
   final String title;
@@ -521,7 +562,7 @@ class _ResponsiveStatCardState extends State<_ResponsiveStatCard> {
       onExit: (_) => setState(() => _isHovering = false),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(16), // Reduzido de 20 para 16
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: widget.surfaceColor,
           borderRadius: BorderRadius.circular(20),
@@ -542,118 +583,74 @@ class _ResponsiveStatCardState extends State<_ResponsiveStatCard> {
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Parte Superior: Ícone e Badge
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        widget.color.withOpacity(0.15),
-                        widget.color.withOpacity(0.08),
-                      ],
-                    ),
+                    color: widget.color.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(widget.icon, color: widget.color, size: 22),
                 ),
-                // Badge de Porcentagem
                 if (widget.change.isNotEmpty)
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 5,
-                    ),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: (widget.isNegative ? Colors.red : Colors.green)
                           .withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          widget.isNegative
-                              ? Icons.trending_down_rounded
-                              : Icons.trending_up_rounded,
-                          size: 12,
-                          color: widget.isNegative ? Colors.red : Colors.green,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          widget.change,
-                          style: GoogleFonts.inter(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            color:
-                                widget.isNegative ? Colors.red : Colors.green,
-                          ),
-                        ),
-                      ],
+                    child: Text(
+                      widget.change,
+                      style: GoogleFonts.inter(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: widget.isNegative ? Colors.red : Colors.green,
+                      ),
                     ),
                   ),
               ],
             ),
-
-            const SizedBox(height: 8), // Reduzido de 12 para 8
-            // Valor Principal
+            const SizedBox(height: 12),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                widget.value,
+                style: GoogleFonts.outfit(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: widget.theme.colorScheme.onSurface,
+                ),
+              ),
+            ),
+            const SizedBox(height: 4),
             Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Flexible(
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      widget.value,
-                      style: GoogleFonts.outfit(
-                        fontSize: 26, // Reduzido de 28 para 26
-                        fontWeight: FontWeight.bold,
-                        color: widget.theme.colorScheme.onSurface,
-                        height: 1.2,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                Text(
+                  widget.title,
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    color: widget.theme.colorScheme.onSurface.withOpacity(0.5),
                   ),
                 ),
                 if (widget.subtitle != null) ...[
-                  const SizedBox(width: 6),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 2),
-                    child: Text(
-                      widget.subtitle!,
-                      style: GoogleFonts.inter(
-                        fontSize: 13, // Reduzido de 14 para 13
-                        color: widget.theme.colorScheme.onSurface.withOpacity(
-                          0.5,
-                        ),
-                        fontWeight: FontWeight.w500,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                  const SizedBox(width: 4),
+                  Text(
+                    '• ${widget.subtitle}',
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color:
+                          widget.theme.colorScheme.onSurface.withOpacity(0.7),
                     ),
                   ),
                 ],
               ],
-            ),
-
-            const SizedBox(height: 4), // Reduzido de 6 para 4
-            // Título
-            Text(
-              widget.title,
-              style: GoogleFonts.inter(
-                fontSize: 12, // Reduzido de 13 para 12
-                color: widget.theme.colorScheme.onSurface.withOpacity(0.6),
-                fontWeight: FontWeight.w500,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),

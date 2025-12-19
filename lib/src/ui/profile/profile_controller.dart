@@ -46,19 +46,16 @@ class ProfileController extends GetxController {
           funcao.value = userData.funcao;
           status.value = userData.status;
           // Para avatar, usar o padrão ou o que estiver disponível
-          avatarUrl.value =
-              userData.photoURL ?? 'https://i.pravatar.cc/150?img=12';
+          avatarUrl.value = userData.photoURL ?? '';
         } else {
           // Se não encontrarmos os dados completos no Firestore, usar dados básicos do Auth
           final authUser = FirebaseAuth.instance.currentUser;
           if (authUser != null) {
-            name.value =
-                authUser.displayName ??
+            name.value = authUser.displayName ??
                 authUser.email?.split('@')[0] ??
                 'Usuário';
             email.value = authUser.email ?? '';
-            avatarUrl.value =
-                authUser.photoURL ?? 'https://i.pravatar.cc/150?img=12';
+            avatarUrl.value = authUser.photoURL ?? '';
           }
         }
       }

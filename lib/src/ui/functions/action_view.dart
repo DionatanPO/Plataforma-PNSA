@@ -4731,8 +4731,8 @@ class _DatePickersSection extends StatelessWidget {
               title: "Reunião de Board",
               time: "14:00 - 16:00",
               participants: [
-                "https://i.pravatar.cc/100?img=1",
-                "https://i.pravatar.cc/100?img=2",
+                "",
+                "",
               ],
             ),
           ],

@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../ui/contribuicoes/models/contribuicao_model.dart';
 
-
 class ContribuicaoService {
   static const String _collectionName = 'contribuicoes';
 
@@ -15,6 +14,7 @@ class ContribuicaoService {
       'valor': contribuicao.valor,
       'metodo': contribuicao.metodo,
       'dataRegistro': contribuicao.dataRegistro.millisecondsSinceEpoch,
+      'usuarioId': contribuicao.usuarioId,
     };
   }
 
@@ -22,13 +22,17 @@ class ContribuicaoService {
   static Contribuicao _fromFirestoreDocument(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     return Contribuicao(
-      id: doc.id, // Usar o ID do documento Firestore como ID do objeto (agora string)
+      id: doc.id,
       dizimistaId: data['dizimistaId']?.toString() ?? '',
       dizimistaNome: data['dizimistaNome'] ?? '',
       tipo: data['tipo'] ?? '',
-      valor: (data['valor'] is int) ? (data['valor'] as int).toDouble() : data['valor']?.toDouble() ?? 0.0,
+      valor: (data['valor'] is int)
+          ? (data['valor'] as int).toDouble()
+          : data['valor']?.toDouble() ?? 0.0,
       metodo: data['metodo'] ?? '',
-      dataRegistro: DateTime.fromMillisecondsSinceEpoch(data['dataRegistro'] ?? 0),
+      dataRegistro:
+          DateTime.fromMillisecondsSinceEpoch(data['dataRegistro'] ?? 0),
+      usuarioId: data['usuarioId'] ?? '',
     );
   }
 
@@ -44,7 +48,8 @@ class ContribuicaoService {
   }
 
   // Obter contribuições por ID de dizimista
-  static Stream<List<Contribuicao>> getContribuicoesByDizimistaId(String dizimistaId) {
+  static Stream<List<Contribuicao>> getContribuicoesByDizimistaId(
+      String dizimistaId) {
     return FirebaseFirestore.instance
         .collection(_collectionName)
         .where('dizimistaId', isEqualTo: dizimistaId)
@@ -70,7 +75,8 @@ class ContribuicaoService {
 
   // Adicionar nova contribuição
   static Future<String> addContribuicao(Contribuicao contribuicao) async {
-    final docRef = await FirebaseFirestore.instance.collection(_collectionName).add({
+    final docRef =
+        await FirebaseFirestore.instance.collection(_collectionName).add({
       ..._toFirestoreMap(contribuicao),
     });
     return docRef.id; // Retorna o ID do documento criado
@@ -93,11 +99,14 @@ class ContribuicaoService {
   }
 
   // Obter contribuições por período
-  static Stream<List<Contribuicao>> getContribuicoesByPeriod(DateTime startDate, DateTime endDate) {
+  static Stream<List<Contribuicao>> getContribuicoesByPeriod(
+      DateTime startDate, DateTime endDate) {
     return FirebaseFirestore.instance
         .collection(_collectionName)
-        .where('dataRegistro', isGreaterThanOrEqualTo: startDate.millisecondsSinceEpoch)
-        .where('dataRegistro', isLessThanOrEqualTo: endDate.millisecondsSinceEpoch)
+        .where('dataRegistro',
+            isGreaterThanOrEqualTo: startDate.millisecondsSinceEpoch)
+        .where('dataRegistro',
+            isLessThanOrEqualTo: endDate.millisecondsSinceEpoch)
         .orderBy('dataRegistro', descending: true)
         .snapshots()
         .map((snapshot) {

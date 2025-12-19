@@ -58,13 +58,11 @@ class ContribuicaoController extends GetxController {
       final contribuicoesStream = ContribuicaoService.getAllContribuicoes();
 
       // Escutar o stream e atualizar a lista local
-      contribuicoesStream
-          .listen((contribuicoesList) {
-            _contribuicoes.assignAll(contribuicoesList);
-          })
-          .onError((error) {
-            print("Erro ao carregar contribuições do Firestore: $error");
-          });
+      contribuicoesStream.listen((contribuicoesList) {
+        _contribuicoes.assignAll(contribuicoesList);
+      }).onError((error) {
+        print("Erro ao carregar contribuições do Firestore: $error");
+      });
     } catch (e) {
       print("Erro ao carregar contribuições: $e");
     } finally {
@@ -79,13 +77,11 @@ class ContribuicaoController extends GetxController {
       final dizimistasStream = DizimistaService.getAllDizimistas();
 
       // Escutar o stream e atualizar a lista local
-      dizimistasStream
-          .listen((dizimistasList) {
-            _dizimistas.assignAll(dizimistasList);
-          })
-          .onError((error) {
-            print("Erro ao carregar dizimistas do Firestore: $error");
-          });
+      dizimistasStream.listen((dizimistasList) {
+        _dizimistas.assignAll(dizimistasList);
+      }).onError((error) {
+        print("Erro ao carregar dizimistas do Firestore: $error");
+      });
     } catch (e) {
       print("Erro ao carregar dizimistas: $e");
     } finally {
@@ -158,17 +154,15 @@ class ContribuicaoController extends GetxController {
       final dizimistasStream = DizimistaService.getAllDizimistas();
       final completer = Completer<List<Dizimista>>();
 
-      dizimistasStream
-          .listen((dizimistasList) {
-            if (!completer.isCompleted) {
-              completer.complete(dizimistasList);
-            }
-          })
-          .onError((error) {
-            if (!completer.isCompleted) {
-              completer.complete([]);
-            }
-          });
+      dizimistasStream.listen((dizimistasList) {
+        if (!completer.isCompleted) {
+          completer.complete(dizimistasList);
+        }
+      }).onError((error) {
+        if (!completer.isCompleted) {
+          completer.complete([]);
+        }
+      });
 
       return completer.future;
     } else {
@@ -176,17 +170,15 @@ class ContribuicaoController extends GetxController {
       final dizimistasStream = DizimistaService.advancedSearch(query);
       final completer = Completer<List<Dizimista>>();
 
-      dizimistasStream
-          .listen((dizimistasList) {
-            if (!completer.isCompleted) {
-              completer.complete(dizimistasList);
-            }
-          })
-          .onError((error) {
-            if (!completer.isCompleted) {
-              completer.complete([]);
-            }
-          });
+      dizimistasStream.listen((dizimistasList) {
+        if (!completer.isCompleted) {
+          completer.complete(dizimistasList);
+        }
+      }).onError((error) {
+        if (!completer.isCompleted) {
+          completer.complete([]);
+        }
+      });
 
       return completer.future;
     }
@@ -496,6 +488,7 @@ class ContribuicaoController extends GetxController {
   // Criar uma nova contribuição a partir dos dados do formulário
   Contribuicao createContribuicaoFromForm() {
     final dizimista = dizimistaSelecionado.value!;
+    final user = Get.find<AuthService>().currentUser;
 
     // Limpa o valor formatado para obter o valor numérico
     String valorLimpo = valor.value
@@ -514,6 +507,7 @@ class ContribuicaoController extends GetxController {
       valor: valorDouble,
       metodo: metodo.value,
       dataRegistro: dataSelecionada.value,
+      usuarioId: user?.uid ?? '',
     );
   }
 }

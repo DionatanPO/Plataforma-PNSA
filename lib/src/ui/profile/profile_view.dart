@@ -21,9 +21,8 @@ class ProfileView extends StatelessWidget {
     );
 
     return Scaffold(
-      backgroundColor: isDark
-          ? const Color(0xFF0D0D0D)
-          : const Color(0xFFF8F9FA),
+      backgroundColor:
+          isDark ? const Color(0xFF0D0D0D) : const Color(0xFFF8F9FA),
       body: LayoutBuilder(
         builder: (context, constraints) {
           bool isDesktop = constraints.maxWidth > 900;
@@ -296,7 +295,7 @@ class _ProfileCard extends StatelessWidget {
                   backgroundImage: NetworkImage(
                     controller.avatarUrl.value.isNotEmpty
                         ? controller.avatarUrl.value
-                        : 'https://i.pravatar.cc/150?img=12',
+                        : '',
                   ),
                   backgroundColor: theme.colorScheme.surfaceVariant,
                   child: controller.avatarUrl.value.isEmpty
@@ -577,9 +576,8 @@ class _DesktopHoverTileState extends State<_DesktopHoverTile> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color = widget.isDestructive
-        ? Colors.redAccent
-        : theme.colorScheme.onSurface;
+    final color =
+        widget.isDestructive ? Colors.redAccent : theme.colorScheme.onSurface;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovering = true),

@@ -6,6 +6,7 @@ class Contribuicao {
   final double valor;
   final String metodo;
   final DateTime dataRegistro;
+  final String usuarioId;
 
   Contribuicao({
     required this.id,
@@ -15,17 +16,18 @@ class Contribuicao {
     required this.valor,
     required this.metodo,
     required this.dataRegistro,
+    required this.usuarioId,
   });
 
   Contribuicao copyWith({
     String? id,
     String? dizimistaId,
     String? dizimistaNome,
-    String? mesReferencia,
     String? tipo,
     double? valor,
     String? metodo,
     DateTime? dataRegistro,
+    String? usuarioId,
   }) {
     return Contribuicao(
       id: id ?? this.id,
@@ -35,6 +37,7 @@ class Contribuicao {
       valor: valor ?? this.valor,
       metodo: metodo ?? this.metodo,
       dataRegistro: dataRegistro ?? this.dataRegistro,
+      usuarioId: usuarioId ?? this.usuarioId,
     );
   }
 
@@ -47,6 +50,7 @@ class Contribuicao {
       'valor': valor,
       'metodo': metodo,
       'dataRegistro': dataRegistro.millisecondsSinceEpoch,
+      'usuarioId': usuarioId,
     };
   }
 
@@ -56,9 +60,13 @@ class Contribuicao {
       dizimistaId: map['dizimistaId']?.toString() ?? '',
       dizimistaNome: map['dizimistaNome'] ?? '',
       tipo: map['tipo'] ?? '',
-      valor: (map['valor'] is int) ? (map['valor'] as int).toDouble() : map['valor']?.toDouble() ?? 0.0,
+      valor: (map['valor'] is int)
+          ? (map['valor'] as int).toDouble()
+          : map['valor']?.toDouble() ?? 0.0,
       metodo: map['metodo'] ?? '',
-      dataRegistro: DateTime.fromMillisecondsSinceEpoch(map['dataRegistro'] ?? 0),
+      dataRegistro:
+          DateTime.fromMillisecondsSinceEpoch(map['dataRegistro'] ?? 0),
+      usuarioId: map['usuarioId'] ?? '',
     );
   }
 
@@ -71,8 +79,7 @@ class Contribuicao {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
 
-    return other is Contribuicao &&
-           other.id == id;
+    return other is Contribuicao && other.id == id;
   }
 
   @override

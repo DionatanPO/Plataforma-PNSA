@@ -784,7 +784,7 @@ class _CadastroDizimistaDesktopViewState
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Image.asset('assets/images/logo_pnsa_white.png',
+                    Image.asset('assets/images/logo.jpg',
                         height: 40,
                         errorBuilder: (_, __, ___) => Icon(Icons.church_rounded,
                             color: Colors.white.withOpacity(0.5))),
