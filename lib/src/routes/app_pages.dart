@@ -23,6 +23,7 @@ import '../ui/web/events/events_view.dart';
 import '../ui/web/tithe/tithe_view.dart';
 import '../ui/support/theme_settings_view.dart';
 import '../ui/dizimistas/views/cadastro/cadastro_dizimista_view.dart';
+import '../ui/access_management/views/access_form_view.dart';
 import '../ui/auth/password_reset/password_reset_view.dart';
 import 'app_routes.dart';
 
@@ -57,6 +58,11 @@ class AppPages {
       name: AppRoutes.dizimista_editar,
       page: () => CadastroDizimistaView(dizimista: Get.arguments),
       binding: DizimistaBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.access_management_form,
+      page: () => AccessFormView(acesso: Get.arguments),
+      binding: AccessManagementBinding(),
     ),
     GetPage(
       name: AppRoutes.contribuicao,
