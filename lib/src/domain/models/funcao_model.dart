@@ -13,15 +13,23 @@ class FuncoesRepository {
     return [
       Funcao(
         nome: 'Administrador',
-        descricao: 'Gerencia toda a plataforma, cria novos usuários e tem acesso irrestrito aos relatórios financeiros sensíveis.',
+        descricao:
+            'Gerencia toda a plataforma, cria novos usuários e tem acesso irrestrito aos relatórios financeiros sensíveis.',
       ),
       Funcao(
         nome: 'Secretaria',
-        descricao: 'Foca no cadastro e atualização de dados dos dizimistas, além de lançar contribuições do dia a dia.',
+        descricao:
+            'Foca no cadastro e atualização de dados dos dizimistas, além de lançar contribuições do dia a dia.',
       ),
       Funcao(
         nome: 'Financeiro',
-        descricao: 'Visualiza fluxo de caixa, emite relatórios para contabilidade e analisa a saúde financeira da paróquia.',
+        descricao:
+            'Visualiza fluxo de caixa, emite relatórios para contabilidade e analisa a saúde financeira da paróquia.',
+      ),
+      Funcao(
+        nome: 'Agente de Dízimo',
+        descricao:
+            'Responsável pela captação e registro de novos dizimistas e contribuições em campo ou após as celebrações.',
       ),
     ];
   }
