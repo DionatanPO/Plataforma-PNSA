@@ -43,6 +43,7 @@ class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
   DateTime? dataCasamento;
   DateTime? dataNascimentoConjugue;
   bool consentimento = false;
+  int _currentMobileStep = 0;
 
   bool get isEditing => widget.dizimista != null;
 
@@ -76,8 +77,10 @@ class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
 
     if (isEditing) {
       dataNascimento = d?.dataNascimento;
-      sexo = d?.sexo;
-      estadoCivil = d?.estadoCivil;
+      sexo = (d?.sexo != null && d!.sexo!.isNotEmpty) ? d.sexo : null;
+      estadoCivil = (d?.estadoCivil != null && d!.estadoCivil!.isNotEmpty)
+          ? d.estadoCivil
+          : null;
       dataCasamento = d?.dataCasamento;
       dataNascimentoConjugue = d?.dataNascimentoConjugue;
       consentimento = d?.consentimento ?? false;
@@ -122,7 +125,7 @@ class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
         bairro: bairroController.text,
         cidade: cidadeController.text,
         estado: estadoController.text,
-        cep: null,
+        cep: widget.dizimista?.cep,
         estadoCivil: estadoCivil,
         nomeConjugue: nomeConjugueController.text.isNotEmpty
             ? nomeConjugueController.text
@@ -148,55 +151,26 @@ class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
           'Sucesso',
           isEditing ? 'Dados atualizados.' : 'Novo fiel registrado.',
           snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green.shade600,
+          backgroundColor: Colors.green,
           colorText: Colors.white,
-          margin: const EdgeInsets.all(16),
-          borderRadius: 12,
         );
       } catch (e) {
         Get.snackbar(
           'Erro',
-          'Falha ao salvar: $e',
+          'Erro ao salvar: $e',
           snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red.shade700,
+          backgroundColor: Colors.red,
           colorText: Colors.white,
         );
       }
     }
   }
 
-  String _formatDate(DateTime? date) {
-    if (date == null) return '';
-    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
-  }
-
-  Future<void> _pickDate(BuildContext context, DateTime? initial,
-      Function(DateTime) onConfirm) async {
-    final date = await showDatePicker(
-      context: context,
-      initialDate: initial ?? DateTime.now(),
-      firstDate: DateTime(1900),
-      lastDate: DateTime.now(),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-                primary: Theme.of(context).colorScheme.primary),
-          ),
-          child: child!,
-        );
-      },
-    );
-    if (date != null) onConfirm(date);
-  }
-
-  int _currentMobileStep = 0;
-
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        if (constraints.maxWidth > 1100) {
+        if (constraints.maxWidth > 900) {
           return CadastroDizimistaDesktopView(dizimista: widget.dizimista);
         }
         return _buildMobileView(context);
@@ -210,7 +184,6 @@ class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
     final screenWidth = MediaQuery.of(context).size.width;
     bool isWide = screenWidth > 700;
 
-    // Altura do teclado
     final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
 
     return Scaffold(
@@ -229,9 +202,7 @@ class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
         onTap: () => FocusScope.of(context).unfocus(),
         child: Column(
           children: [
-            // Indicador de Etapas
             _buildMobileStepIndicator(theme),
-
             Expanded(
               child: SingleChildScrollView(
                 padding: EdgeInsets.fromLTRB(12, 12, 12, 40 + bottomPadding),
@@ -544,7 +515,15 @@ class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
                     onChanged: (v) => setState(() => estadoCivil = v),
                   ),
                 ),
-                if (estadoCivil == 'Casado') ...[
+              ],
+            ),
+            if (estadoCivil == 'Casado') ...[
+              const SizedBox(height: 12),
+              _buildSectionCard(
+                theme,
+                title: 'Dados do Cônjuge',
+                icon: Icons.people_outline,
+                children: [
                   _ResponsiveField(
                     isWide: isWide,
                     flex: 2,
@@ -576,9 +555,9 @@ class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
                     ),
                   ),
                 ],
-              ],
-            ),
-            const SizedBox(height: 16),
+              ),
+            ],
+            const SizedBox(height: 12),
             Card(
               elevation: 0,
               color: theme.colorScheme.surfaceContainerLow,
@@ -594,7 +573,7 @@ class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
                   children: [
                     Text('Outras Informações',
                         style: GoogleFonts.inter(
-                            fontSize: 16,
+                            fontSize: 14,
                             fontWeight: FontWeight.bold,
                             color: theme.colorScheme.primary)),
                     const SizedBox(height: 16),
@@ -634,7 +613,6 @@ class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
 
   Widget _buildWebFlowButtons(ThemeData theme) {
     bool isLastStep = _currentMobileStep == 2;
-
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 24),
       child: Row(
@@ -732,11 +710,12 @@ class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
     );
   }
 
-  Widget _buildDatePath(
-      {required String label,
-      required DateTime? date,
-      required VoidCallback onTap,
-      required ThemeData theme}) {
+  Widget _buildDatePath({
+    required String label,
+    required DateTime? date,
+    required VoidCallback onTap,
+    required ThemeData theme,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: AbsorbPointer(
@@ -747,6 +726,22 @@ class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
         ),
       ),
     );
+  }
+
+  String _formatDate(DateTime? date) {
+    if (date == null) return '';
+    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+  }
+
+  Future<void> _pickDate(BuildContext context, DateTime? initialDate,
+      ValueChanged<DateTime> onDateSelected) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: initialDate ?? DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null) onDateSelected(picked);
   }
 
   InputDecoration _buildInputDecoration(

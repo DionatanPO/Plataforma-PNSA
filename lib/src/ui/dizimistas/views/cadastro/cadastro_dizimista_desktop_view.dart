@@ -534,7 +534,9 @@ class _CadastroDizimistaDesktopViewState
 
   Widget _buildSidebarItem(
       int index, String label, IconData icon, ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
     bool isActive = activeSection == index;
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -543,26 +545,30 @@ class _CadastroDizimistaDesktopViewState
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           decoration: BoxDecoration(
             border: Border(
-              right: BorderSide(
-                color: isActive ? theme.primaryColor : Colors.transparent,
-                width: 3,
+              left: BorderSide(
+                color:
+                    isActive ? theme.colorScheme.primary : Colors.transparent,
+                width: 4,
               ),
             ),
             color: isActive
-                ? theme.primaryColor.withOpacity(0.05)
+                ? theme.colorScheme.primary.withOpacity(isDark ? 0.15 : 0.08)
                 : Colors.transparent,
           ),
           child: Row(
             children: [
-              Icon(icon,
-                  color: isActive ? theme.primaryColor : theme.hintColor,
-                  size: 20),
+              Icon(
+                icon,
+                color: isActive ? theme.colorScheme.primary : theme.hintColor,
+                size: 20,
+              ),
               const SizedBox(width: 16),
               Text(
                 label,
                 style: GoogleFonts.inter(
-                  fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-                  color: isActive ? theme.primaryColor : theme.hintColor,
+                  fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
+                  fontSize: 14,
+                  color: isActive ? theme.colorScheme.primary : theme.hintColor,
                 ),
               ),
             ],
