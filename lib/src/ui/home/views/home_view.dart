@@ -8,6 +8,7 @@ import 'package:plataforma_pnsa/src/ui/dizimistas/views/dizimista_view.dart';
 import '../../dashboard/views/dashboard_view.dart';
 import '../../relatorios/views/report_view.dart';
 import '../../profile/profile_view.dart';
+import '../../support/about_view.dart';
 import '../controlles/home_controller.dart';
 
 class NavigationItem {
@@ -16,6 +17,7 @@ class NavigationItem {
   final String label;
   final Widget page;
   final bool isVisible;
+  final bool inMenu;
 
   NavigationItem({
     required this.icon,
@@ -23,6 +25,7 @@ class NavigationItem {
     required this.label,
     required this.page,
     required this.isVisible,
+    this.inMenu = true,
   });
 }
 
@@ -47,6 +50,14 @@ class HomeView extends StatelessWidget {
         selectedIcon: const Icon(Icons.dashboard),
         label: 'Painel',
         page: DashboardView(),
+        isVisible: true,
+      ),
+      NavigationItem(
+        icon: const Icon(Icons.info_outline),
+        selectedIcon: const Icon(Icons.info),
+        label: 'Sobre',
+        page:
+            const AboutView(), // Adicionado como item fixo para garantir n >= 2
         isVisible: true,
       ),
       NavigationItem(
@@ -87,6 +98,7 @@ class HomeView extends StatelessWidget {
         label: 'Minha Conta',
         page: ProfileView(),
         isVisible: true,
+        inMenu: false,
       ),
     ].where((item) => item.isVisible).toList();
   }
@@ -95,6 +107,7 @@ class HomeView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Obx(() {
       final navItems = _getNavItems();
+      final menuItems = navItems.where((item) => item.inMenu).toList();
       final bool mobile = isMobile(context);
       final bool tablet = isTablet(context);
       final bool desktop = isDesktop(context);
@@ -102,6 +115,13 @@ class HomeView extends StatelessWidget {
       // Garante que o índice não estoure se a lista de itens mudar
       if (controller.selectedIndex.value >= navItems.length) {
         controller.selectedIndex.value = 0;
+      }
+
+      // Mapeamento do índice real para o índice do menu (para destaque visual)
+      int? getMenuIndex() {
+        final currentItem = navItems[controller.selectedIndex.value];
+        if (!currentItem.inMenu) return null;
+        return menuItems.indexOf(currentItem);
       }
 
       Widget buildPageContent() {
@@ -116,8 +136,11 @@ class HomeView extends StatelessWidget {
           body: Row(
             children: [
               NavigationRail(
-                selectedIndex: controller.selectedIndex.value,
-                onDestinationSelected: controller.changeIndex,
+                selectedIndex: getMenuIndex(),
+                onDestinationSelected: (index) {
+                  final realIndex = navItems.indexOf(menuItems[index]);
+                  controller.changeIndex(realIndex);
+                },
                 extended: desktop,
                 minExtendedWidth: 240,
                 groupAlignment: -1.0,
@@ -163,7 +186,7 @@ class HomeView extends StatelessWidget {
                       ),
                   ],
                 ),
-                destinations: navItems
+                destinations: menuItems
                     .map((item) => NavigationRailDestination(
                           icon: item.icon,
                           selectedIcon: item.selectedIcon,
@@ -174,7 +197,7 @@ class HomeView extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      _buildUserFooter(context, desktop),
+                      _buildUserFooter(context, desktop, navItems),
                       const SizedBox(height: 16),
                     ],
                   ),
@@ -198,40 +221,26 @@ class HomeView extends StatelessWidget {
         key: controller.scaffoldKey,
         resizeToAvoidBottomInset: true,
         drawer: NavigationDrawer(
-          selectedIndex: controller.selectedIndex.value,
+          selectedIndex: getMenuIndex(),
           onDestinationSelected: (int index) {
-            controller.changeIndex(index);
+            final realIndex = navItems.indexOf(menuItems[index]);
+            controller.changeIndex(realIndex);
             Navigator.pop(context);
           },
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(28, 16, 16, 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Paróquia NS Auxiliadora',
-                      style: Theme.of(context).textTheme.titleSmall),
-                  Text('Sistema de Dízimo',
-                      style: Theme.of(context).textTheme.bodySmall),
-                ],
-              ),
+              padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+              child: _buildUserFooter(context, true, navItems),
             ),
-            ...navItems
+            const Divider(indent: 16, endIndent: 16),
+            const SizedBox(height: 8),
+            ...menuItems
                 .map((item) => NavigationDrawerDestination(
                       icon: item.icon,
                       selectedIcon: item.selectedIcon,
                       label: Text(item.label),
                     ))
                 .toList(),
-            const Divider(),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(28, 16, 28, 10),
-              child: Text('Acesso: ${session.userRole}',
-                  style: Theme.of(context)
-                      .textTheme
-                      .labelSmall
-                      ?.copyWith(color: Theme.of(context).hintColor)),
-            ),
           ],
         ),
         body: buildPageContent(),
@@ -239,59 +248,90 @@ class HomeView extends StatelessWidget {
     });
   }
 
-  Widget _buildUserFooter(BuildContext context, bool isExtended) {
+  Widget _buildUserFooter(
+      BuildContext context, bool isExtended, List<NavigationItem> allItems) {
     final theme = Theme.of(context);
+    final isSelected =
+        allItems[controller.selectedIndex.value].label == 'Minha Conta';
 
-    return Container(
-      width: isExtended ? 220 : 50,
-      padding:
-          EdgeInsets.symmetric(horizontal: isExtended ? 16 : 8, vertical: 12),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          CircleAvatar(
-            radius: 18,
-            backgroundColor: theme.colorScheme.primary,
-            child: Text(
-              session.userName.isNotEmpty
-                  ? session.userName.substring(0, 1).toUpperCase()
-                  : 'U',
-              style: TextStyle(
-                  color: theme.colorScheme.onPrimary,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13),
-            ),
-          ),
-          if (isExtended) ...[
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    session.userName,
-                    style: theme.textTheme.titleSmall
-                        ?.copyWith(fontWeight: FontWeight.bold, fontSize: 13),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Text(
-                    session.userRole,
-                    style: theme.textTheme.labelSmall?.copyWith(
-                        color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 10),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
+    return InkWell(
+      onTap: () {
+        final profileIndex =
+            allItems.indexWhere((item) => item.label == 'Minha Conta');
+        if (profileIndex != -1) {
+          controller.changeIndex(profileIndex);
+          // Usa a chave global em vez de Scaffold.of(context)
+          if (controller.scaffoldKey.currentState?.isDrawerOpen ?? false) {
+            Navigator.pop(context);
+          }
+        }
+      },
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        width: isExtended ? 220 : 50,
+        padding:
+            EdgeInsets.symmetric(horizontal: isExtended ? 16 : 8, vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? theme.colorScheme.primaryContainer
+              : theme.colorScheme.surfaceVariant.withOpacity(0.3),
+          borderRadius: BorderRadius.circular(16),
+          border: isSelected
+              ? Border.all(color: theme.colorScheme.primary, width: 1.5)
+              : null,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircleAvatar(
+              radius: 18,
+              backgroundColor: isSelected
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.primary.withOpacity(0.8),
+              child: Text(
+                session.userName.isNotEmpty
+                    ? session.userName.substring(0, 1).toUpperCase()
+                    : 'U',
+                style: TextStyle(
+                    color: theme.colorScheme.onPrimary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13),
               ),
             ),
+            if (isExtended) ...[
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      session.userName,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                        color: isSelected
+                            ? theme.colorScheme.onPrimaryContainer
+                            : null,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      session.userRole,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                          color: isSelected
+                              ? theme.colorScheme.primary
+                              : theme.colorScheme.primary,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 10),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
