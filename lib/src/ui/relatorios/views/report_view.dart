@@ -48,9 +48,8 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
     final isDesktop = size.width >= 1024;
 
     // Fundo refinado
-    final backgroundColor = isDark
-        ? const Color(0xFF181818)
-        : const Color(0xFFFAFAFA);
+    final backgroundColor =
+        isDark ? const Color(0xFF181818) : const Color(0xFFFAFAFA);
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -81,7 +80,9 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
                       ),
                       onPressed: () {
                         if (Get.isRegistered<HomeController>()) {
-                          Get.find<HomeController>().scaffoldKey.currentState
+                          Get.find<HomeController>()
+                              .scaffoldKey
+                              .currentState
                               ?.openDrawer();
                         } else {
                           Scaffold.of(context).openDrawer();
@@ -104,8 +105,25 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Obx(
-                      () => Text(
+                    Obx(() {
+                      if (controller.isRangeMode.value &&
+                          controller.selectedRange.value != null) {
+                        final start = DateFormat('dd/MM/yy')
+                            .format(controller.selectedRange.value!.start);
+                        final end = DateFormat('dd/MM/yy')
+                            .format(controller.selectedRange.value!.end);
+                        return Text(
+                          'Relatório: $start - $end',
+                          style: GoogleFonts.outfit(
+                            fontSize: size.width < 600 ? 20 : 28,
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.onSurface,
+                            letterSpacing: -0.5,
+                            height: 1.2,
+                          ),
+                        );
+                      }
+                      return Text(
                         'Relatório Diário - ${DateFormat('dd/MM/yyyy').format(controller.selectedDate.value)}',
                         style: GoogleFonts.outfit(
                           fontSize: size.width < 600 ? 20 : 28,
@@ -114,8 +132,8 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
                           letterSpacing: -0.5,
                           height: 1.2,
                         ),
-                      ),
-                    ),
+                      );
+                    }),
                     Text(
                       'Visão geral de contribuições do dia',
                       style: GoogleFonts.inter(
@@ -129,7 +147,8 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
               ),
               actions: [
                 IconButton(
-                  icon: const Icon(Icons.calendar_today),
+                  tooltip: 'Escolher Dia',
+                  icon: const Icon(Icons.calendar_today_outlined),
                   color: theme.colorScheme.onSurface,
                   onPressed: () async {
                     final date = await showDatePicker(
@@ -140,6 +159,32 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
                     );
                     if (date != null) {
                       controller.updateDate(date);
+                    }
+                  },
+                ),
+                IconButton(
+                  tooltip: 'Escolher Período',
+                  icon: const Icon(Icons.date_range_outlined),
+                  color: theme.colorScheme.onSurface,
+                  onPressed: () async {
+                    final range = await showDateRangePicker(
+                      context: context,
+                      initialDateRange: controller.selectedRange.value,
+                      firstDate: DateTime(2020),
+                      lastDate: DateTime(2030),
+                      builder: (context, child) {
+                        return Theme(
+                          data: theme.copyWith(
+                            colorScheme: theme.colorScheme.copyWith(
+                              primary: theme.primaryColor,
+                            ),
+                          ),
+                          child: child!,
+                        );
+                      },
+                    );
+                    if (range != null) {
+                      controller.updateRange(range);
                     }
                   },
                 ),
@@ -164,9 +209,8 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
                       return Container(
                         padding: const EdgeInsets.all(24),
                         decoration: BoxDecoration(
-                          color: isDark
-                              ? const Color(0xFF202020)
-                              : Colors.white,
+                          color:
+                              isDark ? const Color(0xFF202020) : Colors.white,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
                             color: theme.dividerColor.withOpacity(0.1),
@@ -399,13 +443,13 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
   // Helper para animação em cascata
   Widget _buildAnimatedSection({required int index, required Widget child}) {
     return SlideTransition(
-      position: Tween<Offset>(begin: const Offset(0, 0.1), end: Offset.zero)
-          .animate(
-            CurvedAnimation(
-              parent: _animationController,
-              curve: Interval(index * 0.1, 1.0, curve: Curves.easeOutQuart),
-            ),
-          ),
+      position:
+          Tween<Offset>(begin: const Offset(0, 0.1), end: Offset.zero).animate(
+        CurvedAnimation(
+          parent: _animationController,
+          curve: Interval(index * 0.1, 1.0, curve: Curves.easeOutQuart),
+        ),
+      ),
       child: FadeTransition(
         opacity: Tween<double>(begin: 0, end: 1).animate(
           CurvedAnimation(

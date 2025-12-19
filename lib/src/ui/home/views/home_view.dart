@@ -8,7 +8,6 @@ import 'package:plataforma_pnsa/src/ui/dizimistas/views/dizimista_view.dart';
 import '../../dashboard/views/dashboard_view.dart';
 import '../../relatorios/views/report_view.dart';
 import '../../profile/profile_view.dart';
-import '../../support/about_view.dart';
 import '../controlles/home_controller.dart';
 
 class NavigationItem {
@@ -44,20 +43,12 @@ class HomeView extends StatelessWidget {
       MediaQuery.of(context).size.width >= 840;
 
   List<NavigationItem> _getNavItems() {
-    return [
+    final items = [
       NavigationItem(
         icon: const Icon(Icons.dashboard_outlined),
         selectedIcon: const Icon(Icons.dashboard),
         label: 'Painel',
         page: DashboardView(),
-        isVisible: true,
-      ),
-      NavigationItem(
-        icon: const Icon(Icons.info_outline),
-        selectedIcon: const Icon(Icons.info),
-        label: 'Sobre',
-        page:
-            const AboutView(), // Adicionado como item fixo para garantir n >= 2
         isVisible: true,
       ),
       NavigationItem(
@@ -100,7 +91,30 @@ class HomeView extends StatelessWidget {
         isVisible: true,
         inMenu: false,
       ),
-    ].where((item) => item.isVisible).toList();
+    ];
+
+    final filtered = items.where((item) => item.isVisible).toList();
+
+    // Se após filtrar sobrar apenas 1 item no menu (ex: Painel),
+    // reativamos o "Minha Conta" no menu para evitar o crash do NavigationRail (min 2 itens)
+    final menuItemsCount = filtered.where((item) => item.inMenu).length;
+    if (menuItemsCount < 2) {
+      final profileIndex =
+          filtered.indexWhere((item) => item.label == 'Minha Conta');
+      if (profileIndex != -1) {
+        final profile = filtered[profileIndex];
+        filtered[profileIndex] = NavigationItem(
+          icon: profile.icon,
+          selectedIcon: profile.selectedIcon,
+          label: profile.label,
+          page: profile.page,
+          isVisible: profile.isVisible,
+          inMenu: true, // Forçamos no menu para evitar o crash
+        );
+      }
+    }
+
+    return filtered;
   }
 
   @override

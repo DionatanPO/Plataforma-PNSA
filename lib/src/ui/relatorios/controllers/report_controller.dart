@@ -1,5 +1,6 @@
 import 'dart:io';
-import 'package:flutter/foundation.dart'; // for kIsWeb and Platform
+import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -28,6 +29,8 @@ class ReportController extends GetxController {
 
   // Date selection
   final Rx<DateTime> selectedDate = DateTime.now().obs;
+  final Rxn<DateTimeRange> selectedRange = Rxn<DateTimeRange>();
+  final RxBool isRangeMode = false.obs;
 
   @override
   void onInit() {
@@ -35,23 +38,51 @@ class ReportController extends GetxController {
     // Load data when controller is initialized
     fetchDailyReport(selectedDate.value);
 
-    // Listen to date changes to refetch
-    ever(selectedDate, (date) => fetchDailyReport(date));
+    // Listen to changes to refetch
+    ever(selectedDate, (date) {
+      if (!isRangeMode.value) fetchDailyReport(date);
+    });
+
+    ever(selectedRange, (range) {
+      if (isRangeMode.value && range != null) {
+        fetchPeriodReport(range.start, range.end);
+      }
+    });
+
+    ever(isRangeMode, (rangeMode) {
+      if (rangeMode) {
+        if (selectedRange.value != null) {
+          fetchPeriodReport(
+              selectedRange.value!.start, selectedRange.value!.end);
+        }
+      } else {
+        fetchDailyReport(selectedDate.value);
+      }
+    });
   }
 
   void updateDate(DateTime date) {
+    isRangeMode.value = false;
     selectedDate.value = date;
   }
 
+  void updateRange(DateTimeRange range) {
+    isRangeMode.value = true;
+    selectedRange.value = range;
+  }
+
   Future<void> fetchDailyReport(DateTime date) async {
+    final startOfDay = DateTime(date.year, date.month, date.day, 0, 0, 0);
+    final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);
+    await fetchPeriodReport(startOfDay, endOfDay);
+  }
+
+  Future<void> fetchPeriodReport(DateTime start, DateTime end) async {
     isLoading.value = true;
     try {
-      final startOfDay = DateTime(date.year, date.month, date.day, 0, 0, 0);
-      final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);
-
       final stream = ContribuicaoService.getContribuicoesByPeriod(
-        startOfDay,
-        endOfDay,
+        start,
+        end,
       );
 
       stream.listen(
@@ -139,9 +170,10 @@ class ReportController extends GetxController {
 
         await Share.shareXFiles(
           [XFile(filePath, mimeType: 'application/pdf')],
-          text:
-              'Relatório diário - ${DateFormat('dd/MM/yyyy').format(selectedDate.value)}',
-          subject: 'Relatório Diário Paróquia Nossa Senhora Auxiliadora',
+          text: isRangeMode.value
+              ? 'Relatório por Período'
+              : 'Relatório diário - ${DateFormat('dd/MM/yyyy').format(selectedDate.value)}',
+          subject: 'Relatório Paróquia Nossa Senhora Auxiliadora',
         );
 
         // Limpeza após um delay
@@ -221,7 +253,9 @@ class ReportController extends GetxController {
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
                     pw.Text(
-                      'RELATÓRIO DIÁRIO',
+                      isRangeMode.value
+                          ? 'RELATÓRIO POR PERÍODO'
+                          : 'RELATÓRIO DIÁRIO',
                       style: pw.TextStyle(
                         fontSize: 18,
                         fontWeight: pw.FontWeight.bold,
@@ -249,7 +283,9 @@ class ReportController extends GetxController {
                     borderRadius: pw.BorderRadius.circular(20),
                   ),
                   child: pw.Text(
-                    dateFormat.format(selectedDate.value),
+                    isRangeMode.value && selectedRange.value != null
+                        ? '${DateFormat('dd/MM/yy').format(selectedRange.value!.start)} - ${DateFormat('dd/MM/yy').format(selectedRange.value!.end)}'
+                        : dateFormat.format(selectedDate.value),
                     style: pw.TextStyle(
                       fontWeight: pw.FontWeight.bold,
                       color: PdfColors.grey800,
@@ -435,8 +471,7 @@ class ReportController extends GetxController {
     final dateStr = DateFormat('dd/MM/yyyy').format(selectedDate.value);
     final currency = NumberFormat.simpleCurrency(locale: 'pt_BR');
 
-    final message =
-        '''
+    final message = '''
 *Relatório Diário - $dateStr*
 Paróquia Nossa Senhora Auxiliadora
 

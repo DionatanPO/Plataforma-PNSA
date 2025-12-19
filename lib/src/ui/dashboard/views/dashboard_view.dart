@@ -19,10 +19,9 @@ class _DashboardViewState extends State<DashboardView> {
     final isDark = theme.brightness == Brightness.dark;
 
     // Cores modernas e refinadas
-    final backgroundColor = isDark
-        ? const Color(0xFF0D0D0D)
-        : const Color(0xFFF8F9FA);
-    final surfaceColor = isDark ? const Color(0xFF1A1A1A) : Colors.white;
+    final backgroundColor =
+        isDark ? const Color(0xFF121212) : const Color(0xFFF8F9FA);
+    final surfaceColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
     final borderColor = isDark
         ? Colors.white.withOpacity(0.08)
         : Colors.black.withOpacity(0.06);
@@ -79,7 +78,9 @@ class _DashboardViewState extends State<DashboardView> {
                     icon: Icon(Icons.menu, color: theme.colorScheme.onSurface),
                     onPressed: () {
                       if (Get.isRegistered<HomeController>()) {
-                        Get.find<HomeController>().scaffoldKey.currentState
+                        Get.find<HomeController>()
+                            .scaffoldKey
+                            .currentState
                             ?.openDrawer();
                       } else {
                         Scaffold.of(context).openDrawer();
@@ -589,9 +590,8 @@ class _ResponsiveStatCardState extends State<_ResponsiveStatCard> {
                           style: GoogleFonts.inter(
                             fontSize: 11,
                             fontWeight: FontWeight.bold,
-                            color: widget.isNegative
-                                ? Colors.red
-                                : Colors.green,
+                            color:
+                                widget.isNegative ? Colors.red : Colors.green,
                           ),
                         ),
                       ],
