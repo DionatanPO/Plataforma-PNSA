@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import '../data/services/auth_middleware.dart';
 
 import '../ui/auth/login/login_view.dart';
 import '../ui/auth/password_reset/password_reset_binding.dart';
@@ -38,41 +39,49 @@ class AppPages {
       name: AppRoutes.home,
       page: () => HomeView(),
       binding: HomeBinding(),
+      middlewares: [AuthMiddleware()],
     ),
     GetPage(
       name: AppRoutes.DASHBOARD,
       page: () => DashboardView(),
       binding: DashboardBinding(),
+      middlewares: [AuthMiddleware()],
     ),
     GetPage(
       name: AppRoutes.dizimista,
       page: () => const DizimistaView(),
       binding: DizimistaBinding(),
+      middlewares: [AuthMiddleware()],
     ),
     GetPage(
       name: AppRoutes.dizimista_cadastro,
       page: () => CadastroDizimistaView(dizimista: Get.arguments),
       binding: DizimistaBinding(),
+      middlewares: [AuthMiddleware()],
     ),
     GetPage(
       name: AppRoutes.dizimista_editar,
       page: () => CadastroDizimistaView(dizimista: Get.arguments),
       binding: DizimistaBinding(),
+      middlewares: [AuthMiddleware()],
     ),
     GetPage(
       name: AppRoutes.access_management_form,
       page: () => AccessFormView(acesso: Get.arguments),
       binding: AccessManagementBinding(),
+      middlewares: [AuthMiddleware()],
     ),
     GetPage(
       name: AppRoutes.contribuicao,
       page: () => const ContribuicaoView(),
       binding: ContribuicaoBinding(),
+      middlewares: [AuthMiddleware()],
     ),
     GetPage(
       name: AppRoutes.access_management,
       page: () => const AccessManagementView(),
       binding: AccessManagementBinding(),
+      middlewares: [AuthMiddleware()],
     ),
     GetPage(name: AppRoutes.help, page: () => HelpView(), binding: null),
     GetPage(name: AppRoutes.about, page: () => AboutView(), binding: null),
@@ -81,31 +90,33 @@ class AppPages {
       name: AppRoutes.theme_settings,
       page: () => ThemeSettingsView(),
       binding: null,
+      middlewares: [AuthMiddleware()],
     ),
     GetPage(
       name: AppRoutes.CONTACT,
       page: () => const ContactWebView(),
-      binding: null, // No binding for now
+      binding: null,
     ),
     GetPage(
       name: AppRoutes.PARISH,
       page: () => const ParishView(),
-      binding: null, // No binding for now
+      binding: null,
     ),
     GetPage(
       name: AppRoutes.EVENTS,
       page: () => const EventsView(),
-      binding: null, // No binding for now
+      binding: null,
     ),
     GetPage(
       name: AppRoutes.TITHE,
       page: () => const TitheView(),
-      binding: null, // No binding for now
+      binding: null,
     ),
     GetPage(
       name: AppRoutes.password_reset,
       page: () => const PasswordResetView(),
       binding: PasswordResetBinding(),
+      // Removido middleware aqui para permitir que o usuário mude a senha se houver pendência logo após o login
     ),
     GetPage(
       name: AppRoutes.splash,
