@@ -1,8 +1,9 @@
 import 'dart:ui';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import '../../home/controlles/home_controller.dart';
 import '../controllers/dashboard_controller.dart';
 
@@ -403,31 +404,46 @@ class DashboardView extends StatelessWidget {
             // =======================================================
             SliverToBoxAdapter(
               child: Padding(
-                padding: EdgeInsets.fromLTRB(padding, 0, padding, 60),
+                padding: EdgeInsets.fromLTRB(padding, 40, padding, 60),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: accentColor.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Icon(
-                            Icons.history_rounded,
-                            color: accentColor,
-                            size: 20,
-                          ),
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: accentColor.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Icon(
+                                Icons.history_rounded,
+                                color: accentColor,
+                                size: 20,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              'Contribuições Recentes',
+                              style: GoogleFonts.outfit(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: theme.colorScheme.onSurface,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 12),
-                        Text(
-                          'Contribuições Recentes',
-                          style: GoogleFonts.outfit(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: theme.colorScheme.onSurface,
+                        TextButton.icon(
+                          onPressed: () => _showHistoryDialog(context),
+                          icon: const Icon(Icons.list_alt_rounded, size: 18),
+                          label: Text(
+                            'Ver tudo',
+                            style: GoogleFonts.inter(
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       ],
@@ -493,7 +509,7 @@ class DashboardView extends StatelessWidget {
                                     ),
                                   ),
                                   subtitle: Text(
-                                    '${c.tipo} • ${DateFormat('dd/MM/yyyy HH:mm').format(c.dataRegistro)}',
+                                    '${c.tipo} • ${c.metodo} • ${DateFormat('dd/MM/yyyy HH:mm').format(c.dataRegistro)}',
                                     style: GoogleFonts.inter(
                                       fontSize: 12,
                                       color: theme.colorScheme.onSurface
@@ -519,6 +535,264 @@ class DashboardView extends StatelessWidget {
           ],
         );
       }),
+    );
+  }
+
+  void _showHistoryDialog(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final surfaceColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
+    final borderColor = isDark
+        ? Colors.white.withOpacity(0.08)
+        : Colors.black.withOpacity(0.06);
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.8,
+          height: MediaQuery.of(context).size.height * 0.8,
+          decoration: BoxDecoration(
+            color: surfaceColor,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: borderColor),
+          ),
+          child: Column(
+            children: [
+              // Header do Dialog
+              Padding(
+                padding: const EdgeInsets.all(24),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: theme.primaryColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Icon(Icons.history_rounded,
+                          color: theme.primaryColor, size: 24),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Histórico de Contribuições',
+                            style: GoogleFonts.outfit(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: theme.colorScheme.onSurface,
+                            ),
+                          ),
+                          Text(
+                            'Lista completa de todos os lançamentos',
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              color:
+                                  theme.colorScheme.onSurface.withOpacity(0.5),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close_rounded),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Campo de Busca
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: TextField(
+                  onChanged: (value) => controller.searchTerms.value = value,
+                  decoration: InputDecoration(
+                    hintText: 'Buscar por nome, tipo, método ou usuário...',
+                    prefixIcon: const Icon(Icons.search_rounded),
+                    filled: true,
+                    fillColor: theme.colorScheme.onSurface.withOpacity(0.03),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // Lista
+              Expanded(
+                child: Obx(() {
+                  final list = controller.filteredContribuicoes;
+
+                  if (list.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.search_off_rounded,
+                              size: 48,
+                              color:
+                                  theme.colorScheme.onSurface.withOpacity(0.2)),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Nenhum registro encontrado',
+                            style: GoogleFonts.inter(
+                              color:
+                                  theme.colorScheme.onSurface.withOpacity(0.5),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  return ListView.separated(
+                    padding: const EdgeInsets.all(24),
+                    itemCount: list.length,
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      final c = list[index];
+                      final agentName = controller.getAgentName(c.usuarioId);
+                      final agentFunc =
+                          controller.getAgentFunction(c.usuarioId);
+
+                      return Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.onSurface.withOpacity(0.02),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: borderColor),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              flex: 3,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    c.dizimistaNome,
+                                    style: GoogleFonts.inter(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    c.tipo,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 13,
+                                      color: theme.colorScheme.onSurface
+                                          .withOpacity(0.6),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            // Forma de Pagamento
+                            Expanded(
+                              flex: 2,
+                              child: Text(
+                                c.metodo,
+                                style: GoogleFonts.inter(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                  color: theme.colorScheme.onSurface
+                                      .withOpacity(0.7),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              flex: 3,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      const Icon(Icons.person_pin_rounded,
+                                          size: 14, color: Colors.blue),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        agentName,
+                                        style: GoogleFonts.inter(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    agentFunc,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 11,
+                                      color: theme.colorScheme.onSurface
+                                          .withOpacity(0.4),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Expanded(
+                              flex: 3,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      IconButton(
+                                        onPressed: () => controller
+                                            .downloadOrShareReceiptPdf(c),
+                                        icon: const Icon(
+                                            Icons.receipt_long_rounded,
+                                            size: 20),
+                                        tooltip: 'Gerar Recibo',
+                                        color: theme.primaryColor,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        controller.formatCurrency(c.valor),
+                                        style: GoogleFonts.outfit(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.green,
+                                          fontSize: 18,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Text(
+                                    DateFormat('dd/MM/yy HH:mm')
+                                        .format(c.dataRegistro),
+                                    style: GoogleFonts.inter(
+                                      fontSize: 11,
+                                      color: theme.colorScheme.onSurface
+                                          .withOpacity(0.4),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                }),
+              ),
+              const SizedBox(height: 24),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -656,5 +930,11 @@ class _ResponsiveStatCardState extends State<_ResponsiveStatCard> {
         ),
       ),
     );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ThemeData>('theme', widget.theme));
   }
 }

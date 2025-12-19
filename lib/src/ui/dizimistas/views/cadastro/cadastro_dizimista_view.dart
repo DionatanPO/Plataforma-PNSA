@@ -40,6 +40,7 @@ class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
   DateTime? dataNascimento;
   String? sexo;
   String? estadoCivil;
+  String? status;
   DateTime? dataCasamento;
   DateTime? dataNascimentoConjugue;
   bool consentimento = false;
@@ -81,9 +82,12 @@ class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
       estadoCivil = (d?.estadoCivil != null && d!.estadoCivil!.isNotEmpty)
           ? d.estadoCivil
           : null;
+      status = (d?.status != null && d!.status.isNotEmpty) ? d.status : 'Ativo';
       dataCasamento = d?.dataCasamento;
       dataNascimentoConjugue = d?.dataNascimentoConjugue;
       consentimento = d?.consentimento ?? false;
+    } else {
+      status = 'Ativo';
     }
   }
 
@@ -136,7 +140,7 @@ class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
             ? observacoesController.text
             : null,
         consentimento: consentimento,
-        status: widget.dizimista?.status ?? 'Ativo',
+        status: status ?? 'Ativo',
         dataRegistro: widget.dizimista?.dataRegistro ?? DateTime.now(),
       );
 
@@ -350,6 +354,21 @@ class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
                     icon: Icons.numbers,
                   ),
                 ),
+                if (isEditing)
+                  _ResponsiveField(
+                    isWide: isWide,
+                    flex: 1,
+                    child: DropdownButtonFormField<String>(
+                      value: status,
+                      decoration: _buildInputDecoration(
+                          theme, 'Status do Fiel', Icons.info_outline),
+                      items: ['Ativo', 'Inativo', 'Afastado']
+                          .map(
+                              (v) => DropdownMenuItem(value: v, child: Text(v)))
+                          .toList(),
+                      onChanged: (v) => setState(() => status = v),
+                    ),
+                  ),
               ],
             ),
             const SizedBox(height: 12),

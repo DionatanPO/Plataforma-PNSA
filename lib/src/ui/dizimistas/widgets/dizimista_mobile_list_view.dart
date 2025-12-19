@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../controllers/dizimista_controller.dart';
 import '../models/dizimista_model.dart';
 import 'dizimista_avatar.dart';
 import 'status_badge.dart';
@@ -143,29 +145,42 @@ class DizimistaMobileListView extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 8),
-                        // TELEFONE
-                        Row(
-                          children: [
-                            Icon(
-                              Icons
-                                  .phone_rounded, // Ícone arredondado mais moderno
-                              size: 14,
-                              color: theme.colorScheme.onSurface.withOpacity(
-                                0.5,
+                        // ÚLTIMA CONTRIBUIÇÃO (Mobile)
+                        Obx(() {
+                          final controller = Get.find<DizimistaController>();
+                          final timeAgo =
+                              controller.getTimeSinceLastContribution(d.id);
+                          return Row(
+                            children: [
+                              Icon(
+                                Icons.history_rounded,
+                                size: 14,
+                                color: timeAgo == 'Nenhuma'
+                                    ? Colors.orange
+                                    : theme.primaryColor.withOpacity(0.7),
                               ),
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              formatPhone(d.telefone),
-                              style: GoogleFonts.inter(
-                                fontSize: 13,
-                                color: theme.colorScheme.onSurface.withOpacity(
-                                  0.8,
+                              const SizedBox(width: 6),
+                              Text(
+                                'Últ. Contribuição: ',
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  color: theme.colorScheme.onSurface
+                                      .withOpacity(0.5),
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
+                              Text(
+                                timeAgo,
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: timeAgo == 'Nenhuma'
+                                      ? Colors.orange.shade800
+                                      : theme.primaryColor,
+                                ),
+                              ),
+                            ],
+                          );
+                        }),
                       ],
                     ),
                   ),

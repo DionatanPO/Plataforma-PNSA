@@ -46,6 +46,7 @@ class _CadastroDizimistaDesktopViewState
   String? estadoCivil;
   DateTime? dataCasamento;
   DateTime? dataNascimentoConjugue;
+  String? status;
   bool consentimento = false;
   int activeSection = 0;
 
@@ -82,7 +83,10 @@ class _CadastroDizimistaDesktopViewState
       estadoCivil = d?.estadoCivil;
       dataCasamento = d?.dataCasamento;
       dataNascimentoConjugue = d?.dataNascimentoConjugue;
+      status = (d?.status != null && d!.status.isNotEmpty) ? d.status : 'Ativo';
       consentimento = d?.consentimento ?? false;
+    } else {
+      status = 'Ativo';
     }
   }
 
@@ -148,7 +152,7 @@ class _CadastroDizimistaDesktopViewState
             ? observacoesController.text
             : null,
         consentimento: consentimento,
-        status: widget.dizimista?.status ?? 'Ativo',
+        status: status ?? 'Ativo',
         dataRegistro: widget.dizimista?.dataRegistro ?? DateTime.now(),
       );
 
@@ -230,6 +234,20 @@ class _CadastroDizimistaDesktopViewState
                                         icon: Icons.numbers_rounded,
                                         flex: 1,
                                       ),
+                                      if (isEditing)
+                                        _buildDropdownField(
+                                          label: 'Status do Fiel',
+                                          value: status,
+                                          items: [
+                                            'Ativo',
+                                            'Inativo',
+                                            'Afastado'
+                                          ],
+                                          onChanged: (v) =>
+                                              setState(() => status = v),
+                                          icon: Icons.info_outline_rounded,
+                                          flex: 1,
+                                        ),
                                     ]),
                                   ],
                                 ),

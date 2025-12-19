@@ -1,11 +1,14 @@
 import 'package:get/get.dart';
 import '../../../core/services/dizimista_service.dart';
+import '../../../core/services/contribuicao_service.dart';
+import '../../contribuicoes/models/contribuicao_model.dart';
 import '../models/dizimista_model.dart';
 
 class DizimistaController extends GetxController {
   final _dizimistas = <Dizimista>[].obs;
+  final _contribuicoes = <Contribuicao>[].obs;
   final _isLoading = false.obs;
-  
+
   List<Dizimista> get dizimistas => _dizimistas;
   bool get isLoading => _isLoading.value;
   final searchQuery = ''.obs;
@@ -17,24 +20,27 @@ class DizimistaController extends GetxController {
       final queryLower = searchQuery.value.toLowerCase().trim();
       return _dizimistas.where((dizimista) {
         return dizimista.nome.toLowerCase().contains(queryLower) ||
-               dizimista.cpf.contains(searchQuery.value) ||
-               dizimista.numeroRegistro.contains(searchQuery.value) ||
-               dizimista.telefone.contains(searchQuery.value) ||
-               (dizimista.email?.toLowerCase().contains(queryLower) ?? false) ||
-               (dizimista.rua?.toLowerCase().contains(queryLower) ?? false) ||
-               (dizimista.numero?.toLowerCase().contains(queryLower) ?? false) ||
-               (dizimista.bairro?.toLowerCase().contains(queryLower) ?? false) ||
-               dizimista.cidade.toLowerCase().contains(queryLower) ||
-               dizimista.estado.toLowerCase().contains(queryLower) ||
-               (dizimista.cep?.contains(searchQuery.value) ?? false) ||
-               (dizimista.nomeConjugue?.toLowerCase().contains(queryLower) ?? false) ||
-               (dizimista.estadoCivil?.toLowerCase().contains(queryLower) ?? false) ||
-               (dizimista.observacoes?.toLowerCase().contains(queryLower) ?? false) ||
-               dizimista.status.toLowerCase().contains(queryLower);
+            dizimista.cpf.contains(searchQuery.value) ||
+            dizimista.numeroRegistro.contains(searchQuery.value) ||
+            dizimista.telefone.contains(searchQuery.value) ||
+            (dizimista.email?.toLowerCase().contains(queryLower) ?? false) ||
+            (dizimista.rua?.toLowerCase().contains(queryLower) ?? false) ||
+            (dizimista.numero?.toLowerCase().contains(queryLower) ?? false) ||
+            (dizimista.bairro?.toLowerCase().contains(queryLower) ?? false) ||
+            dizimista.cidade.toLowerCase().contains(queryLower) ||
+            dizimista.estado.toLowerCase().contains(queryLower) ||
+            (dizimista.cep?.contains(searchQuery.value) ?? false) ||
+            (dizimista.nomeConjugue?.toLowerCase().contains(queryLower) ??
+                false) ||
+            (dizimista.estadoCivil?.toLowerCase().contains(queryLower) ??
+                false) ||
+            (dizimista.observacoes?.toLowerCase().contains(queryLower) ??
+                false) ||
+            dizimista.status.toLowerCase().contains(queryLower);
       }).toList();
     }
   }
-  
+
   @override
   void onInit() {
     super.onInit();
@@ -46,10 +52,61 @@ class DizimistaController extends GetxController {
       print("Erro ao carregar dizimistas do Firestore: $error");
     });
 
+    // Escutar mudanças em tempo real nas contribuições
+    ContribuicaoService.getAllContribuicoes().listen((contribuicaoList) {
+      _contribuicoes.assignAll(contribuicaoList);
+    }).onError((error) {
+      print("Erro ao carregar contribuições do Firestore: $error");
+    });
+
     // Observar mudanças na pesquisa para atualizar a lista filtrada
     ever(searchQuery, (_) {
       // A atualização é automática graças ao getter filteredDizimistas
     });
+  }
+
+  // Método para obter a data da última contribuição de um dizimista
+  DateTime? getLastContributionDate(String dizimistaId) {
+    try {
+      final filtered =
+          _contribuicoes.where((c) => c.dizimistaId == dizimistaId).toList();
+      if (filtered.isEmpty) return null;
+
+      // Como a lista já vem ordenada por dataRegistro desc do serviço, o primeiro é o mais recente
+      return filtered.first.dataRegistro;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  // Método para formatar quanto tempo faz desde a última contribuição
+  String getTimeSinceLastContribution(String dizimistaId) {
+    final lastDate = getLastContributionDate(dizimistaId);
+    if (lastDate == null) return 'Nenhuma';
+
+    final now = DateTime.now();
+    final difference = now.difference(lastDate);
+
+    if (difference.inDays == 0) return 'Hoje';
+    if (difference.inDays == 1) return 'Ontem';
+    if (difference.inDays < 30) return '${difference.inDays} dias';
+
+    final months = (difference.inDays / 30).floor();
+    if (months == 1) return '1 mês';
+    if (months < 12) return '$months meses';
+
+    final years = (months / 12).floor();
+    if (years == 1) return '1 ano';
+    return '$years anos';
+  }
+
+  // Método para obter meses de atraso (para lógica de status se precisar)
+  int getMonthsOfDelay(String dizimistaId) {
+    final lastDate = getLastContributionDate(dizimistaId);
+    if (lastDate == null) return 999; // Nunca contribuiu
+
+    final now = DateTime.now();
+    return ((now.year - lastDate.year) * 12) + now.month - lastDate.month;
   }
 
   Future<void> fetchDizimistas() async {

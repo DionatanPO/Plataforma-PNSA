@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:get/get.dart';
 import '../models/dizimista_model.dart';
+import '../controllers/dizimista_controller.dart';
 import 'dizimista_avatar.dart';
 import 'status_badge.dart';
 import 'table_header_cell.dart';
@@ -91,6 +93,8 @@ class DizimistaDesktopTableView extends StatelessWidget {
                 _TableHeaderCell(text: 'CONTATO', flex: 2, theme: theme),
                 _TableHeaderCell(text: 'LOCALIZAÇÃO', flex: 2, theme: theme),
                 _TableHeaderCell(text: 'STATUS', flex: 1, theme: theme),
+                _TableHeaderCell(
+                    text: 'ÚLT. CONTRIBUIÇÃO', flex: 2, theme: theme),
                 _TableHeaderCell(text: 'CADASTRO', flex: 1, theme: theme),
                 _TableHeaderCell(text: '', flex: 1, theme: theme),
               ],
@@ -396,7 +400,57 @@ class _TableRowState extends State<_TableRow> {
 
             const SizedBox(width: 12),
 
-            // Coluna 6: Data
+            // Coluna 6: Última Contribuição
+            Expanded(
+              flex: 2,
+              child: Obx(() {
+                final controller = Get.find<DizimistaController>();
+                final timeAgo = controller.getTimeSinceLastContribution(d.id);
+                return Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: timeAgo == 'Nenhuma'
+                        ? Colors.orange.withOpacity(0.1)
+                        : theme.primaryColor.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.history_rounded,
+                        size: 13,
+                        color: timeAgo == 'Nenhuma'
+                            ? Colors.orange
+                            : theme.primaryColor,
+                      ),
+                      const SizedBox(width: 6),
+                      Flexible(
+                        child: Text(
+                          timeAgo,
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: timeAgo == 'Nenhuma'
+                                ? Colors.orange.shade800
+                                : theme.primaryColor,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+            ),
+
+            const SizedBox(width: 12),
+
+            // Coluna 7: Data Registro
             Expanded(
               flex: 1,
               child: Container(
