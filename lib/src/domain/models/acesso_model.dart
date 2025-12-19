@@ -7,7 +7,7 @@ class Acesso {
   final String endereco;
   final String funcao;
   final String status;
-  final DateTime ultimoAcesso;
+  final DateTime? ultimoAcesso;
   final bool pendencia;
 
   Acesso({
@@ -19,7 +19,7 @@ class Acesso {
     required this.endereco,
     required this.funcao,
     required this.status,
-    required this.ultimoAcesso,
+    this.ultimoAcesso,
     required this.pendencia,
   });
 
@@ -59,7 +59,7 @@ class Acesso {
       'endereco': endereco,
       'funcao': funcao,
       'status': status,
-      'ultimoAcesso': ultimoAcesso.millisecondsSinceEpoch,
+      'ultimoAcesso': ultimoAcesso?.millisecondsSinceEpoch,
       'pendencia': pendencia,
     };
   }
@@ -74,7 +74,9 @@ class Acesso {
       endereco: map['endereco'] ?? '',
       funcao: map['funcao'] ?? '',
       status: map['status'] ?? '',
-      ultimoAcesso: DateTime.fromMillisecondsSinceEpoch(map['ultimoAcesso'] ?? 0),
+      ultimoAcesso: map['ultimoAcesso'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(map['ultimoAcesso'])
+          : null,
       pendencia: map['pendencia'] ?? false,
     );
   }
@@ -88,8 +90,7 @@ class Acesso {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
 
-    return other is Acesso &&
-           other.id == id;
+    return other is Acesso && other.id == id;
   }
 
   @override

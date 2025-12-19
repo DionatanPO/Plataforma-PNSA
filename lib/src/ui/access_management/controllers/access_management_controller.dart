@@ -27,23 +27,21 @@ class AccessManagementController extends GetxController {
       final currentUserId = currentUser?.uid;
 
       // Subscreve ao stream de dados do Firestore
-      AccessService.getAllAcessos()
-          .listen((acessosList) {
-            // Filtrar o usuário logado da lista (excluir o próprio usuário dos resultados)
-            if (currentUserId != null) {
-              final filteredList = acessosList
-                  .where((acesso) => acesso.id != currentUserId)
-                  .toList();
-              _acessos.assignAll(filteredList);
-            } else {
-              _acessos.assignAll(acessosList);
-            }
-            _isLoading.value = false;
-          })
-          .onError((error) {
-            print("Erro ao carregar acessos do Firestore: $error");
-            _isLoading.value = false;
-          });
+      AccessService.getAllAcessos().listen((acessosList) {
+        // Filtrar o usuário logado da lista (excluir o próprio usuário dos resultados)
+        if (currentUserId != null) {
+          final filteredList = acessosList
+              .where((acesso) => acesso.id != currentUserId)
+              .toList();
+          _acessos.assignAll(filteredList);
+        } else {
+          _acessos.assignAll(acessosList);
+        }
+        _isLoading.value = false;
+      }).onError((error) {
+        print("Erro ao carregar acessos do Firestore: $error");
+        _isLoading.value = false;
+      });
     } catch (e) {
       print("Erro ao carregar acessos: $e");
       _isLoading.value = false;
@@ -67,9 +65,8 @@ class AccessManagementController extends GetxController {
 
     // Filtrar o usuário logado da lista base
     if (currentUserId != null) {
-      baseList = baseList
-          .where((acesso) => acesso.id != currentUserId)
-          .toList();
+      baseList =
+          baseList.where((acesso) => acesso.id != currentUserId).toList();
     }
 
     if (_searchQuery.isEmpty) {
@@ -79,14 +76,14 @@ class AccessManagementController extends GetxController {
           .where(
             (acesso) =>
                 acesso.nome.toLowerCase().contains(
-                  _searchQuery.toLowerCase(),
-                ) ||
+                      _searchQuery.toLowerCase(),
+                    ) ||
                 acesso.email.toLowerCase().contains(
-                  _searchQuery.toLowerCase(),
-                ) ||
+                      _searchQuery.toLowerCase(),
+                    ) ||
                 acesso.funcao.toLowerCase().contains(
-                  _searchQuery.toLowerCase(),
-                ),
+                      _searchQuery.toLowerCase(),
+                    ),
           )
           .toList();
     }
@@ -95,11 +92,28 @@ class AccessManagementController extends GetxController {
   Future<void> addAcesso(Acesso acesso) async {
     _isLoading.value = true;
     try {
+      // 1. Verificar duplicidade de CPF antes de cadastrar
+      final cpfLimpo = acesso.cpf.replaceAll(RegExp(r'[^0-9]'), '');
+      final existingCpf = await AccessService.getAcessoByCpf(cpfLimpo);
+
+      if (existingCpf != null) {
+        throw Exception(
+            'Este CPF já está cadastrado para outro usuário (${existingCpf.nome}).');
+      }
+
+      // 2. Verificar duplicidade de E-mail antes de cadastrar
+      final existingEmail = await AccessService.getAcessoByEmail(acesso.email);
+      if (existingEmail != null) {
+        throw Exception(
+            'Este e-mail já está em uso por outro usuário (${existingEmail.nome}).');
+      }
+
       await AccessService.addAcesso(acesso);
       // Após adicionar o acesso, não precisamos fazer nenhuma ação adicional
       // O sistema deve manter o administrador logado graças às proteções implementadas
     } catch (e) {
       print("Erro ao adicionar acesso: $e");
+      rethrow; // Repassar o erro para a View tratar
     } finally {
       _isLoading.value = false;
     }
@@ -108,6 +122,22 @@ class AccessManagementController extends GetxController {
   Future<void> updateAcesso(Acesso acesso) async {
     _isLoading.value = true;
     try {
+      // 1. Verificar duplicidade de CPF (se mudou o CPF)
+      final cpfLimpo = acesso.cpf.replaceAll(RegExp(r'[^0-9]'), '');
+      final existingCpf = await AccessService.getAcessoByCpf(cpfLimpo);
+
+      if (existingCpf != null && existingCpf.id != acesso.id) {
+        throw Exception(
+            'Este CPF já está sendo usado por outro usuário (${existingCpf.nome}).');
+      }
+
+      // 2. Verificar duplicidade de E-mail (se mudou o e-mail)
+      final existingEmail = await AccessService.getAcessoByEmail(acesso.email);
+      if (existingEmail != null && existingEmail.id != acesso.id) {
+        throw Exception(
+            'Este e-mail já está sendo usado por outro usuário (${existingEmail.nome}).');
+      }
+
       await AccessService.updateAcesso(acesso);
 
       // Verificar se o usuário atual está sendo atualizado e se o status foi alterado para Inativo
@@ -125,12 +155,14 @@ class AccessManagementController extends GetxController {
       }
     } catch (e) {
       print("Erro ao atualizar acesso: $e");
+      rethrow;
     } finally {
       _isLoading.value = false;
     }
   }
 
-  String formatarData(DateTime data) {
+  String formatarData(DateTime? data) {
+    if (data == null) return "Nunca acessou";
     return "${data.day.toString().padLeft(2, '0')}/${data.month.toString().padLeft(2, '0')}/${data.year}, "
         "${data.hour.toString().padLeft(2, '0')}:${data.minute.toString().padLeft(2, '0')}:${data.second.toString().padLeft(2, '0')}";
   }

@@ -23,7 +23,8 @@ class DizimistaService {
       'estado_civil': dizimista.estadoCivil,
       'nome_conjugue': dizimista.nomeConjugue,
       'data_casamento': dizimista.dataCasamento?.millisecondsSinceEpoch,
-      'data_nascimento_conjugue': dizimista.dataNascimentoConjugue?.millisecondsSinceEpoch,
+      'data_nascimento_conjugue':
+          dizimista.dataNascimentoConjugue?.millisecondsSinceEpoch,
       'observacoes': dizimista.observacoes,
       'consentimento': dizimista.consentimento,
       'status': dizimista.status,
@@ -57,12 +58,14 @@ class DizimistaService {
           ? DateTime.fromMillisecondsSinceEpoch(data['data_casamento'])
           : null,
       dataNascimentoConjugue: data['data_nascimento_conjugue'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(data['data_nascimento_conjugue'])
+          ? DateTime.fromMillisecondsSinceEpoch(
+              data['data_nascimento_conjugue'])
           : null,
       observacoes: data['observacoes'],
       consentimento: data['consentimento'] ?? false,
       status: data['status'] ?? '',
-      dataRegistro: DateTime.fromMillisecondsSinceEpoch(data['data_registro'] ?? 0),
+      dataRegistro:
+          DateTime.fromMillisecondsSinceEpoch(data['data_registro'] ?? 0),
     );
   }
 
@@ -148,25 +151,71 @@ class DizimistaService {
         .orderBy('nome')
         .snapshots()
         .map((snapshot) {
-      final allDocs = snapshot.docs.map((doc) => _fromFirestoreDocument(doc)).toList();
+      final allDocs =
+          snapshot.docs.map((doc) => _fromFirestoreDocument(doc)).toList();
 
       // Filtra os resultados localmente nos campos relevantes
       final queryLower = query.toLowerCase();
       final filteredDocs = allDocs.where((dizimista) {
         return dizimista.nome.toLowerCase().contains(queryLower) ||
-               dizimista.cpf.contains(query) ||
-               dizimista.numeroRegistro.contains(query) ||
-               dizimista.telefone.contains(query) ||
-               (dizimista.email?.toLowerCase().contains(queryLower) ?? false) ||
-               (dizimista.cidade.toLowerCase().contains(queryLower) ?? false) ||
-               (dizimista.estado.toLowerCase().contains(queryLower) ?? false) ||
-               (dizimista.nomeConjugue?.toLowerCase().contains(queryLower) ?? false) ||
-               (dizimista.estadoCivil?.toLowerCase().contains(queryLower) ?? false) ||
-               (dizimista.observacoes?.toLowerCase().contains(queryLower) ?? false) ||
-               dizimista.status.toLowerCase().contains(queryLower);
+            dizimista.cpf.contains(query) ||
+            dizimista.numeroRegistro.contains(query) ||
+            dizimista.telefone.contains(query) ||
+            (dizimista.email?.toLowerCase().contains(queryLower) ?? false) ||
+            dizimista.cidade.toLowerCase().contains(queryLower) ||
+            dizimista.estado.toLowerCase().contains(queryLower) ||
+            (dizimista.nomeConjugue?.toLowerCase().contains(queryLower) ??
+                false) ||
+            (dizimista.estadoCivil?.toLowerCase().contains(queryLower) ??
+                false) ||
+            (dizimista.observacoes?.toLowerCase().contains(queryLower) ??
+                false) ||
+            dizimista.status.toLowerCase().contains(queryLower);
       }).toList();
 
       return filteredDocs;
     });
+  }
+
+  // Verificar se um CPF já existe
+  static Future<Dizimista?> getDizimistaByCpf(String cpf) async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection(_collectionName)
+        .where('cpf', isEqualTo: cpf)
+        .limit(1)
+        .get();
+
+    if (snapshot.docs.isNotEmpty) {
+      return _fromFirestoreDocument(snapshot.docs.first);
+    }
+    return null;
+  }
+
+  // Verificar se um E-mail já existe
+  static Future<Dizimista?> getDizimistaByEmail(String email) async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection(_collectionName)
+        .where('email', isEqualTo: email.toLowerCase().trim())
+        .limit(1)
+        .get();
+
+    if (snapshot.docs.isNotEmpty) {
+      return _fromFirestoreDocument(snapshot.docs.first);
+    }
+    return null;
+  }
+
+  // Verificar se um Número de Registro já existe
+  static Future<Dizimista?> getDizimistaByRegistro(String registro) async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection(_collectionName)
+        .where('numero_registro', isEqualTo: registro)
+        .limit(1)
+        .get();
+
+    if (snapshot.docs.isNotEmpty) {
+      return _fromFirestoreDocument(snapshot.docs.first);
+    }
+    return null;
   }
 }

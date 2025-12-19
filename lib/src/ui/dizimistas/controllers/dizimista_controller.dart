@@ -125,6 +125,37 @@ class DizimistaController extends GetxController {
   Future<void> addDizimista(Dizimista dizimista) async {
     _isLoading.value = true;
     try {
+      // 1. Verificar Número de Registro (Obrigatório e Único)
+      if (dizimista.numeroRegistro.isEmpty) {
+        throw Exception('O Nº de Registro Paroquial é obrigatório.');
+      }
+      final existingRegistro = await DizimistaService.getDizimistaByRegistro(
+          dizimista.numeroRegistro);
+      if (existingRegistro != null) {
+        throw Exception(
+            'Este Nº de Registro Paroquial já pertence a ${existingRegistro.nome}.');
+      }
+
+      // 2. Verificar CPF (Único se preenchido)
+      if (dizimista.cpf.isNotEmpty) {
+        final existingCpf =
+            await DizimistaService.getDizimistaByCpf(dizimista.cpf);
+        if (existingCpf != null) {
+          throw Exception(
+              'Este CPF já está cadastrado para ${existingCpf.nome}.');
+        }
+      }
+
+      // 3. Verificar E-mail (Único se preenchido)
+      if (dizimista.email != null && dizimista.email!.isNotEmpty) {
+        final existingEmail =
+            await DizimistaService.getDizimistaByEmail(dizimista.email!);
+        if (existingEmail != null) {
+          throw Exception(
+              'Este e-mail já está em uso por ${existingEmail.nome}.');
+        }
+      }
+
       await DizimistaService.addDizimista(dizimista);
     } catch (e) {
       print("Erro ao adicionar dizimista no Firestore: $e");
@@ -137,6 +168,36 @@ class DizimistaController extends GetxController {
   Future<void> updateDizimista(Dizimista dizimista) async {
     _isLoading.value = true;
     try {
+      // 1. Verificar Número de Registro (Único)
+      if (dizimista.numeroRegistro.isNotEmpty) {
+        final existingRegistro = await DizimistaService.getDizimistaByRegistro(
+            dizimista.numeroRegistro);
+        if (existingRegistro != null && existingRegistro.id != dizimista.id) {
+          throw Exception(
+              'Este Nº de Registro Paroquial já pertence a ${existingRegistro.nome}.');
+        }
+      }
+
+      // 2. Verificar CPF (Único se preenchido)
+      if (dizimista.cpf.isNotEmpty) {
+        final existingCpf =
+            await DizimistaService.getDizimistaByCpf(dizimista.cpf);
+        if (existingCpf != null && existingCpf.id != dizimista.id) {
+          throw Exception(
+              'Este CPF já está sendo usado por ${existingCpf.nome}.');
+        }
+      }
+
+      // 3. Verificar E-mail (Único se preenchido)
+      if (dizimista.email != null && dizimista.email!.isNotEmpty) {
+        final existingEmail =
+            await DizimistaService.getDizimistaByEmail(dizimista.email!);
+        if (existingEmail != null && existingEmail.id != dizimista.id) {
+          throw Exception(
+              'Este e-mail já está sendo usado por ${existingEmail.nome}.');
+        }
+      }
+
       await DizimistaService.updateDizimista(dizimista);
     } catch (e) {
       print("Erro ao atualizar dizimista no Firestore: $e");

@@ -88,7 +88,7 @@ class _AccessFormViewState extends State<AccessFormView> {
         endereco: enderecoController.text,
         funcao: funcao ?? 'Administrador',
         status: status ?? 'Ativo',
-        ultimoAcesso: widget.acesso?.ultimoAcesso ?? DateTime.now(),
+        ultimoAcesso: widget.acesso?.ultimoAcesso, // Fica null se for novo
         pendencia: widget.acesso?.pendencia ?? true,
       );
 
@@ -108,10 +108,73 @@ class _AccessFormViewState extends State<AccessFormView> {
           margin: const EdgeInsets.all(16),
         );
       } catch (e) {
-        Get.snackbar('Erro', 'Erro ao salvar: $e',
-            backgroundColor: Colors.red, colorText: Colors.white);
+        String msg = e.toString();
+        if (msg.startsWith('Exception: ')) {
+          msg = msg.replaceFirst('Exception: ', '');
+        }
+        _showErrorDialog(msg);
       }
     }
+  }
+
+  void _showErrorDialog(String message) {
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            color: Theme.of(context).cardColor,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.warning_amber_rounded,
+                    color: Colors.red, size: 40),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'Ops! Atenção',
+                style: GoogleFonts.outfit(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  color: Theme.of(context).hintColor,
+                ),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: () => Get.back(),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: const Text('Entendi'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -260,13 +323,17 @@ class _AccessFormViewState extends State<AccessFormView> {
                         child: _buildTextField(
                             cpfController, 'CPF', Icons.fingerprint,
                             formatter: cpfFormatter,
-                            inputType: TextInputType.number)),
+                            inputType: TextInputType.number,
+                            validator: (v) =>
+                                v!.isEmpty ? 'Obrigatório' : null)),
                     const SizedBox(width: 12),
                     Expanded(
                         child: _buildTextField(
                             telefoneController, 'Celular', Icons.phone_android,
                             formatter: telefoneFormatter,
-                            inputType: TextInputType.phone)),
+                            inputType: TextInputType.phone,
+                            validator: (v) =>
+                                v!.isEmpty ? 'Obrigatório' : null)),
                   ],
                 ),
                 const SizedBox(height: 16),
@@ -289,9 +356,15 @@ class _AccessFormViewState extends State<AccessFormView> {
                     _controller.getFuncoes().map((f) => f.nome).toList(),
                     (v) => setState(() => funcao = v),
                     Icons.admin_panel_settings),
-                const SizedBox(height: 20),
-                _buildDropdown('Status da Conta', status, ['Ativo', 'Inativo'],
-                    (v) => setState(() => status = v), Icons.info_outline),
+                if (isEditing) ...[
+                  const SizedBox(height: 20),
+                  _buildDropdown(
+                      'Status da Conta',
+                      status,
+                      ['Ativo', 'Inativo'],
+                      (v) => setState(() => status = v),
+                      Icons.info_outline),
+                ],
               ]),
           const SizedBox(height: 20),
           Container(
@@ -348,18 +421,29 @@ class _AccessFormViewState extends State<AccessFormView> {
         if (_currentMobileStep > 0) const SizedBox(width: 12),
         Expanded(
           flex: 2,
-          child: FilledButton(
-            onPressed: isLast
-                ? _submitForm
-                : () => setState(() => _currentMobileStep++),
-            style: FilledButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12))),
-            child: Text(isLast
-                ? (isEditing ? 'Salvar Alterações' : 'Criar Usuário')
-                : 'Próximo Passo'),
-          ),
+          child: Obx(() => FilledButton(
+                onPressed: isLast && !_controller.isLoading
+                    ? _submitForm
+                    : isLast
+                        ? null
+                        : () => setState(() => _currentMobileStep++),
+                style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12))),
+                child: _controller.isLoading && isLast
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Text(isLast
+                        ? (isEditing ? 'Salvar Alterações' : 'Criar Usuário')
+                        : 'Próximo Passo'),
+              )),
         ),
       ],
     );

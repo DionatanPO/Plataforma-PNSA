@@ -19,7 +19,7 @@ class AccessService {
       'endereco': acesso.endereco,
       'funcao': acesso.funcao,
       'status': acesso.status,
-      'ultimoAcesso': acesso.ultimoAcesso.millisecondsSinceEpoch,
+      'ultimoAcesso': acesso.ultimoAcesso?.millisecondsSinceEpoch,
       'pendencia': acesso.pendencia,
     };
   }
@@ -36,9 +36,9 @@ class AccessService {
       endereco: data['endereco'] ?? '',
       funcao: data['funcao'] ?? '',
       status: data['status'] ?? '',
-      ultimoAcesso: DateTime.fromMillisecondsSinceEpoch(
-        data['ultimoAcesso']?.toInt() ?? DateTime.now().millisecondsSinceEpoch,
-      ),
+      ultimoAcesso: data['ultimoAcesso'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(data['ultimoAcesso'])
+          : null,
       pendencia: data['pendencia'] ?? true,
     );
   }
@@ -50,10 +50,8 @@ class AccessService {
         .orderBy('nome')
         .snapshots()
         .map((snapshot) {
-          return snapshot.docs
-              .map((doc) => _fromFirestoreDocument(doc))
-              .toList();
-        });
+      return snapshot.docs.map((doc) => _fromFirestoreDocument(doc)).toList();
+    });
   }
 
   // Obter acesso por ID
@@ -75,10 +73,9 @@ class AccessService {
         endereco: data['endereco'] ?? '',
         funcao: data['funcao'] ?? '',
         status: data['status'] ?? '',
-        ultimoAcesso: DateTime.fromMillisecondsSinceEpoch(
-          (data['ultimoAcesso'] as int?) ??
-              DateTime.now().millisecondsSinceEpoch,
-        ),
+        ultimoAcesso: data['ultimoAcesso'] != null
+            ? DateTime.fromMillisecondsSinceEpoch(data['ultimoAcesso'] as int)
+            : null,
         pendencia: data['pendencia'] ?? true,
       );
     }
@@ -128,16 +125,16 @@ class AccessService {
           .collection(_collectionName)
           .doc(newUserUid)
           .set({
-            'nome': acesso.nome,
-            'email': acesso.email,
-            'cpf': acesso.cpf,
-            'telefone': acesso.telefone,
-            'endereco': acesso.endereco,
-            'funcao': acesso.funcao,
-            'status': acesso.status,
-            'ultimoAcesso': acesso.ultimoAcesso.millisecondsSinceEpoch,
-            'pendencia': acesso.pendencia,
-          });
+        'nome': acesso.nome,
+        'email': acesso.email,
+        'cpf': acesso.cpf,
+        'telefone': acesso.telefone,
+        'endereco': acesso.endereco,
+        'funcao': acesso.funcao,
+        'status': acesso.status,
+        'ultimoAcesso': acesso.ultimoAcesso?.millisecondsSinceEpoch,
+        'pendencia': acesso.pendencia,
+      });
 
       print(
         '✅ Novo usuário criado com sucesso (UID: $newUserUid) sem afetar a sessão do admin.',
@@ -203,9 +200,35 @@ class AccessService {
         .orderBy('nome') // Adicionado para ordenar resultados de busca
         .snapshots()
         .map((snapshot) {
-          return snapshot.docs
-              .map((doc) => _fromFirestoreDocument(doc))
-              .toList();
-        });
+      return snapshot.docs.map((doc) => _fromFirestoreDocument(doc)).toList();
+    });
+  }
+
+  // Verificar se um CPF já existe
+  static Future<Acesso?> getAcessoByCpf(String cpf) async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection(_collectionName)
+        .where('cpf', isEqualTo: cpf)
+        .limit(1)
+        .get();
+
+    if (snapshot.docs.isNotEmpty) {
+      return _fromFirestoreDocument(snapshot.docs.first);
+    }
+    return null;
+  }
+
+  // Verificar se um e-mail já existe
+  static Future<Acesso?> getAcessoByEmail(String email) async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection(_collectionName)
+        .where('email', isEqualTo: email.toLowerCase().trim())
+        .limit(1)
+        .get();
+
+    if (snapshot.docs.isNotEmpty) {
+      return _fromFirestoreDocument(snapshot.docs.first);
+    }
+    return null;
   }
 }

@@ -126,6 +126,11 @@ class _CadastroDizimistaDesktopViewState
 
   Future<void> _submitForm() async {
     if (_formKey.currentState?.validate() ?? false) {
+      if (!consentimento) {
+        _showErrorDialog(
+            'Para realizar o cadastro, é necessário autorizar o consentimento de dados.');
+        return;
+      }
       final dizimista = Dizimista(
         id: widget.dizimista?.id ??
             DateTime.now().millisecondsSinceEpoch.toString(),
@@ -175,17 +180,77 @@ class _CadastroDizimistaDesktopViewState
           borderRadius: 16,
         );
       } catch (e) {
-        Get.snackbar(
-          'Erro',
-          'Não foi possível salvar os dados: $e',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red.shade700,
-          colorText: Colors.white,
-          margin: const EdgeInsets.all(24),
-          borderRadius: 16,
-        );
+        String msg = e.toString();
+        if (msg.startsWith('Exception: ')) {
+          msg = msg.replaceFirst('Exception: ', '');
+        }
+        _showErrorDialog(msg);
       }
     }
+  }
+
+  void _showErrorDialog(String message) {
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        child: Container(
+          width: 400,
+          padding: const EdgeInsets.all(32),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            color: Theme.of(context).cardColor,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.warning_amber_rounded,
+                    color: Colors.red, size: 48),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Atenção',
+                style: GoogleFonts.outfit(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  color: Theme.of(context).hintColor,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: () => Get.back(),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: Text('Entendi',
+                      style: GoogleFonts.inter(
+                          fontWeight: FontWeight.bold, fontSize: 16)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -233,6 +298,8 @@ class _CadastroDizimistaDesktopViewState
                                         label: 'Nº Registro Paroquial',
                                         icon: Icons.numbers_rounded,
                                         flex: 1,
+                                        validator: (v) =>
+                                            v!.isEmpty ? 'Obrigatório' : null,
                                       ),
                                       if (isEditing)
                                         _buildDropdownField(
@@ -285,6 +352,9 @@ class _CadastroDizimistaDesktopViewState
                                       _buildDateField(
                                         label: 'Data de Nascimento',
                                         date: dataNascimento,
+                                        validator: dataNascimento == null
+                                            ? 'Obrigatório'
+                                            : null,
                                         onTap: () => _pickDate(
                                             dataNascimento,
                                             (d) => setState(
@@ -304,6 +374,8 @@ class _CadastroDizimistaDesktopViewState
                                       _buildDropdownField(
                                         label: 'Estado Civil',
                                         value: estadoCivil,
+                                        validator: (v) =>
+                                            v == null ? 'Obrigatório' : null,
                                         items: [
                                           'Solteiro',
                                           'Casado',
@@ -343,6 +415,8 @@ class _CadastroDizimistaDesktopViewState
                                         icon: Icons.alternate_email_rounded,
                                         inputType: TextInputType.emailAddress,
                                         flex: 2,
+                                        validator: (v) =>
+                                            v!.isEmpty ? 'Obrigatório' : null,
                                       ),
                                     ]),
                                     const SizedBox(height: 16),
@@ -367,24 +441,18 @@ class _CadastroDizimistaDesktopViewState
                                         label: 'Bairro',
                                         icon: Icons.holiday_village_rounded,
                                         flex: 2,
-                                        validator: (v) =>
-                                            v!.isEmpty ? 'Obrigatório' : null,
                                       ),
                                       _buildTextField(
                                         controller: cidadeController,
                                         label: 'Cidade',
                                         icon: Icons.location_city_rounded,
                                         flex: 2,
-                                        validator: (v) =>
-                                            v!.isEmpty ? 'Obrigatório' : null,
                                       ),
                                       _buildTextField(
                                         controller: estadoController,
                                         label: 'UF',
                                         icon: Icons.flag_rounded,
                                         flex: 1,
-                                        validator: (v) =>
-                                            v!.isEmpty ? 'Obrigatório' : null,
                                       ),
                                     ]),
                                   ],
@@ -401,12 +469,21 @@ class _CadastroDizimistaDesktopViewState
                                         controller: nomeConjugueController,
                                         label: 'Nome do Cônjuge',
                                         icon: Icons.person_add_rounded,
+                                        validator: (v) =>
+                                            (estadoCivil == 'Casado' &&
+                                                    (v?.isEmpty ?? true))
+                                                ? 'Obrigatório'
+                                                : null,
                                       ),
                                       const SizedBox(height: 16),
                                       _buildRow([
                                         _buildDateField(
                                           label: 'Data Casamento',
                                           date: dataCasamento,
+                                          validator: (estadoCivil == 'Casado' &&
+                                                  dataCasamento == null)
+                                              ? 'Obrigatório'
+                                              : null,
                                           onTap: () => _pickDate(
                                               dataCasamento,
                                               (d) => setState(
@@ -417,6 +494,11 @@ class _CadastroDizimistaDesktopViewState
                                         _buildDateField(
                                           label: 'Nasc. Cônjuge',
                                           date: dataNascimentoConjugue,
+                                          validator: (estadoCivil == 'Casado' &&
+                                                  dataNascimentoConjugue ==
+                                                      null)
+                                              ? 'Obrigatório'
+                                              : null,
                                           onTap: () => _pickDate(
                                               dataNascimentoConjugue,
                                               (d) => setState(() =>
@@ -536,15 +618,6 @@ class _CadastroDizimistaDesktopViewState
                 3, 'Dados do Cônjuge', Icons.favorite_outline_rounded, theme),
           _buildSidebarItem(
               4, 'Finalização', Icons.check_circle_outline_rounded, theme),
-          const Spacer(),
-          Padding(
-            padding: const EdgeInsets.all(24),
-            child: Text(
-              'Versão Desktop 2.0',
-              style: TextStyle(
-                  color: theme.hintColor.withOpacity(0.5), fontSize: 11),
-            ),
-          ),
         ],
       ),
     );
@@ -612,14 +685,6 @@ class _CadastroDizimistaDesktopViewState
                 ? 'Cadastro / Editar Registro'
                 : 'Cadastro / Novo Registro',
             style: GoogleFonts.outfit(fontSize: 14, color: theme.hintColor),
-          ),
-          const Spacer(),
-          Text(
-            'Campos marcados com * são fundamentais para o registro pastoral.',
-            style: TextStyle(
-                fontSize: 12,
-                color: theme.hintColor.withOpacity(0.6),
-                fontStyle: FontStyle.italic),
           ),
         ],
       ),
@@ -712,6 +777,7 @@ class _CadastroDizimistaDesktopViewState
     required List<String> items,
     required ValueChanged<String?> onChanged,
     required IconData icon,
+    String? Function(String?)? validator,
     int flex = 1,
   }) {
     return DropdownButtonFormField<String>(
@@ -719,6 +785,7 @@ class _CadastroDizimistaDesktopViewState
       items:
           items.map((i) => DropdownMenuItem(value: i, child: Text(i))).toList(),
       onChanged: onChanged,
+      validator: validator,
       decoration: _buildInputDecoration(Theme.of(context), label, icon),
     );
   }
@@ -728,6 +795,7 @@ class _CadastroDizimistaDesktopViewState
     required DateTime? date,
     required VoidCallback onTap,
     required ThemeData theme,
+    String? validator,
     int flex = 1,
   }) {
     return GestureDetector(
@@ -739,6 +807,7 @@ class _CadastroDizimistaDesktopViewState
                 ? '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}'
                 : '',
           ),
+          validator: (_) => validator,
           decoration:
               _buildInputDecoration(theme, label, Icons.calendar_today_rounded),
         ),
@@ -931,18 +1000,29 @@ class _CadastroDizimistaDesktopViewState
             child: const Text('Cancelar'),
           ),
           const SizedBox(width: 16),
-          ElevatedButton.icon(
-            onPressed: _submitForm,
-            icon: const Icon(Icons.save_rounded, size: 20),
-            label: Text(isEditing ? 'Salvar Alterações' : 'Concluir Cadastro'),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16)),
-              elevation: 4,
-              shadowColor: theme.primaryColor.withOpacity(0.4),
-            ),
-          ),
+          Obx(() => ElevatedButton.icon(
+                onPressed: _controller.isLoading ? null : _submitForm,
+                icon: _controller.isLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Icon(Icons.save_rounded, size: 20),
+                label:
+                    Text(isEditing ? 'Salvar Alterações' : 'Concluir Cadastro'),
+                style: ElevatedButton.styleFrom(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
+                  elevation: 4,
+                  shadowColor: theme.primaryColor.withOpacity(0.4),
+                ),
+              )),
         ],
       ),
     );

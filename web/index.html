@@ -22,16 +22,53 @@
   <link rel="manifest" href="manifest.json">
 
   <style>
-    /* Estilo de site: fundo limpo e rolagem natural */
     body {
-      background-color: #F8F9FC;
+      background-color: #F8F9FB;
       margin: 0;
       padding: 0;
+      overflow: hidden;
+    }
+
+    .loading-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      width: 100vw;
+      position: fixed;
+      top: 0;
+      left: 0;
+      background-color: #F8F9FB;
+    }
+
+    .loader {
+      width: 24px;
+      height: 24px;
+      border: 3px solid rgba(200, 167, 85, 0.1);
+      border-top-color: #c8a755;
+      border-radius: 50%;
+      display: inline-block;
+      box-sizing: border-box;
+      animation: rotation 0.8s linear infinite;
+    }
+
+    @keyframes rotation {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
     }
   </style>
 </head>
 
 <body>
+  <div class="loading-container" id="loading-indicator">
+    <span class="loader"></span>
+  </div>
+
   <script src="flutter_bootstrap.js" async></script>
 </body>
 

@@ -84,7 +84,7 @@ class _AccessFormDesktopViewState extends State<AccessFormDesktopView> {
         endereco: enderecoController.text,
         funcao: funcao ?? 'Administrador',
         status: status ?? 'Ativo',
-        ultimoAcesso: widget.acesso?.ultimoAcesso ?? DateTime.now(),
+        ultimoAcesso: widget.acesso?.ultimoAcesso,
         pendencia: widget.acesso?.pendencia ?? true,
       );
 
@@ -102,10 +102,79 @@ class _AccessFormDesktopViewState extends State<AccessFormDesktopView> {
             snackPosition: SnackPosition.BOTTOM,
             margin: const EdgeInsets.all(24));
       } catch (e) {
-        Get.snackbar('Erro', 'Ocorreu um erro: $e',
-            backgroundColor: Colors.red, colorText: Colors.white);
+        String msg = e.toString();
+        if (msg.startsWith('Exception: ')) {
+          msg = msg.replaceFirst('Exception: ', '');
+        }
+        _showErrorDialog(msg);
       }
     }
+  }
+
+  void _showErrorDialog(String message) {
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 400),
+          padding: const EdgeInsets.all(32),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            color: Theme.of(context).cardColor,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.warning_amber_rounded,
+                    color: Colors.red, size: 48),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Ops! Atenção',
+                style: GoogleFonts.outfit(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  fontSize: 15,
+                  color: Theme.of(context).hintColor,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: () => Get.back(),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: Text(
+                    'Entendi',
+                    style: GoogleFonts.inter(
+                        fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -154,10 +223,16 @@ class _AccessFormDesktopViewState extends State<AccessFormDesktopView> {
                                   _buildRow([
                                     _buildTextField(
                                         cpfController, 'CPF', Icons.fingerprint,
-                                        formatter: cpfFormatter, flex: 1),
+                                        formatter: cpfFormatter,
+                                        flex: 1,
+                                        validator: (v) =>
+                                            v!.isEmpty ? 'Obrigatório' : null),
                                     _buildTextField(telefoneController,
                                         'Celular', Icons.phone_iphone,
-                                        formatter: telefoneFormatter, flex: 1),
+                                        formatter: telefoneFormatter,
+                                        flex: 1,
+                                        validator: (v) =>
+                                            v!.isEmpty ? 'Obrigatório' : null),
                                   ]),
                                   const SizedBox(height: 16),
                                   // Campo único, sem estar dentro de Row para evitar erro de Expanded
@@ -183,12 +258,13 @@ class _AccessFormDesktopViewState extends State<AccessFormDesktopView> {
                                             .toList(),
                                         (v) => setState(() => funcao = v),
                                         Icons.admin_panel_settings),
-                                    _buildDropdown(
-                                        'Status da Conta',
-                                        status,
-                                        ['Ativo', 'Inativo'],
-                                        (v) => setState(() => status = v),
-                                        Icons.info_outline),
+                                    if (isEditing)
+                                      _buildDropdown(
+                                          'Status da Conta',
+                                          status,
+                                          ['Ativo', 'Inativo'],
+                                          (v) => setState(() => status = v),
+                                          Icons.info_outline),
                                   ]),
                                   const SizedBox(height: 24),
                                   _buildSecurityNote(theme),
@@ -530,14 +606,23 @@ class _AccessFormDesktopViewState extends State<AccessFormDesktopView> {
                       borderRadius: BorderRadius.circular(12))),
               child: const Text('Cancelar')),
           const SizedBox(width: 16),
-          FilledButton(
-              onPressed: _submitForm,
+          Obx(() => FilledButton(
+              onPressed: _controller.isLoading ? null : _submitForm,
               style: FilledButton.styleFrom(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 48, vertical: 20),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12))),
-              child: Text(isEditing ? 'Salvar Alterações' : 'Criar Conta')),
+              child: _controller.isLoading
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Text(isEditing ? 'Salvar Alterações' : 'Criar Conta'))),
         ],
       ),
     );
