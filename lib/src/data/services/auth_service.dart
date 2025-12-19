@@ -11,10 +11,12 @@ class AuthService extends GetxService {
       FirebaseFirestore.instance; // Changed from FirebaseDatabase
   final SessionService _sessionService = Get.find<SessionService>();
 
-  // Observable para o usuário atual
+  // Observáveis para o usuário atual
   final Rxn<User> _firebaseUser = Rxn<User>();
+  final Rxn<UserModel> userData = Rxn<UserModel>();
 
   User? get currentUser => _firebaseUser.value;
+  UserModel? get currentUserData => userData.value;
 
   @override
   void onInit() {
@@ -27,10 +29,14 @@ class AuthService extends GetxService {
     }
 
     // Escuta as mudanças no estado de autenticação
-    // NOTA: Com a nova implementação usando instância secundária do Firebase para criar usuários,
-    // a criação de novos usuários NUNCA afeta a sessão do admin principal.
-    _auth.authStateChanges().listen((firebaseUser) {
+    _auth.authStateChanges().listen((firebaseUser) async {
       _firebaseUser.value = firebaseUser;
+      if (firebaseUser != null) {
+        // Busca os dados complementares no Firestore
+        userData.value = await getUserData(firebaseUser.uid);
+      } else {
+        userData.value = null;
+      }
     });
 
     // Restaura a sessão se ela existir
@@ -109,11 +115,9 @@ class AuthService extends GetxService {
         nome: nome,
         displayName: user.displayName ?? nome,
         photoURL: user.photoURL ?? '',
-        createdAt:
-            user.metadata.creationTime?.millisecondsSinceEpoch ??
+        createdAt: user.metadata.creationTime?.millisecondsSinceEpoch ??
             now.millisecondsSinceEpoch,
-        lastLoginAt:
-            user.metadata.lastSignInTime?.millisecondsSinceEpoch ??
+        lastLoginAt: user.metadata.lastSignInTime?.millisecondsSinceEpoch ??
             now.millisecondsSinceEpoch,
         cpf: '', // Padrão
         telefone: '', // Padrão

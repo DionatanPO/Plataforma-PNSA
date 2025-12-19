@@ -17,6 +17,20 @@ class SessionService extends GetxService {
     return _auth.currentUser != null;
   }
 
+  String get userName =>
+      Get.find<AuthService>().currentUserData?.nome ??
+      getSession()?['nome'] ??
+      'Usuário';
+
+  // Getters de função (Perfil)
+  String get userRole => Get.find<AuthService>().currentUserData?.funcao ?? '';
+
+  bool get isAdmin => userRole == 'Administrador';
+  bool get isSecretaria => userRole == 'Secretaria' || isAdmin;
+  bool get isFinanceiro => userRole == 'Financeiro' || isAdmin;
+  bool get isAgente => userRole == 'Agente de Dízimo' || isAdmin;
+  bool get isMembro => userRole == 'Membro';
+
   // Obtém o UID do usuário atual
   String? get currentUserId {
     return _auth.currentUser?.uid;
