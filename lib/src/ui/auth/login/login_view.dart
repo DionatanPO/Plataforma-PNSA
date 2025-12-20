@@ -416,6 +416,9 @@ class _ModernInputState extends State<_ModernInput> {
               controller: widget.controller,
               obscureText: widget.obscureText,
               keyboardType: widget.inputType,
+              autofillHints: const [],
+              enableSuggestions: false,
+              autocorrect: false,
               style: GoogleFonts.inter(fontSize: 16), // Fonte maior para mobile
               decoration: InputDecoration(
                 isDense: true,

@@ -69,6 +69,14 @@
     <span class="loader"></span>
   </div>
 
+  <script>
+    function removeSplashFromWeb() {
+      var loader = document.getElementById('loading-indicator');
+      if (loader) {
+        loader.remove();
+      }
+    }
+  </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 

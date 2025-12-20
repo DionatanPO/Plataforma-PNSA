@@ -27,11 +27,11 @@ class LoginController extends GetxController {
   void onInit() {
     super.onInit();
     _loginModel = LoginModel(
-      email: 'test@example.com',
-      password: '123456',
+      email: '',
+      password: '',
     );
-    emailController.text = _loginModel.email;
-    passwordController.text = _loginModel.password;
+    emailController.text = '';
+    passwordController.text = '';
   }
 
   void togglePasswordVisibility() {

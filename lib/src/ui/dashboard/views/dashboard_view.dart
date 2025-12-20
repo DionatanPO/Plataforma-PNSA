@@ -35,12 +35,12 @@ class DashboardView extends StatelessWidget {
     final crossAxisCount = isDesktop ? 3 : (isTablet ? 2 : 1);
     final padding = isDesktop ? 32.0 : 24.0;
 
-    // Cálculo do aspect ratio dinâmico
-    double cardHeightTarget = 180.0;
+    double cardHeightTarget =
+        190.0; // Aumentado para evitar o overflow de 9.4px
     if (isTablet) {
-      cardHeightTarget = 200.0;
+      cardHeightTarget = 210.0;
     } else if (!isDesktop) {
-      cardHeightTarget = 160.0;
+      cardHeightTarget = 185.0; // Aumentado para dar mais folga vertical
     }
 
     final double availableWidth =
@@ -59,7 +59,9 @@ class DashboardView extends StatelessWidget {
           physics: const BouncingScrollPhysics(),
           slivers: [
             SliverAppBar(
-              toolbarHeight: width < 600 ? 80 : 120,
+              toolbarHeight: width < 600
+                  ? 90
+                  : 130, // Aumentado para evitar overflow no título
               titleSpacing: 0,
               floating: true,
               pinned: false,
@@ -515,6 +517,8 @@ class DashboardView extends StatelessWidget {
                                       color: theme.colorScheme.onSurface
                                           .withOpacity(0.5),
                                     ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                   trailing: Text(
                                     controller.formatCurrency(c.valor),
@@ -663,6 +667,7 @@ class DashboardView extends StatelessWidget {
                       final agentName = controller.getAgentName(c.usuarioId);
                       final agentFunc =
                           controller.getAgentFunction(c.usuarioId);
+                      final width = MediaQuery.of(context).size.width;
 
                       return Container(
                         padding: const EdgeInsets.all(16),
@@ -671,118 +676,222 @@ class DashboardView extends StatelessWidget {
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(color: borderColor),
                         ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              flex: 3,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    c.dizimistaNome,
-                                    style: GoogleFonts.inter(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    c.tipo,
-                                    style: GoogleFonts.inter(
-                                      fontSize: 13,
-                                      color: theme.colorScheme.onSurface
-                                          .withOpacity(0.6),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            // Forma de Pagamento
-                            Expanded(
-                              flex: 2,
-                              child: Text(
-                                c.metodo,
-                                style: GoogleFonts.inter(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w500,
-                                  color: theme.colorScheme.onSurface
-                                      .withOpacity(0.7),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 3,
-                              child: Column(
+                        child: width < 800
+                            ? Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
-                                      const Icon(Icons.person_pin_rounded,
-                                          size: 14, color: Colors.blue),
-                                      const SizedBox(width: 6),
-                                      Text(
-                                        agentName,
-                                        style: GoogleFonts.inter(
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 13,
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              c.dizimistaNome,
+                                              style: GoogleFonts.inter(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 15,
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            Text(
+                                              '${c.tipo} • ${c.metodo}',
+                                              style: GoogleFonts.inter(
+                                                fontSize: 12,
+                                                color: theme
+                                                    .colorScheme.onSurface
+                                                    .withOpacity(0.5),
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    agentFunc,
-                                    style: GoogleFonts.inter(
-                                      fontSize: 11,
-                                      color: theme.colorScheme.onSurface
-                                          .withOpacity(0.4),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Expanded(
-                              flex: 3,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: [
-                                      IconButton(
-                                        onPressed: () => controller
-                                            .downloadOrShareReceiptPdf(c),
-                                        icon: const Icon(
-                                            Icons.receipt_long_rounded,
-                                            size: 20),
-                                        tooltip: 'Gerar Recibo',
-                                        color: theme.primaryColor,
-                                      ),
-                                      const SizedBox(width: 8),
                                       Text(
                                         controller.formatCurrency(c.valor),
                                         style: GoogleFonts.outfit(
                                           fontWeight: FontWeight.bold,
                                           color: Colors.green,
-                                          fontSize: 18,
+                                          fontSize: 16,
                                         ),
                                       ),
                                     ],
                                   ),
-                                  Text(
-                                    DateFormat('dd/MM/yy HH:mm')
-                                        .format(c.dataRegistro),
-                                    style: GoogleFonts.inter(
-                                      fontSize: 11,
-                                      color: theme.colorScheme.onSurface
-                                          .withOpacity(0.4),
+                                  const SizedBox(height: 12),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Row(
+                                          children: [
+                                            const Icon(Icons.person_pin_rounded,
+                                                size: 14, color: Colors.blue),
+                                            const SizedBox(width: 6),
+                                            Flexible(
+                                              child: Text(
+                                                agentName,
+                                                style: GoogleFonts.inter(
+                                                  fontWeight: FontWeight.w600,
+                                                  fontSize: 12,
+                                                ),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Row(
+                                        children: [
+                                          Text(
+                                            DateFormat('dd/MM HH:mm')
+                                                .format(c.dataRegistro),
+                                            style: GoogleFonts.inter(
+                                              fontSize: 11,
+                                              color: theme.colorScheme.onSurface
+                                                  .withOpacity(0.4),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          IconButton(
+                                            onPressed: () => controller
+                                                .downloadOrShareReceiptPdf(c),
+                                            icon: const Icon(
+                                                Icons.receipt_long_rounded,
+                                                size: 20),
+                                            constraints: const BoxConstraints(),
+                                            padding: EdgeInsets.zero,
+                                            tooltip: 'Gerar Recibo',
+                                            color: theme.primaryColor,
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              )
+                            : Row(
+                                children: [
+                                  Expanded(
+                                    flex: 3,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          c.dizimistaNome,
+                                          style: GoogleFonts.inter(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          c.tipo,
+                                          style: GoogleFonts.inter(
+                                            fontSize: 13,
+                                            color: theme.colorScheme.onSurface
+                                                .withOpacity(0.6),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 2,
+                                    child: Text(
+                                      c.metodo,
+                                      style: GoogleFonts.inter(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w500,
+                                        color: theme.colorScheme.onSurface
+                                            .withOpacity(0.7),
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 3,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            const Icon(Icons.person_pin_rounded,
+                                                size: 14, color: Colors.blue),
+                                            const SizedBox(width: 6),
+                                            Flexible(
+                                              child: Text(
+                                                agentName,
+                                                style: GoogleFonts.inter(
+                                                  fontWeight: FontWeight.w600,
+                                                  fontSize: 13,
+                                                ),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          agentFunc,
+                                          style: GoogleFonts.inter(
+                                            fontSize: 11,
+                                            color: theme.colorScheme.onSurface
+                                                .withOpacity(0.4),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 3,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.end,
+                                          children: [
+                                            IconButton(
+                                              onPressed: () => controller
+                                                  .downloadOrShareReceiptPdf(c),
+                                              icon: const Icon(
+                                                  Icons.receipt_long_rounded,
+                                                  size: 20),
+                                              tooltip: 'Gerar Recibo',
+                                              color: theme.primaryColor,
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Text(
+                                              controller
+                                                  .formatCurrency(c.valor),
+                                              style: GoogleFonts.outfit(
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.green,
+                                                fontSize: 18,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        Text(
+                                          DateFormat('dd/MM/yy HH:mm')
+                                              .format(c.dataRegistro),
+                                          style: GoogleFonts.inter(
+                                            fontSize: 11,
+                                            color: theme.colorScheme.onSurface
+                                                .withOpacity(0.4),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ],
                               ),
-                            ),
-                          ],
-                        ),
                       );
                     },
                   );
@@ -905,11 +1014,16 @@ class _ResponsiveStatCardState extends State<_ResponsiveStatCard> {
             const SizedBox(height: 4),
             Row(
               children: [
-                Text(
-                  widget.title,
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    color: widget.theme.colorScheme.onSurface.withOpacity(0.5),
+                Expanded(
+                  child: Text(
+                    widget.title,
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color:
+                          widget.theme.colorScheme.onSurface.withOpacity(0.5),
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
                   ),
                 ),
                 if (widget.subtitle != null) ...[
