@@ -1,3 +1,32 @@
+class ContribuicaoCompetencia {
+  final String mesReferencia; // ex: 2024-03
+  final double valor;
+
+  ContribuicaoCompetencia({
+    required this.mesReferencia,
+    required this.valor,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'mesReferencia': mesReferencia,
+      'valor': valor,
+    };
+  }
+
+  factory ContribuicaoCompetencia.fromMap(Map<String, dynamic> map) {
+    return ContribuicaoCompetencia(
+      mesReferencia: map['mesReferencia'] ?? '',
+      valor: (map['valor'] is int)
+          ? (map['valor'] as int).toDouble()
+          : map['valor']?.toDouble() ?? 0.0,
+    );
+  }
+
+  @override
+  String toString() => '($mesReferencia: R\$ $valor)';
+}
+
 class Contribuicao {
   final String id;
   final String dizimistaId;
@@ -7,6 +36,9 @@ class Contribuicao {
   final String metodo;
   final DateTime dataRegistro;
   final String usuarioId;
+  final String? observacao;
+  final List<ContribuicaoCompetencia> competencias;
+  final List<String> mesesCompetencia;
 
   Contribuicao({
     required this.id,
@@ -17,6 +49,9 @@ class Contribuicao {
     required this.metodo,
     required this.dataRegistro,
     required this.usuarioId,
+    this.observacao,
+    this.competencias = const [],
+    this.mesesCompetencia = const [],
   });
 
   Contribuicao copyWith({
@@ -28,6 +63,9 @@ class Contribuicao {
     String? metodo,
     DateTime? dataRegistro,
     String? usuarioId,
+    String? observacao,
+    List<ContribuicaoCompetencia>? competencias,
+    List<String>? mesesCompetencia,
   }) {
     return Contribuicao(
       id: id ?? this.id,
@@ -38,6 +76,9 @@ class Contribuicao {
       metodo: metodo ?? this.metodo,
       dataRegistro: dataRegistro ?? this.dataRegistro,
       usuarioId: usuarioId ?? this.usuarioId,
+      observacao: observacao ?? this.observacao,
+      competencias: competencias ?? this.competencias,
+      mesesCompetencia: mesesCompetencia ?? this.mesesCompetencia,
     );
   }
 
@@ -51,6 +92,9 @@ class Contribuicao {
       'metodo': metodo,
       'dataRegistro': dataRegistro.millisecondsSinceEpoch,
       'usuarioId': usuarioId,
+      'observacao': observacao,
+      'competencias': competencias.map((x) => x.toMap()).toList(),
+      'mesesCompetencia': mesesCompetencia,
     };
   }
 
@@ -67,12 +111,20 @@ class Contribuicao {
       dataRegistro:
           DateTime.fromMillisecondsSinceEpoch(map['dataRegistro'] ?? 0),
       usuarioId: map['usuarioId'] ?? '',
+      observacao: map['observacao'],
+      competencias: map['competencias'] != null
+          ? List<ContribuicaoCompetencia>.from(map['competencias']
+              .map((x) => ContribuicaoCompetencia.fromMap(x)))
+          : [],
+      mesesCompetencia: map['mesesCompetencia'] != null
+          ? List<String>.from(map['mesesCompetencia'])
+          : [],
     );
   }
 
   @override
   String toString() {
-    return 'Contribuicao(id: $id, dizimistaId: $dizimistaId, dizimistaNome: $dizimistaNome,  tipo: $tipo, valor: $valor, metodo: $metodo, dataRegistro: $dataRegistro)';
+    return 'Contribuicao(id: $id, dizimistaId: $dizimistaId, dizimistaNome: $dizimistaNome, tipo: $tipo, valor: $valor, metodo: $metodo, dataRegistro: $dataRegistro, competencias: $competencias)';
   }
 
   @override

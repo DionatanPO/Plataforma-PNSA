@@ -15,6 +15,9 @@ class ContribuicaoService {
       'metodo': contribuicao.metodo,
       'dataRegistro': contribuicao.dataRegistro.millisecondsSinceEpoch,
       'usuarioId': contribuicao.usuarioId,
+      'observacao': contribuicao.observacao,
+      'competencias': contribuicao.competencias.map((c) => c.toMap()).toList(),
+      'mesesCompetencia': contribuicao.mesesCompetencia,
     };
   }
 
@@ -33,6 +36,14 @@ class ContribuicaoService {
       dataRegistro:
           DateTime.fromMillisecondsSinceEpoch(data['dataRegistro'] ?? 0),
       usuarioId: data['usuarioId'] ?? '',
+      observacao: data['observacao'],
+      competencias: data['competencias'] != null
+          ? List<ContribuicaoCompetencia>.from(data['competencias']
+              .map((x) => ContribuicaoCompetencia.fromMap(x)))
+          : [],
+      mesesCompetencia: data['mesesCompetencia'] != null
+          ? List<String>.from(data['mesesCompetencia'])
+          : [],
     );
   }
 
@@ -108,6 +119,18 @@ class ContribuicaoService {
         .where('dataRegistro',
             isLessThanOrEqualTo: endDate.millisecondsSinceEpoch)
         .orderBy('dataRegistro', descending: true)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map((doc) => _fromFirestoreDocument(doc)).toList();
+    });
+  }
+
+  // Obter contribuições por mês de competência (Referência)
+  static Stream<List<Contribuicao>> getContribuicoesByCompetence(
+      String mesReferencia) {
+    return FirebaseFirestore.instance
+        .collection(_collectionName)
+        .where('mesesCompetencia', arrayContains: mesReferencia)
         .snapshots()
         .map((snapshot) {
       return snapshot.docs.map((doc) => _fromFirestoreDocument(doc)).toList();

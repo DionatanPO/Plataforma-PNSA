@@ -106,6 +106,18 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Obx(() {
+                      if (controller.isCompetenceMode.value) {
+                        return Text(
+                          'Relatório de Competência - ${controller.selectedCompetenceMonth.value}',
+                          style: GoogleFonts.outfit(
+                            fontSize: size.width < 600 ? 20 : 28,
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.onSurface,
+                            letterSpacing: -0.5,
+                            height: 1.2,
+                          ),
+                        );
+                      }
                       if (controller.isRangeMode.value &&
                           controller.selectedRange.value != null) {
                         final start = DateFormat('dd/MM/yy')
@@ -134,61 +146,27 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
                         ),
                       );
                     }),
-                    Text(
-                      'Visão geral de contribuições do dia',
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        color: theme.colorScheme.onSurface.withOpacity(0.5),
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
+                    Obx(() => Text(
+                          controller.isCompetenceMode.value
+                              ? 'Valores referentes à competência (mês de referência)'
+                              : 'Visão geral de contribuições do dia (fluxo de caixa)',
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            color: theme.colorScheme.onSurface.withOpacity(0.5),
+                            fontWeight: FontWeight.w400,
+                          ),
+                        )),
                   ],
                 ),
               ),
               actions: [
                 IconButton(
-                  tooltip: 'Escolher Dia',
-                  icon: const Icon(Icons.calendar_today_outlined),
-                  color: theme.colorScheme.onSurface,
-                  onPressed: () async {
-                    final date = await showDatePicker(
-                      context: context,
-                      initialDate: controller.selectedDate.value,
-                      firstDate: DateTime(2020),
-                      lastDate: DateTime(2030),
-                    );
-                    if (date != null) {
-                      controller.updateDate(date);
-                    }
-                  },
+                  tooltip: 'Gerar PDF do Relatório',
+                  icon: const Icon(Icons.picture_as_pdf_outlined),
+                  color: theme.colorScheme.primary,
+                  onPressed: () => controller.downloadOrShareDailyReportPdf(),
                 ),
-                IconButton(
-                  tooltip: 'Escolher Período',
-                  icon: const Icon(Icons.date_range_outlined),
-                  color: theme.colorScheme.onSurface,
-                  onPressed: () async {
-                    final range = await showDateRangePicker(
-                      context: context,
-                      initialDateRange: controller.selectedRange.value,
-                      firstDate: DateTime(2020),
-                      lastDate: DateTime(2030),
-                      builder: (context, child) {
-                        return Theme(
-                          data: theme.copyWith(
-                            colorScheme: theme.colorScheme.copyWith(
-                              primary: theme.primaryColor,
-                            ),
-                          ),
-                          child: child!,
-                        );
-                      },
-                    );
-                    if (range != null) {
-                      controller.updateRange(range);
-                    }
-                  },
-                ),
-                const SizedBox(width: 20),
+                const SizedBox(width: 16),
               ],
             ),
 
@@ -199,6 +177,13 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
               ),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
+                  // CONTROL PANEL
+                  _buildAnimatedSection(
+                    index: 0,
+                    child: _buildReportControls(context),
+                  ),
+                  const SizedBox(height: 24),
+
                   // PAYMENT METHODS SUMMARY
                   _buildAnimatedSection(
                     index: 0,
@@ -441,6 +426,178 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
   }
 
   // Helper para animação em cascata
+  Widget _buildReportControls(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF202020) : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'O que você deseja ver no relatório?',
+            style: GoogleFonts.outfit(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 16),
+          LayoutBuilder(builder: (context, constraints) {
+            return Obx(() => ToggleButtons(
+                  borderRadius: BorderRadius.circular(12),
+                  selectedColor: Colors.white,
+                  fillColor: theme.primaryColor,
+                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                  isSelected: [
+                    !controller.isCompetenceMode.value,
+                    controller.isCompetenceMode.value,
+                  ],
+                  onPressed: (index) {
+                    if (index == 0) {
+                      controller.isCompetenceMode.value = false;
+                    } else {
+                      _showCompetencePicker(context);
+                    }
+                  },
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.payments_outlined),
+                          const SizedBox(height: 4),
+                          Text('Entradas Hoje',
+                              style: GoogleFonts.inter(
+                                  fontSize: 12, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.calendar_month_outlined),
+                          const SizedBox(height: 4),
+                          Text('Dízimo por Mês',
+                              style: GoogleFonts.inter(
+                                  fontSize: 12, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ));
+          }),
+          const SizedBox(height: 24),
+          const Divider(),
+          const SizedBox(height: 16),
+          Obx(() {
+            if (!controller.isCompetenceMode.value) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Entradas por Data',
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Mostra tudo o que foi pago fisicamente na data selecionada.',
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: theme.colorScheme.onSurface.withOpacity(0.5),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      FilledButton.icon(
+                        onPressed: () async {
+                          final date = await showDatePicker(
+                            context: context,
+                            initialDate: controller.selectedDate.value,
+                            firstDate: DateTime(2020),
+                            lastDate: DateTime(2030),
+                          );
+                          if (date != null) controller.updateDate(date);
+                        },
+                        icon:
+                            const Icon(Icons.calendar_today_rounded, size: 18),
+                        label: const Text('Mudar Dia'),
+                      ),
+                      const SizedBox(width: 12),
+                      OutlinedButton.icon(
+                        onPressed: () async {
+                          final range = await showDateRangePicker(
+                            context: context,
+                            initialDateRange: controller.selectedRange.value,
+                            firstDate: DateTime(2020),
+                            lastDate: DateTime(2030),
+                          );
+                          if (range != null) controller.updateRange(range);
+                        },
+                        icon: const Icon(Icons.date_range_rounded, size: 18),
+                        label: const Text('Ver Período'),
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            } else {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Referência: Mês selecionado',
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Mostra a quais meses o dízimo se refere, ignorando quando foi pago.',
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: theme.colorScheme.onSurface.withOpacity(0.5),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  FilledButton.icon(
+                    onPressed: () => _showCompetencePicker(context),
+                    icon: const Icon(Icons.edit_calendar_rounded, size: 18),
+                    label: Text(
+                        'Trocar para outro mês (${controller.selectedCompetenceMonth.value})'),
+                  ),
+                ],
+              );
+            }
+          }),
+        ],
+      ),
+    );
+  }
+
   Widget _buildAnimatedSection({required int index, required Widget child}) {
     return SlideTransition(
       position:
@@ -459,6 +616,65 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
         ),
         child: child,
       ),
+    );
+  }
+
+  void _showCompetencePicker(BuildContext context) async {
+    final now = DateTime.now();
+    // Parse current selection
+    final currentParts = controller.selectedCompetenceMonth.value.split('-');
+    int selectedYear = int.tryParse(currentParts[0]) ?? now.year;
+    int selectedMonth = int.tryParse(currentParts[1]) ?? now.month;
+
+    await Get.dialog(
+      StatefulBuilder(builder: (context, setDialogState) {
+        return AlertDialog(
+          title: Text(
+            'Mês de Referência',
+            style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+          ),
+          content: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Expanded(
+                child: DropdownButton<int>(
+                  value: selectedYear,
+                  items: List.generate(10, (index) => now.year - 5 + index)
+                      .map((y) =>
+                          DropdownMenuItem(value: y, child: Text(y.toString())))
+                      .toList(),
+                  onChanged: (val) => setDialogState(() => selectedYear = val!),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: DropdownButton<int>(
+                  value: selectedMonth,
+                  items: List.generate(12, (index) => index + 1)
+                      .map((m) => DropdownMenuItem(
+                          value: m, child: Text(m.toString().padLeft(2, '0'))))
+                      .toList(),
+                  onChanged: (val) =>
+                      setDialogState(() => selectedMonth = val!),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+                onPressed: () => Get.back(), child: const Text('Cancelar')),
+            FilledButton(
+              onPressed: () {
+                controller.isCompetenceMode.value = true;
+                controller.selectedCompetenceMonth.value =
+                    '$selectedYear-${selectedMonth.toString().padLeft(2, '0')}';
+                Get.back();
+              },
+              child: const Text('Filtrar'),
+            ),
+          ],
+        );
+      }),
     );
   }
 }

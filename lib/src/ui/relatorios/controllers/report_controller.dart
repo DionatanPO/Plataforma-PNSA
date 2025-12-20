@@ -31,6 +31,9 @@ class ReportController extends GetxController {
   final Rx<DateTime> selectedDate = DateTime.now().obs;
   final Rxn<DateTimeRange> selectedRange = Rxn<DateTimeRange>();
   final RxBool isRangeMode = false.obs;
+  final RxBool isCompetenceMode = false.obs;
+  final RxString selectedCompetenceMonth =
+      DateFormat('yyyy-MM').format(DateTime.now()).obs;
 
   @override
   void onInit() {
@@ -51,6 +54,7 @@ class ReportController extends GetxController {
 
     ever(isRangeMode, (rangeMode) {
       if (rangeMode) {
+        isCompetenceMode.value = false;
         if (selectedRange.value != null) {
           fetchPeriodReport(
               selectedRange.value!.start, selectedRange.value!.end);
@@ -58,6 +62,19 @@ class ReportController extends GetxController {
       } else {
         fetchDailyReport(selectedDate.value);
       }
+    });
+
+    ever(isCompetenceMode, (compMode) {
+      if (compMode) {
+        isRangeMode.value = false;
+        fetchCompetenceReport(selectedCompetenceMonth.value);
+      } else {
+        fetchDailyReport(selectedDate.value);
+      }
+    });
+
+    ever(selectedCompetenceMonth, (month) {
+      if (isCompetenceMode.value) fetchCompetenceReport(month);
     });
   }
 
@@ -102,6 +119,28 @@ class ReportController extends GetxController {
     }
   }
 
+  Future<void> fetchCompetenceReport(String month) async {
+    isLoading.value = true;
+    try {
+      final stream = ContribuicaoService.getContribuicoesByCompetence(month);
+
+      stream.listen(
+        (lista) {
+          contribuicoes.value = lista;
+          _calculateTotals(lista);
+          isLoading.value = false;
+        },
+        onError: (e) {
+          print("Erro ao buscar competências: $e");
+          isLoading.value = false;
+        },
+      );
+    } catch (e) {
+      print("Erro no controller (competência): $e");
+      isLoading.value = false;
+    }
+  }
+
   void _calculateTotals(List<Contribuicao> lista) {
     double total = 0;
     double dizimos = 0;
@@ -114,29 +153,44 @@ class ReportController extends GetxController {
     double transferencia = 0;
 
     for (var c in lista) {
-      total += c.valor;
+      double valorCalculado = c.valor;
+
+      // Se estiver em modo competência, usar apenas o valor daquela competência
+      if (isCompetenceMode.value) {
+        try {
+          final comp = c.competencias.firstWhere(
+            (cp) => cp.mesReferencia == selectedCompetenceMonth.value,
+          );
+          valorCalculado = comp.valor;
+        } catch (_) {
+          // Se não achar (não deveria acontecer pelo filtro), pula ou usa 0
+          valorCalculado = 0;
+        }
+      }
+
+      total += valorCalculado;
       if (c.tipo.toLowerCase().contains('dízimo') ||
           c.tipo.toLowerCase().contains('dizimo')) {
-        dizimos += c.valor;
+        dizimos += valorCalculado;
       } else if (c.tipo.toLowerCase().contains('oferta')) {
-        ofertas += c.valor;
+        ofertas += valorCalculado;
       }
 
       final metodo = c.metodo.toLowerCase();
       if (metodo.contains('dinheiro') || metodo.contains('espécie')) {
-        dinheiro += c.valor;
+        dinheiro += valorCalculado;
       } else if (metodo.contains('pix')) {
-        pix += c.valor;
+        pix += valorCalculado;
       } else if (metodo.contains('cartão') ||
           metodo.contains('cartao') ||
           metodo.contains('crédito') ||
           metodo.contains('débito')) {
-        cartao += c.valor;
+        cartao += valorCalculado;
       } else if (metodo.contains('transferência') ||
           metodo.contains('transferencia') ||
           metodo.contains('ted') ||
           metodo.contains('doc')) {
-        transferencia += c.valor;
+        transferencia += valorCalculado;
       }
     }
 
@@ -253,9 +307,11 @@ class ReportController extends GetxController {
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
                     pw.Text(
-                      isRangeMode.value
-                          ? 'RELATÓRIO POR PERÍODO'
-                          : 'RELATÓRIO DIÁRIO',
+                      isCompetenceMode.value
+                          ? 'RELATÓRIO DE COMPETÊNCIA'
+                          : isRangeMode.value
+                              ? 'RELATÓRIO POR PERÍODO'
+                              : 'RELATÓRIO DIÁRIO',
                       style: pw.TextStyle(
                         fontSize: 18,
                         fontWeight: pw.FontWeight.bold,
@@ -263,11 +319,13 @@ class ReportController extends GetxController {
                       ),
                     ),
                     pw.Text(
-                      'PARÓQUIA NOSSA SENHORA AUXILIADORA',
+                      isCompetenceMode.value
+                          ? 'MÊS DE REFERÊNCIA: ${selectedCompetenceMonth.value}'
+                          : 'PARÓQUIA NOSSA SENHORA AUXILIADORA',
                       style: pw.TextStyle(
                         color: PdfColors.grey600,
                         fontSize: 9,
-                        letterSpacing: 2.0,
+                        letterSpacing: isCompetenceMode.value ? 1.0 : 2.0,
                       ),
                     ),
                   ],
@@ -283,9 +341,11 @@ class ReportController extends GetxController {
                     borderRadius: pw.BorderRadius.circular(20),
                   ),
                   child: pw.Text(
-                    isRangeMode.value && selectedRange.value != null
-                        ? '${DateFormat('dd/MM/yy').format(selectedRange.value!.start)} - ${DateFormat('dd/MM/yy').format(selectedRange.value!.end)}'
-                        : dateFormat.format(selectedDate.value),
+                    isCompetenceMode.value
+                        ? 'COMPETÊNCIA'
+                        : isRangeMode.value && selectedRange.value != null
+                            ? '${DateFormat('dd/MM/yy').format(selectedRange.value!.start)} - ${DateFormat('dd/MM/yy').format(selectedRange.value!.end)}'
+                            : dateFormat.format(selectedDate.value),
                     style: pw.TextStyle(
                       fontWeight: pw.FontWeight.bold,
                       color: PdfColors.grey800,
@@ -394,11 +454,23 @@ class ReportController extends GetxController {
             pw.Table.fromTextArray(
               headers: ['Nome', 'Tipo', 'Método', 'Valor'],
               data: contribuicoes.map((c) {
+                double valorCalculado = c.valor;
+                if (isCompetenceMode.value) {
+                  try {
+                    final comp = c.competencias.firstWhere(
+                      (cp) => cp.mesReferencia == selectedCompetenceMonth.value,
+                    );
+                    valorCalculado = comp.valor;
+                  } catch (_) {
+                    valorCalculado = 0;
+                  }
+                }
+
                 return [
                   c.dizimistaNome.isNotEmpty ? c.dizimistaNome : 'Anônimo',
                   c.tipo,
                   c.metodo,
-                  currency.format(c.valor),
+                  currency.format(valorCalculado),
                 ];
               }).toList(),
               headerStyle: pw.TextStyle(

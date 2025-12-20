@@ -42,13 +42,103 @@ class ContribuicaoController extends GetxController {
   final tipo = 'Dízimo Regular'.obs; // Transformar em observável
   final metodo = 'PIX'.obs; // Transformar em observável
   final valor = ''.obs; // Transformar em observável
+  final observacao = ''.obs;
+
+  // Lista de competências (mês/ano e valor)
+  final competencias = <ContribuicaoCompetencia>[].obs;
+
   double valorNumerico = 0.0;
+
+  // Método para adicionar uma competência
+  void adicionarCompetencia(String mesAno, double valor) {
+    // Se já existe, remove primeiro
+    competencias.removeWhere((c) => c.mesReferencia == mesAno);
+    competencias
+        .add(ContribuicaoCompetencia(mesReferencia: mesAno, valor: valor));
+    competencias.sort((a, b) => a.mesReferencia.compareTo(b.mesReferencia));
+  }
+
+  // Método para remover uma competência
+  void removerCompetencia(String mesAno) {
+    competencias.removeWhere((c) => c.mesReferencia == mesAno);
+
+    // Recalcular se houver valor
+    if (valor.value.isNotEmpty) {
+      dividirValorEntreCompetencias();
+    }
+  }
+
+  // Método para limpar competências
+  void limparCompetencias() {
+    competencias.clear();
+  }
+
+  // Método para dividir o valor total igualmente entre as competências selecionadas
+  void dividirValorEntreCompetencias() {
+    if (competencias.isEmpty) return;
+
+    String valorLimpo = valor.value
+        .replaceAll('.', '')
+        .replaceAll('R\$', '')
+        .replaceAll(' ', '')
+        .replaceAll(',', '.');
+
+    double total = double.tryParse(valorLimpo) ?? 0.0;
+    if (total <= 0) return;
+
+    double valorPorMes = total / competencias.length;
+
+    // Atualizar a lista mantendo a ordem mas com novos valores
+    final novosMeses = competencias.map((c) => c.mesReferencia).toList();
+    competencias.clear();
+    for (var mes in novosMeses) {
+      competencias
+          .add(ContribuicaoCompetencia(mesReferencia: mes, valor: valorPorMes));
+    }
+  }
 
   @override
   void onInit() {
     super.onInit();
     fetchContribuicoes();
     fetchDizimistas();
+
+    // Recalcular divisão quando o valor mudar
+    ever(valor, (_) => dividirValorEntreCompetencias());
+
+    // Gerenciar competências baseado no tipo
+    ever(tipo, (String? novoTipo) {
+      if (novoTipo == 'Dízimo Regular') {
+        _sugerirMesAtual();
+      } else {
+        // Se for Atrasado, deixa o usuário escolher (limpa a sugestão automática)
+        competencias.clear();
+      }
+    });
+
+    // Inicialização
+    if (tipo.value == 'Dízimo Regular') {
+      _sugerirMesAtual();
+    }
+  }
+
+  void adicionarVariasCompetencias(List<String> meses) {
+    // Mantém os valores se já existirem, ou adiciona novos com 0
+    final novos = <ContribuicaoCompetencia>[];
+    for (var mes in meses) {
+      novos.add(ContribuicaoCompetencia(mesReferencia: mes, valor: 0));
+    }
+    competencias.assignAll(novos);
+    competencias.sort((a, b) => a.mesReferencia.compareTo(b.mesReferencia));
+    dividirValorEntreCompetencias();
+  }
+
+  void _sugerirMesAtual() {
+    final now = DateTime.now();
+    final mesRef = '${now.year}-${now.month.toString().padLeft(2, '0')}';
+    competencias.clear();
+    adicionarCompetencia(mesRef, 0);
+    dividirValorEntreCompetencias();
   }
 
   Future<void> fetchContribuicoes() async {
@@ -230,6 +320,32 @@ class ContribuicaoController extends GetxController {
     return true;
   }
 
+  String _formatMesReferencia(String mesRef) {
+    // 2024-03 -> Março/2024
+    final parts = mesRef.split('-');
+    if (parts.length != 2) return mesRef;
+
+    final year = parts[0];
+    final month = int.tryParse(parts[1]) ?? 1;
+
+    final months = [
+      'Jan',
+      'Fev',
+      'Mar',
+      'Abr',
+      'Mai',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Set',
+      'Out',
+      'Nov',
+      'Dez'
+    ];
+
+    return '${months[month - 1]}/$year';
+  }
+
   // ==================================================================
   // GERAÇÃO DE RECIBO PDF
   // ==================================================================
@@ -405,10 +521,34 @@ class ContribuicaoController extends GetxController {
                         text: contribuicao.tipo.toUpperCase(),
                         style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
                       ),
+                      if (contribuicao.competencias.isNotEmpty) ...[
+                        const pw.TextSpan(text: ' ('),
+                        pw.TextSpan(
+                          text: contribuicao.competencias
+                              .map((c) => _formatMesReferencia(c.mesReferencia))
+                              .join(', '),
+                          style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                        ),
+                        const pw.TextSpan(text: ')'),
+                      ],
                       const pw.TextSpan(text: '.'),
                     ],
                   ),
                 ),
+
+                if (contribuicao.observacao != null &&
+                    contribuicao.observacao!.isNotEmpty)
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.only(top: 8),
+                    child: pw.Text(
+                      'Obs: ${contribuicao.observacao}',
+                      style: pw.TextStyle(
+                        fontSize: 9,
+                        fontStyle: pw.FontStyle.italic,
+                        color: PdfColors.grey700,
+                      ),
+                    ),
+                  ),
 
                 pw.SizedBox(height: 15),
                 pw.Row(
@@ -506,8 +646,11 @@ class ContribuicaoController extends GetxController {
       tipo: tipo.value,
       valor: valorDouble,
       metodo: metodo.value,
-      dataRegistro: dataSelecionada.value,
+      dataRegistro: DateTime.now(),
       usuarioId: user?.uid ?? '',
+      observacao: observacao.value.isEmpty ? null : observacao.value,
+      competencias: List<ContribuicaoCompetencia>.from(competencias),
+      mesesCompetencia: competencias.map((c) => c.mesReferencia).toList(),
     );
   }
 }

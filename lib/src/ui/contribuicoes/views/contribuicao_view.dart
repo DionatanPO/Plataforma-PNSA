@@ -464,10 +464,12 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
               // Edit button (only shown when not selected)
               if (!isSelected)
                 IconButton(
-                  icon: Icon(Icons.edit_rounded, size: 20, color: theme.colorScheme.onSurfaceVariant),
+                  icon: Icon(Icons.edit_rounded,
+                      size: 20, color: theme.colorScheme.onSurfaceVariant),
                   onPressed: () {
                     // Navigate to edit dizimista view
-                    Get.toNamed(AppRoutes.dizimista_editar, arguments: dizimista);
+                    Get.toNamed(AppRoutes.dizimista_editar,
+                        arguments: dizimista);
                   },
                   padding: EdgeInsets.zero,
                   constraints: BoxConstraints.tight(const Size(32, 32)),
@@ -545,7 +547,8 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
           FilledButton.icon(
             onPressed: () {
               // Navigate to edit dizimista view
-              Get.toNamed(AppRoutes.dizimista_editar, arguments: controller.dizimistaSelecionado.value);
+              Get.toNamed(AppRoutes.dizimista_editar,
+                  arguments: controller.dizimistaSelecionado.value);
             },
             icon: Icon(Icons.edit_rounded, size: 16),
             label: Text('Editar Dados'),
@@ -687,7 +690,8 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
                 icon: Icon(Icons.edit_rounded, size: 20, color: accentColor),
                 onPressed: () {
                   // Navigate to edit dizimista view
-                  Get.toNamed(AppRoutes.dizimista_editar, arguments: controller.dizimistaSelecionado.value);
+                  Get.toNamed(AppRoutes.dizimista_editar,
+                      arguments: controller.dizimistaSelecionado.value);
                 },
                 padding: EdgeInsets.zero,
                 constraints: BoxConstraints.tight(const Size(32, 32)),
@@ -703,60 +707,17 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
         _label('Tipo de Contribuição'),
         _buildModernDropdown(
           value: controller.tipo.value,
-          items: ['Dízimo Regular', 'Dízimo Atrasado', 'Oferta', 'Doação'],
-          onChanged: (val) => setState(() => controller.tipo.value = val!),
+          items: ['Dízimo Regular', 'Dízimo Atrasado'],
+          onChanged: (val) {
+            setState(() => controller.tipo.value = val!);
+            if (val == 'Dízimo Atrasado') {
+              Future.delayed(
+                  const Duration(milliseconds: 300), () => _showMonthPicker());
+            }
+          },
         ),
 
         const SizedBox(height: 20),
-
-        // Data e Hora
-        _label('Data do Recebimento'),
-        InkWell(
-          onTap: () => _pickDateTime(context),
-          borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
-          child: Container(
-            padding: EdgeInsets.all(isMobile ? 12 : 16),
-            decoration: BoxDecoration(
-              color: backgroundColor,
-              borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
-              border: Border.all(color: borderColor),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: accentColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    Icons.calendar_today_rounded,
-                    size: 18,
-                    color: accentColor,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Obx(
-                    () => Text(
-                      '${controller.dataSelecionada.value.day.toString().padLeft(2, '0')}/${controller.dataSelecionada.value.month.toString().padLeft(2, '0')}/${controller.dataSelecionada.value.year} às ${controller.dataSelecionada.value.hour.toString().padLeft(2, '0')}:${controller.dataSelecionada.value.minute.toString().padLeft(2, '0')}',
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: theme.colorScheme.onSurface,
-                      ),
-                    ),
-                  ),
-                ),
-                Icon(
-                  Icons.chevron_right_rounded,
-                  size: 20,
-                  color: theme.colorScheme.onSurface.withOpacity(0.3),
-                ),
-              ],
-            ),
-          ),
-        ),
 
         const SizedBox(height: 24),
 
@@ -812,8 +773,355 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
             ],
           ),
         ),
+
+        const SizedBox(height: 24),
+
+        // Observação
+        _label('Observação (Opcional)'),
+        Container(
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: borderColor),
+          ),
+          child: TextField(
+            onChanged: (val) => controller.observacao.value = val,
+            maxLines: 2,
+            style: GoogleFonts.inter(fontSize: 14),
+            decoration: InputDecoration(
+              hintText: 'Ex: Pagamento referente aos meses em atraso...',
+              hintStyle: GoogleFonts.inter(
+                color: theme.colorScheme.onSurface.withOpacity(0.3),
+                fontSize: 14,
+              ),
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.all(16),
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 32),
+
+        // Meses de Referência (Competência) - Apenas se for Atrasado
+        Obx(() => controller.tipo.value == 'Dízimo Atrasado'
+            ? _buildCompetenciaSection()
+            : const SizedBox.shrink()),
       ],
     );
+  }
+
+  Widget _buildCompetenciaSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _label('Meses de Referência (Competência)'),
+            TextButton.icon(
+              onPressed: () => _showMonthPicker(),
+              icon: const Icon(Icons.calendar_month_rounded, size: 18),
+              label: const Text('Adicionar Mês'),
+              style: TextButton.styleFrom(foregroundColor: accentColor),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Obx(() {
+          final isAtrasado = controller.tipo.value == 'Dízimo Atrasado';
+
+          if (controller.competencias.isEmpty) {
+            return InkWell(
+              onTap: () => _showMonthPicker(),
+              borderRadius: BorderRadius.circular(16),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: isAtrasado
+                      ? Colors.orange.withOpacity(0.05)
+                      : backgroundColor,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: isAtrasado
+                        ? Colors.orange.withOpacity(0.3)
+                        : borderColor,
+                    style: BorderStyle.solid,
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Icon(
+                      isAtrasado
+                          ? Icons.event_busy_rounded
+                          : Icons.history_edu_rounded,
+                      size: 36,
+                      color: isAtrasado
+                          ? Colors.orange
+                          : theme.colorScheme.onSurface.withOpacity(0.2),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      isAtrasado
+                          ? 'Dízimo Atrasado: Quais meses?'
+                          : 'Nenhum mês de referência selecionado',
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        fontWeight:
+                            isAtrasado ? FontWeight.w700 : FontWeight.w500,
+                        color: isAtrasado
+                            ? Colors.orange.shade800
+                            : theme.colorScheme.onSurface.withOpacity(0.4),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      isAtrasado
+                          ? 'Toque aqui para indicar os meses que o fiel está pagando'
+                          : 'Opcional: use para dízimos atrasados ou adiantados',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.inter(
+                        fontSize: 11,
+                        color: theme.colorScheme.onSurface.withOpacity(0.3),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          return Container(
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: borderColor),
+            ),
+            child: Column(
+              children: [
+                ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: controller.competencias.length,
+                  separatorBuilder: (context, index) => Divider(
+                    height: 1,
+                    color: borderColor,
+                    indent: 16,
+                    endIndent: 16,
+                  ),
+                  itemBuilder: (context, index) {
+                    final comp = controller.competencias[index];
+                    return ListTile(
+                      dense: true,
+                      title: Text(
+                        _formatMesReferencia(comp.mesReferencia),
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            _currencyFormatter.formatDouble(comp.valor),
+                            style: GoogleFonts.outfit(
+                              fontWeight: FontWeight.bold,
+                              color: accentColor,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton(
+                            icon: const Icon(
+                                Icons.remove_circle_outline_rounded,
+                                size: 20,
+                                color: Colors.redAccent),
+                            onPressed: () => controller
+                                .removerCompetencia(comp.mesReferencia),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: accentColor.withOpacity(0.05),
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(16),
+                      bottomRight: Radius.circular(16),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.auto_awesome_rounded,
+                          size: 14, color: accentColor),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Valor total dividido automaticamente',
+                        style: GoogleFonts.inter(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                          color: accentColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        }),
+      ],
+    );
+  }
+
+  String _formatMesReferencia(String mesRef) {
+    // 2024-03 -> Março de 2024
+    final parts = mesRef.split('-');
+    if (parts.length != 2) return mesRef;
+
+    final year = parts[0];
+    final month = int.tryParse(parts[1]) ?? 1;
+
+    final months = [
+      'Janeiro',
+      'Fevereiro',
+      'Março',
+      'Abril',
+      'Maio',
+      'Junho',
+      'Julho',
+      'Agosto',
+      'Setembro',
+      'Outubro',
+      'Novembro',
+      'Dezembro'
+    ];
+
+    return '${months[month - 1]} de $year';
+  }
+
+  void _showMonthPicker() async {
+    final now = DateTime.now();
+    int selectedYear = now.year;
+    final List<int> selectedMonths = controller.competencias
+        .map((c) => int.parse(c.mesReferencia.split('-')[1]))
+        .toList();
+
+    await Get.dialog(
+      StatefulBuilder(builder: (context, setDialogState) {
+        return AlertDialog(
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Selecionar Meses',
+                style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+              ),
+              DropdownButton<int>(
+                value: selectedYear,
+                underline: const SizedBox(),
+                items: List.generate(5, (index) => now.year - 2 + index)
+                    .map((y) => DropdownMenuItem(
+                        value: y,
+                        child: Text(y.toString(),
+                            style: GoogleFonts.inter(fontSize: 14))))
+                    .toList(),
+                onChanged: (val) => setDialogState(() => selectedYear = val!),
+              ),
+            ],
+          ),
+          content: SizedBox(
+            width: 320,
+            child: GridView.builder(
+              shrinkWrap: true,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10,
+                childAspectRatio: 1.5,
+              ),
+              itemCount: 12,
+              itemBuilder: (context, index) {
+                final month = index + 1;
+                final isSelected = selectedMonths.contains(month);
+                return InkWell(
+                  onTap: () {
+                    setDialogState(() {
+                      if (isSelected) {
+                        selectedMonths.remove(month);
+                      } else {
+                        selectedMonths.add(month);
+                      }
+                    });
+                  },
+                  borderRadius: BorderRadius.circular(8),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? accentColor
+                          : theme.colorScheme.surfaceVariant.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: isSelected ? accentColor : borderColor,
+                      ),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      _formatMonth(month),
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        fontWeight:
+                            isSelected ? FontWeight.bold : FontWeight.normal,
+                        color: isSelected
+                            ? Colors.white
+                            : theme.colorScheme.onSurface,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+                onPressed: () => Get.back(), child: const Text('Cancelar')),
+            FilledButton(
+              onPressed: () {
+                final List<String> mesesRef = selectedMonths
+                    .map((m) => '$selectedYear-${m.toString().padLeft(2, '0')}')
+                    .toList();
+                controller.adicionarVariasCompetencias(mesesRef);
+                Get.back();
+              },
+              child: const Text('Confirmar'),
+            ),
+          ],
+        );
+      }),
+    );
+  }
+
+  String _formatMonth(int m) {
+    final months = [
+      'Jan',
+      'Fev',
+      'Mar',
+      'Abr',
+      'Mai',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Set',
+      'Out',
+      'Nov',
+      'Dez'
+    ];
+    return months[m - 1];
   }
 
   Widget _buildStepNavigationButtons() {
@@ -922,6 +1230,22 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
       return;
     }
 
+    // Validação de competência se for Dízimo
+    if (controller.tipo.value.contains('Dízimo') &&
+        controller.competencias.isEmpty) {
+      Get.snackbar(
+        'Mês de Referência',
+        'Por favor, selecione ao menos um mês de referência para dízimos.',
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(24),
+        backgroundColor: Colors.orange,
+        colorText: Colors.white,
+        borderRadius: 12,
+        icon: Icon(Icons.calendar_month_rounded, color: Colors.white),
+      );
+      return;
+    }
+
     try {
       final novaContribuicao = controller.createContribuicaoFromForm();
       final contribuicaoSalva = await controller.addContribuicao(
@@ -971,6 +1295,8 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
 
       _valorController.clear();
       controller.valor.value = '';
+      controller.observacao.value = '';
+      controller.limparCompetencias();
       controller.dizimistaSelecionado.value = null;
       controller.dataSelecionada.value = DateTime.now();
       setState(() {
