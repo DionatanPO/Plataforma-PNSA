@@ -84,8 +84,19 @@ class ReportController extends GetxController {
   }
 
   void updateRange(DateTimeRange range) {
+    // Ajustar o fim do período para o último segundo do dia selecionado
+    final adjustedEnd = DateTime(
+      range.end.year,
+      range.end.month,
+      range.end.day,
+      23,
+      59,
+      59,
+    );
+    final adjustedRange = DateTimeRange(start: range.start, end: adjustedEnd);
+
     isRangeMode.value = true;
-    selectedRange.value = range;
+    selectedRange.value = adjustedRange;
   }
 
   Future<void> fetchDailyReport(DateTime date) async {

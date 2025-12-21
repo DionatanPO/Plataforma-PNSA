@@ -447,6 +447,7 @@ class _ModernInputState extends State<_ModernInput> {
                 contentPadding:
                     const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
               ),
+              validator: widget.validator,
             ),
           ),
         ),

@@ -54,67 +54,46 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
     return Scaffold(
       backgroundColor: backgroundColor,
       body: Scrollbar(
-        // Item essencial para Desktop
-        controller: _scrollController, // Controller vinculado
+        controller: _scrollController,
         thumbVisibility: true,
-        thickness: 8,
-        radius: const Radius.circular(4),
+        thickness: 6,
+        radius: const Radius.circular(3),
         child: CustomScrollView(
-          controller: _scrollController, // Controller vinculado
+          controller: _scrollController,
           physics: const BouncingScrollPhysics(),
           slivers: [
-            // HEADER FLUTUANTE ESTILO MACOS/WINDOWS
+            // APP BAR MODERNO
             SliverAppBar(
-              backgroundColor: backgroundColor.withOpacity(0.95),
+              backgroundColor: backgroundColor.withOpacity(0.9),
               surfaceTintColor: Colors.transparent,
               elevation: 0,
-              pinned: false,
-              floating: true,
-              snap: true,
-              toolbarHeight: size.width < 600 ? 80 : 100,
-              leading: !isDesktop
-                  ? IconButton(
-                      icon: Icon(
-                        Icons.menu,
-                        color: theme.colorScheme.onSurface,
-                      ),
-                      onPressed: () {
-                        if (Get.isRegistered<HomeController>()) {
-                          Get.find<HomeController>()
-                              .scaffoldKey
-                              .currentState
-                              ?.openDrawer();
-                        } else {
-                          Scaffold.of(context).openDrawer();
-                        }
-                      },
-                    )
-                  : null,
-              automaticallyImplyLeading: false,
-              titleSpacing: 0,
-              title: Padding(
-                padding: EdgeInsets.fromLTRB(
-                  size.width < 600
-                      ? 0
-                      : 24, // Matches ModernHeader/Dashboard logic
-                  16,
-                  16,
-                  16,
-                ),
-                child: Column(
+              pinned: true,
+              expandedHeight: 120,
+              flexibleSpace: FlexibleSpaceBar(
+                centerTitle: false,
+                titlePadding: EdgeInsets.symmetric(
+                    horizontal: isDesktop ? 60 : 20, vertical: 16),
+                title: Column(
+                  mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    Text(
+                      'Relatórios Financeiros',
+                      style: GoogleFonts.outfit(
+                        fontSize: size.width < 600 ? 18 : 24,
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.onSurface,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
                     Obx(() {
                       if (controller.isCompetenceMode.value) {
                         return Text(
-                          'Relatório de Competência - ${controller.selectedCompetenceMonth.value}',
-                          style: GoogleFonts.outfit(
-                            fontSize: size.width < 600 ? 20 : 28,
-                            fontWeight: FontWeight.bold,
-                            color: theme.colorScheme.onSurface,
-                            letterSpacing: -0.5,
-                            height: 1.2,
+                          'Referência: ${controller.selectedCompetenceMonth.value}',
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: theme.colorScheme.onSurface.withOpacity(0.5),
+                            fontWeight: FontWeight.w400,
                           ),
                         );
                       }
@@ -125,180 +104,88 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
                         final end = DateFormat('dd/MM/yy')
                             .format(controller.selectedRange.value!.end);
                         return Text(
-                          'Relatório: $start - $end',
-                          style: GoogleFonts.outfit(
-                            fontSize: size.width < 600 ? 20 : 28,
-                            fontWeight: FontWeight.bold,
-                            color: theme.colorScheme.onSurface,
-                            letterSpacing: -0.5,
-                            height: 1.2,
+                          'Período: $start até $end',
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: theme.colorScheme.onSurface.withOpacity(0.5),
+                            fontWeight: FontWeight.w400,
                           ),
                         );
                       }
                       return Text(
-                        'Relatório Diário - ${DateFormat('dd/MM/yyyy').format(controller.selectedDate.value)}',
-                        style: GoogleFonts.outfit(
-                          fontSize: size.width < 600 ? 20 : 28,
-                          fontWeight: FontWeight.bold,
-                          color: theme.colorScheme.onSurface,
-                          letterSpacing: -0.5,
-                          height: 1.2,
+                        'Fluxo de Caixa: ${DateFormat('dd/MM/yyyy').format(controller.selectedDate.value)}',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: theme.colorScheme.onSurface.withOpacity(0.5),
+                          fontWeight: FontWeight.w400,
                         ),
                       );
                     }),
-                    Obx(() => Text(
-                          controller.isCompetenceMode.value
-                              ? 'Valores referentes à competência (mês de referência)'
-                              : 'Visão geral de contribuições do dia (fluxo de caixa)',
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            color: theme.colorScheme.onSurface.withOpacity(0.5),
-                            fontWeight: FontWeight.w400,
-                          ),
-                        )),
                   ],
                 ),
               ),
+              leading: !isDesktop
+                  ? IconButton(
+                      icon:
+                          Icon(Icons.menu, color: theme.colorScheme.onSurface),
+                      onPressed: () => Get.find<HomeController>()
+                          .scaffoldKey
+                          .currentState
+                          ?.openDrawer(),
+                    )
+                  : null,
               actions: [
                 IconButton(
-                  tooltip: 'Gerar PDF do Relatório',
-                  icon: const Icon(Icons.picture_as_pdf_outlined),
-                  color: theme.colorScheme.primary,
+                  tooltip: 'Exportar em PDF',
+                  icon: const Icon(Icons.picture_as_pdf_rounded),
+                  color: theme.primaryColor,
+                  style: IconButton.styleFrom(
+                    backgroundColor: theme.primaryColor.withOpacity(0.1),
+                    padding: const EdgeInsets.all(12),
+                  ),
                   onPressed: () => controller.downloadOrShareDailyReportPdf(),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 20),
               ],
             ),
 
             SliverPadding(
               padding: EdgeInsets.symmetric(
-                horizontal: isDesktop ? 60 : 20,
-                vertical: 24,
+                horizontal: isDesktop ? 60 : 16,
+                vertical: 16,
               ),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
-                  // CONTROL PANEL
+                  // 1. SELETOR DE MODO (PROFISSIONAL)
                   _buildAnimatedSection(
                     index: 0,
-                    child: _buildReportControls(context),
+                    child: _buildModeToggle(context),
                   ),
                   const SizedBox(height: 24),
 
-                  // PAYMENT METHODS SUMMARY
-                  _buildAnimatedSection(
-                    index: 0,
-                    child: Obx(() {
-                      final currency = NumberFormat.simpleCurrency(
-                        locale: 'pt_BR',
-                      );
-                      return Container(
-                        padding: const EdgeInsets.all(24),
-                        decoration: BoxDecoration(
-                          color:
-                              isDark ? const Color(0xFF202020) : Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: theme.dividerColor.withOpacity(0.1),
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.04),
-                              blurRadius: 16,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Detalhes por Forma de Pagamento',
-                              style: GoogleFonts.inter(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(height: 24),
-                            Wrap(
-                              spacing: 24,
-                              runSpacing: 24,
-                              children: [
-                                _PaymentDetailItem(
-                                  theme: theme,
-                                  label: 'Dinheiro',
-                                  icon: Icons.money,
-                                  value: controller.totalDinheiro.value,
-                                  currency: currency,
-                                  color: Colors.green,
-                                ),
-                                _PaymentDetailItem(
-                                  theme: theme,
-                                  label: 'Pix',
-                                  icon: Icons.pix,
-                                  value: controller.totalPix.value,
-                                  currency: currency,
-                                  color: Colors.teal,
-                                ),
-                                _PaymentDetailItem(
-                                  theme: theme,
-                                  label: 'Cartão',
-                                  icon: Icons.credit_card,
-                                  value: controller.totalCartao.value,
-                                  currency: currency,
-                                  color: Colors.blue,
-                                ),
-                                _PaymentDetailItem(
-                                  theme: theme,
-                                  label: 'Transferência',
-                                  icon: Icons.account_balance,
-                                  value: controller.totalTransferencia.value,
-                                  currency: currency,
-                                  color: Colors.orange,
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 24),
-                            Divider(color: theme.dividerColor.withOpacity(0.1)),
-                            const SizedBox(height: 16),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'Total Geral',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Text(
-                                  currency.format(
-                                    controller.totalArrecadado.value,
-                                  ),
-                                  style: GoogleFonts.outfit(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.green,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      );
-                    }),
-                  ),
-
-                  const SizedBox(height: 32),
-
-                  // TABLES SECTION
+                  // 2. HERO STATS (GRANDES NÚMEROS)
                   _buildAnimatedSection(
                     index: 1,
-                    child: Obx(() {
-                      // .toList() forces GetX to register dependency in the builder
-                      final lista = controller.contribuicoes.toList();
+                    child: _buildHeroStats(context),
+                  ),
+                  const SizedBox(height: 24),
 
+                  // 3. DETALHAMENTO DE PAGAMENTO
+                  _buildAnimatedSection(
+                    index: 2,
+                    child: _buildPaymentMethodStrip(context),
+                  ),
+                  const SizedBox(height: 32),
+
+                  // 4. LISTA DE TRANSAÇÕES
+                  _buildAnimatedSection(
+                    index: 3,
+                    child: Obx(() {
+                      final lista = controller.contribuicoes.toList();
                       return _ModernTableCard(
-                        title: 'Contribuições do Dia',
+                        title: controller.isCompetenceMode.value
+                            ? 'Lançamentos Vinculados ao Mês'
+                            : 'Entradas Reais do Dia',
                         contribuicoes: lista,
                         onReceiptPressed: (c) =>
                             controller.downloadOrShareReceiptPdf(c),
@@ -306,22 +193,19 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
                       );
                     }),
                   ),
-                  const SizedBox(height: 60),
+                  const SizedBox(height: 32),
+
+                  // 5. SEÇÃO DE AJUDA
+                  _buildAnimatedSection(
+                    index: 4,
+                    child: _buildHelpSection(context),
+                  ),
+                  const SizedBox(height: 80),
                 ]),
               ),
             ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        heroTag: 'report_fab',
-        onPressed: () {
-          _showExportModal(context);
-        },
-        icon: const Icon(Icons.file_upload),
-        label: const Text('Exportar Relatório'),
-        backgroundColor: theme.primaryColor,
-        foregroundColor: theme.colorScheme.onPrimary,
       ),
     );
   }
@@ -425,176 +309,191 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
     );
   }
 
-  // Helper para animação em cascata
-  Widget _buildReportControls(BuildContext context) {
+  Widget _buildModeToggle(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
     return Container(
-      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF202020) : Colors.white,
+        color: isDark ? const Color(0xFF252525) : Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.04),
-            blurRadius: 16,
+            blurRadius: 10,
             offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'O que você deseja ver no relatório?',
-            style: GoogleFonts.outfit(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: theme.colorScheme.onSurface,
+      child: Obx(() {
+        final isComp = controller.isCompetenceMode.value;
+        return Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _ToggleItem(
+                      label: 'Relatório de Caixa',
+                      subtitle: 'O que foi pago no dia/período',
+                      isSelected: !isComp,
+                      icon: Icons.payments_rounded,
+                      activeColor: Colors.green,
+                      onTap: () {
+                        controller.isCompetenceMode.value = false;
+                        controller
+                            .fetchDailyReport(controller.selectedDate.value);
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _ToggleItem(
+                      label: 'Relatório de Competência',
+                      subtitle: 'Dízimos de um mês específico',
+                      isSelected: isComp,
+                      icon: Icons.calendar_view_month_rounded,
+                      activeColor: Colors.blue,
+                      onTap: () => _showCompetencePicker(context),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
-          LayoutBuilder(builder: (context, constraints) {
-            return Obx(() => ToggleButtons(
-                  borderRadius: BorderRadius.circular(12),
-                  selectedColor: Colors.white,
-                  fillColor: theme.primaryColor,
-                  color: theme.colorScheme.onSurface.withOpacity(0.6),
-                  isSelected: [
-                    !controller.isCompetenceMode.value,
-                    controller.isCompetenceMode.value,
-                  ],
-                  onPressed: (index) {
-                    if (index == 0) {
-                      controller.isCompetenceMode.value = false;
-                    } else {
-                      _showCompetencePicker(context);
-                    }
-                  },
+            if (!isComp)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
+                child: Row(
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(Icons.payments_outlined),
-                          const SizedBox(height: 4),
-                          Text('Entradas Hoje',
-                              style: GoogleFonts.inter(
-                                  fontSize: 12, fontWeight: FontWeight.bold)),
-                        ],
+                    Text(
+                      'Data:',
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.onSurface.withOpacity(0.6),
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(Icons.calendar_month_outlined),
-                          const SizedBox(height: 4),
-                          Text('Dízimo por Mês',
-                              style: GoogleFonts.inter(
-                                  fontSize: 12, fontWeight: FontWeight.bold)),
-                        ],
-                      ),
+                    const SizedBox(width: 12),
+                    FilledButton.tonalIcon(
+                      onPressed: () async {
+                        final date = await showDatePicker(
+                          context: context,
+                          initialDate: controller.selectedDate.value,
+                          firstDate: DateTime(2020),
+                          lastDate: DateTime(2030),
+                        );
+                        if (date != null) controller.updateDate(date);
+                      },
+                      icon: const Icon(Icons.edit_calendar_rounded, size: 16),
+                      label: Text(DateFormat('dd/MM/yyyy')
+                          .format(controller.selectedDate.value)),
+                    ),
+                    const SizedBox(width: 8),
+                    OutlinedButton.icon(
+                      onPressed: () async {
+                        final range = await showDateRangePicker(
+                          context: context,
+                          initialDateRange: controller.selectedRange.value,
+                          firstDate: DateTime(2020),
+                          lastDate: DateTime(2030),
+                        );
+                        if (range != null) controller.updateRange(range);
+                      },
+                      icon: const Icon(Icons.date_range_rounded, size: 16),
+                      label: const Text('Período'),
                     ),
                   ],
-                ));
-          }),
-          const SizedBox(height: 24),
-          const Divider(),
-          const SizedBox(height: 16),
-          Obx(() {
-            if (!controller.isCompetenceMode.value) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Entradas por Data',
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: theme.colorScheme.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Mostra tudo o que foi pago fisicamente na data selecionada.',
-                    style: GoogleFonts.inter(
-                      fontSize: 12,
-                      color: theme.colorScheme.onSurface.withOpacity(0.5),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      FilledButton.icon(
-                        onPressed: () async {
-                          final date = await showDatePicker(
-                            context: context,
-                            initialDate: controller.selectedDate.value,
-                            firstDate: DateTime(2020),
-                            lastDate: DateTime(2030),
-                          );
-                          if (date != null) controller.updateDate(date);
-                        },
-                        icon:
-                            const Icon(Icons.calendar_today_rounded, size: 18),
-                        label: const Text('Mudar Dia'),
+                ),
+              )
+            else
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      'Meses que estamos vendo:',
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.onSurface.withOpacity(0.6),
                       ),
-                      const SizedBox(width: 12),
-                      OutlinedButton.icon(
-                        onPressed: () async {
-                          final range = await showDateRangePicker(
-                            context: context,
-                            initialDateRange: controller.selectedRange.value,
-                            firstDate: DateTime(2020),
-                            lastDate: DateTime(2030),
-                          );
-                          if (range != null) controller.updateRange(range);
-                        },
-                        icon: const Icon(Icons.date_range_rounded, size: 18),
-                        label: const Text('Ver Período'),
-                      ),
-                    ],
-                  ),
-                ],
-              );
-            } else {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Referência: Mês selecionado',
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: theme.colorScheme.onSurface,
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Mostra a quais meses o dízimo se refere, ignorando quando foi pago.',
-                    style: GoogleFonts.inter(
-                      fontSize: 12,
-                      color: theme.colorScheme.onSurface.withOpacity(0.5),
+                    const SizedBox(width: 12),
+                    FilledButton.tonalIcon(
+                      onPressed: () => _showCompetencePicker(context),
+                      icon: const Icon(Icons.calendar_month_rounded, size: 16),
+                      label: Text(controller.selectedCompetenceMonth.value),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  FilledButton.icon(
-                    onPressed: () => _showCompetencePicker(context),
-                    icon: const Icon(Icons.edit_calendar_rounded, size: 18),
-                    label: Text(
-                        'Trocar para outro mês (${controller.selectedCompetenceMonth.value})'),
-                  ),
-                ],
-              );
-            }
-          }),
-        ],
-      ),
+                  ],
+                ),
+              ),
+          ],
+        );
+      }),
+    );
+  }
+
+  Widget _buildHeroStats(BuildContext context) {
+    final currency = NumberFormat.simpleCurrency(locale: 'pt_BR');
+    return Obx(() => Row(
+          children: [
+            Expanded(
+              child: _HeroStatCard(
+                title: 'Total Recebido',
+                value: currency.format(controller.totalArrecadado.value),
+                icon: Icons.trending_up_rounded,
+                color: Colors.green,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: _HeroStatCard(
+                title: 'Ação do Dia',
+                value: '${controller.contribuicoes.length} Lanç.',
+                icon: Icons.receipt_long_rounded,
+                color: Colors.blue,
+              ),
+            ),
+          ],
+        ));
+  }
+
+  Widget _buildPaymentMethodStrip(BuildContext context) {
+    final currency = NumberFormat.simpleCurrency(locale: 'pt_BR');
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
+      child: Obx(() => Row(
+            children: [
+              _MiniStat(
+                label: 'Dinheiro',
+                value: currency.format(controller.totalDinheiro.value),
+                icon: Icons.payments_outlined,
+                color: Colors.green,
+              ),
+              _MiniStat(
+                label: 'Pix',
+                value: currency.format(controller.totalPix.value),
+                icon: Icons.pix_rounded,
+                color: Colors.teal,
+              ),
+              _MiniStat(
+                label: 'Cartão',
+                value: currency.format(controller.totalCartao.value),
+                icon: Icons.credit_card_rounded,
+                color: Colors.blue,
+              ),
+              _MiniStat(
+                label: 'Transf.',
+                value: currency.format(controller.totalTransferencia.value),
+                icon: Icons.account_balance_rounded,
+                color: Colors.orange,
+              ),
+            ],
+          )),
     );
   }
 
@@ -677,62 +576,205 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
       }),
     );
   }
+
+  Widget _buildHelpSection(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 16),
+          child: Text(
+            'Entenda os Relatórios',
+            style: GoogleFonts.outfit(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+        ),
+        _HelpCard(
+          title: 'O que entrou Hoje (Fluxo de Caixa)',
+          description:
+              'Este relatório mostra o dinheiro real que entrou na paróquia na data selecionada. É ideal para conferir o caixa físico, conferir PIX e depósitos feitos no dia.',
+          icon: Icons.payments_rounded,
+          color: Colors.green,
+          theme: theme,
+        ),
+        const SizedBox(height: 12),
+        _HelpCard(
+          title: 'Dízimo por Mês (Competência)',
+          description:
+              'Mostra a arrecadação vinculada ao mês de referência do dízimo. Se um fiel pagar 3 meses atrasados hoje, este relatório dividirá os valores nos meses correspondentes. Ideal para análise contábil.',
+          icon: Icons.calendar_view_month_rounded,
+          color: Colors.blue,
+          theme: theme,
+        ),
+        const SizedBox(height: 12),
+        _HelpCard(
+          title: 'Exportação em PDF',
+          description:
+              'Utilize o botão de PDF no topo para gerar um documento oficial pronto para impressão ou compartilhamento via WhatsApp/E-mail.',
+          icon: Icons.picture_as_pdf_rounded,
+          color: Colors.red,
+          theme: theme,
+        ),
+      ],
+    );
+  }
 }
 
 // =============================================================================
 // COMPONENTES MODERNOS E REUTILIZÁVEIS
 // =============================================================================
 
-class _PaymentDetailItem extends StatelessWidget {
-  final ThemeData theme;
+class _ToggleItem extends StatelessWidget {
   final String label;
+  final String subtitle;
+  final bool isSelected;
   final IconData icon;
-  final double value;
-  final NumberFormat currency;
+  final Color? activeColor;
+  final VoidCallback onTap;
+
+  const _ToggleItem({
+    required this.label,
+    required this.subtitle,
+    required this.isSelected,
+    required this.icon,
+    this.activeColor,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final colorToUse =
+        activeColor ?? theme.primaryColor; // Usa a cor ativa ou padrão
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? colorToUse
+              : (isDark
+                  ? Colors.white.withOpacity(0.05)
+                  : Colors.grey.shade100),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? colorToUse : Colors.transparent,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? Colors.white.withOpacity(0.2)
+                    : colorToUse.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                icon,
+                size: 20,
+                color: isSelected ? Colors.white : colorToUse,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: isSelected
+                          ? Colors.white
+                          : theme.colorScheme.onSurface,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.inter(
+                      fontSize: 10,
+                      color: isSelected
+                          ? Colors.white.withOpacity(0.8)
+                          : theme.colorScheme.onSurface.withOpacity(0.5),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HeroStatCard extends StatelessWidget {
+  final String title;
+  final String value;
+  final IconData icon;
   final Color color;
 
-  const _PaymentDetailItem({
-    required this.theme,
-    required this.label,
-    required this.icon,
+  const _HeroStatCard({
+    required this.title,
     required this.value,
-    required this.currency,
+    required this.icon,
     required this.color,
   });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
-      width: 160,
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: theme.dividerColor.withOpacity(0.05)),
+        color: isDark ? const Color(0xFF252525) : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(color: color.withOpacity(0.1)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Icon(icon, size: 16, color: color),
-              const SizedBox(width: 8),
               Text(
-                label,
+                title,
                 style: GoogleFonts.inter(
                   fontSize: 12,
-                  color: theme.colorScheme.onSurface.withOpacity(0.6),
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurface.withOpacity(0.5),
                 ),
               ),
+              Icon(icon, color: color.withOpacity(0.5), size: 18),
             ],
           ),
           const SizedBox(height: 8),
           Text(
-            currency.format(value),
+            value,
             style: GoogleFonts.outfit(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
               color: theme.colorScheme.onSurface,
             ),
           ),
@@ -742,129 +784,60 @@ class _PaymentDetailItem extends StatelessWidget {
   }
 }
 
-class _HoverStatCard extends StatefulWidget {
-  final String title;
+class _MiniStat extends StatelessWidget {
+  final String label;
   final String value;
-  final String change;
-  final bool isPositive;
   final IconData icon;
   final Color color;
-  final ThemeData theme;
 
-  const _HoverStatCard({
-    required this.title,
+  const _MiniStat({
+    required this.label,
     required this.value,
-    required this.change,
-    required this.isPositive,
     required this.icon,
     required this.color,
-    required this.theme,
   });
 
   @override
-  State<_HoverStatCard> createState() => _HoverStatCardState();
-}
-
-class _HoverStatCardState extends State<_HoverStatCard> {
-  bool _isHovering = false;
-
-  @override
   Widget build(BuildContext context) {
-    final isDark = widget.theme.brightness == Brightness.dark;
-    final statusColor = widget.isPositive ? Colors.green : Colors.red;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHovering = true),
-      onExit: (_) => setState(() => _isHovering = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeOut,
-        transform: Matrix4.translationValues(0, _isHovering ? -4 : 0, 0),
-        decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF202020) : Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: _isHovering
-                ? widget.color.withOpacity(0.5)
-                : widget.theme.dividerColor.withOpacity(0.1),
-            width: _isHovering ? 1.5 : 1,
+    return Container(
+      margin: const EdgeInsets.only(right: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF252525) : Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: theme.dividerColor.withOpacity(0.05)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: color, size: 16),
+          const SizedBox(width: 8),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                label,
+                style: GoogleFonts.inter(
+                  fontSize: 10,
+                  color: theme.colorScheme.onSurface.withOpacity(0.4),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              Text(
+                value,
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+            ],
           ),
-          boxShadow: [
-            BoxShadow(
-              color: _isHovering
-                  ? widget.color.withOpacity(0.15)
-                  : Colors.black.withOpacity(0.04),
-              blurRadius: _isHovering ? 12 : 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: widget.color.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(widget.icon, color: widget.color, size: 20),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        widget.isPositive
-                            ? Icons.arrow_upward
-                            : Icons.arrow_downward,
-                        size: 12,
-                        color: statusColor,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        widget.change,
-                        style: GoogleFonts.inter(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: statusColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              widget.value,
-              style: GoogleFonts.outfit(
-                fontSize: 26,
-                fontWeight: FontWeight.bold,
-                color: widget.theme.colorScheme.onSurface,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              widget.title,
-              style: GoogleFonts.inter(
-                fontSize: 13,
-                color: widget.theme.colorScheme.onSurface.withOpacity(0.6),
-              ),
-            ),
-          ],
-        ),
+        ],
       ),
     );
   }
@@ -1149,6 +1122,73 @@ class _StatusBadge extends StatelessWidget {
           fontWeight: FontWeight.w600,
           color: color,
         ),
+      ),
+    );
+  }
+}
+
+class _HelpCard extends StatelessWidget {
+  final String title;
+  final String description;
+  final IconData icon;
+  final Color color;
+  final ThemeData theme;
+
+  const _HelpCard({
+    required this.title,
+    required this.description,
+    required this.icon,
+    required this.color,
+    required this.theme,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = theme.brightness == Brightness.dark;
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF252525) : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: theme.dividerColor.withOpacity(0.05)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: color, size: 24),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: GoogleFonts.inter(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  description,
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    height: 1.5,
+                    color: theme.colorScheme.onSurface.withOpacity(0.6),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
