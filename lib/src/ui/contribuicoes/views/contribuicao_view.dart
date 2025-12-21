@@ -388,6 +388,8 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
       child: InkWell(
         onTap: () {
           controller.dizimistaSelecionado.value = dizimista;
+          // Automatically advance to the next step after selecting a dizimista
+          _goToNextStep();
         },
         borderRadius: BorderRadius.circular(12),
         child: Container(
