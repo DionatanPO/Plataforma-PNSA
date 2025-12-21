@@ -102,12 +102,35 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxWidth > 900) {
+          // For large screens, show both the stepper and explanation side by side
           return Row(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [Expanded(flex: 4, child: _buildStepperCard())],
+            children: [
+              Expanded(
+                flex: 5,
+                child: Container(
+                  padding: const EdgeInsets.only(right: 16),
+                  child: _buildStepperCard(),
+                ),
+              ),
+              Expanded(
+                flex: 3,
+                child: Container(
+                  padding: const EdgeInsets.only(left: 16),
+                  child: _buildExplanationColumn(),
+                ),
+              ),
+            ],
           );
         } else {
-          return _buildStepperCard();
+          // For mobile, show stepper first, then explanation below
+          return Column(
+            children: [
+              _buildStepperCard(),
+              const SizedBox(height: 24),
+              _buildExplanationColumn(),
+            ],
+          );
         }
       },
     );
@@ -198,6 +221,202 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
 
                 // Botões de navegação
                 _buildStepNavigationButtons(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildExplanationColumn() {
+    return Container(
+      decoration: BoxDecoration(
+        color: surfaceColor,
+        borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
+        border: Border.all(color: borderColor),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(isDark ? 0.2 : 0.03),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(isMobile ? 16 : 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: accentColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.info_rounded,
+                    color: accentColor,
+                    size: 22,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Text(
+                  'Como Contribuir',
+                  style: GoogleFonts.outfit(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onSurface,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            _buildInstructionCard(
+              step: 1,
+              title: 'Selecione o Fiel',
+              description: 'Busque e selecione o fiel que está fazendo a contribuição usando o campo de busca.',
+              icon: Icons.person_search_rounded,
+            ),
+            const SizedBox(height: 16),
+            _buildInstructionCard(
+              step: 2,
+              title: 'Preencha os Dados',
+              description: 'Informe o tipo de contribuição, valor, forma de pagamento e observações.',
+              icon: Icons.edit_note_rounded,
+            ),
+            const SizedBox(height: 16),
+            _buildInstructionCard(
+              step: 3,
+              title: 'Confirme o Registro',
+              description: 'Revise todos os dados e clique em "Registrar" para concluir o lançamento.',
+              icon: Icons.check_circle_rounded,
+            ),
+            const SizedBox(height: 24),
+            Container(
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: accentColor.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.lightbulb_rounded, color: accentColor, size: 20),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Dicas Importantes',
+                        style: GoogleFonts.outfit(
+                          fontWeight: FontWeight.w600,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    '• Use o campo de busca com nome, CPF ou telefone para localizar rapidamente o fiel',
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      height: 1.5,
+                      color: theme.colorScheme.onSurface.withOpacity(0.8),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '• Para dízimos atrasados, selecione "Dízimo Atrasado" e indique os meses de referência',
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      height: 1.5,
+                      color: theme.colorScheme.onSurface.withOpacity(0.8),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '• O valor total será dividido automaticamente entre os meses selecionados',
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      height: 1.5,
+                      color: theme.colorScheme.onSurface.withOpacity(0.8),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInstructionCard({
+    required int step,
+    required String title,
+    required String description,
+    required IconData icon,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [accentColor, accentColor.withOpacity(0.8)],
+              ),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Center(
+              child: Text(
+                step.toString(),
+                style: GoogleFonts.outfit(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(icon, size: 18, color: accentColor),
+                    const SizedBox(width: 8),
+                    Text(
+                      title,
+                      style: GoogleFonts.outfit(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 15,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  description,
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    height: 1.4,
+                    color: theme.colorScheme.onSurface.withOpacity(0.7),
+                  ),
+                ),
               ],
             ),
           ),
