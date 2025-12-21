@@ -65,7 +65,9 @@ class AppTheme {
       ),
 
       // Tema de Ícones
-      iconTheme: const IconThemeData(color: Colors.white),
+      // Tema de Ícones
+      // Removido para permitir que os ícones sigam a cor do widget pai ou padrão (Primary/OnSurface)
+      // iconTheme: const IconThemeData(color: Colors.white),
 
       // Tema para TextButton (Cancelar)
       textButtonTheme: TextButtonThemeData(
@@ -77,7 +79,7 @@ class AppTheme {
       // Tema para OutlinedButton
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: ButtonStyle(
-          foregroundColor: MaterialStateProperty.all(Colors.white),
+          foregroundColor: MaterialStateProperty.all(primaryColor),
           side: MaterialStateProperty.all(
             const BorderSide(color: Colors.white30),
           ),

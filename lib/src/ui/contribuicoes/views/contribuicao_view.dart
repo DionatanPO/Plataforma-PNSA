@@ -29,6 +29,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
   final TextEditingController _searchController = TextEditingController();
   int _currentStep = 0;
   Timer? _debounceTimer;
+  Future<List<Dizimista>>? _searchFuture;
 
   final CurrencyTextInputFormatter _currencyFormatter =
       CurrencyTextInputFormatter.currency(
@@ -278,21 +279,24 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
             _buildInstructionCard(
               step: 1,
               title: 'Selecione o Fiel',
-              description: 'Busque e selecione o fiel que está fazendo a contribuição usando o campo de busca.',
+              description:
+                  'Busque e selecione o fiel que está fazendo a contribuição usando o campo de busca.',
               icon: Icons.person_search_rounded,
             ),
             const SizedBox(height: 16),
             _buildInstructionCard(
               step: 2,
               title: 'Preencha os Dados',
-              description: 'Informe o tipo de contribuição, valor, forma de pagamento e observações.',
+              description:
+                  'Informe o tipo de contribuição, valor, forma de pagamento e observações.',
               icon: Icons.edit_note_rounded,
             ),
             const SizedBox(height: 16),
             _buildInstructionCard(
               step: 3,
               title: 'Confirme o Registro',
-              description: 'Revise todos os dados e clique em "Registrar" para concluir o lançamento.',
+              description:
+                  'Revise todos os dados e clique em "Registrar" para concluir o lançamento.',
               icon: Icons.check_circle_rounded,
             ),
             const SizedBox(height: 24),
@@ -307,7 +311,8 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.lightbulb_rounded, color: accentColor, size: 20),
+                      Icon(Icons.lightbulb_rounded,
+                          color: accentColor, size: 20),
                       const SizedBox(width: 8),
                       Text(
                         'Dicas Importantes',
@@ -532,12 +537,53 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
               ),
             ),
             onChanged: (value) {
-              setState(() {});
+              if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
+              _debounceTimer = Timer(const Duration(milliseconds: 500), () {
+                _searchFuture = controller.searchDizimistasFirestore(value);
+                setState(() {});
+              });
             },
           ),
         ),
 
-        const SizedBox(height: 20),
+        const SizedBox(height: 16),
+
+        // Botão de cadastro sempre visível
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            FilledButton.icon(
+              onPressed: () async {
+                await Get.toNamed(AppRoutes.dizimista_cadastro);
+                // Refresh search results when coming back
+                if (mounted && _searchController.text.isNotEmpty) {
+                  _searchFuture = controller
+                      .searchDizimistasFirestore(_searchController.text);
+                  setState(() {});
+                }
+              },
+              icon: const Icon(Icons.person_add_rounded,
+                  size: 18, color: Colors.white),
+              label: Text(
+                'Cadastrar Novo Fiel',
+                style: GoogleFonts.outfit(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+              style: FilledButton.styleFrom(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                backgroundColor: accentColor,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 16),
 
         // Lista de resultados
         _buildSearchResults(),
@@ -553,51 +599,57 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
       return _buildEmptySearchState();
     }
 
+    // Ensure future is initialized if not already
+    if (_searchFuture == null && _searchController.text.isNotEmpty) {
+      _searchFuture =
+          controller.searchDizimistasFirestore(_searchController.text);
+    }
+
     return Container(
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
         border: Border.all(color: borderColor),
       ),
-      child: Obx(() {
-        final selecionado = controller.dizimistaSelecionado.value;
-        return FutureBuilder<List<Dizimista>>(
-          future: controller.searchDizimistasFirestore(_searchController.text),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Padding(
-                padding: const EdgeInsets.all(40),
-                child: Center(
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: accentColor,
-                  ),
+      child: FutureBuilder<List<Dizimista>>(
+        future: _searchFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Padding(
+              padding: const EdgeInsets.all(40),
+              child: Center(
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: accentColor,
                 ),
-              );
-            }
-
-            final List<Dizimista> dizimistasFiltrados = snapshot.data ?? [];
-
-            if (dizimistasFiltrados.isEmpty) {
-              return _buildNoResultsState();
-            }
-
-            return ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(8),
-              itemCount: dizimistasFiltrados.length,
-              separatorBuilder: (context, index) => const SizedBox(height: 8),
-              itemBuilder: (context, index) {
-                final dizimista = dizimistasFiltrados[index];
-                final isSelected = selecionado?.id == dizimista.id;
-
-                return _buildDizimistaCard(dizimista, isSelected);
-              },
+              ),
             );
-          },
-        );
-      }),
+          }
+
+          final List<Dizimista> dizimistasFiltrados = snapshot.data ?? [];
+
+          if (dizimistasFiltrados.isEmpty) {
+            return _buildNoResultsState();
+          }
+
+          return ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(8),
+            itemCount: dizimistasFiltrados.length,
+            separatorBuilder: (context, index) => const SizedBox(height: 8),
+            itemBuilder: (context, index) {
+              final dizimista = dizimistasFiltrados[index];
+
+              return Obx(() {
+                final isSelected =
+                    controller.dizimistaSelecionado.value?.id == dizimista.id;
+                return _buildDizimistaCard(dizimista, isSelected);
+              });
+            },
+          );
+        },
+      ),
     );
   }
 
