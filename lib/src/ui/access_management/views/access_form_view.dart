@@ -428,6 +428,8 @@ class _AccessFormViewState extends State<AccessFormView> {
                         ? null
                         : () => setState(() => _currentMobileStep++),
                 style: FilledButton.styleFrom(
+                    backgroundColor: theme.colorScheme.primary,
+                    foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12))),

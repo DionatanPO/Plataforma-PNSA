@@ -24,7 +24,7 @@ class DashboardView extends StatelessWidget {
     final borderColor = isDark
         ? Colors.white.withOpacity(0.08)
         : Colors.black.withOpacity(0.06);
-    final accentColor = theme.primaryColor;
+    final accentColor = theme.colorScheme.primary;
 
     // Medidas da tela
     final width = MediaQuery.of(context).size.width;

@@ -28,7 +28,7 @@ class ModernHeader extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final surfaceColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
-    final accentColor = theme.primaryColor;
+    final accentColor = theme.colorScheme.primary;
 
     return SliverLayoutBuilder(
       builder: (context, constraints) {
@@ -58,7 +58,9 @@ class ModernHeader extends StatelessWidget {
                     // Usa a chave global do HomeController para abrir o Drawer do Scaffold pai (HomeView)
                     // Isso é necessário pois as Views internas possuem seus próprios Scaffolds
                     if (Get.isRegistered<HomeController>()) {
-                      Get.find<HomeController>().scaffoldKey.currentState
+                      Get.find<HomeController>()
+                          .scaffoldKey
+                          .currentState
                           ?.openDrawer();
                     } else {
                       Scaffold.of(context).openDrawer();

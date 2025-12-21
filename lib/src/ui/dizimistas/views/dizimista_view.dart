@@ -34,7 +34,7 @@ class _DizimistaViewState extends State<DizimistaView> {
     final borderColor = isDark
         ? Colors.white.withOpacity(0.08)
         : Colors.black.withOpacity(0.06);
-    final accentColor = theme.primaryColor;
+    final accentColor = theme.colorScheme.primary;
 
     // Medidas responsivas
     final screenWidth = MediaQuery.of(context).size.width;
@@ -58,12 +58,6 @@ class _DizimistaViewState extends State<DizimistaView> {
               title: 'Fiéis',
               subtitle: 'Gerenciamento de cadastros',
               icon: Icons.people_rounded,
-              onActionPressed: isDesktop
-                  ? () => Get.toNamed(AppRoutes.dizimista_cadastro)
-                  : null,
-              actionLabel: 'Novo Fiel',
-              actionIcon: Icons.person_add_rounded,
-              actionColor: accentColor,
             ),
 
             // =======================================================
@@ -170,19 +164,17 @@ class _DizimistaViewState extends State<DizimistaView> {
             ),
           ],
         ),
-        floatingActionButton: !isDesktop
-            ? FloatingActionButton.extended(
-                heroTag: 'dizimista_fab',
-                onPressed: () => Get.toNamed(AppRoutes.dizimista_cadastro),
-                backgroundColor: accentColor,
-                foregroundColor: Colors.white,
-                icon: const Icon(Icons.add_rounded),
-                label: Text(
-                  'Novo Fiel',
-                  style: GoogleFonts.inter(fontWeight: FontWeight.w600),
-                ),
-              )
-            : null,
+        floatingActionButton: FloatingActionButton.extended(
+          heroTag: 'dizimista_fab',
+          onPressed: () => Get.toNamed(AppRoutes.dizimista_cadastro),
+          backgroundColor: accentColor,
+          foregroundColor: Colors.white,
+          icon: const Icon(Icons.add_rounded),
+          label: Text(
+            'Novo Fiel',
+            style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+          ),
+        ),
       ),
     );
   }

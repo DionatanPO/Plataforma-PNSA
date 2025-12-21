@@ -65,7 +65,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
     borderColor = isDark
         ? Colors.white.withOpacity(0.08)
         : Colors.black.withOpacity(0.06);
-    accentColor = theme.primaryColor;
+    accentColor = theme.colorScheme.primary;
 
     final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
 

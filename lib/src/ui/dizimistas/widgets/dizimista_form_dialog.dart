@@ -259,7 +259,8 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
                 decoration: inputDecoration.copyWith(
                   labelText: 'Data de Nascimento',
                   hintText: 'Selecione a data',
-                  suffixIcon: const Icon(Icons.calendar_today_rounded),
+                  suffixIcon: Icon(Icons.calendar_today_rounded,
+                      color: theme.colorScheme.primary),
                 ),
               ),
             ),
@@ -432,7 +433,8 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
                   decoration: inputDecoration.copyWith(
                     labelText: 'Data de Casamento',
                     hintText: 'Selecione a data',
-                    suffixIcon: const Icon(Icons.calendar_today_rounded),
+                    suffixIcon: Icon(Icons.calendar_today_rounded,
+                        color: theme.colorScheme.primary),
                   ),
                 ),
               ),
@@ -463,7 +465,8 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
                   decoration: inputDecoration.copyWith(
                     labelText: 'Data de Nascimento do Cônjuge',
                     hintText: 'Selecione a data',
-                    suffixIcon: const Icon(Icons.calendar_today_rounded),
+                    suffixIcon: Icon(Icons.calendar_today_rounded,
+                        color: theme.colorScheme.primary),
                   ),
                 ),
               ),

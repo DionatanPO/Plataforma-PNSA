@@ -65,9 +65,7 @@ class AppTheme {
       ),
 
       // Tema de Ícones
-      // Tema de Ícones
-      // Removido para permitir que os ícones sigam a cor do widget pai ou padrão (Primary/OnSurface)
-      // iconTheme: const IconThemeData(color: Colors.white),
+      iconTheme: const IconThemeData(color: primaryColor),
 
       // Tema para TextButton (Cancelar)
       textButtonTheme: TextButtonThemeData(

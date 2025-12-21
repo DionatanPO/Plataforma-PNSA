@@ -153,7 +153,7 @@ class _AccessManagementViewState extends State<AccessManagementView> {
         ),
         floatingActionButton: FloatingActionButton.extended(
           onPressed: () => Get.toNamed(AppRoutes.access_management_form),
-          backgroundColor: theme.primaryColor,
+          backgroundColor: theme.colorScheme.primary,
           foregroundColor: Colors.white,
           icon: const Icon(Icons.add_rounded),
           label: Text(

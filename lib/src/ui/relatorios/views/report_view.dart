@@ -67,60 +67,105 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
               backgroundColor: backgroundColor.withOpacity(0.9),
               surfaceTintColor: Colors.transparent,
               elevation: 0,
-              pinned: true,
-              expandedHeight: 120,
-              flexibleSpace: FlexibleSpaceBar(
-                centerTitle: false,
-                titlePadding: EdgeInsets.symmetric(
+              pinned: false,
+              floating: true,
+              snap: true,
+              toolbarHeight: 120,
+              titleSpacing: 0,
+              title: Padding(
+                padding: EdgeInsets.symmetric(
                     horizontal: isDesktop ? 60 : 20, vertical: 16),
-                title: Column(
+                child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Relatórios Financeiros',
-                      style: GoogleFonts.outfit(
-                        fontSize: size.width < 600 ? 18 : 24,
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.onSurface,
-                        letterSpacing: -0.5,
-                      ),
-                    ),
-                    Obx(() {
-                      if (controller.isCompetenceMode.value) {
-                        return Text(
-                          'Referência: ${controller.selectedCompetenceMonth.value}',
-                          style: GoogleFonts.inter(
-                            fontSize: 12,
-                            color: theme.colorScheme.onSurface.withOpacity(0.5),
-                            fontWeight: FontWeight.w400,
+                    Row(
+                      children: [
+                        if (size.width >= 600) ...[
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  theme.colorScheme.primary,
+                                  theme.colorScheme.primary.withOpacity(0.8),
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: theme.colorScheme.primary
+                                      .withOpacity(0.3),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: const Icon(
+                              Icons.bar_chart_rounded, // Icon for report
+                              color: Colors.white,
+                              size: 28,
+                            ),
                           ),
-                        );
-                      }
-                      if (controller.isRangeMode.value &&
-                          controller.selectedRange.value != null) {
-                        final start = DateFormat('dd/MM/yy')
-                            .format(controller.selectedRange.value!.start);
-                        final end = DateFormat('dd/MM/yy')
-                            .format(controller.selectedRange.value!.end);
-                        return Text(
-                          'Período: $start até $end',
-                          style: GoogleFonts.inter(
-                            fontSize: 12,
-                            color: theme.colorScheme.onSurface.withOpacity(0.5),
-                            fontWeight: FontWeight.w400,
+                          const SizedBox(width: 16),
+                        ],
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Relatórios Financeiros',
+                                style: GoogleFonts.outfit(
+                                  fontSize: size.width < 600 ? 20 : 28,
+                                  fontWeight: FontWeight.bold,
+                                  color: theme.colorScheme.onSurface,
+                                  letterSpacing: -0.5,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Obx(() {
+                                if (controller.isCompetenceMode.value) {
+                                  return Text(
+                                    'Referência: ${controller.selectedCompetenceMonth.value}',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 14,
+                                      color: theme.colorScheme.onSurface
+                                          .withOpacity(0.6),
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  );
+                                }
+                                if (controller.isRangeMode.value &&
+                                    controller.selectedRange.value != null) {
+                                  final start = DateFormat('dd/MM/yy').format(
+                                      controller.selectedRange.value!.start);
+                                  final end = DateFormat('dd/MM/yy').format(
+                                      controller.selectedRange.value!.end);
+                                  return Text(
+                                    'Período: $start até $end',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 14,
+                                      color: theme.colorScheme.onSurface
+                                          .withOpacity(0.6),
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  );
+                                }
+                                return Text(
+                                  'Fluxo de Caixa: ${DateFormat('dd/MM/yyyy').format(controller.selectedDate.value)}',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 14,
+                                    color: theme.colorScheme.onSurface
+                                        .withOpacity(0.6),
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                );
+                              }),
+                            ],
                           ),
-                        );
-                      }
-                      return Text(
-                        'Fluxo de Caixa: ${DateFormat('dd/MM/yyyy').format(controller.selectedDate.value)}',
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
-                          color: theme.colorScheme.onSurface.withOpacity(0.5),
-                          fontWeight: FontWeight.w400,
                         ),
-                      );
-                    }),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -138,9 +183,9 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
                 IconButton(
                   tooltip: 'Exportar em PDF',
                   icon: const Icon(Icons.picture_as_pdf_rounded),
-                  color: theme.primaryColor,
+                  color: theme.colorScheme.primary,
                   style: IconButton.styleFrom(
-                    backgroundColor: theme.primaryColor.withOpacity(0.1),
+                    backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
                     padding: const EdgeInsets.all(12),
                   ),
                   onPressed: () => controller.downloadOrShareDailyReportPdf(),
