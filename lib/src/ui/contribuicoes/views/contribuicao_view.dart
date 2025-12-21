@@ -703,26 +703,92 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
 
         const SizedBox(height: 24),
 
-        // Tipo
-        _label('Tipo de Contribuição'),
-        _buildModernDropdown(
-          value: controller.tipo.value,
-          items: ['Dízimo Regular', 'Dízimo Atrasado'],
-          onChanged: (val) {
-            setState(() => controller.tipo.value = val!);
-            if (val == 'Dízimo Atrasado') {
-              Future.delayed(
-                  const Duration(milliseconds: 300), () => _showMonthPicker());
-            }
-          },
+        // O QUE ESTÁ SENDO PAGO?
+        _label('O que está sendo pago?'),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: borderColor),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              isExpanded: true,
+              dropdownColor: surfaceColor,
+              value: controller.tipo.value,
+              icon: Icon(
+                Icons.expand_more_rounded,
+                size: 24,
+                color: theme.colorScheme.onSurface.withOpacity(0.5),
+              ),
+              items: [
+                DropdownMenuItem(
+                  value: 'Dízimo Regular',
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Dízimo Regular (Mês Atual)',
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      ),
+                      Text(
+                        'Pagamento normal do mês',
+                        style: GoogleFonts.inter(
+                          fontSize: 11,
+                          color: theme.colorScheme.onSurface.withOpacity(0.5),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: 'Dízimo Atrasado',
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Dízimo Atrasado / Adiantado',
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      ),
+                      Text(
+                        'Para pagamentos de outros meses',
+                        style: GoogleFonts.inter(
+                          fontSize: 11,
+                          color: theme.colorScheme.onSurface.withOpacity(0.5),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+              onChanged: (val) {
+                setState(() => controller.tipo.value = val!);
+                if (val == 'Dízimo Atrasado') {
+                  Future.delayed(const Duration(milliseconds: 300),
+                      () => _showMonthPicker());
+                }
+              },
+            ),
+          ),
         ),
 
         const SizedBox(height: 20),
 
         const SizedBox(height: 24),
 
-        // Valor
-        _label('Valor da Contribuição'),
+        // VALOR
+        _label('Qual o valor total recebido?'),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
           decoration: BoxDecoration(
@@ -760,7 +826,8 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
         const SizedBox(height: 24),
 
         // Forma de Pagamento
-        _label('Forma de Pagamento'),
+        // Forma de Pagamento
+        _label('Como foi recebido?'),
         Obx(
           () => Wrap(
             spacing: 10,
@@ -806,6 +873,11 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
         Obx(() => controller.tipo.value == 'Dízimo Atrasado'
             ? _buildCompetenciaSection()
             : const SizedBox.shrink()),
+
+        const SizedBox(height: 32),
+
+        // RESUMO DO LANÇAMENTO
+        _buildSummaryCard(),
       ],
     );
   }
@@ -1434,6 +1506,96 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSummaryCard() {
+    return Obx(() {
+      final hasValue = controller.valor.value.isNotEmpty;
+      if (!hasValue) return const SizedBox.shrink();
+
+      return Container(
+        margin: const EdgeInsets.only(top: 16),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.primaryContainer.withOpacity(0.4),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+              color: theme.colorScheme.primary.withOpacity(0.2), width: 1.5),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.verified_user_rounded,
+                    color: theme.colorScheme.primary, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  'Resumo do Lançamento',
+                  style: GoogleFonts.outfit(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            _summaryRow('Fiel:', controller.dizimistaSelecionado.value?.nome),
+            _summaryRow('Tipo:', controller.tipo.value),
+            _summaryRow('Método:', controller.metodo.value),
+            const Divider(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Total a Receber:',
+                  style: GoogleFonts.inter(
+                    fontWeight: FontWeight.w600,
+                    color: theme.colorScheme.onSurface.withOpacity(0.7),
+                  ),
+                ),
+                Text(
+                  controller.valor.value,
+                  style: GoogleFonts.outfit(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    });
+  }
+
+  Widget _summaryRow(String label, String? value) {
+    if (value == null || value.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: GoogleFonts.inter(
+              color: theme.colorScheme.onSurface.withOpacity(0.6),
+              fontSize: 14,
+            ),
+          ),
+          Text(
+            value,
+            style: GoogleFonts.inter(
+              fontWeight: FontWeight.w600,
+              color: theme.colorScheme.onSurface,
+              fontSize: 14,
+            ),
+          ),
+        ],
       ),
     );
   }
