@@ -53,7 +53,8 @@ class ProfileView extends StatelessWidget {
 
         // Content
         SliverPadding(
-          padding: const EdgeInsets.all(40),
+          padding:
+              const EdgeInsets.only(left: 40, right: 40, top: 68, bottom: 40),
           sliver: SliverToBoxAdapter(
             child: Center(
               child: ConstrainedBox(
@@ -120,84 +121,78 @@ class ProfileView extends StatelessWidget {
   }) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final accentColor = theme.primaryColor;
+    final accentColor = isDark ? theme.colorScheme.primary : theme.primaryColor;
 
-    return Obx(() {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _FluentSectionTitle(
-            theme,
-            "GERAL",
-            Icons.settings_rounded,
-            accentColor,
-          ),
-          const SizedBox(height: 12),
-          _FluentSettingsGroup(
-            children: [
-              _DesktopHoverTile(
-                icon: Icons.person_outline_rounded,
-                title: 'Dados Pessoais',
-                subtitle: controller.cpf.value.isNotEmpty
-                    ? controller.cpf.value
-                    : 'CPF não informado',
-                onTap: () {},
-              ),
-              _DesktopHoverTile(
-                icon: Icons.lock_outline_rounded,
-                title: 'Segurança',
-                subtitle: controller.funcao.value.isNotEmpty
-                    ? controller.funcao.value
-                    : 'Função não informada',
-                onTap: controller.changePassword,
-              ),
-            ],
-          ),
-          const SizedBox(height: 32),
-          _FluentSectionTitle(
-            theme,
-            "PREFERÊNCIAS",
-            Icons.tune_rounded,
-            accentColor,
-          ),
-          const SizedBox(height: 12),
-          _FluentSettingsGroup(
-            children: [
-              _DesktopHoverTile(
-                icon: Icons.dark_mode_outlined,
-                title: 'Aparência',
-                subtitle: 'Tema do sistema',
-                onTap: () => Get.toNamed(AppRoutes.theme_settings),
-              ),
-            ],
-          ),
-          const SizedBox(height: 32),
-          _FluentSectionTitle(
-            theme,
-            "SISTEMA",
-            Icons.help_outline_rounded,
-            accentColor,
-          ),
-          const SizedBox(height: 12),
-          _FluentSettingsGroup(
-            children: [
-              _DesktopHoverTile(
-                icon: Icons.help_outline_rounded,
-                title: 'Ajuda e Suporte',
-                onTap: () => Get.toNamed(AppRoutes.help),
-              ),
-              _DesktopHoverTile(
-                icon: Icons.logout_rounded,
-                title: 'Sair',
-                onTap: controller.logout,
-                isDestructive: true,
-                showChevron: false,
-              ),
-            ],
-          ),
-        ],
-      );
-    });
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _FluentSectionTitle(
+          theme,
+          "GERAL",
+          Icons.settings_rounded,
+          accentColor,
+        ),
+        const SizedBox(height: 12),
+        _FluentSettingsGroup(
+          children: [
+            _DesktopHoverTile(
+              icon: Icons.person_outline_rounded,
+              title: 'Dados Pessoais',
+              subtitle: 'Gerenciar meu cadastro',
+              onTap: () {},
+            ),
+            _DesktopHoverTile(
+              icon: Icons.lock_outline_rounded,
+              title: 'Segurança',
+              subtitle: 'Alterar minha senha',
+              onTap: controller.changePassword,
+            ),
+          ],
+        ),
+        const SizedBox(height: 32),
+        _FluentSectionTitle(
+          theme,
+          "PREFERÊNCIAS",
+          Icons.tune_rounded,
+          accentColor,
+        ),
+        const SizedBox(height: 12),
+        _FluentSettingsGroup(
+          children: [
+            _DesktopHoverTile(
+              icon: Icons.dark_mode_outlined,
+              title: 'Aparência',
+              subtitle: 'Tema do sistema',
+              onTap: () => Get.toNamed(AppRoutes.theme_settings),
+            ),
+          ],
+        ),
+        const SizedBox(height: 32),
+        _FluentSectionTitle(
+          theme,
+          "SISTEMA",
+          Icons.help_outline_rounded,
+          accentColor,
+        ),
+        const SizedBox(height: 12),
+        _FluentSettingsGroup(
+          children: [
+            _DesktopHoverTile(
+              icon: Icons.help_outline_rounded,
+              title: 'Ajuda e Suporte',
+              onTap: () => Get.toNamed(AppRoutes.help),
+            ),
+            _DesktopHoverTile(
+              icon: Icons.logout_rounded,
+              title: 'Sair',
+              onTap: controller.logout,
+              isDestructive: true,
+              showChevron: false,
+            ),
+          ],
+        ),
+      ],
+    );
   }
 
   Widget _FluentSectionTitle(
@@ -249,7 +244,9 @@ class _ProfileCard extends StatelessWidget {
     final borderColor = isDark
         ? Colors.white.withOpacity(0.08)
         : Colors.black.withOpacity(0.06);
-    final accentColor = theme.primaryColor;
+    final isDarkIcon = theme.brightness == Brightness.dark;
+    final accentColor =
+        isDarkIcon ? theme.colorScheme.primary : theme.primaryColor;
 
     return Obx(
       () => Container(
@@ -292,11 +289,9 @@ class _ProfileCard extends StatelessWidget {
                 ),
                 child: CircleAvatar(
                   radius: 56,
-                  backgroundImage: NetworkImage(
-                    controller.avatarUrl.value.isNotEmpty
-                        ? controller.avatarUrl.value
-                        : '',
-                  ),
+                  backgroundImage: controller.avatarUrl.value.isNotEmpty
+                      ? NetworkImage(controller.avatarUrl.value)
+                      : null,
                   backgroundColor: theme.colorScheme.surfaceVariant,
                   child: controller.avatarUrl.value.isEmpty
                       ? Icon(
@@ -333,7 +328,7 @@ class _ProfileCard extends StatelessWidget {
             ),
             const SizedBox(height: 24),
 
-            // Informações do usuário
+            // Informações do usuário (Reintegrado conforme pedido)
             if (controller.funcao.value.isNotEmpty ||
                 controller.status.value.isNotEmpty)
               Container(
@@ -368,73 +363,10 @@ class _ProfileCard extends StatelessWidget {
                         controller.status.value,
                         theme,
                       ),
-                    if (controller.telefone.value.isNotEmpty)
-                      _buildInfoRow(
-                        Icons.phone_outlined,
-                        'Telefone',
-                        controller.telefone.value,
-                        theme,
-                      ),
-                    if (controller.endereco.value.isNotEmpty)
-                      _buildInfoRow(
-                        Icons.location_on_outlined,
-                        'Endereço',
-                        controller.endereco.value,
-                        theme,
-                      ),
                   ],
                 ),
               ),
-            const SizedBox(height: 24),
-
-            // Botão de editar
-            SizedBox(
-              width: double.infinity,
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [accentColor, accentColor.withOpacity(0.8)],
-                  ),
-                  borderRadius: BorderRadius.circular(14),
-                  boxShadow: [
-                    BoxShadow(
-                      color: accentColor.withOpacity(0.3),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: ElevatedButton(
-                  onPressed: () {
-                    // TODO: Implementar edição de perfil
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.transparent,
-                    foregroundColor: Colors.white,
-                    shadowColor: Colors.transparent,
-                    elevation: 0,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.edit_rounded, size: 18),
-                      const SizedBox(width: 8),
-                      Text(
-                        "Editar Perfil",
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+            const SizedBox(height: 12),
           ],
         ),
       ),
@@ -460,7 +392,9 @@ class _ProfileCard extends StatelessWidget {
             child: Icon(
               icon,
               size: 16,
-              color: theme.colorScheme.onSurface.withOpacity(0.6),
+              color: theme.brightness == Brightness.dark
+                  ? theme.colorScheme.primary
+                  : theme.primaryColor,
             ),
           ),
           const SizedBox(width: 12),
@@ -576,8 +510,12 @@ class _DesktopHoverTileState extends State<_DesktopHoverTile> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final color =
         widget.isDestructive ? Colors.redAccent : theme.colorScheme.onSurface;
+    final iconColor = widget.isDestructive
+        ? Colors.redAccent
+        : (isDark ? theme.colorScheme.primary : theme.primaryColor);
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovering = true),
@@ -613,7 +551,7 @@ class _DesktopHoverTileState extends State<_DesktopHoverTile> {
                 ),
                 child: Icon(
                   widget.icon,
-                  color: color.withOpacity(widget.isDestructive ? 1 : 0.7),
+                  color: iconColor.withOpacity(widget.isDestructive ? 1 : 0.8),
                   size: 20,
                 ),
               ),

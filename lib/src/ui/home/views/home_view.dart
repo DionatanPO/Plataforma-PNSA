@@ -4,10 +4,12 @@ import 'package:plataforma_pnsa/src/data/services/session_service.dart';
 import 'package:plataforma_pnsa/src/ui/access_management/views/access_management_view.dart';
 import 'package:plataforma_pnsa/src/ui/contribuicoes/views/contribuicao_view.dart';
 import 'package:plataforma_pnsa/src/ui/dizimistas/views/dizimista_view.dart';
+import 'package:plataforma_pnsa/src/data/services/auth_service.dart';
 
 import '../../dashboard/views/dashboard_view.dart';
 import '../../relatorios/views/report_view.dart';
 import '../../profile/profile_view.dart';
+import '../../support/help_view.dart';
 import '../controlles/home_controller.dart';
 
 class NavigationItem {
@@ -92,16 +94,25 @@ class HomeView extends StatelessWidget {
         label: 'Minha Conta',
         page: ProfileView(),
         isVisible: true,
-        inMenu: false,
+        inMenu: false, // Por padrão fora do menu para ficar no footer
+      ),
+      NavigationItem(
+        icon: const Icon(Icons.help_outline_rounded),
+        selectedIcon: const Icon(Icons.help_rounded),
+        label: 'Ajuda',
+        page: HelpView(),
+        isVisible: true,
+        inMenu: true,
       ),
     ];
 
     final filtered = items.where((item) => item.isVisible).toList();
 
-    // Se após filtrar sobrar apenas 1 item no menu (ex: Painel),
-    // reativamos o "Minha Conta" no menu para evitar o crash do NavigationRail (min 2 itens)
-    final menuItemsCount = filtered.where((item) => item.inMenu).length;
+    // Garante que o menuItemsCount seja >= 2 para não quebrar o NavigationRail
+    int menuItemsCount = filtered.where((item) => item.inMenu).length;
+
     if (menuItemsCount < 2) {
+      // Se tiver apenas 1 item no menu, forçamos o "Minha Conta" para dentro do menu
       final profileIndex =
           filtered.indexWhere((item) => item.label == 'Minha Conta');
       if (profileIndex != -1) {
@@ -112,7 +123,7 @@ class HomeView extends StatelessWidget {
           label: profile.label,
           page: profile.page,
           isVisible: profile.isVisible,
-          inMenu: true, // Forçamos no menu para evitar o crash
+          inMenu: true,
         );
       }
     }
@@ -123,6 +134,9 @@ class HomeView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
+      // Toque em observável para evitar aviso de improper use do Obx
+      final _ = Get.find<AuthService>().userData.value;
+
       final navItems = _getNavItems();
       final menuItems = navItems.where((item) => item.inMenu).toList();
       final bool mobile = isMobile(context);

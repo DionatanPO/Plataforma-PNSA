@@ -17,6 +17,7 @@ class HelpView extends StatelessWidget {
     final isTablet = size.width >= 768 && size.width < 1024;
     final primaryColor = theme.primaryColor;
     final isDark = theme.brightness == Brightness.dark;
+    final iconColor = isDark ? theme.colorScheme.primary : theme.primaryColor;
 
     // Fluent/Material 3 colors
     final surfaceColor =
@@ -53,11 +54,6 @@ class HelpView extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Search Bar
-                        _buildSearchBar(theme, primaryColor, isDark, cardColor),
-
-                        const SizedBox(height: 48),
-
                         // Quick Access / Topics
                         Text(
                           'Tópicos Populares',
@@ -71,28 +67,7 @@ class HelpView extends StatelessWidget {
                         const SizedBox(height: 20),
                         _buildTopicsGrid(
                           theme,
-                          primaryColor,
-                          isDark,
-                          cardColor,
-                          isDesktop,
-                        ),
-
-                        const SizedBox(height: 48),
-
-                        // Support Options
-                        Text(
-                          'Ainda precisa de ajuda?',
-                          style: GoogleFonts.outfit(
-                            fontSize: 22,
-                            fontWeight: FontWeight.w600,
-                            color: theme.colorScheme.onSurface,
-                            letterSpacing: -0.5,
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        _buildSupportOptions(
-                          theme,
-                          primaryColor,
+                          iconColor,
                           isDark,
                           cardColor,
                           isDesktop,
@@ -120,78 +95,9 @@ class HelpView extends StatelessWidget {
     );
   }
 
-  Widget _buildSearchBar(
-    ThemeData theme,
-    Color primaryColor,
-    bool isDark,
-    Color cardColor,
-  ) {
-    return Container(
-      height: 56,
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(28), // Pill shape for modern feel
-        border: Border.all(
-          color: isDark
-              ? Colors.white.withOpacity(0.08)
-              : Colors.black.withOpacity(0.08),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: isDark
-                ? Colors.black.withOpacity(0.2)
-                : Colors.black.withOpacity(0.05),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Icon(
-            Icons.search_rounded,
-            color: theme.colorScheme.onSurface.withOpacity(0.5),
-            size: 24,
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: TextField(
-              style: GoogleFonts.inter(
-                fontSize: 16,
-                color: theme.colorScheme.onSurface,
-              ),
-              decoration: InputDecoration(
-                hintText: 'Buscar por funcionalidades, dúvidas ou tópicos...',
-                hintStyle: GoogleFonts.inter(
-                  color: theme.colorScheme.onSurface.withOpacity(0.5),
-                  fontSize: 15,
-                ),
-                border: InputBorder.none,
-                contentPadding: EdgeInsets.zero,
-              ),
-            ),
-          ),
-          Container(
-            width: 1,
-            height: 24,
-            color: theme.colorScheme.onSurface.withOpacity(0.1),
-          ),
-          const SizedBox(width: 12),
-          IconButton(
-            icon: Icon(Icons.mic_none_rounded, color: primaryColor, size: 22),
-            onPressed: () {},
-            tooltip: 'Pesquisa por voz',
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildTopicsGrid(
     ThemeData theme,
-    Color primaryColor,
+    Color iconColor,
     bool isDark,
     Color cardColor,
     bool isDesktop,
@@ -201,21 +107,45 @@ class HelpView extends StatelessWidget {
         'icon': Icons.church_outlined,
         'title': 'Cadastro de Fiéis',
         'desc': 'Adicionar e gerenciar membros',
+        'content': [
+          '• Para cadastrar um novo fiel, clique no botão "+" flutuante na tela de Fiéis.',
+          '• Você pode filtrar fiéis por nome, CPF ou endereço na barra de busca.',
+          '• A edição de dados é feita clicando no ícone de lápis na listagem.',
+          '• O histórico de cada dizimista mostra todas as suas contribuições passadas.',
+        ],
       },
       {
         'icon': Icons.payments_outlined,
         'title': 'Controle de Dízimos',
         'desc': 'Registro e acompanhamento',
+        'content': [
+          '• O lançamento de dízimos é feito na aba de "Contribuições".',
+          '• Vincule cada contribuição a um fiel cadastrado ou faça lançamentos avulsos se permitido.',
+          '• Após salvar, você pode gerar e compartilhar o recibo em PDF na hora.',
+          '• O sistema permite filtrar registros por data, método ou valor.',
+        ],
       },
       {
         'icon': Icons.group_work_outlined,
         'title': 'Gestão de Acesso',
         'desc': 'Usuários e permissões',
+        'content': [
+          '• Administrador: Acesso irrestrito a todas as funções e configurações.',
+          '• Secretaria: Foco em cadastros de fiéis e lançamentos diários de dízimo.',
+          '• Financeiro: Acesso a relatórios financeiros, fluxo de caixa e gestão de fiéis.',
+          '• Agente de Dízimo: Permissão apenas para cadastros e lançamentos em campo.',
+        ],
       },
       {
         'icon': Icons.dashboard_outlined,
         'title': 'Painel Administrativo',
         'desc': 'Relatórios e estatísticas',
+        'content': [
+          '• O Painel (Dashboard) oferece uma visão consolidada da arrecadação.',
+          '• Visualize totais do dia, mês atual e ano vigente.',
+          '• O sistema gera gráficos de desempenho e variação percentual.',
+          '• Relatórios detalhados podem ser exportados para contabilidade na aba Relatórios.',
+        ],
       },
     ];
 
@@ -233,14 +163,18 @@ class HelpView extends StatelessWidget {
           children: topics.map((topic) {
             return SizedBox(
               width: width,
-              child: _buildTopicCard(
-                theme,
-                primaryColor,
-                isDark,
-                cardColor,
-                topic['icon'] as IconData,
-                topic['title'] as String,
-                topic['desc'] as String,
+              child: SizedBox(
+                height: 220, // Altura aumentada para evitar overflow
+                child: _buildTopicCard(
+                  theme,
+                  iconColor,
+                  isDark,
+                  cardColor,
+                  topic['icon'] as IconData,
+                  topic['title'] as String,
+                  topic['desc'] as String,
+                  topic['content'] as List<String>,
+                ),
               ),
             );
           }).toList(),
@@ -249,14 +183,109 @@ class HelpView extends StatelessWidget {
     );
   }
 
+  void _showHelpDialog(BuildContext context, String title, IconData icon,
+      List<String> content, ThemeData theme, bool isDark) {
+    showDialog(
+      context: context,
+      builder: (context) => BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+        child: Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.all(24),
+          child: Container(
+            width: 500,
+            padding: const EdgeInsets.all(32),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF252525) : Colors.white,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: isDark
+                    ? Colors.white.withOpacity(0.1)
+                    : Colors.black.withOpacity(0.05),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 40,
+                  offset: const Offset(0, 20),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(icon,
+                          color: theme.colorScheme.primary, size: 28),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: GoogleFonts.outfit(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close_rounded),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                ...content.map((point) => Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Text(
+                        point,
+                        style: GoogleFonts.inter(
+                          fontSize: 15,
+                          color: theme.colorScheme.onSurface.withOpacity(0.8),
+                          height: 1.5,
+                        ),
+                      ),
+                    )),
+                const SizedBox(height: 32),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text('Entendi'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildTopicCard(
     ThemeData theme,
-    Color primaryColor,
+    Color iconColor,
     bool isDark,
     Color cardColor,
     IconData icon,
     String title,
     String desc,
+    List<String> content,
   ) {
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0.0, end: 1.0),
@@ -290,9 +319,10 @@ class HelpView extends StatelessWidget {
               child: Material(
                 color: Colors.transparent,
                 child: InkWell(
-                  onTap: () {},
+                  onTap: () => _showHelpDialog(
+                      context, title, icon, content, theme, isDark),
                   borderRadius: BorderRadius.circular(16),
-                  hoverColor: primaryColor.withOpacity(0.04),
+                  hoverColor: iconColor.withOpacity(0.04),
                   child: Padding(
                     padding: const EdgeInsets.all(24),
                     child: Column(
@@ -306,9 +336,9 @@ class HelpView extends StatelessWidget {
                                 : Colors.black.withOpacity(0.04),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: Icon(icon, color: primaryColor, size: 26),
+                          child: Icon(icon, color: iconColor, size: 26),
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 16),
                         Text(
                           title,
                           style: GoogleFonts.outfit(
@@ -316,8 +346,10 @@ class HelpView extends StatelessWidget {
                             fontWeight: FontWeight.w600,
                             color: theme.colorScheme.onSurface,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: 4),
                         Text(
                           desc,
                           style: GoogleFonts.inter(
@@ -325,6 +357,8 @@ class HelpView extends StatelessWidget {
                             color: theme.colorScheme.onSurface.withOpacity(0.6),
                             height: 1.4,
                           ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),
@@ -335,133 +369,6 @@ class HelpView extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-
-  Widget _buildSupportOptions(
-    ThemeData theme,
-    Color primaryColor,
-    bool isDark,
-    Color cardColor,
-    bool isDesktop,
-  ) {
-    return Flex(
-      direction: isDesktop ? Axis.horizontal : Axis.vertical,
-      children: [
-        Expanded(
-          flex: isDesktop ? 1 : 0,
-          child: _buildSupportCard(
-            theme,
-            primaryColor,
-            isDark,
-            cardColor,
-            Icons.church_outlined,
-            'Secretaria Paroquial',
-            'Presencial ou telefone',
-            () => Get.snackbar(
-                'Contato', 'Entre em contato com a secretaria: (64) 3674-1540'),
-          ),
-        ),
-        SizedBox(width: isDesktop ? 16 : 0, height: isDesktop ? 0 : 16),
-        Expanded(
-          flex: isDesktop ? 1 : 0,
-          child: _buildSupportCard(
-            theme,
-            primaryColor,
-            isDark,
-            cardColor,
-            Icons.mail_outline_rounded,
-            'Envie um E-mail',
-            'Dúvidas sobre o sistema',
-            () => Get.snackbar('Email', 'auxiliadora@gmail.com'),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSupportCard(
-    ThemeData theme,
-    Color primaryColor,
-    bool isDark,
-    Color cardColor,
-    IconData icon,
-    String title,
-    String subtitle,
-    VoidCallback onTap,
-  ) {
-    return Container(
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isDark
-              ? Colors.white.withOpacity(0.08)
-              : Colors.black.withOpacity(0.08),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: isDark
-                ? Colors.black.withOpacity(0.2)
-                : Colors.black.withOpacity(0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(16),
-          hoverColor: primaryColor.withOpacity(0.04),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: primaryColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Icon(icon, color: primaryColor, size: 28),
-                ),
-                const SizedBox(width: 20),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: GoogleFonts.outfit(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: theme.colorScheme.onSurface,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        subtitle,
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          color: theme.colorScheme.onSurface.withOpacity(0.6),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Icon(
-                  Icons.arrow_forward_rounded,
-                  color: theme.colorScheme.onSurface.withOpacity(0.3),
-                  size: 20,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 

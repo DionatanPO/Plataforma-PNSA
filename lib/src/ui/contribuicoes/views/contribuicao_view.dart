@@ -526,7 +526,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
                 padding: const EdgeInsets.all(12),
                 child: Icon(
                   Icons.search_rounded,
-                  color: theme.colorScheme.onSurface.withOpacity(0.3),
+                  color: accentColor,
                   size: 22,
                 ),
               ),

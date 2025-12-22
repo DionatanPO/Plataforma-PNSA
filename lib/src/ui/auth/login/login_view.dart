@@ -154,7 +154,7 @@ class _DesktopLayout extends StatelessWidget {
                 image: !isDark
                     ? DecorationImage(
                         image: const NetworkImage(
-                            "https://images.unsplash.com/photo-1548625361-e877477d94c9?q=80&w=1920&auto=format&fit=crop"),
+                            "https://images.unsplash.com/photo-1438232992991-995b7058bbb3?q=80&w=1920&auto=format&fit=crop"),
                         fit: BoxFit.cover,
                         colorFilter: ColorFilter.mode(
                           colorScheme.primary.withOpacity(0.85),
