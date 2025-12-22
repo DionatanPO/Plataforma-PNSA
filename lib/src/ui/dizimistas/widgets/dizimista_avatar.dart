@@ -28,7 +28,9 @@ class DizimistaAvatar extends StatelessWidget {
           style: GoogleFonts.outfit(
             fontSize: size * 0.4,
             fontWeight: FontWeight.bold,
-            color: theme.primaryColor,
+            color: theme.brightness == Brightness.dark
+                ? theme.colorScheme.primary
+                : theme.primaryColor,
           ),
         ),
       ),
@@ -42,7 +44,9 @@ class DizimistaAvatar extends StatelessWidget {
       final ultimaInicial = nomes.last.isNotEmpty ? nomes.last[0] : '';
       return '$primeiraInicial$ultimaInicial'.toUpperCase();
     } else {
-      return nomes.isNotEmpty && nomes.first.isNotEmpty ? '${nomes.first[0]}' : '';
+      return nomes.isNotEmpty && nomes.first.isNotEmpty
+          ? '${nomes.first[0]}'
+          : '';
     }
   }
 }

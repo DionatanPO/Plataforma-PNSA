@@ -153,8 +153,14 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final size = MediaQuery.of(context).size;
     final isMobile = size.width < 600;
+
+    // Cor dos ícones adaptativa: brilho total no modo escuro para melhor contraste
+    final iconColor = isDark
+        ? theme.colorScheme.primary
+        : theme.colorScheme.primary.withOpacity(0.7);
 
     // inputDecoration seguindo padrão Material 3
     final inputDecoration = InputDecoration(
@@ -196,9 +202,12 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
           // Número de Registro Paroquial
           TextField(
             controller: numeroRegistroController,
+            style: GoogleFonts.inter(
+                color: theme.colorScheme.onSurface, fontSize: 14),
             decoration: inputDecoration.copyWith(
               labelText: 'Nº de Registro Paroquial *',
               hintText: 'Ex: 0001',
+              prefixIcon: Icon(Icons.tag_rounded, color: iconColor),
             ),
           ),
           const SizedBox(height: 16),
@@ -217,9 +226,12 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
           // Nome Completo
           TextField(
             controller: nomeController,
+            style: GoogleFonts.inter(
+                color: theme.colorScheme.onSurface, fontSize: 14),
             decoration: inputDecoration.copyWith(
               labelText: 'Nome Completo *',
               hintText: 'Ex: João da Silva',
+              prefixIcon: Icon(Icons.person_outline_rounded, color: iconColor),
             ),
           ),
           const SizedBox(height: 16),
@@ -229,9 +241,12 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
             controller: cpfController,
             inputFormatters: [cpfFormatter],
             keyboardType: TextInputType.number,
+            style: GoogleFonts.inter(
+                color: theme.colorScheme.onSurface, fontSize: 14),
             decoration: inputDecoration.copyWith(
               labelText: 'CPF *',
               hintText: '000.000.000-00',
+              prefixIcon: Icon(Icons.badge_outlined, color: iconColor),
             ),
           ),
           const SizedBox(height: 16),
@@ -256,11 +271,14 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
                       ? '${dataNascimento!.day.toString().padLeft(2, '0')}/${dataNascimento!.month.toString().padLeft(2, '0')}/${dataNascimento!.year}'
                       : '',
                 ),
+                style: GoogleFonts.inter(
+                    color: theme.colorScheme.onSurface, fontSize: 14),
                 decoration: inputDecoration.copyWith(
                   labelText: 'Data de Nascimento',
                   hintText: 'Selecione a data',
-                  suffixIcon: Icon(Icons.calendar_today_rounded,
-                      color: theme.colorScheme.primary),
+                  prefixIcon: Icon(Icons.cake_outlined, color: iconColor),
+                  suffixIcon:
+                      Icon(Icons.calendar_today_rounded, color: iconColor),
                 ),
               ),
             ),
@@ -270,7 +288,13 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
           // Sexo (Dropdown M3 Style)
           DropdownButtonFormField<String>(
             value: sexo,
-            decoration: inputDecoration.copyWith(labelText: 'Sexo'),
+            style: GoogleFonts.inter(
+                color: theme.colorScheme.onSurface, fontSize: 14),
+            decoration: inputDecoration.copyWith(
+              labelText: 'Sexo',
+              prefixIcon: Icon(Icons.person_search_outlined, color: iconColor),
+            ),
+            dropdownColor: theme.colorScheme.surface,
             items: [
               'Masculino',
               'Feminino',
@@ -294,9 +318,12 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
             controller: telefoneController,
             inputFormatters: [telefoneFormatter],
             keyboardType: TextInputType.phone,
+            style: GoogleFonts.inter(
+                color: theme.colorScheme.onSurface, fontSize: 14),
             decoration: inputDecoration.copyWith(
               labelText: 'Telefone / WhatsApp *',
               hintText: '(00) 00000-0000',
+              prefixIcon: Icon(Icons.phone_outlined, color: iconColor),
             ),
           ),
           const SizedBox(height: 16),
@@ -304,9 +331,12 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
           TextField(
             controller: emailController,
             keyboardType: TextInputType.emailAddress,
+            style: GoogleFonts.inter(
+                color: theme.colorScheme.onSurface, fontSize: 14),
             decoration: inputDecoration.copyWith(
               labelText: 'E-mail',
               hintText: 'exemplo@email.com',
+              prefixIcon: Icon(Icons.email_outlined, color: iconColor),
             ),
           ),
           const SizedBox(height: 24),
@@ -324,7 +354,12 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
 
           TextField(
             controller: ruaController,
-            decoration: inputDecoration.copyWith(labelText: 'Rua'),
+            style: GoogleFonts.inter(
+                color: theme.colorScheme.onSurface, fontSize: 14),
+            decoration: inputDecoration.copyWith(
+              labelText: 'Rua',
+              prefixIcon: Icon(Icons.location_on_outlined, color: iconColor),
+            ),
           ),
           const SizedBox(height: 16),
 
@@ -334,7 +369,12 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
                 flex: 1,
                 child: TextField(
                   controller: numeroController,
-                  decoration: inputDecoration.copyWith(labelText: 'Número'),
+                  style: GoogleFonts.inter(
+                      color: theme.colorScheme.onSurface, fontSize: 14),
+                  decoration: inputDecoration.copyWith(
+                    labelText: 'Número',
+                    prefixIcon: Icon(Icons.home_outlined, color: iconColor),
+                  ),
                 ),
               ),
               const SizedBox(width: 16),
@@ -342,7 +382,12 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
                 flex: 2,
                 child: TextField(
                   controller: bairroController,
-                  decoration: inputDecoration.copyWith(labelText: 'Bairro *'),
+                  style: GoogleFonts.inter(
+                      color: theme.colorScheme.onSurface, fontSize: 14),
+                  decoration: inputDecoration.copyWith(
+                    labelText: 'Bairro *',
+                    prefixIcon: Icon(Icons.map_outlined, color: iconColor),
+                  ),
                 ),
               ),
             ],
@@ -355,14 +400,25 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
                 flex: 2,
                 child: TextField(
                   controller: cidadeController,
-                  decoration: inputDecoration.copyWith(labelText: 'Cidade *'),
+                  style: GoogleFonts.inter(
+                      color: theme.colorScheme.onSurface, fontSize: 14),
+                  decoration: inputDecoration.copyWith(
+                    labelText: 'Cidade *',
+                    prefixIcon:
+                        Icon(Icons.location_city_outlined, color: iconColor),
+                  ),
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: TextField(
                   controller: estadoController,
-                  decoration: inputDecoration.copyWith(labelText: 'UF *'),
+                  style: GoogleFonts.inter(
+                      color: theme.colorScheme.onSurface, fontSize: 14),
+                  decoration: inputDecoration.copyWith(
+                    labelText: 'UF *',
+                    prefixIcon: Icon(Icons.flag_outlined, color: iconColor),
+                  ),
                 ),
               ),
             ],
@@ -373,14 +429,26 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
             controller: cepController,
             inputFormatters: [cepFormatter],
             keyboardType: TextInputType.number,
-            decoration: inputDecoration.copyWith(labelText: 'CEP'),
+            style: GoogleFonts.inter(
+                color: theme.colorScheme.onSurface, fontSize: 14),
+            decoration: inputDecoration.copyWith(
+              labelText: 'CEP',
+              prefixIcon:
+                  Icon(Icons.local_post_office_outlined, color: iconColor),
+            ),
           ),
           const SizedBox(height: 24),
 
           // Estado Civil e Conjuge
           DropdownButtonFormField<String>(
             value: estadoCivil,
-            decoration: inputDecoration.copyWith(labelText: 'Estado Civil'),
+            style: GoogleFonts.inter(
+                color: theme.colorScheme.onSurface, fontSize: 14),
+            decoration: inputDecoration.copyWith(
+              labelText: 'Estado Civil',
+              prefixIcon: Icon(Icons.people_outline_rounded, color: iconColor),
+            ),
+            dropdownColor: theme.colorScheme.surface,
             items: [
               'Solteiro',
               'Casado',
@@ -403,8 +471,12 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
             const SizedBox(height: 16),
             TextField(
               controller: nomeConjugueController,
+              style: GoogleFonts.inter(
+                  color: theme.colorScheme.onSurface, fontSize: 14),
               decoration: inputDecoration.copyWith(
                 labelText: 'Nome do Cônjuge',
+                prefixIcon: Icon(Icons.person_outline_rounded,
+                    color: theme.colorScheme.primary.withOpacity(0.7)),
               ),
             ),
             const SizedBox(height: 16),
@@ -430,11 +502,15 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
                         ? '${dataCasamento!.day.toString().padLeft(2, '0')}/${dataCasamento!.month.toString().padLeft(2, '0')}/${dataCasamento!.year}'
                         : '',
                   ),
+                  style: GoogleFonts.inter(
+                      color: theme.colorScheme.onSurface, fontSize: 14),
                   decoration: inputDecoration.copyWith(
                     labelText: 'Data de Casamento',
                     hintText: 'Selecione a data',
-                    suffixIcon: Icon(Icons.calendar_today_rounded,
-                        color: theme.colorScheme.primary),
+                    prefixIcon:
+                        Icon(Icons.favorite_outline_rounded, color: iconColor),
+                    suffixIcon:
+                        Icon(Icons.calendar_today_rounded, color: iconColor),
                   ),
                 ),
               ),
@@ -462,11 +538,14 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
                         ? '${dataNascimentoConjugue!.day.toString().padLeft(2, '0')}/${dataNascimentoConjugue!.month.toString().padLeft(2, '0')}/${dataNascimentoConjugue!.year}'
                         : '',
                   ),
+                  style: GoogleFonts.inter(
+                      color: theme.colorScheme.onSurface, fontSize: 14),
                   decoration: inputDecoration.copyWith(
                     labelText: 'Data de Nascimento do Cônjuge',
                     hintText: 'Selecione a data',
-                    suffixIcon: Icon(Icons.calendar_today_rounded,
-                        color: theme.colorScheme.primary),
+                    prefixIcon: Icon(Icons.cake_outlined, color: iconColor),
+                    suffixIcon:
+                        Icon(Icons.calendar_today_rounded, color: iconColor),
                   ),
                 ),
               ),
@@ -477,7 +556,12 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
           TextField(
             controller: observacoesController,
             maxLines: 3,
-            decoration: inputDecoration.copyWith(labelText: 'Observações'),
+            style: GoogleFonts.inter(
+                color: theme.colorScheme.onSurface, fontSize: 14),
+            decoration: inputDecoration.copyWith(
+              labelText: 'Observações',
+              prefixIcon: Icon(Icons.notes_rounded, color: iconColor),
+            ),
           ),
 
           const SizedBox(height: 16),
@@ -501,7 +585,13 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
           const SizedBox(height: 16),
           DropdownButtonFormField<String>(
             value: selectedStatus,
-            decoration: inputDecoration.copyWith(labelText: 'Status'),
+            style: GoogleFonts.inter(
+                color: theme.colorScheme.onSurface, fontSize: 14),
+            decoration: inputDecoration.copyWith(
+              labelText: 'Status',
+              prefixIcon: Icon(Icons.info_outline_rounded, color: iconColor),
+            ),
+            dropdownColor: theme.colorScheme.surface,
             items: [
               'Ativo',
               'Afastado',

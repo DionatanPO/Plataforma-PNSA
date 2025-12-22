@@ -626,6 +626,9 @@ class _CadastroDizimistaDesktopViewState
   Widget _buildSidebarItem(
       int index, String label, IconData icon, ThemeData theme) {
     final isDark = theme.brightness == Brightness.dark;
+    final iconColor = isDark
+        ? theme.colorScheme.primary
+        : theme.colorScheme.primary.withOpacity(0.8);
     bool isActive = activeSection == index;
 
     return Material(
@@ -650,7 +653,7 @@ class _CadastroDizimistaDesktopViewState
             children: [
               Icon(
                 icon,
-                color: isActive ? theme.colorScheme.primary : theme.hintColor,
+                color: isActive ? iconColor : theme.hintColor.withOpacity(0.5),
                 size: 20,
               ),
               const SizedBox(width: 16),
@@ -698,6 +701,10 @@ class _CadastroDizimistaDesktopViewState
     required ThemeData theme,
     required List<Widget> children,
   }) {
+    final isDark = theme.brightness == Brightness.dark;
+    final iconColor = isDark
+        ? theme.colorScheme.primary
+        : theme.colorScheme.primary.withOpacity(0.8);
     return Container(
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
@@ -719,10 +726,10 @@ class _CadastroDizimistaDesktopViewState
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: theme.primaryColor.withOpacity(0.1),
+                  color: iconColor.withOpacity(isDark ? 0.2 : 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(icon, color: theme.primaryColor, size: 22),
+                child: Icon(icon, color: iconColor, size: 22),
               ),
               const SizedBox(width: 16),
               Text(title,
@@ -817,9 +824,14 @@ class _CadastroDizimistaDesktopViewState
 
   InputDecoration _buildInputDecoration(
       ThemeData theme, String label, IconData icon) {
+    final isDark = theme.brightness == Brightness.dark;
     return InputDecoration(
       labelText: label,
-      prefixIcon: Icon(icon, size: 20),
+      prefixIcon: Icon(icon,
+          size: 20,
+          color: isDark
+              ? theme.colorScheme.primary
+              : theme.colorScheme.primary.withOpacity(0.7)),
       labelStyle: TextStyle(color: theme.hintColor, fontSize: 14),
       floatingLabelStyle:
           TextStyle(color: theme.primaryColor, fontWeight: FontWeight.bold),

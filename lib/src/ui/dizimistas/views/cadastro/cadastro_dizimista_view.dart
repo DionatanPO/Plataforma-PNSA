@@ -779,7 +779,11 @@ class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
           children: [
             Row(
               children: [
-                Icon(icon, size: 18, color: theme.colorScheme.primary),
+                Icon(icon,
+                    size: 18,
+                    color: theme.brightness == Brightness.dark
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.primary.withOpacity(0.8)),
                 const SizedBox(width: 8),
                 Text(title,
                     style: GoogleFonts.inter(
@@ -857,7 +861,11 @@ class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
       ThemeData theme, String label, IconData icon) {
     return InputDecoration(
       labelText: label,
-      prefixIcon: Icon(icon, size: 20, color: theme.colorScheme.primary),
+      prefixIcon: Icon(icon,
+          size: 20,
+          color: theme.brightness == Brightness.dark
+              ? theme.colorScheme.primary
+              : theme.colorScheme.primary.withOpacity(0.7)),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(color: theme.colorScheme.outline),

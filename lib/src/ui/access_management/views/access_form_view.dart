@@ -467,7 +467,11 @@ class _AccessFormViewState extends State<AccessFormView> {
           children: [
             Row(
               children: [
-                Icon(icon, color: theme.primaryColor, size: 20),
+                Icon(icon,
+                    color: theme.brightness == Brightness.dark
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.primary.withOpacity(0.8),
+                    size: 20),
                 const SizedBox(width: 8),
                 Text(title,
                     style: GoogleFonts.inter(
@@ -511,7 +515,11 @@ class _AccessFormViewState extends State<AccessFormView> {
     final theme = Theme.of(context);
     return InputDecoration(
       labelText: label,
-      prefixIcon: Icon(icon, size: 20, color: theme.primaryColor),
+      prefixIcon: Icon(icon,
+          size: 20,
+          color: theme.brightness == Brightness.dark
+              ? theme.colorScheme.primary
+              : theme.colorScheme.primary.withOpacity(0.7)),
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       filled: true,
       fillColor: theme.brightness == Brightness.dark

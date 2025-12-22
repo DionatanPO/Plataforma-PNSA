@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../data/services/session_service.dart';
 import '../controllers/dizimista_controller.dart';
 import '../models/dizimista_model.dart';
 import 'dizimista_avatar.dart';
@@ -84,6 +85,7 @@ class DizimistaMobileListView extends StatelessWidget {
                                 style: GoogleFonts.outfit(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,
+                                  color: theme.colorScheme.onSurface,
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -111,8 +113,10 @@ class DizimistaMobileListView extends StatelessWidget {
                                   fontSize:
                                       12, // Leve aumento para legibilidade
                                   fontWeight: FontWeight.w600, // Destaque sutil
-                                  color: theme.colorScheme.onSurface
-                                      .withOpacity(0.9),
+                                  color: theme.brightness == Brightness.dark
+                                      ? theme.colorScheme.primary
+                                      : theme.colorScheme.onSurface
+                                          .withOpacity(0.9),
                                 ),
                               ),
                             ),
@@ -195,14 +199,51 @@ class DizimistaMobileListView extends StatelessWidget {
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: () => onEditPressed(d),
-                      icon: const Icon(Icons.edit, size: 16),
+                      icon: const Icon(Icons.edit_rounded, size: 16),
                       label: const Text('Editar'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: theme.colorScheme.onSurface,
-                        side: BorderSide(color: theme.dividerColor),
+                        side: BorderSide(
+                            color: theme.dividerColor.withOpacity(0.2)),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
                       ),
                     ),
                   ),
+                  Obx(() {
+                    final sessionService = Get.find<SessionService>();
+                    if (!sessionService.isSecretaria) {
+                      return const SizedBox.shrink();
+                    }
+                    return Expanded(
+                      child: Row(
+                        children: [
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: FilledButton.icon(
+                              onPressed: () => onViewHistoryPressed(d),
+                              icon: const Icon(Icons.history_rounded, size: 16),
+                              label: const Text('Histórico'),
+                              style: FilledButton.styleFrom(
+                                backgroundColor: theme.colorScheme.primary
+                                    .withOpacity(
+                                        theme.brightness == Brightness.dark
+                                            ? 0.2
+                                            : 0.1),
+                                foregroundColor: theme.colorScheme.primary,
+                                elevation: 0,
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12)),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
                 ],
               ),
             ],

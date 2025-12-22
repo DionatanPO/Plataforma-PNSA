@@ -122,33 +122,35 @@ class PasswordResetView extends GetView<PasswordResetController> {
                     }),
 
                     // Campos de Texto
-                    Column(
-                      children: [
-                        _buildPasswordField(
-                          controller: controller.newPasswordController,
-                          label: 'Nova senha',
-                          isObscure: controller.obscureNewPassword.value,
-                          onToggle: controller.toggleNewPasswordVisibility,
-                          primaryColor: primaryColor,
-                          passwordResetController: controller,
-                          onFieldSubmitted: (_) {
-                            controller.validatePasswords();
-                          },
-                        ),
-                        const SizedBox(height: 20),
-                        _buildPasswordField(
-                          controller: controller.confirmPasswordController,
-                          label: 'Confirmar senha',
-                          isObscure: controller.obscureConfirmPassword.value,
-                          onToggle: controller.toggleConfirmPasswordVisibility,
-                          primaryColor: primaryColor,
-                          passwordResetController: controller,
-                          onFieldSubmitted: (_) {
-                            controller.validatePasswords();
-                          },
-                        ),
-                      ],
-                    ),
+                    Obx(() => Column(
+                          children: [
+                            _buildPasswordField(
+                              controller: controller.newPasswordController,
+                              label: 'Nova senha',
+                              isObscure: controller.obscureNewPassword.value,
+                              onToggle: controller.toggleNewPasswordVisibility,
+                              primaryColor: primaryColor,
+                              passwordResetController: controller,
+                              onFieldSubmitted: (_) {
+                                controller.validatePasswords();
+                              },
+                            ),
+                            const SizedBox(height: 20),
+                            _buildPasswordField(
+                              controller: controller.confirmPasswordController,
+                              label: 'Confirmar senha',
+                              isObscure:
+                                  controller.obscureConfirmPassword.value,
+                              onToggle:
+                                  controller.toggleConfirmPasswordVisibility,
+                              primaryColor: primaryColor,
+                              passwordResetController: controller,
+                              onFieldSubmitted: (_) {
+                                controller.validatePasswords();
+                              },
+                            ),
+                          ],
+                        )),
 
                     const SizedBox(height: 32),
 
@@ -257,7 +259,10 @@ class PasswordResetView extends GetView<PasswordResetController> {
               // Validar campos sempre que o texto mudar
               passwordResetController.validatePasswords();
             },
-            style: const TextStyle(fontSize: 16),
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey[900],
+            ),
             decoration: InputDecoration(
               labelText: label,
               labelStyle: TextStyle(color: Colors.grey[600], fontSize: 14),

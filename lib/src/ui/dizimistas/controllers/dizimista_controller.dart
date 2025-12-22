@@ -10,8 +10,14 @@ class DizimistaController extends GetxController {
   final _isLoading = false.obs;
 
   List<Dizimista> get dizimistas => _dizimistas;
+  List<Contribuicao> get contribuicoes => _contribuicoes;
   bool get isLoading => _isLoading.value;
   final searchQuery = ''.obs;
+
+  // Método para obter o histórico de contribuições de um dizimista
+  List<Contribuicao> historicoContribuicoes(String dizimistaId) {
+    return _contribuicoes.where((c) => c.dizimistaId == dizimistaId).toList();
+  }
 
   List<Dizimista> get filteredDizimistas {
     if (searchQuery.value.isEmpty) {

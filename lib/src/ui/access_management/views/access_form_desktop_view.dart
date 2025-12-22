@@ -389,6 +389,7 @@ class _AccessFormDesktopViewState extends State<AccessFormDesktopView> {
 
   Widget _buildSection(int id, String title, IconData icon, ThemeData theme,
       List<Widget> children) {
+    final isDark = theme.brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
@@ -404,9 +405,13 @@ class _AccessFormDesktopViewState extends State<AccessFormDesktopView> {
               Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                      color: theme.primaryColor.withOpacity(0.1),
+                      color: theme.primaryColor.withOpacity(isDark ? 0.2 : 0.1),
                       borderRadius: BorderRadius.circular(12)),
-                  child: Icon(icon, color: theme.primaryColor, size: 22)),
+                  child: Icon(icon,
+                      color: isDark
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.primary.withOpacity(0.8),
+                      size: 22)),
               const SizedBox(width: 16),
               Text(title,
                   style: GoogleFonts.outfit(
@@ -630,9 +635,14 @@ class _AccessFormDesktopViewState extends State<AccessFormDesktopView> {
 
   InputDecoration _buildInputDecoration(
       ThemeData theme, String label, IconData icon) {
+    final isDark = theme.brightness == Brightness.dark;
     return InputDecoration(
       labelText: label,
-      prefixIcon: Icon(icon, size: 20),
+      prefixIcon: Icon(icon,
+          size: 20,
+          color: isDark
+              ? theme.colorScheme.primary
+              : theme.colorScheme.primary.withOpacity(0.7)),
       labelStyle: TextStyle(color: theme.hintColor, fontSize: 14),
       border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),

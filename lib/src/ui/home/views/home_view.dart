@@ -49,14 +49,17 @@ class HomeView extends StatelessWidget {
         selectedIcon: const Icon(Icons.dashboard),
         label: 'Painel',
         page: DashboardView(),
-        isVisible: true,
+        isVisible: session.isSecretaria || session.isFinanceiro,
       ),
       NavigationItem(
         icon: const Icon(Icons.church_outlined),
         selectedIcon: const Icon(Icons.church),
         label: 'Dizimistas',
         page: DizimistaView(),
-        isVisible: session.isAdmin || session.isSecretaria || session.isAgente,
+        isVisible: session.isAdmin ||
+            session.isSecretaria ||
+            session.isAgente ||
+            session.isFinanceiro,
       ),
       NavigationItem(
         icon: const Icon(Icons.payments_outlined),

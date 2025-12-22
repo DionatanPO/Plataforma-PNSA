@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
+import '../../../data/services/session_service.dart';
 import '../models/dizimista_model.dart';
 import '../controllers/dizimista_controller.dart';
 import 'dizimista_avatar.dart';
@@ -37,6 +38,7 @@ class DizimistaDesktopTableView extends StatelessWidget {
   final ThemeData theme;
   final Color surfaceColor;
   final Function(Dizimista) onEditPressed;
+  final Function(Dizimista) onViewHistoryPressed;
 
   const DizimistaDesktopTableView({
     Key? key,
@@ -44,6 +46,7 @@ class DizimistaDesktopTableView extends StatelessWidget {
     required this.theme,
     required this.surfaceColor,
     required this.onEditPressed,
+    required this.onViewHistoryPressed,
   }) : super(key: key);
 
   @override
@@ -119,6 +122,7 @@ class DizimistaDesktopTableView extends StatelessWidget {
                 theme: theme,
                 borderColor: borderColor,
                 onEditPressed: onEditPressed,
+                onViewHistoryPressed: onViewHistoryPressed,
               );
             },
           ),
@@ -151,7 +155,8 @@ class _TableHeaderCell extends StatelessWidget {
         style: GoogleFonts.inter(
           fontSize: 11,
           fontWeight: FontWeight.bold,
-          color: theme.colorScheme.onSurface.withOpacity(0.6),
+          color: theme.colorScheme.onSurface
+              .withOpacity(theme.brightness == Brightness.dark ? 0.8 : 0.6),
           letterSpacing: 0.5,
         ),
       ),
@@ -167,12 +172,14 @@ class _TableRow extends StatefulWidget {
   final ThemeData theme;
   final Color borderColor;
   final Function(Dizimista) onEditPressed;
+  final Function(Dizimista) onViewHistoryPressed;
 
   const _TableRow({
     required this.dizimista,
     required this.theme,
     required this.borderColor,
     required this.onEditPressed,
+    required this.onViewHistoryPressed,
   });
 
   @override
@@ -214,7 +221,9 @@ class _TableRowState extends State<_TableRow> {
                   style: GoogleFonts.inter(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: theme.primaryColor,
+                    color: theme.brightness == Brightness.dark
+                        ? theme.colorScheme.primary
+                        : theme.primaryColor,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -435,7 +444,9 @@ class _TableRowState extends State<_TableRow> {
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                             color: timeAgo == 'Nenhuma'
-                                ? Colors.orange.shade800
+                                ? (theme.brightness == Brightness.dark
+                                    ? Colors.orange
+                                    : Colors.orange.shade800)
                                 : theme.primaryColor,
                           ),
                           maxLines: 1,
@@ -477,7 +488,8 @@ class _TableRowState extends State<_TableRow> {
                         style: GoogleFonts.inter(
                           fontSize: 10,
                           fontWeight: FontWeight.w500,
-                          color: theme.colorScheme.onSurface.withOpacity(0.6),
+                          color: theme.colorScheme.onSurface.withOpacity(
+                              theme.brightness == Brightness.dark ? 0.8 : 0.6),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -496,6 +508,50 @@ class _TableRowState extends State<_TableRow> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
+                  // Botão Histórico
+                  Obx(() {
+                    final sessionService = Get.find<SessionService>();
+                    if (!sessionService.isSecretaria) {
+                      return const SizedBox.shrink();
+                    }
+                    return Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: () => widget.onViewHistoryPressed(d),
+                            borderRadius: BorderRadius.circular(10),
+                            child: Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    theme.colorScheme.primary.withOpacity(
+                                        theme.brightness == Brightness.dark
+                                            ? 0.25
+                                            : 0.15),
+                                    theme.colorScheme.primary.withOpacity(
+                                        theme.brightness == Brightness.dark
+                                            ? 0.12
+                                            : 0.08),
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Icon(
+                                Icons.history_rounded,
+                                size: 18,
+                                color: theme.colorScheme.primary,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                    );
+                  }),
+                  // Botão Editar
                   Material(
                     color: Colors.transparent,
                     child: InkWell(
@@ -506,8 +562,8 @@ class _TableRowState extends State<_TableRow> {
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
-                              Colors.blue.withOpacity(0.15),
-                              Colors.blue.withOpacity(0.08),
+                              theme.colorScheme.primary.withOpacity(0.1),
+                              theme.colorScheme.primary.withOpacity(0.05),
                             ],
                           ),
                           borderRadius: BorderRadius.circular(10),
@@ -515,7 +571,7 @@ class _TableRowState extends State<_TableRow> {
                         child: Icon(
                           Icons.edit_rounded,
                           size: 18,
-                          color: Colors.blue,
+                          color: theme.colorScheme.primary,
                         ),
                       ),
                     ),

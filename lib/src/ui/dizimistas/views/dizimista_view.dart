@@ -9,6 +9,7 @@ import '../widgets/dizimista_empty_state_view.dart';
 import '../widgets/dizimista_mobile_list_view.dart';
 import '../widgets/dizimista_desktop_table_view.dart';
 import '../widgets/dizimista_search_bar_view.dart';
+import '../widgets/dizimista_history_dialog.dart';
 import '../../core/widgets/modern_header.dart';
 
 class DizimistaView extends StatefulWidget {
@@ -139,6 +140,8 @@ class _DizimistaViewState extends State<DizimistaView> {
                           onEditPressed: (dizimista) => Get.toNamed(
                               AppRoutes.dizimista_editar,
                               arguments: dizimista),
+                          onViewHistoryPressed: (dizimista) =>
+                              _openHistoryDialog(dizimista),
                         ),
                       );
                     } else {
@@ -150,7 +153,8 @@ class _DizimistaViewState extends State<DizimistaView> {
                           onEditPressed: (dizimista) => Get.toNamed(
                               AppRoutes.dizimista_editar,
                               arguments: dizimista),
-                          onViewHistoryPressed: (dizimista) {},
+                          onViewHistoryPressed: (dizimista) =>
+                              _openHistoryDialog(dizimista),
                         ),
                       );
                     }
@@ -176,6 +180,13 @@ class _DizimistaViewState extends State<DizimistaView> {
           ),
         ),
       ),
+    );
+  }
+
+  void _openHistoryDialog(Dizimista d) {
+    showDialog(
+      context: context,
+      builder: (context) => DizimistaHistoryDialog(dizimista: d),
     );
   }
 
