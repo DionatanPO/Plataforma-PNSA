@@ -78,6 +78,11 @@ class LoginController extends GetxController {
             }
 
             final userData = await _authService.getUserDataWithRetry(user.uid);
+
+            // Limpa os campos antes de navegar para a próxima tela
+            emailController.clear();
+            passwordController.clear();
+
             if (userData != null && userData.pendencia) {
               Get.offAllNamed(AppRoutes.password_reset);
             } else {

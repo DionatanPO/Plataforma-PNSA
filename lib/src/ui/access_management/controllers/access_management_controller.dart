@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:get/get.dart';
 import '../../../data/services/auth_service.dart';
 import '../../../domain/models/acesso_model.dart';
@@ -13,18 +14,36 @@ class AccessManagementController extends GetxController {
   bool get isLoading => _isLoading.value;
   String get searchQuery => _searchQuery.value;
 
+  StreamSubscription? _acessosSub;
+
   @override
   void onInit() {
     super.onInit();
-    _setupAcessosStream();
+
+    final authService = Get.find<AuthService>();
+
+    // Escutar mudanças no login
+    ever(authService.userData, (userData) {
+      if (userData != null) {
+        _setupAcessosStream();
+      } else {
+        _stopListening();
+      }
+    });
+
+    // Se já estiver logado (ex: F5)
+    if (authService.userData.value != null) {
+      _setupAcessosStream();
+    }
   }
 
   void _setupAcessosStream() {
+    _stopListening();
     _isLoading.value = true;
     final authService = Get.find<AuthService>();
 
     // Subscreve ao stream de dados do Firestore uma única vez
-    AccessService.getAllAcessos().listen((acessosList) {
+    _acessosSub = AccessService.getAllAcessos().listen((acessosList) {
       final currentUserId = authService.currentUser?.uid;
 
       if (currentUserId != null) {
@@ -35,10 +54,21 @@ class AccessManagementController extends GetxController {
         _acessos.assignAll(acessosList);
       }
       _isLoading.value = false;
-    }).onError((error) {
+    }, onError: (error) {
       print("Erro no stream de acessos: $error");
       _isLoading.value = false;
     });
+  }
+
+  void _stopListening() {
+    _acessosSub?.cancel();
+    _acessos.clear();
+  }
+
+  @override
+  void onClose() {
+    _stopListening();
+    super.onClose();
   }
 
   // Removido o método fetchAcessos manual para evitar inconsistências

@@ -27,6 +27,9 @@ class ContribuicaoController extends GetxController {
   List<Dizimista> get dizimistas => _dizimistas;
   bool get isLoading => _isLoading.value;
 
+  StreamSubscription? _contribuicoesSub;
+  StreamSubscription? _dizimistasSub;
+
   // ==================================================================
   // VARIÁVEIS DO FORMULÁRIO
   // ==================================================================
@@ -100,8 +103,22 @@ class ContribuicaoController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    fetchContribuicoes();
-    fetchDizimistas();
+
+    final authService = Get.find<AuthService>();
+
+    // Reage a mudanças no login
+    ever(authService.userData, (userData) {
+      if (userData != null) {
+        _startListening();
+      } else {
+        _stopListening();
+      }
+    });
+
+    // Se já estiver logado (ex: F5)
+    if (authService.userData.value != null) {
+      _startListening();
+    }
 
     // Recalcular divisão quando o valor mudar
     ever(valor, (_) => dividirValorEntreCompetencias());
@@ -120,6 +137,25 @@ class ContribuicaoController extends GetxController {
     if (tipo.value == 'Dízimo Regular') {
       _sugerirMesAtual();
     }
+  }
+
+  void _startListening() {
+    _stopListening();
+    fetchContribuicoes();
+    fetchDizimistas();
+  }
+
+  void _stopListening() {
+    _contribuicoesSub?.cancel();
+    _dizimistasSub?.cancel();
+    _contribuicoes.clear();
+    _dizimistas.clear();
+  }
+
+  @override
+  void onClose() {
+    _stopListening();
+    super.onClose();
   }
 
   void adicionarVariasCompetencias(List<String> meses) {
@@ -148,11 +184,14 @@ class ContribuicaoController extends GetxController {
       final contribuicoesStream = ContribuicaoService.getAllContribuicoes();
 
       // Escutar o stream e atualizar a lista local
-      contribuicoesStream.listen((contribuicoesList) {
-        _contribuicoes.assignAll(contribuicoesList);
-      }).onError((error) {
-        print("Erro ao carregar contribuições do Firestore: $error");
-      });
+      _contribuicoesSub = contribuicoesStream.listen(
+        (contribuicoesList) {
+          _contribuicoes.assignAll(contribuicoesList);
+        },
+        onError: (error) {
+          print("Erro ao carregar contribuições do Firestore: $error");
+        },
+      );
     } catch (e) {
       print("Erro ao carregar contribuições: $e");
     } finally {
@@ -167,11 +206,14 @@ class ContribuicaoController extends GetxController {
       final dizimistasStream = DizimistaService.getAllDizimistas();
 
       // Escutar o stream e atualizar a lista local
-      dizimistasStream.listen((dizimistasList) {
-        _dizimistas.assignAll(dizimistasList);
-      }).onError((error) {
-        print("Erro ao carregar dizimistas do Firestore: $error");
-      });
+      _dizimistasSub = dizimistasStream.listen(
+        (dizimistasList) {
+          _dizimistas.assignAll(dizimistasList);
+        },
+        onError: (error) {
+          print("Erro ao carregar dizimistas do Firestore: $error");
+        },
+      );
     } catch (e) {
       print("Erro ao carregar dizimistas: $e");
     } finally {

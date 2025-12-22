@@ -34,7 +34,32 @@ class DashboardController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _startListening();
+
+    final authService = Get.find<AuthService>();
+
+    // Reage a mudanças no usuário (login/logout)
+    ever(authService.userData, (userData) {
+      if (userData != null) {
+        _startListening();
+      } else {
+        _stopListening();
+      }
+    });
+
+    // Se já estiver logado (ex: refresh), inicia agora
+    if (authService.userData.value != null) {
+      _startListening();
+    }
+  }
+
+  void _stopListening() {
+    _contribuicoesSub?.cancel();
+    _dizimistasSub?.cancel();
+    _acessosSub?.cancel();
+    _todasContribuicoes.clear();
+    _todosDizimistas.clear();
+    _todosAcessos.clear();
+    isLoading.value = true;
   }
 
   @override

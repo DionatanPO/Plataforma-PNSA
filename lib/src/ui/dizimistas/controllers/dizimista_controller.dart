@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'package:get/get.dart';
 import '../../../core/services/dizimista_service.dart';
 import '../../../core/services/contribuicao_service.dart';
+import '../../../data/services/auth_service.dart';
 import '../../contribuicoes/models/contribuicao_model.dart';
 import '../models/dizimista_model.dart';
 
@@ -13,6 +15,9 @@ class DizimistaController extends GetxController {
   List<Contribuicao> get contribuicoes => _contribuicoes;
   bool get isLoading => _isLoading.value;
   final searchQuery = ''.obs;
+
+  StreamSubscription? _dizimistasSub;
+  StreamSubscription? _contribuicoesSub;
 
   // Método para obter o histórico de contribuições de um dizimista
   List<Contribuicao> historicoContribuicoes(String dizimistaId) {
@@ -51,24 +56,57 @@ class DizimistaController extends GetxController {
   void onInit() {
     super.onInit();
 
+    final authService = Get.find<AuthService>();
+
+    // Reage a mudanças no status de login do usuário
+    ever(authService.userData, (userData) {
+      if (userData != null) {
+        _startListening();
+      } else {
+        _stopListening();
+      }
+    });
+
+    // Se já estiver logado no momento do onInit (ex: F5)
+    if (authService.userData.value != null) {
+      _startListening();
+    }
+  }
+
+  void _startListening() {
+    _stopListening(); // Garante que não temos duplicidade
+    _isLoading.value = true;
+
     // Escutar mudanças em tempo real no Firestore
-    DizimistaService.getAllDizimistas().listen((dizimistasList) {
+    _dizimistasSub =
+        DizimistaService.getAllDizimistas().listen((dizimistasList) {
       _dizimistas.assignAll(dizimistasList);
-    }).onError((error) {
+      _isLoading.value = false;
+    }, onError: (error) {
       print("Erro ao carregar dizimistas do Firestore: $error");
+      _isLoading.value = false;
     });
 
     // Escutar mudanças em tempo real nas contribuições
-    ContribuicaoService.getAllContribuicoes().listen((contribuicaoList) {
+    _contribuicoesSub =
+        ContribuicaoService.getAllContribuicoes().listen((contribuicaoList) {
       _contribuicoes.assignAll(contribuicaoList);
-    }).onError((error) {
+    }, onError: (error) {
       print("Erro ao carregar contribuições do Firestore: $error");
     });
+  }
 
-    // Observar mudanças na pesquisa para atualizar a lista filtrada
-    ever(searchQuery, (_) {
-      // A atualização é automática graças ao getter filteredDizimistas
-    });
+  void _stopListening() {
+    _dizimistasSub?.cancel();
+    _contribuicoesSub?.cancel();
+    _dizimistas.clear();
+    _contribuicoes.clear();
+  }
+
+  @override
+  void onClose() {
+    _stopListening();
+    super.onClose();
   }
 
   // Método para obter a data da última contribuição de um dizimista

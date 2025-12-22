@@ -6,10 +6,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:plataforma_pnsa/src/data/services/auth_guard.dart';
 import 'package:plataforma_pnsa/src/data/services/theme_service.dart';
-import 'package:plataforma_pnsa/src/ui/access_management/controllers/access_management_controller.dart';
 import 'package:plataforma_pnsa/src/ui/auth/login/login_controller.dart';
-import 'package:plataforma_pnsa/src/ui/contribuicoes/controllers/contribuicao_controller.dart';
-import 'package:plataforma_pnsa/src/ui/dizimistas/controllers/dizimista_controller.dart';
 import 'package:plataforma_pnsa/src/ui/auth/password_reset/password_reset_controller.dart';
 
 import 'app.dart';
@@ -19,11 +16,8 @@ import 'src/data/services/session_service.dart';
 
 import 'package:intl/date_symbol_data_local.dart';
 
-
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
 
   await initializeDateFormatting('pt_BR', null);
 
@@ -32,18 +26,15 @@ Future<void> main() async {
 
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
+  // Instanciar os serviços principais
   Get.put<SessionService>(SessionService());
   Get.put<AuthService>(AuthService());
   Get.put<ThemeService>(ThemeService());
   Get.put(AuthGuard());
 
-  // Instanciar os controllers após os serviços
+  // Controller de Login (necessário para a tela inicial se for Login)
   Get.put(LoginController());
-  Get.put(DizimistaController());
-  Get.put(ContribuicaoController());
-  Get.put(AccessManagementController());
   Get.put(PasswordResetController());
 
   runApp(App());
 }
-
