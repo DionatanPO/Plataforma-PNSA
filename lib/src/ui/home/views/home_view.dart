@@ -134,8 +134,10 @@ class HomeView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      // Toque em observável para evitar aviso de improper use do Obx
-      final _ = Get.find<AuthService>().userData.value;
+      final auth = Get.find<AuthService>();
+      // Detecta se estamos carregando permissões (usuário logado mas sem dados do Firestore ainda)
+      final bool isLoadingPermissions =
+          auth.userData.value == null && auth.currentUser != null;
 
       final navItems = _getNavItems();
       final menuItems = navItems.where((item) => item.inMenu).toList();
@@ -215,6 +217,15 @@ class HomeView extends StatelessWidget {
                         child: Icon(Icons.church_outlined,
                             color: Theme.of(context).colorScheme.primary),
                       ),
+                    if (isLoadingPermissions)
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: desktop ? 32 : 16, vertical: 8),
+                        child: const LinearProgressIndicator(
+                          minHeight: 2,
+                          borderRadius: BorderRadius.all(Radius.circular(2)),
+                        ),
+                      ),
                   ],
                 ),
                 destinations: menuItems
@@ -228,7 +239,8 @@ class HomeView extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      _buildUserFooter(context, desktop, navItems),
+                      _buildUserFooter(context, desktop, navItems,
+                          isLoading: isLoadingPermissions),
                       const SizedBox(height: 16),
                     ],
                   ),
@@ -261,8 +273,14 @@ class HomeView extends StatelessWidget {
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
-              child: _buildUserFooter(context, true, navItems),
+              child: _buildUserFooter(context, true, navItems,
+                  isLoading: isLoadingPermissions),
             ),
+            if (isLoadingPermissions)
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 24),
+                child: LinearProgressIndicator(minHeight: 2),
+              ),
             const Divider(indent: 16, endIndent: 16),
             const SizedBox(height: 8),
             ...menuItems
@@ -280,7 +298,8 @@ class HomeView extends StatelessWidget {
   }
 
   Widget _buildUserFooter(
-      BuildContext context, bool isExtended, List<NavigationItem> allItems) {
+      BuildContext context, bool isExtended, List<NavigationItem> allItems,
+      {bool isLoading = false}) {
     final theme = Theme.of(context);
     final isSelected =
         allItems[controller.selectedIndex.value].label == 'Minha Conta';
@@ -348,10 +367,10 @@ class HomeView extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      session.userRole,
+                      isLoading ? 'Sincronizando...' : session.userRole,
                       style: theme.textTheme.labelSmall?.copyWith(
-                          color: isSelected
-                              ? theme.colorScheme.primary
+                          color: isLoading
+                              ? theme.colorScheme.primary.withOpacity(0.5)
                               : theme.colorScheme.primary,
                           fontWeight: FontWeight.w600,
                           fontSize: 10),

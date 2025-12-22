@@ -154,14 +154,21 @@ class DizimistaMobileListView extends StatelessWidget {
                           final controller = Get.find<DizimistaController>();
                           final timeAgo =
                               controller.getTimeSinceLastContribution(d.id);
+                          final isDark = theme.brightness == Brightness.dark;
+
                           return Row(
                             children: [
                               Icon(
                                 Icons.history_rounded,
                                 size: 14,
                                 color: timeAgo == 'Nenhuma'
-                                    ? Colors.orange
-                                    : theme.primaryColor.withOpacity(0.7),
+                                    ? (isDark
+                                        ? Colors.orangeAccent
+                                        : Colors.orange)
+                                    : (isDark
+                                        ? theme.colorScheme.primary
+                                        : theme.colorScheme.primary
+                                            .withOpacity(0.7)),
                               ),
                               const SizedBox(width: 6),
                               Text(
@@ -178,8 +185,12 @@ class DizimistaMobileListView extends StatelessWidget {
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
                                   color: timeAgo == 'Nenhuma'
-                                      ? Colors.orange.shade800
-                                      : theme.primaryColor,
+                                      ? (isDark
+                                          ? Colors.orangeAccent
+                                          : Colors.orange.shade800)
+                                      : (isDark
+                                          ? theme.colorScheme.primary
+                                          : theme.colorScheme.primary),
                                 ),
                               ),
                             ],

@@ -512,7 +512,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
           decoration: BoxDecoration(
             color: backgroundColor,
             borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
-            border: Border.all(color: borderColor),
+            border: Border.all(color: accentColor.withOpacity(0.25)),
           ),
           child: TextField(
             controller: _searchController,

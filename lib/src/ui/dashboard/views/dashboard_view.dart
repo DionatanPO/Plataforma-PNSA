@@ -464,6 +464,7 @@ class DashboardView extends StatelessWidget {
     final borderColor = isDark
         ? Colors.white.withOpacity(0.08)
         : Colors.black.withOpacity(0.06);
+    final accentColor = theme.colorScheme.primary;
 
     showDialog(
       context: context,
@@ -532,12 +533,22 @@ class DashboardView extends StatelessWidget {
                   onChanged: (value) => controller.searchTerms.value = value,
                   decoration: InputDecoration(
                     hintText: 'Buscar por nome, tipo, método ou usuário...',
-                    prefixIcon: const Icon(Icons.search_rounded),
+                    prefixIcon: Icon(Icons.search_rounded, color: accentColor),
                     filled: true,
-                    fillColor: theme.colorScheme.onSurface.withOpacity(0.03),
+                    fillColor: accentColor.withOpacity(0.02),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide.none,
+                      borderSide:
+                          BorderSide(color: accentColor.withOpacity(0.2)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide:
+                          BorderSide(color: accentColor.withOpacity(0.2)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: accentColor, width: 2),
                     ),
                   ),
                 ),

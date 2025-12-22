@@ -16,37 +16,32 @@ class AccessManagementController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    fetchAcessos();
+    _setupAcessosStream();
   }
 
-  Future<void> fetchAcessos() async {
+  void _setupAcessosStream() {
     _isLoading.value = true;
-    try {
-      final authService = Get.find<AuthService>();
-      final currentUser = authService.currentUser;
-      final currentUserId = currentUser?.uid;
+    final authService = Get.find<AuthService>();
 
-      // Subscreve ao stream de dados do Firestore
-      AccessService.getAllAcessos().listen((acessosList) {
-        // Filtrar o usuário logado da lista (excluir o próprio usuário dos resultados)
-        if (currentUserId != null) {
-          final filteredList = acessosList
-              .where((acesso) => acesso.id != currentUserId)
-              .toList();
-          _acessos.assignAll(filteredList);
-        } else {
-          _acessos.assignAll(acessosList);
-        }
-        _isLoading.value = false;
-      }).onError((error) {
-        print("Erro ao carregar acessos do Firestore: $error");
-        _isLoading.value = false;
-      });
-    } catch (e) {
-      print("Erro ao carregar acessos: $e");
+    // Subscreve ao stream de dados do Firestore uma única vez
+    AccessService.getAllAcessos().listen((acessosList) {
+      final currentUserId = authService.currentUser?.uid;
+
+      if (currentUserId != null) {
+        final filteredList =
+            acessosList.where((acesso) => acesso.id != currentUserId).toList();
+        _acessos.assignAll(filteredList);
+      } else {
+        _acessos.assignAll(acessosList);
+      }
       _isLoading.value = false;
-    }
+    }).onError((error) {
+      print("Erro no stream de acessos: $error");
+      _isLoading.value = false;
+    });
   }
+
+  // Removido o método fetchAcessos manual para evitar inconsistências
 
   List<Funcao> getFuncoes() {
     return FuncoesRepository.getFuncoes();
@@ -109,8 +104,8 @@ class AccessManagementController extends GetxController {
       }
 
       await AccessService.addAcesso(acesso);
-      // Após adicionar o acesso, não precisamos fazer nenhuma ação adicional
-      // O sistema deve manter o administrador logado graças às proteções implementadas
+      // Limpa a busca para que o novo usuário apareça imediatamente
+      setSearchQuery('');
     } catch (e) {
       print("Erro ao adicionar acesso: $e");
       rethrow; // Repassar o erro para a View tratar

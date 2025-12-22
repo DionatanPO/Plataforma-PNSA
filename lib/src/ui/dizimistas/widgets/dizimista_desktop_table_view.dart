@@ -193,6 +193,7 @@ class _TableRowState extends State<_TableRow> {
   Widget build(BuildContext context) {
     final d = widget.dizimista;
     final theme = widget.theme;
+    final isDark = theme.brightness == Brightness.dark;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovering = true),
@@ -422,8 +423,9 @@ class _TableRowState extends State<_TableRow> {
                   ),
                   decoration: BoxDecoration(
                     color: timeAgo == 'Nenhuma'
-                        ? Colors.orange.withOpacity(0.1)
-                        : theme.primaryColor.withOpacity(0.05),
+                        ? Colors.orange.withOpacity(isDark ? 0.15 : 0.1)
+                        : theme.colorScheme.primary
+                            .withOpacity(isDark ? 0.15 : 0.05),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -433,8 +435,10 @@ class _TableRowState extends State<_TableRow> {
                         Icons.history_rounded,
                         size: 13,
                         color: timeAgo == 'Nenhuma'
-                            ? Colors.orange
-                            : theme.primaryColor,
+                            ? (isDark ? Colors.orangeAccent : Colors.orange)
+                            : (isDark
+                                ? theme.colorScheme.primary
+                                : theme.colorScheme.primary),
                       ),
                       const SizedBox(width: 6),
                       Flexible(
@@ -444,10 +448,12 @@ class _TableRowState extends State<_TableRow> {
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                             color: timeAgo == 'Nenhuma'
-                                ? (theme.brightness == Brightness.dark
-                                    ? Colors.orange
+                                ? (isDark
+                                    ? Colors.orangeAccent
                                     : Colors.orange.shade800)
-                                : theme.primaryColor,
+                                : (isDark
+                                    ? theme.colorScheme.primary
+                                    : theme.colorScheme.primary),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -479,7 +485,8 @@ class _TableRowState extends State<_TableRow> {
                     Icon(
                       Icons.calendar_today_rounded,
                       size: 11,
-                      color: theme.colorScheme.onSurface.withOpacity(0.5),
+                      color: theme.colorScheme.onSurface
+                          .withOpacity(isDark ? 0.7 : 0.5),
                     ),
                     const SizedBox(width: 4),
                     Flexible(
@@ -488,8 +495,8 @@ class _TableRowState extends State<_TableRow> {
                         style: GoogleFonts.inter(
                           fontSize: 10,
                           fontWeight: FontWeight.w500,
-                          color: theme.colorScheme.onSurface.withOpacity(
-                              theme.brightness == Brightness.dark ? 0.8 : 0.6),
+                          color: theme.colorScheme.onSurface
+                              .withOpacity(isDark ? 0.9 : 0.6),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,

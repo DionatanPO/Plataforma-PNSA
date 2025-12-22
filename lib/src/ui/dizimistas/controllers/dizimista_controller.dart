@@ -163,6 +163,8 @@ class DizimistaController extends GetxController {
       }
 
       await DizimistaService.addDizimista(dizimista);
+      // Limpa a busca para garantir que o novo fiel apareça na lista
+      searchQuery.value = '';
     } catch (e) {
       print("Erro ao adicionar dizimista no Firestore: $e");
       rethrow;
