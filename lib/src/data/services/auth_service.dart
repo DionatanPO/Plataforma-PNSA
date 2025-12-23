@@ -30,11 +30,30 @@ class AuthService extends GetxService {
 
     // Escuta as mudanças no estado de autenticação
     _auth.authStateChanges().listen((firebaseUser) async {
+      print('[AuthService] authStateChanges fired. User: ${firebaseUser?.uid}');
       _firebaseUser.value = firebaseUser;
       if (firebaseUser != null) {
-        // Busca os dados complementares no Firestore
-        userData.value = await getUserData(firebaseUser.uid);
+        // Busca os dados complementares no Firestore com retry
+        print('[AuthService] Fetching user data for ${firebaseUser.uid}...');
+        final fetchedData = await getUserDataWithRetry(firebaseUser.uid);
+        print('[AuthService] Fetched data: ${fetchedData?.nome ?? 'null'}');
+
+        // Só atualiza se conseguir os dados ou se for explicitamente diferente
+        // Evita sobrescrever com null se já tivermos dados (ex: do LoginController)
+        if (fetchedData != null) {
+          print('[AuthService] Updating userData with fetched data.');
+          userData.value = fetchedData;
+        } else if (userData.value == null) {
+          // Se falhar e não tivermos nada, setamos null (mas idealmente o retry resolveria)
+          print(
+              '[AuthService] Fetched data is null and userData is null. Setting to null.');
+          userData.value = null;
+        } else {
+          print(
+              '[AuthService] Fetched data is null but keeping existing userData.');
+        }
       } else {
+        print('[AuthService] User is null. Clearing userData.');
         userData.value = null;
       }
     });

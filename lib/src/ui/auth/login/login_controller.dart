@@ -79,6 +79,11 @@ class LoginController extends GetxController {
 
             final userData = await _authService.getUserDataWithRetry(user.uid);
 
+            // Define explicitamente o userData no serviço antes da navegação.
+            // Isso garante que os controllers carregados na Home (Dashboard, Dizimistas, etc)
+            // já encontrem o usuário logado e iniciem a busca de dados sem atraso.
+            _authService.userData.value = userData;
+
             // Limpa os campos antes de navegar para a próxima tela
             emailController.clear();
             passwordController.clear();

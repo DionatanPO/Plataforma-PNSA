@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -27,6 +28,8 @@ class ReportController extends GetxController {
 
   final RxBool isLoading = false.obs;
 
+  StreamSubscription? _reportSub;
+
   // Date selection
   final Rx<DateTime> selectedDate = DateTime.now().obs;
   final Rxn<DateTimeRange> selectedRange = Rxn<DateTimeRange>();
@@ -38,8 +41,27 @@ class ReportController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // Load data when controller is initialized
-    fetchDailyReport(selectedDate.value);
+
+    final authService = Get.find<AuthService>();
+
+    // Reage a mudanças no usuário (login/logout)
+    ever(authService.userData, (userData) {
+      if (userData != null) {
+        if (_reportSub == null) {
+          _fetchAllInitially();
+        }
+      } else {
+        _reportSub?.cancel();
+        _reportSub = null;
+        contribuicoes.clear();
+        _calculateTotals([]);
+      }
+    });
+
+    // Se já estiver logado (ex: F5)
+    if (authService.userData.value != null) {
+      _fetchAllInitially();
+    }
 
     // Listen to changes to refetch
     ever(selectedDate, (date) {
@@ -78,6 +100,16 @@ class ReportController extends GetxController {
     });
   }
 
+  void _fetchAllInitially() {
+    if (isCompetenceMode.value) {
+      fetchCompetenceReport(selectedCompetenceMonth.value);
+    } else if (isRangeMode.value && selectedRange.value != null) {
+      fetchPeriodReport(selectedRange.value!.start, selectedRange.value!.end);
+    } else {
+      fetchDailyReport(selectedDate.value);
+    }
+  }
+
   void updateDate(DateTime date) {
     isRangeMode.value = false;
     selectedDate.value = date;
@@ -107,13 +139,14 @@ class ReportController extends GetxController {
 
   Future<void> fetchPeriodReport(DateTime start, DateTime end) async {
     isLoading.value = true;
+    await _reportSub?.cancel();
     try {
       final stream = ContribuicaoService.getContribuicoesByPeriod(
         start,
         end,
       );
 
-      stream.listen(
+      _reportSub = stream.listen(
         (lista) {
           contribuicoes.value = lista;
           _calculateTotals(lista);
@@ -132,10 +165,11 @@ class ReportController extends GetxController {
 
   Future<void> fetchCompetenceReport(String month) async {
     isLoading.value = true;
+    await _reportSub?.cancel();
     try {
       final stream = ContribuicaoService.getContribuicoesByCompetence(month);
 
-      stream.listen(
+      _reportSub = stream.listen(
         (lista) {
           contribuicoes.value = lista;
           _calculateTotals(lista);
@@ -150,6 +184,12 @@ class ReportController extends GetxController {
       print("Erro no controller (competência): $e");
       isLoading.value = false;
     }
+  }
+
+  @override
+  void onClose() {
+    _reportSub?.cancel();
+    super.onClose();
   }
 
   void _calculateTotals(List<Contribuicao> lista) {

@@ -25,7 +25,9 @@ class AccessManagementController extends GetxController {
     // Escutar mudanças no login
     ever(authService.userData, (userData) {
       if (userData != null) {
-        _setupAcessosStream();
+        if (_acessosSub == null) {
+          _setupAcessosStream();
+        }
       } else {
         _stopListening();
       }
@@ -62,6 +64,7 @@ class AccessManagementController extends GetxController {
 
   void _stopListening() {
     _acessosSub?.cancel();
+    _acessosSub = null;
     _acessos.clear();
   }
 

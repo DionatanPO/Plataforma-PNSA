@@ -9,11 +9,13 @@ class HomeBinding extends Bindings {
   @override
   void dependencies() {
     Get.lazyPut<HomeController>(() => HomeController());
-    Get.lazyPut<DizimistaController>(() => DizimistaController(), fenix: true);
+    // DizimistaController deve ser criado imediatamente pois DizimistaView usa Get.find() no initState
+    Get.put<DizimistaController>(DizimistaController(), permanent: true);
     Get.lazyPut<ContribuicaoController>(() => ContribuicaoController(),
         fenix: true);
-    Get.lazyPut<AccessManagementController>(() => AccessManagementController(),
-        fenix: true);
+    // AccessManagementController deve ser criado imediatamente
+    Get.put<AccessManagementController>(AccessManagementController(),
+        permanent: true);
     Get.lazyPut<DashboardController>(() => DashboardController(), fenix: true);
   }
 }

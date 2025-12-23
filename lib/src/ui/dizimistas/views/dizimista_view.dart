@@ -24,6 +24,16 @@ class _DizimistaViewState extends State<DizimistaView> {
   final TextEditingController _searchController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    // Força uma verificação de dados sempre que a View for montada
+    // Isso resolve situações onde o controller já foi iniciado mas sem dados (ex: navegação)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.onViewReady();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -137,6 +147,7 @@ class _DizimistaViewState extends State<DizimistaView> {
                           lista: controller.filteredDizimistas,
                           theme: theme,
                           surfaceColor: surfaceColor,
+                          controller: controller,
                           onEditPressed: (dizimista) => Get.toNamed(
                               AppRoutes.dizimista_editar,
                               arguments: dizimista),

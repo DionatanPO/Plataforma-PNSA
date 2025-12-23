@@ -39,6 +39,7 @@ class DizimistaDesktopTableView extends StatelessWidget {
   final Color surfaceColor;
   final Function(Dizimista) onEditPressed;
   final Function(Dizimista) onViewHistoryPressed;
+  final DizimistaController controller;
 
   const DizimistaDesktopTableView({
     Key? key,
@@ -47,6 +48,7 @@ class DizimistaDesktopTableView extends StatelessWidget {
     required this.surfaceColor,
     required this.onEditPressed,
     required this.onViewHistoryPressed,
+    required this.controller,
   }) : super(key: key);
 
   @override
@@ -123,6 +125,7 @@ class DizimistaDesktopTableView extends StatelessWidget {
                 borderColor: borderColor,
                 onEditPressed: onEditPressed,
                 onViewHistoryPressed: onViewHistoryPressed,
+                controller: controller,
               );
             },
           ),
@@ -173,6 +176,7 @@ class _TableRow extends StatefulWidget {
   final Color borderColor;
   final Function(Dizimista) onEditPressed;
   final Function(Dizimista) onViewHistoryPressed;
+  final DizimistaController controller;
 
   const _TableRow({
     required this.dizimista,
@@ -180,6 +184,7 @@ class _TableRow extends StatefulWidget {
     required this.borderColor,
     required this.onEditPressed,
     required this.onViewHistoryPressed,
+    required this.controller,
   });
 
   @override
@@ -414,8 +419,8 @@ class _TableRowState extends State<_TableRow> {
             Expanded(
               flex: 2,
               child: Obx(() {
-                final controller = Get.find<DizimistaController>();
-                final timeAgo = controller.getTimeSinceLastContribution(d.id);
+                final timeAgo =
+                    widget.controller.getTimeSinceLastContribution(d.id);
                 return Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 10,

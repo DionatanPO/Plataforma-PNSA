@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/services/dizimista_service.dart';
 import '../../../core/services/contribuicao_service.dart';
@@ -61,29 +62,46 @@ class DizimistaController extends GetxController {
     // Reage a mudanças no status de login do usuário
     ever(authService.userData, (userData) {
       if (userData != null) {
-        _startListening();
+        if (_dizimistasSub == null) {
+          _startListening();
+        }
       } else {
         _stopListening();
       }
     });
 
-    // Se já estiver logado no momento do onInit (ex: F5)
-    if (authService.userData.value != null) {
-      _startListening();
-    }
+    // Se já estiver logado no momento do onInit (ex: F5 ou navegação direta)
+    // Pequeno delay para garantir que o ciclo de construção do GetX terminou
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (authService.userData.value != null) {
+        print(
+            '[DizimistaController] onInit: User is logged in. Starting listener.');
+        _startListening();
+      }
+    });
   }
 
   void _startListening() {
-    _stopListening(); // Garante que não temos duplicidade
+    print('[DizimistaController] _startListening called.');
+    if (_dizimistasSub != null) {
+      print('[DizimistaController] Subscription already exists. Skipping.');
+      return;
+    }
+
+    // _stopListening(); // Garante que não temos duplicidade - Already handled by check above
     _isLoading.value = true;
 
     // Escutar mudanças em tempo real no Firestore
+    print('[DizimistaController] Subscribing to DizimistaService...');
     _dizimistasSub =
         DizimistaService.getAllDizimistas().listen((dizimistasList) {
+      print(
+          '[DizimistaController] Received ${dizimistasList.length} dizimistas.');
       _dizimistas.assignAll(dizimistasList);
       _isLoading.value = false;
     }, onError: (error) {
-      print("Erro ao carregar dizimistas do Firestore: $error");
+      print(
+          "[DizimistaController] Erro ao carregar dizimistas do Firestore: $error");
       _isLoading.value = false;
     });
 
@@ -99,6 +117,8 @@ class DizimistaController extends GetxController {
   void _stopListening() {
     _dizimistasSub?.cancel();
     _contribuicoesSub?.cancel();
+    _dizimistasSub = null;
+    _contribuicoesSub = null;
     _dizimistas.clear();
     _contribuicoes.clear();
   }
@@ -250,6 +270,23 @@ class DizimistaController extends GetxController {
       rethrow;
     } finally {
       _isLoading.value = false;
+    }
+  }
+
+  // Método chamado quando a View é montada
+  void onViewReady() {
+    final authService = Get.find<AuthService>();
+    if (authService.userData.value != null) {
+      if (_dizimistasSub == null) {
+        print('[DizimistaController] View Ready: Starting listener.');
+        _startListening();
+      } else if (_dizimistas.isEmpty && !_isLoading.value) {
+        // Se já tem subscrição mas a lista está vazia, força refresh
+        print(
+            '[DizimistaController] View Ready: List is empty. Restarting listener.');
+        _stopListening();
+        _startListening();
+      }
     }
   }
 
