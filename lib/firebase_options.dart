@@ -41,48 +41,48 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyCIFRaGH3OY9yq4UC_Zx-wiifpt1x5QHl4',
-    appId: '1:471291795710:web:a41cf3f19cd6c96f15adaf',
-    messagingSenderId: '471291795710',
-    projectId: 'plataforma--pnsa',
-    authDomain: 'plataforma--pnsa.firebaseapp.com',
-    storageBucket: 'plataforma--pnsa.firebasestorage.app',
-    measurementId: 'G-YPMKYBVY39',
+    apiKey: 'AIzaSyD9m2NKSrTEOghxrD_r0qkZOHlqerPRehk',
+    appId: '1:783229758718:web:254f876a2cd17abf5249af',
+    messagingSenderId: '783229758718',
+    projectId: 'sistema-pnsa',
+    authDomain: 'sistema-pnsa.firebaseapp.com',
+    storageBucket: 'sistema-pnsa.firebasestorage.app',
+    measurementId: 'G-JTM1QS982K',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBCmKlWScLOd5qqCkf9U6vbZX7bydSfjdo',
-    appId: '1:471291795710:android:dc9b392503f637c215adaf',
-    messagingSenderId: '471291795710',
-    projectId: 'plataforma--pnsa',
-    storageBucket: 'plataforma--pnsa.firebasestorage.app',
+    apiKey: 'AIzaSyAm5CsP8saC3WNPOprO-osoBf2vhHXhAGQ',
+    appId: '1:783229758718:android:da863a44c49569045249af',
+    messagingSenderId: '783229758718',
+    projectId: 'sistema-pnsa',
+    storageBucket: 'sistema-pnsa.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyA9GGmiHRRC8CoLwQkrrI6Dp0cq-SO_F84',
-    appId: '1:471291795710:ios:23399c8b1d9197d815adaf',
-    messagingSenderId: '471291795710',
-    projectId: 'plataforma--pnsa',
-    storageBucket: 'plataforma--pnsa.firebasestorage.app',
+    apiKey: 'AIzaSyAi02HYoGvoV30JjgB4bUE_lvLOsyjxNRs',
+    appId: '1:783229758718:ios:2210c3e11a2364425249af',
+    messagingSenderId: '783229758718',
+    projectId: 'sistema-pnsa',
+    storageBucket: 'sistema-pnsa.firebasestorage.app',
     iosBundleId: 'com.example.plataformaPnsa',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyA9GGmiHRRC8CoLwQkrrI6Dp0cq-SO_F84',
-    appId: '1:471291795710:ios:23399c8b1d9197d815adaf',
-    messagingSenderId: '471291795710',
-    projectId: 'plataforma--pnsa',
-    storageBucket: 'plataforma--pnsa.firebasestorage.app',
+    apiKey: 'AIzaSyAi02HYoGvoV30JjgB4bUE_lvLOsyjxNRs',
+    appId: '1:783229758718:ios:2210c3e11a2364425249af',
+    messagingSenderId: '783229758718',
+    projectId: 'sistema-pnsa',
+    storageBucket: 'sistema-pnsa.firebasestorage.app',
     iosBundleId: 'com.example.plataformaPnsa',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyCIFRaGH3OY9yq4UC_Zx-wiifpt1x5QHl4',
-    appId: '1:471291795710:web:0851d6eee053a7eb15adaf',
-    messagingSenderId: '471291795710',
-    projectId: 'plataforma--pnsa',
-    authDomain: 'plataforma--pnsa.firebaseapp.com',
-    storageBucket: 'plataforma--pnsa.firebasestorage.app',
-    measurementId: 'G-93BHH6CSRY',
+    apiKey: 'AIzaSyD9m2NKSrTEOghxrD_r0qkZOHlqerPRehk',
+    appId: '1:783229758718:web:594a345b7d5e1f135249af',
+    messagingSenderId: '783229758718',
+    projectId: 'sistema-pnsa',
+    authDomain: 'sistema-pnsa.firebaseapp.com',
+    storageBucket: 'sistema-pnsa.firebasestorage.app',
+    measurementId: 'G-X9MGC5G7QG',
   );
 }

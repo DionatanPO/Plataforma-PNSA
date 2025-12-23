@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "471291795710",
-    "project_id": "plataforma--pnsa",
-    "storage_bucket": "plataforma--pnsa.firebasestorage.app"
+    "project_number": "783229758718",
+    "project_id": "sistema-pnsa",
+    "storage_bucket": "sistema-pnsa.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:471291795710:android:dc9b392503f637c215adaf",
+        "mobilesdk_app_id": "1:783229758718:android:da863a44c49569045249af",
         "android_client_info": {
           "package_name": "com.example.plataforma_pnsa"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBCmKlWScLOd5qqCkf9U6vbZX7bydSfjdo"
+          "current_key": "AIzaSyAm5CsP8saC3WNPOprO-osoBf2vhHXhAGQ"
         }
       ],
       "services": {

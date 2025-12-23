@@ -1,6 +1,6 @@
 {
   "projects": {
-    "prod": "plataforma--pnsa"
+    "prod": "sistema-pnsa"
   },
   "targets": {},
   "etags": {}

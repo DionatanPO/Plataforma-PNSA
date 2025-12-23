@@ -138,14 +138,14 @@ class ProfileView extends StatelessWidget {
             _DesktopHoverTile(
               icon: Icons.person_outline_rounded,
               title: 'Dados Pessoais',
-              subtitle: 'Gerenciar meu cadastro',
+              subtitle: '',
               onTap: () {},
             ),
             _DesktopHoverTile(
               icon: Icons.lock_outline_rounded,
               title: 'Segurança',
-              subtitle: 'Alterar minha senha',
-              onTap: controller.changePassword,
+              subtitle: '',
+              onTap: () {},
             ),
           ],
         ),
