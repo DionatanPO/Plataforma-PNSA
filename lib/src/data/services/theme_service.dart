@@ -16,9 +16,10 @@ class ThemeService {
     if (themeString != null) {
       return ThemeMode.values.firstWhere(
         (e) => e.toString() == themeString,
-        orElse: () => ThemeMode.system, // Valor padrão se o valor salvo for inválido
+        orElse: () =>
+            ThemeMode.light, // Valor padrão se o valor salvo for inválido
       );
     }
-    return ThemeMode.system; // Valor padrão
+    return ThemeMode.light; // Valor padrão (Inicia sempre no Claro)
   }
 }
