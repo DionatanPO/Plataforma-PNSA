@@ -147,6 +147,7 @@ class ProfileView extends StatelessWidget {
               subtitle: '',
               onTap: () {},
             ),
+            
           ],
         ),
         const SizedBox(height: 32),
