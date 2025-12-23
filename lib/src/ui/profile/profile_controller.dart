@@ -65,25 +65,8 @@ class ProfileController extends GetxController {
     }
   }
 
-  void editProfile() {
-    // Navigate to edit profile or show dialog
-    Get.snackbar('Edit Profile', 'Feature coming soon');
-  }
-
-  void changePassword() {
-    Get.snackbar('Change Password', 'Feature coming soon');
-  }
-
-  void toggleNotifications() {
-    Get.snackbar('Notifications', 'Feature coming soon');
-  }
-
   void openThemeSettings() {
     Get.toNamed('/theme_settings');
-  }
-
-  void openFAQ() {
-    Get.snackbar('FAQ', 'Feature coming soon');
   }
 
   void openSupport() {
