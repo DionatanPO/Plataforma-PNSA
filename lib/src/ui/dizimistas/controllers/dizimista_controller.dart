@@ -5,11 +5,14 @@ import '../../../core/services/dizimista_service.dart';
 import '../../../core/services/contribuicao_service.dart';
 import '../../../data/services/auth_service.dart';
 import '../../contribuicoes/models/contribuicao_model.dart';
+import '../../../domain/models/acesso_model.dart';
+import '../../../core/services/access_service.dart';
 import '../models/dizimista_model.dart';
 
 class DizimistaController extends GetxController {
   final _dizimistas = <Dizimista>[].obs;
   final _contribuicoes = <Contribuicao>[].obs;
+  final _todosAcessos = <Acesso>[].obs;
   final _isLoading = false.obs;
 
   List<Dizimista> get dizimistas => _dizimistas;
@@ -19,6 +22,7 @@ class DizimistaController extends GetxController {
 
   StreamSubscription? _dizimistasSub;
   StreamSubscription? _contribuicoesSub;
+  StreamSubscription? _acessosSub;
 
   // Método para obter o histórico de contribuições de um dizimista
   List<Contribuicao> historicoContribuicoes(String dizimistaId) {
@@ -105,6 +109,11 @@ class DizimistaController extends GetxController {
       _isLoading.value = false;
     });
 
+    // Escutar mudanças em tempo real nos usuários (acessos) para mostrar nomes de quem registrou
+    _acessosSub = AccessService.getAllAcessos().listen((list) {
+      _todosAcessos.value = list;
+    });
+
     // Escutar mudanças em tempo real nas contribuições
     _contribuicoesSub =
         ContribuicaoService.getAllContribuicoes().listen((contribuicaoList) {
@@ -117,8 +126,10 @@ class DizimistaController extends GetxController {
   void _stopListening() {
     _dizimistasSub?.cancel();
     _contribuicoesSub?.cancel();
+    _acessosSub?.cancel();
     _dizimistasSub = null;
     _contribuicoesSub = null;
+    _acessosSub = null;
     _dizimistas.clear();
     _contribuicoes.clear();
   }
@@ -189,15 +200,37 @@ class DizimistaController extends GetxController {
   Future<void> addDizimista(Dizimista dizimista) async {
     _isLoading.value = true;
     try {
-      // 1. Verificar Número de Registro (Obrigatório e Único)
-      if (dizimista.numeroRegistro.isEmpty) {
-        throw Exception('O Nº de Registro Paroquial é obrigatório.');
+      // 0. Validação de Campos Obrigatórios
+      if (dizimista.nome.isEmpty) {
+        throw Exception('O Nome Completo é obrigatório.');
       }
-      final existingRegistro = await DizimistaService.getDizimistaByRegistro(
-          dizimista.numeroRegistro);
-      if (existingRegistro != null) {
-        throw Exception(
-            'Este Nº de Registro Paroquial já pertence a ${existingRegistro.nome}.');
+      if (dizimista.telefone.isEmpty) {
+        throw Exception('O Telefone é obrigatório.');
+      }
+      if (dizimista.estadoCivil == null || dizimista.estadoCivil!.isEmpty) {
+        throw Exception('O Estado Civil é obrigatório.');
+      }
+      if (dizimista.estadoCivil == 'Casado') {
+        if (dizimista.nomeConjugue == null || dizimista.nomeConjugue!.isEmpty) {
+          throw Exception('O Nome do Cônjuge é obrigatório para casados.');
+        }
+        if (dizimista.dataCasamento == null) {
+          throw Exception('A Data de Casamento é obrigatória para casados.');
+        }
+        if (dizimista.dataNascimentoConjugue == null) {
+          throw Exception(
+              'A Data de Nascimento do Cônjuge é obrigatória para casados.');
+        }
+      }
+
+      // 1. Verificar Número de Registro (Único se preenchido)
+      if (dizimista.numeroRegistro.isNotEmpty) {
+        final existingRegistro = await DizimistaService.getDizimistaByRegistro(
+            dizimista.numeroRegistro);
+        if (existingRegistro != null) {
+          throw Exception(
+              'Este Nº de Registro Paroquial já pertence a ${existingRegistro.nome}.');
+        }
       }
 
       // 2. Verificar CPF (Único se preenchido)
@@ -234,6 +267,29 @@ class DizimistaController extends GetxController {
   Future<void> updateDizimista(Dizimista dizimista) async {
     _isLoading.value = true;
     try {
+      // 0. Validação de Campos Obrigatórios
+      if (dizimista.nome.isEmpty) {
+        throw Exception('O Nome Completo é obrigatório.');
+      }
+      if (dizimista.telefone.isEmpty) {
+        throw Exception('O Telefone é obrigatório.');
+      }
+      if (dizimista.estadoCivil == null || dizimista.estadoCivil!.isEmpty) {
+        throw Exception('O Estado Civil é obrigatório.');
+      }
+      if (dizimista.estadoCivil == 'Casado') {
+        if (dizimista.nomeConjugue == null || dizimista.nomeConjugue!.isEmpty) {
+          throw Exception('O Nome do Cônjuge é obrigatório para casados.');
+        }
+        if (dizimista.dataCasamento == null) {
+          throw Exception('A Data de Casamento é obrigatória para casados.');
+        }
+        if (dizimista.dataNascimentoConjugue == null) {
+          throw Exception(
+              'A Data de Nascimento do Cônjuge é obrigatória para casados.');
+        }
+      }
+
       // 1. Verificar Número de Registro (Único)
       if (dizimista.numeroRegistro.isNotEmpty) {
         final existingRegistro = await DizimistaService.getDizimistaByRegistro(
@@ -296,6 +352,26 @@ class DizimistaController extends GetxController {
       return DizimistaService.getAllDizimistas();
     } else {
       return DizimistaService.advancedSearch(query);
+    }
+  }
+
+  String getAgentName(String uid) {
+    if (uid.isEmpty) return 'Sistema';
+    try {
+      final agent = _todosAcessos.firstWhereOrNull((a) => a.id == uid);
+      return agent?.nome ?? 'Usuário Desconhecido';
+    } catch (_) {
+      return 'Usuário Desconhecido';
+    }
+  }
+
+  String getAgentFunction(String uid) {
+    if (uid.isEmpty) return 'Automático';
+    try {
+      final agent = _todosAcessos.firstWhereOrNull((a) => a.id == uid);
+      return agent?.funcao ?? 'Agente';
+    } catch (_) {
+      return 'Agente';
     }
   }
 }

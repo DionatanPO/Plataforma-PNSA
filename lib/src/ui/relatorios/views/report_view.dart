@@ -1013,6 +1013,8 @@ class _ModernTableCard extends StatelessWidget {
                 contribuicao: c,
                 onReceiptPressed: () => onReceiptPressed(c),
                 theme: theme,
+                agentName:
+                    Get.find<ReportController>().getAgentName(c.usuarioId),
               ),
             ),
         ],
@@ -1025,11 +1027,13 @@ class _TableRow extends StatefulWidget {
   final Contribuicao contribuicao;
   final VoidCallback onReceiptPressed;
   final ThemeData theme;
+  final String agentName;
 
   const _TableRow({
     required this.contribuicao,
     required this.onReceiptPressed,
     required this.theme,
+    required this.agentName,
   });
 
   @override
@@ -1048,69 +1052,175 @@ class _TableRowState extends State<_TableRow> {
       onExit: (_) => setState(() => _isHovering = false),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         decoration: BoxDecoration(
           color: _isHovering
               ? widget.theme.primaryColor.withOpacity(0.04)
               : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: _isHovering
+                ? widget.theme.primaryColor.withOpacity(0.1)
+                : Colors.transparent,
+          ),
         ),
-        child: Row(
+        child: Column(
           children: [
-            // Nome
-            Expanded(
-              flex: 2,
-              child: Text(
-                widget.contribuicao.dizimistaNome.isNotEmpty
-                    ? widget.contribuicao.dizimistaNome
-                    : 'Anônimo',
-                style: GoogleFonts.inter(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  color: widget.theme.colorScheme.onSurface,
+            Row(
+              children: [
+                // Nome e Data
+                Expanded(
+                  flex: 4,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.contribuicao.dizimistaNome.isNotEmpty
+                            ? widget.contribuicao.dizimistaNome
+                            : 'Anônimo',
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: widget.theme.colorScheme.onSurface,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Icon(Icons.access_time_rounded,
+                              size: 12,
+                              color: widget.theme.colorScheme.onSurface
+                                  .withOpacity(0.4)),
+                          const SizedBox(width: 4),
+                          Flexible(
+                            child: Text(
+                              DateFormat('dd/MM/yy HH:mm')
+                                  .format(widget.contribuicao.dataRegistro),
+                              style: GoogleFonts.inter(
+                                fontSize: 11,
+                                color: widget.theme.colorScheme.onSurface
+                                    .withOpacity(0.4),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                // Tipo (Badge)
+                Expanded(
+                  flex: 2,
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: _StatusBadge(status: widget.contribuicao.tipo),
+                  ),
+                ),
+                // Método e Agente
+                Expanded(
+                  flex: 2,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.contribuicao.metodo,
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: widget.theme.colorScheme.onSurface
+                              .withOpacity(0.7),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Icon(Icons.person_pin_rounded,
+                              size: 12, color: Colors.blue.withOpacity(0.6)),
+                          const SizedBox(width: 4),
+                          Flexible(
+                            child: Text(
+                              widget.agentName,
+                              style: GoogleFonts.inter(
+                                fontSize: 11,
+                                color: widget.theme.colorScheme.onSurface
+                                    .withOpacity(0.4),
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                // Valor
+                Expanded(
+                  flex: 3,
+                  child: Text(
+                    currency.format(widget.contribuicao.valor),
+                    style: GoogleFonts.outfit(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green,
+                    ),
+                    textAlign: TextAlign.right,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                // Ações
+                const SizedBox(width: 16),
+                IconButton(
+                  onPressed: widget.onReceiptPressed,
+                  icon: const Icon(Icons.receipt_long_rounded, size: 20),
+                  tooltip: 'Gerar Recibo',
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  color: widget.theme.colorScheme.primary.withOpacity(0.7),
+                ),
+              ],
+            ),
+            if (widget.contribuicao.observacao != null &&
+                widget.contribuicao.observacao!.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: widget.theme.colorScheme.onSurface.withOpacity(0.03),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.notes_rounded,
+                        size: 14,
+                        color: widget.theme.colorScheme.onSurface
+                            .withOpacity(0.4)),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        widget.contribuicao.observacao!,
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontStyle: FontStyle.italic,
+                          color: widget.theme.colorScheme.onSurface
+                              .withOpacity(0.6),
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-            // Tipo
-            Expanded(
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: _StatusBadge(status: widget.contribuicao.tipo),
-              ),
-            ),
-            // Método
-            Expanded(
-              child: Text(
-                widget.contribuicao.metodo,
-                style: GoogleFonts.inter(
-                  fontSize: 13,
-                  color: widget.theme.colorScheme.onSurface.withOpacity(0.7),
-                ),
-              ),
-            ),
-            // Valor
-            Expanded(
-              child: Text(
-                currency.format(widget.contribuicao.valor),
-                style: GoogleFonts.inter(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: widget.theme.colorScheme.primary,
-                ),
-              ),
-            ),
-            // Ações
-            SizedBox(
-              width: 100,
-              child: IconButton(
-                onPressed: widget.onReceiptPressed,
-                icon: const Icon(Icons.receipt_long_rounded, size: 20),
-                tooltip: 'Gerar Recibo',
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                color: widget.theme.colorScheme.primary.withOpacity(0.7),
-              ),
-            ),
+            ],
           ],
         ),
       ),

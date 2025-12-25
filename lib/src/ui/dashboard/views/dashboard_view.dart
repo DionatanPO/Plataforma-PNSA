@@ -425,15 +425,50 @@ class DashboardView extends StatelessWidget {
                                       fontSize: 14,
                                     ),
                                   ),
-                                  subtitle: Text(
-                                    '${c.tipo} • ${c.metodo} • ${DateFormat('dd/MM/yyyy HH:mm').format(c.dataRegistro)}',
-                                    style: GoogleFonts.inter(
-                                      fontSize: 12,
-                                      color: theme.colorScheme.onSurface
-                                          .withOpacity(0.5),
-                                    ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
+                                  subtitle: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        '${c.tipo} • ${c.metodo} • ${DateFormat('dd/MM HH:mm').format(c.dataRegistro)}',
+                                        style: GoogleFonts.inter(
+                                          fontSize: 12,
+                                          color: theme.colorScheme.onSurface
+                                              .withOpacity(0.5),
+                                        ),
+                                      ),
+                                      Row(
+                                        children: [
+                                          Icon(Icons.person_pin_rounded,
+                                              size: 11,
+                                              color:
+                                                  Colors.blue.withOpacity(0.5)),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            controller
+                                                .getAgentName(c.usuarioId),
+                                            style: GoogleFonts.inter(
+                                              fontSize: 11,
+                                              color: theme.colorScheme.onSurface
+                                                  .withOpacity(0.4),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      if (c.observacao != null &&
+                                          c.observacao!.isNotEmpty)
+                                        Text(
+                                          c.observacao!,
+                                          style: GoogleFonts.inter(
+                                            fontSize: 11,
+                                            fontStyle: FontStyle.italic,
+                                            color: theme.colorScheme.onSurface
+                                                .withOpacity(0.4),
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                    ],
                                   ),
                                   trailing: Text(
                                     controller.formatCurrency(c.valor),
@@ -645,6 +680,49 @@ class DashboardView extends StatelessWidget {
                                       ),
                                     ],
                                   ),
+                                  if (c.mesesCompetencia.isNotEmpty) ...[
+                                    const SizedBox(height: 8),
+                                    Wrap(
+                                      spacing: 4,
+                                      runSpacing: 4,
+                                      children: c.mesesCompetencia.map((m) {
+                                        return Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 6, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color:
+                                                Colors.green.withOpacity(0.1),
+                                            borderRadius:
+                                                BorderRadius.circular(4),
+                                            border: Border.all(
+                                                color: Colors.green
+                                                    .withOpacity(0.2)),
+                                          ),
+                                          child: Text(
+                                            _formatMes(m),
+                                            style: GoogleFonts.inter(
+                                              fontSize: 9,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.green.shade700,
+                                            ),
+                                          ),
+                                        );
+                                      }).toList(),
+                                    ),
+                                  ],
+                                  if (c.observacao != null &&
+                                      c.observacao!.isNotEmpty) ...[
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      c.observacao!,
+                                      style: GoogleFonts.inter(
+                                        fontSize: 11,
+                                        fontStyle: FontStyle.italic,
+                                        color: theme.colorScheme.onSurface
+                                            .withOpacity(0.5),
+                                      ),
+                                    ),
+                                  ],
                                   const SizedBox(height: 12),
                                   Row(
                                     mainAxisAlignment:
@@ -723,19 +801,77 @@ class DashboardView extends StatelessWidget {
                                                 .withOpacity(0.6),
                                           ),
                                         ),
+                                        if (c.mesesCompetencia.isNotEmpty) ...[
+                                          const SizedBox(height: 4),
+                                          Wrap(
+                                            spacing: 4,
+                                            runSpacing: 4,
+                                            children:
+                                                c.mesesCompetencia.map((m) {
+                                              return Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 6,
+                                                        vertical: 2),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.green
+                                                      .withOpacity(0.1),
+                                                  borderRadius:
+                                                      BorderRadius.circular(4),
+                                                  border: Border.all(
+                                                      color: Colors.green
+                                                          .withOpacity(0.2)),
+                                                ),
+                                                child: Text(
+                                                  _formatMes(m),
+                                                  style: GoogleFonts.inter(
+                                                    fontSize: 8,
+                                                    fontWeight: FontWeight.w600,
+                                                    color:
+                                                        Colors.green.shade700,
+                                                  ),
+                                                ),
+                                              );
+                                            }).toList(),
+                                          ),
+                                        ],
                                       ],
                                     ),
                                   ),
                                   Expanded(
                                     flex: 2,
-                                    child: Text(
-                                      c.metodo,
-                                      style: GoogleFonts.inter(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w500,
-                                        color: theme.colorScheme.onSurface
-                                            .withOpacity(0.7),
-                                      ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          c.metodo,
+                                          style: GoogleFonts.inter(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w500,
+                                            color: theme.colorScheme.onSurface
+                                                .withOpacity(0.7),
+                                          ),
+                                        ),
+                                        if (c.observacao != null &&
+                                            c.observacao!.isNotEmpty)
+                                          Padding(
+                                            padding:
+                                                const EdgeInsets.only(top: 4.0),
+                                            child: Text(
+                                              c.observacao!,
+                                              style: GoogleFonts.inter(
+                                                fontSize: 11,
+                                                fontStyle: FontStyle.italic,
+                                                color: theme
+                                                    .colorScheme.onSurface
+                                                    .withOpacity(0.5),
+                                              ),
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                      ],
                                     ),
                                   ),
                                   Expanded(
@@ -829,6 +965,32 @@ class DashboardView extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _formatMes(String mesRef) {
+    try {
+      final parts = mesRef.split('-');
+      if (parts.length != 2) return mesRef;
+      final year = parts[0].substring(2);
+      final month = int.parse(parts[1]);
+      const months = [
+        'Jan',
+        'Fev',
+        'Mar',
+        'Abr',
+        'Mai',
+        'Jun',
+        'Jul',
+        'Ago',
+        'Set',
+        'Out',
+        'Nov',
+        'Dez'
+      ];
+      return '${months[month - 1]}/$year';
+    } catch (_) {
+      return mesRef;
+    }
   }
 }
 

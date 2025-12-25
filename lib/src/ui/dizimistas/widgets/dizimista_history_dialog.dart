@@ -160,6 +160,7 @@ class DizimistaHistoryDialog extends StatelessWidget {
                       currency: currency,
                       onReceiptPressed: () =>
                           reportController.downloadOrShareReceiptPdf(c),
+                      agentName: controller.getAgentName(c.usuarioId),
                     );
                   },
                 );
@@ -176,6 +177,7 @@ class _HistoryItemCard extends StatelessWidget {
   final Contribuicao contribuicao;
   final ThemeData theme;
   final NumberFormat currency;
+  final String agentName;
   final VoidCallback onReceiptPressed;
 
   const _HistoryItemCard({
@@ -183,6 +185,7 @@ class _HistoryItemCard extends StatelessWidget {
     required this.theme,
     required this.currency,
     required this.onReceiptPressed,
+    required this.agentName,
   });
 
   @override
@@ -287,6 +290,55 @@ class _HistoryItemCard extends StatelessWidget {
                     }).toList(),
                   ),
                 ],
+                if (contribuicao.observacao != null &&
+                    contribuicao.observacao!.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.onSurface.withOpacity(0.03),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(Icons.notes_rounded,
+                            size: 14,
+                            color:
+                                theme.colorScheme.onSurface.withOpacity(0.4)),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            contribuicao.observacao!,
+                            style: GoogleFonts.inter(
+                              fontSize: 11,
+                              fontStyle: FontStyle.italic,
+                              color:
+                                  theme.colorScheme.onSurface.withOpacity(0.6),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Icon(Icons.person_pin_rounded,
+                        size: 14, color: Colors.blue.withOpacity(0.7)),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Reg. por: $agentName',
+                      style: GoogleFonts.inter(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                        color: theme.colorScheme.onSurface.withOpacity(0.4),
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),

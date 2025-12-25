@@ -18,7 +18,6 @@ class Dizimista {
   final DateTime? dataCasamento;
   final DateTime? dataNascimentoConjugue;
   final String? observacoes;
-  final bool consentimento;
   final String status;
   final DateTime dataRegistro;
 
@@ -42,7 +41,6 @@ class Dizimista {
     this.dataCasamento,
     this.dataNascimentoConjugue,
     this.observacoes,
-    required this.consentimento,
     required this.status,
     required this.dataRegistro,
   });
@@ -67,7 +65,6 @@ class Dizimista {
     DateTime? dataCasamento,
     DateTime? dataNascimentoConjugue,
     String? observacoes,
-    bool? consentimento,
     String? status,
     DateTime? dataRegistro,
   }) {
@@ -91,7 +88,6 @@ class Dizimista {
       dataCasamento: dataCasamento ?? this.dataCasamento,
       dataNascimentoConjugue: dataNascimentoConjugue ?? this.dataNascimentoConjugue,
       observacoes: observacoes ?? this.observacoes,
-      consentimento: consentimento ?? this.consentimento,
       status: status ?? this.status,
       dataRegistro: dataRegistro ?? this.dataRegistro,
     );
@@ -118,7 +114,6 @@ class Dizimista {
       'data_casamento': dataCasamento?.millisecondsSinceEpoch,
       'data_nascimento_conjugue': dataNascimentoConjugue?.millisecondsSinceEpoch,
       'observacoes': observacoes,
-      'consentimento': consentimento,
       'status': status,
       'data_registro': dataRegistro.millisecondsSinceEpoch,
     };
@@ -151,7 +146,6 @@ class Dizimista {
           ? DateTime.fromMillisecondsSinceEpoch(map['data_nascimento_conjugue'])
           : null,
       observacoes: map['observacoes'],
-      consentimento: map['consentimento'] ?? false,
       status: map['status'] ?? '',
       dataRegistro: DateTime.fromMillisecondsSinceEpoch(map['data_registro'] ?? 0),
     );
@@ -159,7 +153,7 @@ class Dizimista {
 
   @override
   String toString() {
-    return 'Dizimista(id: $id, numeroRegistro: $numeroRegistro, nome: $nome, cpf: $cpf, dataNascimento: $dataNascimento, sexo: $sexo, telefone: $telefone, email: $email, rua: $rua, numero: $numero, bairro: $bairro, cidade: $cidade, estado: $estado, cep: $cep, estadoCivil: $estadoCivil, nomeConjugue: $nomeConjugue, dataCasamento: $dataCasamento, dataNascimentoConjugue: $dataNascimentoConjugue, observacoes: $observacoes, consentimento: $consentimento, status: $status, dataRegistro: $dataRegistro)';
+    return 'Dizimista(id: $id, numeroRegistro: $numeroRegistro, nome: $nome, cpf: $cpf, dataNascimento: $dataNascimento, sexo: $sexo, telefone: $telefone, email: $email, rua: $rua, numero: $numero, bairro: $bairro, cidade: $cidade, estado: $estado, cep: $cep, estadoCivil: $estadoCivil, nomeConjugue: $nomeConjugue, dataCasamento: $dataCasamento, dataNascimentoConjugue: $dataNascimentoConjugue, observacoes: $observacoes, status: $status, dataRegistro: $dataRegistro)';
   }
 
   @override

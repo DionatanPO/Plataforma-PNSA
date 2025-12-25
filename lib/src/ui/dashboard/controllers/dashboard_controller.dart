@@ -369,11 +369,6 @@ class DashboardController extends GetxController {
                           fontSize: 14,
                         ),
                       ),
-                      pw.TextSpan(text: ' referente a '),
-                      pw.TextSpan(
-                        text: contribuicao.tipo.toUpperCase(),
-                        style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-                      ),
                       const pw.TextSpan(text: '.'),
                     ],
                   ),

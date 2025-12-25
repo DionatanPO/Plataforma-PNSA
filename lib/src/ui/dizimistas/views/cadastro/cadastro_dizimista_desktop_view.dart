@@ -47,7 +47,6 @@ class _CadastroDizimistaDesktopViewState
   DateTime? dataCasamento;
   DateTime? dataNascimentoConjugue;
   String? status;
-  bool consentimento = false;
   int activeSection = 0;
 
   bool get isEditing => widget.dizimista != null;
@@ -84,7 +83,6 @@ class _CadastroDizimistaDesktopViewState
       dataCasamento = d?.dataCasamento;
       dataNascimentoConjugue = d?.dataNascimentoConjugue;
       status = (d?.status != null && d!.status.isNotEmpty) ? d.status : 'Ativo';
-      consentimento = d?.consentimento ?? false;
     } else {
       status = 'Ativo';
     }
@@ -126,11 +124,6 @@ class _CadastroDizimistaDesktopViewState
 
   Future<void> _submitForm() async {
     if (_formKey.currentState?.validate() ?? false) {
-      if (!consentimento) {
-        _showErrorDialog(
-            'Para realizar o cadastro, é necessário autorizar o consentimento de dados.');
-        return;
-      }
       final dizimista = Dizimista(
         id: widget.dizimista?.id ??
             DateTime.now().millisecondsSinceEpoch.toString(),
@@ -156,7 +149,6 @@ class _CadastroDizimistaDesktopViewState
         observacoes: observacoesController.text.isNotEmpty
             ? observacoesController.text
             : null,
-        consentimento: consentimento,
         status: status ?? 'Ativo',
         dataRegistro: widget.dizimista?.dataRegistro ?? DateTime.now(),
       );
@@ -298,8 +290,6 @@ class _CadastroDizimistaDesktopViewState
                                         label: 'Nº Registro Paroquial',
                                         icon: Icons.numbers_rounded,
                                         flex: 1,
-                                        validator: (v) =>
-                                            v!.isEmpty ? 'Obrigatório' : null,
                                       ),
                                       if (isEditing)
                                         _buildDropdownField(
@@ -328,7 +318,7 @@ class _CadastroDizimistaDesktopViewState
                                     _buildRow([
                                       _buildTextField(
                                         controller: nomeController,
-                                        label: 'Nome Completo',
+                                        label: 'Nome Completo *',
                                         icon: Icons.person_rounded,
                                         flex: 2,
                                         validator: (v) => v!.isEmpty
@@ -342,9 +332,6 @@ class _CadastroDizimistaDesktopViewState
                                         formatter: cpfFormatter,
                                         inputType: TextInputType.number,
                                         flex: 1,
-                                        validator: (v) => v!.isEmpty
-                                            ? 'Campo obrigatório'
-                                            : null,
                                       ),
                                     ]),
                                     const SizedBox(height: 16),
@@ -352,9 +339,6 @@ class _CadastroDizimistaDesktopViewState
                                       _buildDateField(
                                         label: 'Data de Nascimento',
                                         date: dataNascimento,
-                                        validator: dataNascimento == null
-                                            ? 'Obrigatório'
-                                            : null,
                                         onTap: () => _pickDate(
                                             dataNascimento,
                                             (d) => setState(
@@ -372,7 +356,7 @@ class _CadastroDizimistaDesktopViewState
                                         flex: 1,
                                       ),
                                       _buildDropdownField(
-                                        label: 'Estado Civil',
+                                        label: 'Estado Civil *',
                                         value: estadoCivil,
                                         validator: (v) =>
                                             v == null ? 'Obrigatório' : null,
@@ -400,7 +384,7 @@ class _CadastroDizimistaDesktopViewState
                                     _buildRow([
                                       _buildTextField(
                                         controller: telefoneController,
-                                        label: 'Celular / WhatsApp',
+                                        label: 'Celular / WhatsApp *',
                                         icon: Icons.phone_iphone_rounded,
                                         formatter: telefoneFormatter,
                                         inputType: TextInputType.phone,
@@ -415,8 +399,6 @@ class _CadastroDizimistaDesktopViewState
                                         icon: Icons.alternate_email_rounded,
                                         inputType: TextInputType.emailAddress,
                                         flex: 2,
-                                        validator: (v) =>
-                                            v!.isEmpty ? 'Obrigatório' : null,
                                       ),
                                     ]),
                                     const SizedBox(height: 16),
@@ -467,7 +449,7 @@ class _CadastroDizimistaDesktopViewState
                                     children: [
                                       _buildTextField(
                                         controller: nomeConjugueController,
-                                        label: 'Nome do Cônjuge',
+                                        label: 'Nome do Cônjuge *',
                                         icon: Icons.person_add_rounded,
                                         validator: (v) =>
                                             (estadoCivil == 'Casado' &&
@@ -478,7 +460,7 @@ class _CadastroDizimistaDesktopViewState
                                       const SizedBox(height: 16),
                                       _buildRow([
                                         _buildDateField(
-                                          label: 'Data Casamento',
+                                          label: 'Data Casamento *',
                                           date: dataCasamento,
                                           validator: (estadoCivil == 'Casado' &&
                                                   dataCasamento == null)
@@ -492,7 +474,7 @@ class _CadastroDizimistaDesktopViewState
                                           flex: 1,
                                         ),
                                         _buildDateField(
-                                          label: 'Nasc. Cônjuge',
+                                          label: 'Nasc. Cônjuge *',
                                           date: dataNascimentoConjugue,
                                           validator: (estadoCivil == 'Casado' &&
                                                   dataNascimentoConjugue ==
@@ -526,30 +508,6 @@ class _CadastroDizimistaDesktopViewState
                                               Icons.notes_rounded)
                                           .copyWith(
                                         alignLabelWithHint: true,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 24),
-                                    Container(
-                                      padding: const EdgeInsets.all(16),
-                                      decoration: BoxDecoration(
-                                        color: theme.primaryColor
-                                            .withOpacity(0.05),
-                                        borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(
-                                            color: theme.primaryColor
-                                                .withOpacity(0.1)),
-                                      ),
-                                      child: SwitchListTile(
-                                        contentPadding: EdgeInsets.zero,
-                                        title: Text(
-                                            'Consentimento de Dados (LGPD)',
-                                            style: GoogleFonts.outfit(
-                                                fontWeight: FontWeight.w600)),
-                                        subtitle: const Text(
-                                            'Autorizo o tratamento dos dados para fins eclesiásticos conforme a política de privacidade.'),
-                                        value: consentimento,
-                                        onChanged: (v) =>
-                                            setState(() => consentimento = v),
                                       ),
                                     ),
                                   ],

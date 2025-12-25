@@ -12,6 +12,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../core/services/contribuicao_service.dart';
 import '../../../data/services/auth_service.dart';
+import '../../../domain/models/acesso_model.dart';
+import '../../../core/services/access_service.dart';
 import '../../contribuicoes/models/contribuicao_model.dart';
 
 class ReportController extends GetxController {
@@ -25,10 +27,12 @@ class ReportController extends GetxController {
   final RxDouble totalPix = 0.0.obs;
   final RxDouble totalCartao = 0.0.obs;
   final RxDouble totalTransferencia = 0.0.obs;
+  final RxList<Acesso> _todosAcessos = <Acesso>[].obs;
 
   final RxBool isLoading = false.obs;
 
   StreamSubscription? _reportSub;
+  StreamSubscription? _acessosSub;
 
   // Date selection
   final Rx<DateTime> selectedDate = DateTime.now().obs;
@@ -55,6 +59,8 @@ class ReportController extends GetxController {
         _reportSub = null;
         contribuicoes.clear();
         _calculateTotals([]);
+        _acessosSub?.cancel();
+        _acessosSub = null;
       }
     });
 
@@ -97,6 +103,14 @@ class ReportController extends GetxController {
 
     ever(selectedCompetenceMonth, (month) {
       if (isCompetenceMode.value) fetchCompetenceReport(month);
+    });
+
+    _startListeningAcessos();
+  }
+
+  void _startListeningAcessos() {
+    _acessosSub = AccessService.getAllAcessos().listen((list) {
+      _todosAcessos.value = list;
     });
   }
 
@@ -189,6 +203,7 @@ class ReportController extends GetxController {
   @override
   void onClose() {
     _reportSub?.cancel();
+    _acessosSub?.cancel();
     super.onClose();
   }
 
@@ -868,11 +883,6 @@ _Gerado automaticamente pelo sistema_
                           fontSize: 14,
                         ),
                       ),
-                      pw.TextSpan(text: ' referente a '),
-                      pw.TextSpan(
-                        text: contribuicao.tipo.toUpperCase(),
-                        style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-                      ),
                       const pw.TextSpan(text: '.'),
                     ],
                   ),
@@ -979,5 +989,15 @@ _Gerado automaticamente pelo sistema_
     );
 
     return pdf;
+  }
+
+  String getAgentName(String uid) {
+    if (uid.isEmpty) return 'Sistema';
+    try {
+      final agent = _todosAcessos.firstWhereOrNull((a) => a.id == uid);
+      return agent?.nome ?? 'Usuário Desconhecido';
+    } catch (_) {
+      return 'Usuário Desconhecido';
+    }
   }
 }

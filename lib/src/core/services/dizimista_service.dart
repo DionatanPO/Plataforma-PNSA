@@ -26,7 +26,6 @@ class DizimistaService {
       'data_nascimento_conjugue':
           dizimista.dataNascimentoConjugue?.millisecondsSinceEpoch,
       'observacoes': dizimista.observacoes,
-      'consentimento': dizimista.consentimento,
       'status': dizimista.status,
       'data_registro': dizimista.dataRegistro.millisecondsSinceEpoch,
     };
@@ -62,7 +61,6 @@ class DizimistaService {
               data['data_nascimento_conjugue'])
           : null,
       observacoes: data['observacoes'],
-      consentimento: data['consentimento'] ?? false,
       status: data['status'] ?? '',
       dataRegistro:
           DateTime.fromMillisecondsSinceEpoch(data['data_registro'] ?? 0),

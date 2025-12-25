@@ -43,7 +43,6 @@ class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
   String? status;
   DateTime? dataCasamento;
   DateTime? dataNascimentoConjugue;
-  bool consentimento = false;
   int _currentMobileStep = 0;
 
   bool get isEditing => widget.dizimista != null;
@@ -85,7 +84,6 @@ class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
       status = (d?.status != null && d!.status.isNotEmpty) ? d.status : 'Ativo';
       dataCasamento = d?.dataCasamento;
       dataNascimentoConjugue = d?.dataNascimentoConjugue;
-      consentimento = d?.consentimento ?? false;
     } else {
       status = 'Ativo';
     }
@@ -110,11 +108,6 @@ class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
 
   void _submitForm() async {
     if (_formKey.currentState?.validate() ?? false) {
-      if (!consentimento) {
-        _showErrorDialog(
-            'Para realizar o cadastro, é necessário autorizar o consentimento de dados.');
-        return;
-      }
       final cpfSemMascara = cpfFormatter.unmaskText(cpfController.text);
       final telefoneSemMascara =
           telefoneFormatter.unmaskText(telefoneController.text);
@@ -144,7 +137,6 @@ class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
         observacoes: observacoesController.text.isNotEmpty
             ? observacoesController.text
             : null,
-        consentimento: consentimento,
         status: status ?? 'Ativo',
         dataRegistro: widget.dizimista?.dataRegistro ?? DateTime.now(),
       );
@@ -415,7 +407,6 @@ class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
                     controller: numeroRegistroController,
                     label: 'Nº Registro Paroquial',
                     icon: Icons.numbers,
-                    validator: (v) => v!.isEmpty ? 'Obrigatório' : null,
                   ),
                 ),
                 if (isEditing)
@@ -446,7 +437,7 @@ class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
                   flex: 2,
                   child: _buildTextField(
                     controller: nomeController,
-                    label: 'Nome Completo',
+                    label: 'Nome Completo *',
                     icon: Icons.person,
                     validator: (v) => v!.isEmpty ? 'Obrigatório' : null,
                   ),
@@ -460,7 +451,6 @@ class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
                     icon: Icons.fingerprint,
                     formatter: cpfFormatter,
                     inputType: TextInputType.number,
-                    validator: (v) => v!.isEmpty ? 'Obrigatório' : null,
                   ),
                 ),
                 _ResponsiveField(
@@ -469,7 +459,6 @@ class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
                   child: _buildDatePath(
                     label: 'Data de Nascimento',
                     date: dataNascimento,
-                    validator: dataNascimento == null ? 'Obrigatório' : null,
                     onTap: () => _pickDate(context, dataNascimento,
                         (d) => setState(() => dataNascimento = d)),
                     theme: theme,
@@ -505,7 +494,7 @@ class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
                   flex: 1,
                   child: _buildTextField(
                     controller: telefoneController,
-                    label: 'Celular / WhatsApp',
+                    label: 'Celular / WhatsApp *',
                     icon: Icons.phone_android,
                     formatter: telefoneFormatter,
                     inputType: TextInputType.phone,
@@ -520,7 +509,6 @@ class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
                     label: 'E-mail',
                     icon: Icons.email_outlined,
                     inputType: TextInputType.emailAddress,
-                    validator: (v) => v!.isEmpty ? 'Obrigatório' : null,
                   ),
                 ),
               ],
@@ -590,7 +578,7 @@ class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
                   child: DropdownButtonFormField<String>(
                     value: estadoCivil,
                     decoration: _buildInputDecoration(
-                        theme, 'Estado Civil', Icons.people_outline),
+                        theme, 'Estado Civil *', Icons.people_outline),
                     validator: (v) => v == null ? 'Obrigatório' : null,
                     items: ['Solteiro', 'Casado', 'Viúvo', 'Separado']
                         .map((v) => DropdownMenuItem(value: v, child: Text(v)))
@@ -612,7 +600,7 @@ class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
                     flex: 2,
                     child: _buildTextField(
                         controller: nomeConjugueController,
-                        label: 'Nome do Cônjuge',
+                        label: 'Nome do Cônjuge *',
                         icon: Icons.person_add_alt,
                         validator: (v) =>
                             (estadoCivil == 'Casado' && (v?.isEmpty ?? true))
@@ -623,7 +611,7 @@ class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
                     isWide: isWide,
                     flex: 1,
                     child: _buildDatePath(
-                      label: 'Data Casamento',
+                      label: 'Data Casamento *',
                       date: dataCasamento,
                       validator:
                           (estadoCivil == 'Casado' && dataCasamento == null)
@@ -638,7 +626,7 @@ class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
                     isWide: isWide,
                     flex: 1,
                     child: _buildDatePath(
-                      label: 'Nasc. Cônjuge',
+                      label: 'Nasc. Cônjuge *',
                       date: dataNascimentoConjugue,
                       validator: (estadoCivil == 'Casado' &&
                               dataNascimentoConjugue == null)
@@ -678,22 +666,6 @@ class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
                       decoration: _buildInputDecoration(
                               theme, 'Observações', Icons.notes)
                           .copyWith(alignLabelWithHint: true),
-                    ),
-                    const SizedBox(height: 16),
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      activeColor: theme.colorScheme.primary,
-                      title: Text('Consentimento de Dados',
-                          style:
-                              GoogleFonts.inter(fontWeight: FontWeight.w600)),
-                      subtitle: Text(
-                        'Autorizo o uso dos dados para fins pastorais e administrativos da paróquia.',
-                        style: GoogleFonts.inter(
-                            fontSize: 12,
-                            color: theme.colorScheme.onSurfaceVariant),
-                      ),
-                      value: consentimento,
-                      onChanged: (v) => setState(() => consentimento = v),
                     ),
                   ],
                 ),
