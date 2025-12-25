@@ -10,6 +10,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/services/contribuicao_service.dart';
 import '../../../data/services/auth_service.dart';
 import '../../../domain/models/acesso_model.dart';
@@ -281,8 +282,12 @@ class ReportController extends GetxController {
       if (kIsWeb) {
         // Na web, vamos forçar o download direto
         await Printing.sharePdf(bytes: bytes, filename: fileName);
+      } else if (!kIsWeb && Platform.isWindows) {
+        // No Windows, perguntar se quer salvar em Downloads ou compartilhar
+        await _showWindowsExportDialog(bytes, fileName,
+            'Relatório ${isRangeMode.value ? "por Período" : "Diário"}');
       } else {
-        // Para mobile e desktop, salvar temporariamente e compartilhar
+        // Para mobile, salvar temporariamente e compartilhar
         final directory = await getTemporaryDirectory();
         final filePath = '${directory.path}/$fileName';
         final file = File(filePath);
@@ -734,6 +739,9 @@ _Gerado automaticamente pelo sistema_
 
       if (kIsWeb) {
         await Printing.sharePdf(bytes: bytes, filename: fileName);
+      } else if (!kIsWeb && Platform.isWindows) {
+        await _showWindowsExportDialog(
+            bytes, fileName, 'Recibo de ${contribuicao.dizimistaNome}');
       } else {
         final directory = await getTemporaryDirectory();
         final filePath = '${directory.path}/$fileName';
@@ -989,6 +997,66 @@ _Gerado automaticamente pelo sistema_
     );
 
     return pdf;
+  }
+
+  Future<void> _showWindowsExportDialog(
+      Uint8List bytes, String fileName, String subject) async {
+    await Get.dialog(
+      AlertDialog(
+        title: const Text('Exportar PDF'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Arquivo: $fileName'),
+            const SizedBox(height: 16),
+            const Text('Escolha como deseja prosseguir:'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Get.back();
+              // Abre a prévia de impressão que permite "Salvar como PDF" em qualquer lugar
+              await Printing.layoutPdf(
+                onLayout: (PdfPageFormat format) async => bytes,
+                name: fileName,
+              );
+            },
+            child: const Text('Imprimir / Salvar Como...'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Get.back();
+              final downloadsDir = await getDownloadsDirectory();
+              if (downloadsDir != null) {
+                final filePath = '${downloadsDir.path}/$fileName';
+                final file = File(filePath);
+                await file.writeAsBytes(bytes);
+                Get.snackbar(
+                  'Sucesso',
+                  'Arquivo salvo em Downloads: $fileName',
+                  snackPosition: SnackPosition.BOTTOM,
+                  backgroundColor: Colors.green,
+                  colorText: Colors.white,
+                  duration: const Duration(seconds: 5),
+                  mainButton: TextButton(
+                    onPressed: () => launchUrl(Uri.file(downloadsDir.path)),
+                    child: const Text('Abrir Pasta',
+                        style: TextStyle(color: Colors.white)),
+                  ),
+                );
+              }
+            },
+            child: const Text('Salvar em Downloads'),
+          ),
+        ],
+      ),
+    );
   }
 
   String getAgentName(String uid) {

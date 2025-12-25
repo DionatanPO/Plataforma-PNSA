@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-// ignore: avoid_web_libraries_in_flutter
-import 'dart:js' as js;
+import 'web_utils.dart' as web_utils;
 import '../../routes/app_routes.dart';
 import '../../data/services/auth_service.dart';
 import '../../data/services/session_service.dart';
@@ -27,7 +26,7 @@ class _SplashScreenState extends State<SplashScreen>
     if (kIsWeb) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         try {
-          js.context.callMethod('removeSplashFromWeb');
+          web_utils.removeSplash();
         } catch (e) {
           debugPrint('Erro ao remover splash web: $e');
         }
