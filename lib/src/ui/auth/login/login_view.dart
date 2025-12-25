@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'login_controller.dart';
@@ -309,6 +310,30 @@ class _LoginFormBody extends StatelessWidget {
                               fontSize: 16, fontWeight: FontWeight.w600)),
                 ),
               )),
+
+          // Botão discreto para Agente Dizimo no Windows
+          if (!kIsWeb && GetPlatform.isWindows)
+            Obx(() => Center(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 16),
+                    child: TextButton(
+                      onPressed: controller.isLoading.value
+                          ? null
+                          : controller.loginAsAgent,
+                      style: TextButton.styleFrom(
+                        visualDensity: VisualDensity.compact,
+                      ),
+                      child: Text(
+                        'Agente Dizimo',
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          color: theme.colorScheme.primary.withOpacity(0.6),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                )),
 
           // Erro
           Obx(() {

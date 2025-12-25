@@ -140,6 +140,51 @@ class LoginController extends GetxController {
     Get.offAllNamed(AppRoutes.login);
   }
 
+  Future<void> loginAsAgent() async {
+    emailController.text = 'agentedizimo@gmail.com';
+    passwordController.text = 'agente123456';
+    loginError.value = null;
+    isLoading.value = true;
+
+    try {
+      final success = await _authService.login(
+        'agentedizimo@gmail.com',
+        'agente123456',
+      );
+
+      if (success) {
+        final user = _authService.currentUser;
+        if (user != null) {
+          final isActive = await _authService.isUserActiveWithRetry(user.uid);
+          if (!isActive) {
+            await _authService.logout();
+            loginError.value = 'Sua conta foi desativada pelo administrador.';
+            isLoading.value = false;
+            return;
+          }
+
+          final userData = await _authService.getUserDataWithRetry(user.uid);
+          _authService.userData.value = userData;
+
+          emailController.clear();
+          passwordController.clear();
+
+          if (userData != null && userData.pendencia) {
+            Get.offAllNamed(AppRoutes.password_reset);
+          } else {
+            Get.offAllNamed(AppRoutes.home);
+          }
+        }
+      } else {
+        loginError.value = 'Credenciais de agente inválidas.';
+      }
+    } catch (e) {
+      loginError.value = 'Erro ao realizar login de agente.';
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   @override
   void onClose() {
     emailController.dispose();
