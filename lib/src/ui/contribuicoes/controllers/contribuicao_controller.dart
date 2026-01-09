@@ -59,9 +59,24 @@ class ContribuicaoController extends GetxController {
   void adicionarCompetencia(String mesAno, double valor) {
     // Se já existe, remove primeiro
     competencias.removeWhere((c) => c.mesReferencia == mesAno);
-    competencias
-        .add(ContribuicaoCompetencia(mesReferencia: mesAno, valor: valor));
+    competencias.add(ContribuicaoCompetencia(
+        mesReferencia: mesAno,
+        valor: valor,
+        dataPagamento: dataSelecionada.value));
     competencias.sort((a, b) => a.mesReferencia.compareTo(b.mesReferencia));
+  }
+
+  // Método para atualizar a data de uma competência específica
+  void atualizarDataCompetencia(String mesAno, DateTime novaData) {
+    final index = competencias.indexWhere((c) => c.mesReferencia == mesAno);
+    if (index != -1) {
+      final compExistente = competencias[index];
+      competencias[index] = ContribuicaoCompetencia(
+        mesReferencia: compExistente.mesReferencia,
+        valor: compExistente.valor,
+        dataPagamento: novaData,
+      );
+    }
   }
 
   // Método para remover uma competência
@@ -94,12 +109,21 @@ class ContribuicaoController extends GetxController {
 
     double valorPorMes = total / competencias.length;
 
-    // Atualizar a lista mantendo a ordem mas com novos valores
-    final novosMeses = competencias.map((c) => c.mesReferencia).toList();
+    // Atualizar a lista mantendo a ordem mas com novos valores e mantendo as datas se existirem
+    final novosDados = competencias
+        .map((c) => {
+              'mes': c.mesReferencia,
+              'data': c.dataPagamento ?? dataSelecionada.value
+            })
+        .toList();
+
     competencias.clear();
-    for (var mes in novosMeses) {
-      competencias
-          .add(ContribuicaoCompetencia(mesReferencia: mes, valor: valorPorMes));
+    for (var item in novosDados) {
+      competencias.add(ContribuicaoCompetencia(
+        mesReferencia: item['mes'] as String,
+        valor: valorPorMes,
+        dataPagamento: item['data'] as DateTime,
+      ));
     }
   }
 
@@ -162,10 +186,11 @@ class ContribuicaoController extends GetxController {
   }
 
   void adicionarVariasCompetencias(List<String> meses) {
-    // Mantém os valores se já existirem, ou adiciona novos com 0
+    // Mantém os valores se já existirem, ou adiciona novos com 0 e a data selecionada atual
     final novos = <ContribuicaoCompetencia>[];
     for (var mes in meses) {
-      novos.add(ContribuicaoCompetencia(mesReferencia: mes, valor: 0));
+      novos.add(ContribuicaoCompetencia(
+          mesReferencia: mes, valor: 0, dataPagamento: dataSelecionada.value));
     }
     competencias.assignAll(novos);
     competencias.sort((a, b) => a.mesReferencia.compareTo(b.mesReferencia));
@@ -582,9 +607,15 @@ class ContribuicaoController extends GetxController {
                       if (contribuicao.competencias.isNotEmpty) ...[
                         const pw.TextSpan(text: ' ('),
                         pw.TextSpan(
-                          text: contribuicao.competencias
-                              .map((c) => _formatMesReferencia(c.mesReferencia))
-                              .join(', '),
+                          text: contribuicao.competencias.map((c) {
+                            final mes = _formatMesReferencia(c.mesReferencia);
+                            if (c.dataPagamento != null) {
+                              final data = DateFormat('dd/MM/yy')
+                                  .format(c.dataPagamento!);
+                              return '$mes ($data)';
+                            }
+                            return mes;
+                          }).join(', '),
                           style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
                         ),
                         const pw.TextSpan(text: ')'),
@@ -732,7 +763,7 @@ class ContribuicaoController extends GetxController {
       tipo: tipo.value,
       valor: valorDouble,
       metodo: metodo.value,
-      dataRegistro: DateTime.now(),
+      dataRegistro: dataSelecionada.value,
       usuarioId: user?.uid ?? '',
       observacao: observacao.value.isEmpty ? null : observacao.value,
       competencias: List<ContribuicaoCompetencia>.from(competencias),

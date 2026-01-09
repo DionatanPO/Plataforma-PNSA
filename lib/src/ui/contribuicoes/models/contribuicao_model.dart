@@ -1,16 +1,19 @@
 class ContribuicaoCompetencia {
   final String mesReferencia; // ex: 2024-03
   final double valor;
+  final DateTime? dataPagamento;
 
   ContribuicaoCompetencia({
     required this.mesReferencia,
     required this.valor,
+    this.dataPagamento,
   });
 
   Map<String, dynamic> toMap() {
     return {
       'mesReferencia': mesReferencia,
       'valor': valor,
+      'dataPagamento': dataPagamento?.millisecondsSinceEpoch,
     };
   }
 
@@ -20,11 +23,14 @@ class ContribuicaoCompetencia {
       valor: (map['valor'] is int)
           ? (map['valor'] as int).toDouble()
           : map['valor']?.toDouble() ?? 0.0,
+      dataPagamento: map['dataPagamento'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(map['dataPagamento'])
+          : null,
     );
   }
 
   @override
-  String toString() => '($mesReferencia: R\$ $valor)';
+  String toString() => '($mesReferencia: R\$ $valor em $dataPagamento)';
 }
 
 class Contribuicao {

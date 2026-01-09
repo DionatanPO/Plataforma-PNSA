@@ -1147,6 +1147,41 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
 
         const SizedBox(height: 32),
 
+        // Data do Lançamento
+        _label('Data do Recebimento'),
+        InkWell(
+          onTap: () => _pickDateTime(context),
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: borderColor),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.calendar_month_rounded,
+                    color: accentColor, size: 22),
+                const SizedBox(width: 14),
+                Obx(() => Text(
+                      '${controller.dataSelecionada.value.day.toString().padLeft(2, '0')}/${controller.dataSelecionada.value.month.toString().padLeft(2, '0')}/${controller.dataSelecionada.value.year} às ${controller.dataSelecionada.value.hour.toString().padLeft(2, '0')}:${controller.dataSelecionada.value.minute.toString().padLeft(2, '0')}',
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    )),
+                const Spacer(),
+                Icon(Icons.edit_calendar_rounded,
+                    color: accentColor.withOpacity(0.5), size: 20),
+              ],
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 32),
+
         // Meses de Referência (Competência) - Apenas se for Atrasado
         Obx(() => controller.tipo.value == 'Dízimo Atrasado'
             ? _buildCompetenciaSection()
@@ -1158,6 +1193,30 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
         _buildSummaryCard(),
       ],
     );
+  }
+
+  void _pickDateForCompetencia(String mesAno, DateTime? dataAtual) async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: dataAtual ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+      builder: (context, child) {
+        return Theme(
+          data: theme.copyWith(
+            colorScheme: theme.colorScheme.copyWith(
+              primary: accentColor,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (pickedDate != null) {
+      controller.atualizarDataCompetencia(mesAno, pickedDate);
+      setState(() {});
+    }
   }
 
   Widget _buildCompetenciaSection() {
@@ -1263,6 +1322,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
                     final comp = controller.competencias[index];
                     return ListTile(
                       dense: true,
+                      contentPadding: const EdgeInsets.only(left: 16, right: 8),
                       title: Text(
                         _formatMesReferencia(comp.mesReferencia),
                         style: GoogleFonts.inter(
@@ -1270,9 +1330,26 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
                           fontSize: 14,
                         ),
                       ),
+                      subtitle: comp.dataPagamento != null
+                          ? Text(
+                              'Data: ${comp.dataPagamento!.day.toString().padLeft(2, '0')}/${comp.dataPagamento!.month.toString().padLeft(2, '0')}/${comp.dataPagamento!.year}',
+                              style: GoogleFonts.inter(
+                                  fontSize: 11,
+                                  color: theme.colorScheme.onSurface
+                                      .withOpacity(0.5)),
+                            )
+                          : null,
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          IconButton(
+                            icon: Icon(Icons.calendar_today_rounded,
+                                size: 18, color: accentColor.withOpacity(0.7)),
+                            onPressed: () => _pickDateForCompetencia(
+                                comp.mesReferencia, comp.dataPagamento),
+                            tooltip: 'Alterar data deste mês',
+                          ),
+                          const SizedBox(width: 4),
                           Text(
                             _currencyFormatter.formatDouble(comp.valor),
                             style: GoogleFonts.outfit(
@@ -1280,7 +1357,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
                               color: accentColor,
                             ),
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 4),
                           IconButton(
                             icon: const Icon(
                                 Icons.remove_circle_outline_rounded,
