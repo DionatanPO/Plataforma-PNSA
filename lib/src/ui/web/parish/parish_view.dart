@@ -3,6 +3,7 @@ import 'package:plataforma_pnsa/src/routes/app_routes.dart';
 import 'package:plataforma_pnsa/src/ui/core/theme/app_theme.dart';
 import 'package:plataforma_pnsa/src/ui/web/widgets/mobile_drawer.dart';
 import 'package:plataforma_pnsa/src/ui/web/widgets/web_nav_bar.dart';
+import 'package:plataforma_pnsa/src/core/constants/app_constants.dart';
 
 class ParishView extends StatelessWidget {
   const ParishView({super.key});
@@ -58,9 +59,7 @@ class ParishView extends StatelessWidget {
           image: const AssetImage("assets/images/paroquia.png"), // Fundo sutil
           fit: BoxFit.cover,
           colorFilter: ColorFilter.mode(
-              AppTheme.primaryColor.withOpacity(0.9),
-              BlendMode.multiply
-          ),
+              AppTheme.primaryColor.withOpacity(0.9), BlendMode.multiply),
         ),
       ),
       child: Column(
@@ -74,7 +73,11 @@ class ParishView extends StatelessWidget {
             ),
             child: const Text(
               "DESDE 1951",
-              style: TextStyle(color: Colors.white, fontSize: 12, letterSpacing: 2, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  letterSpacing: 2,
+                  fontWeight: FontWeight.bold),
             ),
           ),
           const SizedBox(height: 16),
@@ -92,7 +95,7 @@ class ParishView extends StatelessWidget {
           SizedBox(
             width: 600,
             child: Text(
-              "Conheça a trajetória da Paróquia Nossa Senhora Auxiliadora, um farol de fé em Iporá.",
+              "Conheça a trajetória da ${AppConstants.parishName}, um farol de fé em Iporá.",
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 18,
@@ -159,19 +162,22 @@ class ParishView extends StatelessWidget {
             _buildTimelineItem(
               year: "1951",
               title: "O Início da Jornada",
-              content: "Fundada em 15 de março, a Paróquia Nossa Senhora Auxiliadora nasce como a Igreja Matriz de Iporá, tornando-se o coração pulsante da fé católica na região.",
+              content:
+                  "Fundada em 15 de março, a ${AppConstants.parishName} nasce como a Igreja Matriz de Iporá, tornando-se o coração pulsante da fé católica na região.",
               isLast: false,
             ),
             _buildTimelineItem(
               year: "Missão",
               title: "Espiritualidade Passionista",
-              content: "Entregue aos cuidados da Província Exaltação da Santa Cruz, seguimos os passos de São Paulo da Cruz, vivendo a memória da Paixão de Cristo como remédio para os males do mundo.",
+              content:
+                  "Entregue aos cuidados da Província Exaltação da Santa Cruz, seguimos os passos de São Paulo da Cruz, vivendo a memória da Paixão de Cristo como remédio para os males do mundo.",
               isLast: false,
             ),
             _buildTimelineItem(
               year: "2024",
               title: "Homenagem à Padroeira",
-              content: "Em maio, inauguramos o monumento em homenagem à Nossa Senhora Auxiliadora próximo ao Campo do Juventude, eternizando a devoção da cidade.",
+              content:
+                  "Em maio, inauguramos o monumento em homenagem à Nossa Senhora Auxiliadora próximo ao Campo do Juventude, eternizando a devoção da cidade.",
               isLast: true,
             ),
 
@@ -269,18 +275,18 @@ class ParishView extends StatelessWidget {
                           ? CrossAxisAlignment.center
                           : CrossAxisAlignment.start,
                       children: [
-                        const Text("Paróquia N. Sra. Auxiliadora",
+                        const Text(AppConstants.parishName,
                             style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold)),
                         const SizedBox(height: 16),
                         Text(
-                          "Av. Pará, 491 - Centro\nIporá - GO, 76200-000",
+                          "${AppConstants.parishAddress}\n76200-000",
                           textAlign:
-                          isMobile ? TextAlign.center : TextAlign.start,
+                              isMobile ? TextAlign.center : TextAlign.start,
                           style:
-                          TextStyle(color: Colors.grey[400], height: 1.5),
+                              TextStyle(color: Colors.grey[400], height: 1.5),
                         ),
                         const SizedBox(height: 24),
                         Row(
@@ -325,12 +331,13 @@ class ParishView extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text("© 2025 PNSA. Todos os direitos reservados.",
+                  Text(
+                      "© 2025 ${AppConstants.parishName}. Todos os direitos reservados.",
                       style: TextStyle(color: Colors.grey[500], fontSize: 13)),
                   if (!isMobile)
                     Text("Feito com Flutter",
                         style:
-                        TextStyle(color: Colors.grey[600], fontSize: 13)),
+                            TextStyle(color: Colors.grey[600], fontSize: 13)),
                 ],
               )
             ],
@@ -357,7 +364,8 @@ class ParishView extends StatelessWidget {
           Column(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
                   color: AppTheme.primaryColor,
                   borderRadius: BorderRadius.circular(8),
@@ -567,7 +575,7 @@ class _FooterLinksColumn extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment:
-      isMobile ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+          isMobile ? CrossAxisAlignment.center : CrossAxisAlignment.start,
       children: [
         Text(title,
             style: const TextStyle(
@@ -576,13 +584,13 @@ class _FooterLinksColumn extends StatelessWidget {
                 fontSize: 16)),
         const SizedBox(height: 20),
         ...links.map((link) => Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: InkWell(
-            onTap: () {},
-            child: Text(link,
-                style: TextStyle(color: Colors.grey[400], fontSize: 14)),
-          ),
-        ))
+              padding: const EdgeInsets.only(bottom: 12),
+              child: InkWell(
+                onTap: () {},
+                child: Text(link,
+                    style: TextStyle(color: Colors.grey[400], fontSize: 14)),
+              ),
+            ))
       ],
     );
   }

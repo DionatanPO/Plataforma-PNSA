@@ -356,10 +356,8 @@ class _CadastroDizimistaDesktopViewState
                                         flex: 1,
                                       ),
                                       _buildDropdownField(
-                                        label: 'Estado Civil *',
+                                        label: 'Estado Civil',
                                         value: estadoCivil,
-                                        validator: (v) =>
-                                            v == null ? 'Obrigatório' : null,
                                         items: [
                                           'Solteiro',
                                           'Casado',
@@ -384,14 +382,11 @@ class _CadastroDizimistaDesktopViewState
                                     _buildRow([
                                       _buildTextField(
                                         controller: telefoneController,
-                                        label: 'Celular / WhatsApp *',
+                                        label: 'Celular / WhatsApp',
                                         icon: Icons.phone_iphone_rounded,
                                         formatter: telefoneFormatter,
                                         inputType: TextInputType.phone,
                                         flex: 1,
-                                        validator: (v) => v!.isEmpty
-                                            ? 'Campo obrigatório'
-                                            : null,
                                       ),
                                       _buildTextField(
                                         controller: emailController,
@@ -460,12 +455,8 @@ class _CadastroDizimistaDesktopViewState
                                       const SizedBox(height: 16),
                                       _buildRow([
                                         _buildDateField(
-                                          label: 'Data Casamento *',
+                                          label: 'Data Casamento',
                                           date: dataCasamento,
-                                          validator: (estadoCivil == 'Casado' &&
-                                                  dataCasamento == null)
-                                              ? 'Obrigatório'
-                                              : null,
                                           onTap: () => _pickDate(
                                               dataCasamento,
                                               (d) => setState(
@@ -474,13 +465,8 @@ class _CadastroDizimistaDesktopViewState
                                           flex: 1,
                                         ),
                                         _buildDateField(
-                                          label: 'Nasc. Cônjuge *',
+                                          label: 'Nasc. Cônjuge',
                                           date: dataNascimentoConjugue,
-                                          validator: (estadoCivil == 'Casado' &&
-                                                  dataNascimentoConjugue ==
-                                                      null)
-                                              ? 'Obrigatório'
-                                              : null,
                                           onTap: () => _pickDate(
                                               dataNascimentoConjugue,
                                               (d) => setState(() =>

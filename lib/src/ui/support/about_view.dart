@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'dart:ui';
 
 import '../core/widgets/custom_sliver_app_bar.dart';
-
+import 'package:plataforma_pnsa/src/core/constants/app_constants.dart';
 
 class AboutView extends StatelessWidget {
   const AboutView({super.key});
@@ -53,7 +53,7 @@ class AboutView extends StatelessWidget {
 
                       // Description
                       Text(
-                        'Este aplicativo foi desenvolvido para auxiliar na gestão da Paróquia Nossa Senhora Auxiliadora, facilitando o controle de fiéis, dízimos e administração dos acessos ao sistema por diferentes perfis.',
+                        'Este aplicativo foi desenvolvido para auxiliar na gestão da ${AppConstants.parishName}, facilitando o controle de fiéis, dízimos e administração dos acessos ao sistema por diferentes perfis.',
                         textAlign: TextAlign.center,
                         style: GoogleFonts.inter(
                           fontSize: 16,
@@ -88,7 +88,7 @@ class AboutView extends StatelessWidget {
 
                       // Copyright
                       Text(
-                        '© 2025 Paróquia Nossa Senhora Auxiliadora. Todos os direitos reservados.',
+                        '© 2025 ${AppConstants.parishName}. Todos os direitos reservados.',
                         style: GoogleFonts.inter(
                           fontSize: 12,
                           color: theme.colorScheme.onSurface.withOpacity(0.4),
@@ -147,7 +147,7 @@ class AboutView extends StatelessWidget {
         ),
         const SizedBox(height: 24),
         Text(
-          'Sistema Paróquia NS Auxiliadora',
+          'Sistema ${AppConstants.parishName}',
           style: GoogleFonts.outfit(
             fontSize: 32,
             fontWeight: FontWeight.w700,
@@ -159,10 +159,9 @@ class AboutView extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
           decoration: BoxDecoration(
-            color:
-                isDark
-                    ? Colors.white.withOpacity(0.1)
-                    : Colors.black.withOpacity(0.05),
+            color: isDark
+                ? Colors.white.withOpacity(0.1)
+                : Colors.black.withOpacity(0.05),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
@@ -189,7 +188,7 @@ class AboutView extends StatelessWidget {
     final items = [
       {
         'label': 'Paróquia',
-        'value': 'Nossa Senhora Auxiliadora',
+        'value': AppConstants.parishName,
         'icon': Icons.church_outlined,
       },
       {
@@ -199,12 +198,12 @@ class AboutView extends StatelessWidget {
       },
       {
         'label': 'Endereço',
-        'value': 'Av. Pará, n. 491',
+        'value': AppConstants.parishAddress,
         'icon': Icons.location_on_outlined,
       },
       {
         'label': 'Contato',
-        'value': '(64) 3674-1540',
+        'value': AppConstants.parishPhone,
         'icon': Icons.phone_outlined,
       },
     ];
@@ -215,26 +214,25 @@ class AboutView extends StatelessWidget {
         final spacing = 16.0;
         final width =
             (constraints.maxWidth - (spacing * (crossAxisCount - 1))) /
-            crossAxisCount;
+                crossAxisCount;
 
         return Wrap(
           spacing: spacing,
           runSpacing: spacing,
-          children:
-              items.map((item) {
-                return SizedBox(
-                  width: width,
-                  child: _buildInfoCard(
-                    theme,
-                    primaryColor,
-                    isDark,
-                    cardColor,
-                    item['icon'] as IconData,
-                    item['label'] as String,
-                    item['value'] as String,
-                  ),
-                );
-              }).toList(),
+          children: items.map((item) {
+            return SizedBox(
+              width: width,
+              child: _buildInfoCard(
+                theme,
+                primaryColor,
+                isDark,
+                cardColor,
+                item['icon'] as IconData,
+                item['label'] as String,
+                item['value'] as String,
+              ),
+            );
+          }).toList(),
         );
       },
     );
@@ -255,18 +253,16 @@ class AboutView extends StatelessWidget {
         color: cardColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color:
-              isDark
-                  ? Colors.white.withOpacity(0.08)
-                  : Colors.black.withOpacity(0.08),
+          color: isDark
+              ? Colors.white.withOpacity(0.08)
+              : Colors.black.withOpacity(0.08),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color:
-                isDark
-                    ? Colors.black.withOpacity(0.2)
-                    : Colors.black.withOpacity(0.04),
+            color: isDark
+                ? Colors.black.withOpacity(0.2)
+                : Colors.black.withOpacity(0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -323,10 +319,9 @@ class AboutView extends StatelessWidget {
         color: cardColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color:
-              isDark
-                  ? Colors.white.withOpacity(0.08)
-                  : Colors.black.withOpacity(0.08),
+          color: isDark
+              ? Colors.white.withOpacity(0.08)
+              : Colors.black.withOpacity(0.08),
           width: 1,
         ),
       ),
@@ -336,19 +331,17 @@ class AboutView extends StatelessWidget {
           Divider(
             height: 1,
             thickness: 1,
-            color:
-                isDark
-                    ? Colors.white.withOpacity(0.05)
-                    : Colors.black.withOpacity(0.05),
+            color: isDark
+                ? Colors.white.withOpacity(0.05)
+                : Colors.black.withOpacity(0.05),
           ),
           _buildLegalTile(theme, 'Política de Privacidade', isDark),
           Divider(
             height: 1,
             thickness: 1,
-            color:
-                isDark
-                    ? Colors.white.withOpacity(0.05)
-                    : Colors.black.withOpacity(0.05),
+            color: isDark
+                ? Colors.white.withOpacity(0.05)
+                : Colors.black.withOpacity(0.05),
           ),
           _buildLegalTile(theme, 'Licenças de Terceiros', isDark),
         ],

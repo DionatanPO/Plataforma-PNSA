@@ -18,7 +18,8 @@ class DizimistaSelectionWidget extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<DizimistaSelectionWidget> createState() => _DizimistaSelectionWidgetState();
+  State<DizimistaSelectionWidget> createState() =>
+      _DizimistaSelectionWidgetState();
 }
 
 class _DizimistaSelectionWidgetState extends State<DizimistaSelectionWidget> {
@@ -29,9 +30,8 @@ class _DizimistaSelectionWidgetState extends State<DizimistaSelectionWidget> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final surfaceColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
-    final backgroundColor = isDark
-        ? const Color(0xFF121212)
-        : const Color(0xFFF4F6F8);
+    final backgroundColor =
+        isDark ? const Color(0xFF121212) : const Color(0xFFF4F6F8);
     final borderColor = theme.dividerColor.withOpacity(0.1);
 
     return Column(
@@ -91,7 +91,8 @@ class _DizimistaSelectionWidgetState extends State<DizimistaSelectionWidget> {
             child: Obx(() {
               final selecionado = controller.dizimistaSelecionado.value;
               return FutureBuilder<List<Dizimista>>(
-                future: controller.searchDizimistasFirestore(widget.searchController.text),
+                future: controller
+                    .searchDizimistasFirestore(widget.searchController.text),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Padding(
@@ -100,7 +101,8 @@ class _DizimistaSelectionWidgetState extends State<DizimistaSelectionWidget> {
                     );
                   }
 
-                  final List<Dizimista> dizimistasFiltrados = snapshot.data ?? [];
+                  final List<Dizimista> dizimistasFiltrados =
+                      snapshot.data ?? [];
 
                   if (dizimistasFiltrados.isEmpty) {
                     return Container(
@@ -125,7 +127,8 @@ class _DizimistaSelectionWidgetState extends State<DizimistaSelectionWidget> {
                             'Nenhum fiel corresponde à sua pesquisa',
                             style: GoogleFonts.inter(
                               fontSize: 14,
-                              color: theme.colorScheme.onSurface.withOpacity(0.6),
+                              color:
+                                  theme.colorScheme.onSurface.withOpacity(0.6),
                             ),
                           ),
                         ],
@@ -142,7 +145,8 @@ class _DizimistaSelectionWidgetState extends State<DizimistaSelectionWidget> {
                       final isSelected = selecionado?.id == dizimista.id;
 
                       return Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
                           color: isSelected
                               ? theme.primaryColor.withOpacity(0.1)
@@ -155,7 +159,8 @@ class _DizimistaSelectionWidgetState extends State<DizimistaSelectionWidget> {
                           ),
                         ),
                         child: ListTile(
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 8),
                           leading: Container(
                             width: 40,
                             height: 40,
@@ -165,9 +170,19 @@ class _DizimistaSelectionWidgetState extends State<DizimistaSelectionWidget> {
                             ),
                             child: Center(
                               child: Text(
-                                dizimista.nome.isNotEmpty && dizimista.nome.split(' ').length > 1
-                                    ? '${dizimista.nome.split(' ')[0][0]}${dizimista.nome.split(' ').last[0]}'.toUpperCase()
-                                    : dizimista.nome.isNotEmpty ? dizimista.nome[0].toUpperCase() : '?',
+                                () {
+                                  if (dizimista.nome.isEmpty) return '?';
+                                  final parts = dizimista.nome
+                                      .trim()
+                                      .split(' ')
+                                      .where((p) => p.isNotEmpty)
+                                      .toList();
+                                  if (parts.length > 1) {
+                                    return '${parts[0][0]}${parts.last[0]}'
+                                        .toUpperCase();
+                                  }
+                                  return parts[0][0].toUpperCase();
+                                }(),
                                 style: GoogleFonts.outfit(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -179,7 +194,9 @@ class _DizimistaSelectionWidgetState extends State<DizimistaSelectionWidget> {
                           title: Text(
                             dizimista.nome,
                             style: GoogleFonts.outfit(
-                              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.w500,
                               color: theme.colorScheme.onSurface,
                             ),
                           ),
@@ -187,11 +204,13 @@ class _DizimistaSelectionWidgetState extends State<DizimistaSelectionWidget> {
                             'CPF: ${dizimista.cpf} | Tel: ${dizimista.telefone}',
                             style: GoogleFonts.inter(
                               fontSize: 12,
-                              color: theme.colorScheme.onSurface.withOpacity(0.6),
+                              color:
+                                  theme.colorScheme.onSurface.withOpacity(0.6),
                             ),
                           ),
                           trailing: isSelected
-                              ? Icon(Icons.check_circle, color: Colors.green, size: 24)
+                              ? Icon(Icons.check_circle,
+                                  color: Colors.green, size: 24)
                               : null,
                           onTap: () {
                             controller.dizimistaSelecionado.value = dizimista;

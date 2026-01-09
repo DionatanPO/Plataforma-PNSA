@@ -692,13 +692,18 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
                 ),
                 child: Center(
                   child: Text(
-                    dizimista.nome.isNotEmpty &&
-                            dizimista.nome.split(' ').length > 1
-                        ? '${dizimista.nome.split(' ')[0][0]}${dizimista.nome.split(' ').last[0]}'
-                            .toUpperCase()
-                        : dizimista.nome.isNotEmpty
-                            ? dizimista.nome[0].toUpperCase()
-                            : '?',
+                    () {
+                      if (dizimista.nome.isEmpty) return '?';
+                      final parts = dizimista.nome
+                          .trim()
+                          .split(' ')
+                          .where((p) => p.isNotEmpty)
+                          .toList();
+                      if (parts.length > 1) {
+                        return '${parts[0][0]}${parts.last[0]}'.toUpperCase();
+                      }
+                      return parts[0][0].toUpperCase();
+                    }(),
                     style: GoogleFonts.outfit(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -1639,11 +1644,9 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
       );
 
       _valorController.clear();
-      controller.valor.value = '';
-      controller.observacao.value = '';
-      controller.limparCompetencias();
-      controller.dizimistaSelecionado.value = null;
-      controller.dataSelecionada.value = DateTime.now();
+      _searchController.clear();
+      _searchFuture = null;
+      controller.resetForm();
       setState(() {
         _currentStep = 0;
       });

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:plataforma_pnsa/src/routes/app_routes.dart';
 import 'package:plataforma_pnsa/src/ui/core/theme/app_theme.dart';
+import 'package:plataforma_pnsa/src/core/constants/app_constants.dart';
 
 class WebNavBar extends StatelessWidget implements PreferredSizeWidget {
   final String activeRoute;
@@ -41,7 +42,7 @@ class WebNavBar extends StatelessWidget implements PreferredSizeWidget {
                       const SizedBox(width: 12),
                       Flexible(
                         child: Text(
-                          "Paróquia Nossa Senhora Auxiliadora",
+                          AppConstants.parishName,
                           overflow: TextOverflow.ellipsis,
                           softWrap: false,
                           style: TextStyle(
@@ -75,10 +76,20 @@ class WebNavBar extends StatelessWidget implements PreferredSizeWidget {
                         isActive: activeRoute == AppRoutes.PARISH,
                         onTap: () => Get.toNamed(AppRoutes.PARISH),
                       ),
-                      DesktopMenuLink(text: "Horários", primaryColor: primaryColor),
-                      DesktopMenuLink(text: "Eventos", primaryColor: primaryColor, isActive: activeRoute == AppRoutes.EVENTS, onTap: () => Get.toNamed(AppRoutes.EVENTS)),
-                      DesktopMenuLink(text: "Dízimo", primaryColor: primaryColor, isActive: activeRoute == AppRoutes.TITHE, onTap: () => Get.toNamed(AppRoutes.TITHE)),
-                      DesktopMenuLink(text: "Galeria", primaryColor: primaryColor),
+                      DesktopMenuLink(
+                          text: "Horários", primaryColor: primaryColor),
+                      DesktopMenuLink(
+                          text: "Eventos",
+                          primaryColor: primaryColor,
+                          isActive: activeRoute == AppRoutes.EVENTS,
+                          onTap: () => Get.toNamed(AppRoutes.EVENTS)),
+                      DesktopMenuLink(
+                          text: "Dízimo",
+                          primaryColor: primaryColor,
+                          isActive: activeRoute == AppRoutes.TITHE,
+                          onTap: () => Get.toNamed(AppRoutes.TITHE)),
+                      DesktopMenuLink(
+                          text: "Galeria", primaryColor: primaryColor),
                       DesktopMenuLink(
                         text: "Contato",
                         primaryColor: primaryColor,
@@ -91,8 +102,10 @@ class WebNavBar extends StatelessWidget implements PreferredSizeWidget {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: accentColor,
                           foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 18),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8)),
                           elevation: 0,
                         ),
                         child: const Text("Login"),
@@ -147,7 +160,9 @@ class _DesktopMenuLinkState extends State<DesktopMenuLink> {
             style: TextStyle(
               fontSize: 14,
               fontWeight: widget.isActive ? FontWeight.bold : FontWeight.w500,
-              color: _isHovering || widget.isActive ? widget.primaryColor : Colors.grey[700],
+              color: _isHovering || widget.isActive
+                  ? widget.primaryColor
+                  : Colors.grey[700],
             ),
           ),
         ),

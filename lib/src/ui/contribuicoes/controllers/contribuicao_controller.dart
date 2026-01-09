@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
@@ -15,6 +17,7 @@ import '../../dizimistas/controllers/dizimista_controller.dart';
 import '../../../core/services/dizimista_service.dart';
 import '../../../core/services/contribuicao_service.dart';
 import '../../../data/services/auth_service.dart';
+import '../../../core/constants/app_constants.dart';
 
 class ContribuicaoController extends GetxController {
   // Estado privado
@@ -175,6 +178,16 @@ class ContribuicaoController extends GetxController {
     competencias.clear();
     adicionarCompetencia(mesRef, 0);
     dividirValorEntreCompetencias();
+  }
+
+  void resetForm() {
+    dizimistaSelecionado.value = null;
+    dataSelecionada.value = DateTime.now();
+    valor.value = '';
+    observacao.value = '';
+    tipo.value = 'Dízimo Regular';
+    metodo.value = 'PIX';
+    _sugerirMesAtual();
   }
 
   Future<void> fetchContribuicoes() async {
@@ -402,6 +415,9 @@ class ContribuicaoController extends GetxController {
 
       if (kIsWeb) {
         await Printing.sharePdf(bytes: bytes, filename: fileName);
+      } else if (!kIsWeb && Platform.isWindows) {
+        await _showWindowsExportDialog(
+            bytes, fileName, 'Recibo de ${contribuicao.dizimistaNome}');
       } else {
         final directory = await getTemporaryDirectory();
         final filePath = '${directory.path}/$fileName';
@@ -411,7 +427,7 @@ class ContribuicaoController extends GetxController {
         await Share.shareXFiles(
           [XFile(filePath, mimeType: 'application/pdf')],
           text: 'Recibo de Contribuição - ${contribuicao.dizimistaNome}',
-          subject: 'Recibo - Paróquia Nossa Senhora Auxiliadora',
+          subject: 'Recibo - ${AppConstants.parishName}',
         );
 
         Future.delayed(const Duration(seconds: 10), () {
@@ -487,7 +503,7 @@ class ContribuicaoController extends GetxController {
                           crossAxisAlignment: pw.CrossAxisAlignment.start,
                           children: [
                             pw.Text(
-                              'PARÓQUIA NOSSA SENHORA AUXILIADORA',
+                              AppConstants.parishName.toUpperCase(),
                               style: pw.TextStyle(
                                 fontWeight: pw.FontWeight.bold,
                                 fontSize: 12,
@@ -495,14 +511,14 @@ class ContribuicaoController extends GetxController {
                               ),
                             ),
                             pw.Text(
-                              'CNPJ: 00.000.000/0000-00', // Exemplificou
+                              'CNPJ: ${AppConstants.parishCnpj}',
                               style: const pw.TextStyle(
                                 fontSize: 8,
                                 color: PdfColors.grey600,
                               ),
                             ),
                             pw.Text(
-                              'Endereço da Paróquia, Cidade - UF',
+                              '${AppConstants.parishAddress} | ${AppConstants.parishPhone}',
                               style: const pw.TextStyle(
                                 fontSize: 8,
                                 color: PdfColors.grey600,
@@ -611,7 +627,7 @@ class ContribuicaoController extends GetxController {
 
                 pw.Spacer(),
 
-                // Footer
+                // Footer e Assinatura Eletrônica
                 pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: pw.CrossAxisAlignment.end,
@@ -619,16 +635,44 @@ class ContribuicaoController extends GetxController {
                     pw.Column(
                       crossAxisAlignment: pw.CrossAxisAlignment.start,
                       children: [
+                        pw.Container(
+                          padding: const pw.EdgeInsets.all(6),
+                          decoration: pw.BoxDecoration(
+                            border: pw.Border.all(color: PdfColors.blue100),
+                            borderRadius: pw.BorderRadius.circular(4),
+                            color: PdfColors.blue50,
+                          ),
+                          child: pw.Column(
+                            crossAxisAlignment: pw.CrossAxisAlignment.start,
+                            children: [
+                              pw.Text(
+                                'ASSINATURA ELETRÔNICA',
+                                style: pw.TextStyle(
+                                  fontWeight: pw.FontWeight.bold,
+                                  fontSize: 7,
+                                  color: PdfColors.blue800,
+                                ),
+                              ),
+                              pw.SizedBox(height: 2),
+                              pw.Text(
+                                '${AppConstants.pdfAuthBy}: $agentName',
+                                style: const pw.TextStyle(fontSize: 6),
+                              ),
+                              pw.Text(
+                                '${AppConstants.pdfValidatedVia} ${DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now())}',
+                                style: const pw.TextStyle(fontSize: 6),
+                              ),
+                              pw.Text(
+                                '${AppConstants.pdfVerificacaoCode}: ${contribuicao.id.hashCode.toRadixString(16).toUpperCase()}',
+                                style: const pw.TextStyle(fontSize: 6),
+                              ),
+                            ],
+                          ),
+                        ),
+                        pw.SizedBox(height: 8),
                         pw.Text(
                           'Data: ${DateFormat('dd/MM/yyyy').format(contribuicao.dataRegistro)}',
                           style: const pw.TextStyle(fontSize: 10),
-                        ),
-                        pw.Text(
-                          'Emitido por: $agentName',
-                          style: const pw.TextStyle(
-                            fontSize: 8,
-                            color: PdfColors.grey600,
-                          ),
                         ),
                       ],
                     ),
@@ -693,6 +737,66 @@ class ContribuicaoController extends GetxController {
       observacao: observacao.value.isEmpty ? null : observacao.value,
       competencias: List<ContribuicaoCompetencia>.from(competencias),
       mesesCompetencia: competencias.map((c) => c.mesReferencia).toList(),
+    );
+  }
+
+  Future<void> _showWindowsExportDialog(
+      Uint8List bytes, String fileName, String subject) async {
+    await Get.dialog(
+      AlertDialog(
+        title: const Text('Exportar PDF'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Arquivo: $fileName'),
+            const SizedBox(height: 16),
+            const Text('Escolha como deseja prosseguir:'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Get.back();
+              // Abre a prévia de impressão que permite "Salvar como PDF" em qualquer lugar
+              await Printing.layoutPdf(
+                onLayout: (PdfPageFormat format) async => bytes,
+                name: fileName,
+              );
+            },
+            child: const Text('Imprimir / Salvar Como...'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Get.back();
+              final downloadsDir = await getDownloadsDirectory();
+              if (downloadsDir != null) {
+                final filePath = '${downloadsDir.path}/$fileName';
+                final file = File(filePath);
+                await file.writeAsBytes(bytes);
+                Get.snackbar(
+                  'Sucesso',
+                  'Arquivo salvo em Downloads: $fileName',
+                  snackPosition: SnackPosition.BOTTOM,
+                  backgroundColor: Colors.green,
+                  colorText: Colors.white,
+                  duration: const Duration(seconds: 5),
+                  mainButton: TextButton(
+                    onPressed: () => launchUrl(Uri.file(downloadsDir.path)),
+                    child: const Text('Abrir Pasta',
+                        style: TextStyle(color: Colors.white)),
+                  ),
+                );
+              }
+            },
+            child: const Text('Salvar em Downloads'),
+          ),
+        ],
+      ),
     );
   }
 }

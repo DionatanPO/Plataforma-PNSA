@@ -16,6 +16,7 @@ import '../../../data/services/auth_service.dart';
 import '../../../domain/models/acesso_model.dart';
 import '../../../core/services/access_service.dart';
 import '../../contribuicoes/models/contribuicao_model.dart';
+import '../../../core/constants/app_constants.dart';
 
 class ReportController extends GetxController {
   final RxList<Contribuicao> contribuicoes = <Contribuicao>[].obs;
@@ -298,7 +299,7 @@ class ReportController extends GetxController {
           text: isRangeMode.value
               ? 'Relatório por Período'
               : 'Relatório diário - ${DateFormat('dd/MM/yyyy').format(selectedDate.value)}',
-          subject: 'Relatório Paróquia Nossa Senhora Auxiliadora',
+          subject: 'Relatório ${AppConstants.parishName}',
         );
 
         // Limpeza após um delay
@@ -392,7 +393,7 @@ class ReportController extends GetxController {
                     pw.Text(
                       isCompetenceMode.value
                           ? 'MÊS DE REFERÊNCIA: ${selectedCompetenceMonth.value}'
-                          : 'PARÓQUIA NOSSA SENHORA AUXILIADORA',
+                          : AppConstants.parishName.toUpperCase(),
                       style: pw.TextStyle(
                         color: PdfColors.grey600,
                         fontSize: 9,
@@ -577,7 +578,7 @@ class ReportController extends GetxController {
             pw.Divider(),
             pw.SizedBox(height: 10),
             pw.Text(
-              'Este documento foi gerado automaticamente pelo sistema.',
+              AppConstants.pdfFooterGeneratedBy,
               style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey600),
             ),
             pw.SizedBox(height: 5),
@@ -592,7 +593,7 @@ class ReportController extends GetxController {
                   ),
                 ),
                 pw.Text(
-                  'Assinado digitalmente por: $userName',
+                  '${AppConstants.pdfAuthBy}: $userName',
                   style: pw.TextStyle(
                     fontSize: 10,
                     fontWeight: pw.FontWeight.bold,
@@ -616,7 +617,7 @@ class ReportController extends GetxController {
 
     final message = '''
 *Relatório Diário - $dateStr*
-Paróquia Nossa Senhora Auxiliadora
+${AppConstants.parishName}
 
 *RESUMO GERAL*
 💰 *Total:* ${currency.format(totalArrecadado.value)}
@@ -634,7 +635,7 @@ _Gerado automaticamente pelo sistema_
 
     await Share.share(
       message,
-      subject: 'Relatório Diário Paróquia Nossa Senhora Auxiliadora',
+      subject: 'Relatório Diário ${AppConstants.parishName}',
     );
   }
 
@@ -751,7 +752,7 @@ _Gerado automaticamente pelo sistema_
         await Share.shareXFiles(
           [XFile(filePath, mimeType: 'application/pdf')],
           text: 'Recibo de Contribuição - ${contribuicao.dizimistaNome}',
-          subject: 'Recibo - Paróquia Nossa Senhora Auxiliadora',
+          subject: 'Recibo - ${AppConstants.parishName}',
         );
 
         Future.delayed(const Duration(seconds: 10), () {
@@ -827,7 +828,7 @@ _Gerado automaticamente pelo sistema_
                           crossAxisAlignment: pw.CrossAxisAlignment.start,
                           children: [
                             pw.Text(
-                              'PARÓQUIA NOSSA SENHORA AUXILIADORA',
+                              AppConstants.parishName.toUpperCase(),
                               style: pw.TextStyle(
                                 fontWeight: pw.FontWeight.bold,
                                 fontSize: 12,
@@ -835,7 +836,14 @@ _Gerado automaticamente pelo sistema_
                               ),
                             ),
                             pw.Text(
-                              'Endereço da Paróquia, Cidade - UF',
+                              '${AppConstants.parishAddress} | ${AppConstants.parishPhone}',
+                              style: const pw.TextStyle(
+                                fontSize: 8,
+                                color: PdfColors.grey600,
+                              ),
+                            ),
+                            pw.Text(
+                              AppConstants.parishEmail,
                               style: const pw.TextStyle(
                                 fontSize: 8,
                                 color: PdfColors.grey600,
@@ -943,15 +951,15 @@ _Gerado automaticamente pelo sistema_
                               ),
                               pw.SizedBox(height: 2),
                               pw.Text(
-                                'Autenticado por: $agentName',
+                                '${AppConstants.pdfAuthBy}: $agentName',
                                 style: const pw.TextStyle(fontSize: 6),
                               ),
                               pw.Text(
-                                'Validado via Plataforma PNSA em ${DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now())}',
+                                '${AppConstants.pdfValidatedVia} ${DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now())}',
                                 style: const pw.TextStyle(fontSize: 6),
                               ),
                               pw.Text(
-                                'Código de Verificação: ${contribuicao.id.hashCode.toRadixString(16).toUpperCase()}',
+                                '${AppConstants.pdfVerificacaoCode}: ${contribuicao.id.hashCode.toRadixString(16).toUpperCase()}',
                                 style: const pw.TextStyle(fontSize: 6),
                               ),
                             ],

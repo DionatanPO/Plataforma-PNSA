@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:plataforma_pnsa/src/routes/app_routes.dart';
 import 'package:plataforma_pnsa/src/ui/core/theme/app_theme.dart';
+import 'package:plataforma_pnsa/src/core/constants/app_constants.dart';
 
 class WebMobileDrawer extends StatelessWidget {
   const WebMobileDrawer({super.key});
@@ -23,11 +24,11 @@ class WebMobileDrawer extends StatelessWidget {
                   Image.asset('assets/images/logo.jpg', height: 60),
                   const SizedBox(height: 12),
                   const Text(
-                    "Paróquia Nossa Senhora Auxiliadora",
+                    AppConstants.parishName,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 20,
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -70,7 +71,8 @@ class WebMobileDrawer extends StatelessWidget {
   ListTile _mobileListTile(String title, IconData icon, {VoidCallback? onTap}) {
     return ListTile(
       leading: Icon(icon, color: Colors.grey[600]),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+      title: Text(title,
+          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
       onTap: onTap ?? () {},
     );
   }

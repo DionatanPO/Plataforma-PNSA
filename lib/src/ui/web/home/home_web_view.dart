@@ -3,6 +3,7 @@ import 'package:plataforma_pnsa/src/routes/app_routes.dart';
 import 'package:plataforma_pnsa/src/ui/core/theme/app_theme.dart';
 import 'package:plataforma_pnsa/src/ui/web/widgets/mobile_drawer.dart';
 import 'package:plataforma_pnsa/src/ui/web/widgets/web_nav_bar.dart';
+import 'package:plataforma_pnsa/src/core/constants/app_constants.dart';
 
 class HomeWebView extends StatefulWidget {
   const HomeWebView({super.key});
@@ -110,17 +111,24 @@ class _HomeWebViewState extends State<HomeWebView> {
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: isMobile ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+                  crossAxisAlignment: isMobile
+                      ? CrossAxisAlignment.center
+                      : CrossAxisAlignment.start,
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
                         color: accentColor.withOpacity(0.9),
                         borderRadius: BorderRadius.circular(30),
                       ),
                       child: const Text(
                         "SEJAM BEM-VINDOS",
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.5),
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                            letterSpacing: 1.5),
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -134,13 +142,16 @@ class _HomeWebViewState extends State<HomeWebView> {
                         height: 1.1,
                         letterSpacing: -1,
                         shadows: [
-                          Shadow(offset: const Offset(0, 4), blurRadius: 20, color: Colors.black.withOpacity(0.5)),
+                          Shadow(
+                              offset: const Offset(0, 4),
+                              blurRadius: 20,
+                              color: Colors.black.withOpacity(0.5)),
                         ],
                       ),
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      "Paróquia Nossa Senhora Auxiliadora - Iporá/GO",
+                      "${AppConstants.parishName} - Iporá/GO",
                       textAlign: isMobile ? TextAlign.center : TextAlign.start,
                       style: TextStyle(
                         fontSize: 18,
@@ -152,20 +163,19 @@ class _HomeWebViewState extends State<HomeWebView> {
                     Wrap(
                       spacing: 16,
                       runSpacing: 16,
-                      alignment: isMobile ? WrapAlignment.center : WrapAlignment.start,
+                      alignment:
+                          isMobile ? WrapAlignment.center : WrapAlignment.start,
                       children: [
                         _HeroButton(
                             text: "Assistir Ao Vivo",
                             icon: Icons.play_arrow_rounded,
                             isPrimary: true,
-                            color: primaryColor
-                        ),
+                            color: primaryColor),
                         _HeroButton(
                             text: "Horários de Missa",
                             icon: Icons.calendar_today_outlined,
                             isPrimary: false,
-                            color: Colors.white
-                        ),
+                            color: Colors.white),
                       ],
                     ),
                     // Espaço extra para compensar o translate dos cards
@@ -203,10 +213,26 @@ class _HomeWebViewState extends State<HomeWebView> {
   // ---------------------------------------------------------------------------
   Widget _buildQuickCards(BuildContext context) {
     final services = [
-      {'icon': Icons.access_time_filled, 'title': 'Horários', 'desc': 'Missas e confissões'},
-      {'icon': Icons.volunteer_activism, 'title': 'Dízimo', 'desc': 'Contribuição online'},
-      {'icon': Icons.event_note, 'title': 'Agenda', 'desc': 'Calendário paroquial'},
-      {'icon': Icons.perm_phone_msg, 'title': 'Contato', 'desc': 'Fale com a secretaria'},
+      {
+        'icon': Icons.access_time_filled,
+        'title': 'Horários',
+        'desc': 'Missas e confissões'
+      },
+      {
+        'icon': Icons.volunteer_activism,
+        'title': 'Dízimo',
+        'desc': 'Contribuição online'
+      },
+      {
+        'icon': Icons.event_note,
+        'title': 'Agenda',
+        'desc': 'Calendário paroquial'
+      },
+      {
+        'icon': Icons.perm_phone_msg,
+        'title': 'Contato',
+        'desc': 'Fale com a secretaria'
+      },
     ];
 
     return LayoutBuilder(
@@ -262,19 +288,24 @@ class _HomeWebViewState extends State<HomeWebView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildSideNewsItem("12 DEZ", "Inscrições abertas para a Catequese 2025"),
+                _buildSideNewsItem(
+                    "12 DEZ", "Inscrições abertas para a Catequese 2025"),
                 const Divider(height: 30),
-                _buildSideNewsItem("10 DEZ", "Bazar beneficente neste final de semana no salão"),
+                _buildSideNewsItem("10 DEZ",
+                    "Bazar beneficente neste final de semana no salão"),
                 const Divider(height: 30),
-                _buildSideNewsItem("08 DEZ", "Novo horário de atendimento da secretaria paroquial"),
+                _buildSideNewsItem("08 DEZ",
+                    "Novo horário de atendimento da secretaria paroquial"),
                 const SizedBox(height: 20),
                 OutlinedButton(
                   onPressed: () {},
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(color: primaryColor),
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 16),
                   ),
-                  child: Text("VER TODAS AS NOTÍCIAS", style: TextStyle(color: primaryColor)),
+                  child: Text("VER TODAS AS NOTÍCIAS",
+                      style: TextStyle(color: primaryColor)),
                 )
               ],
             ),
@@ -289,9 +320,15 @@ class _HomeWebViewState extends State<HomeWebView> {
       height: 400,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 15, offset: const Offset(0, 5))],
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 15,
+              offset: const Offset(0, 5))
+        ],
         image: const DecorationImage(
-          image: AssetImage("assets/images/paroquia.png"), // Certifique-se que existe
+          image: AssetImage(
+              "assets/images/paroquia.png"), // Certifique-se que existe
           fit: BoxFit.cover,
         ),
       ),
@@ -315,14 +352,25 @@ class _HomeWebViewState extends State<HomeWebView> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(color: accentColor, borderRadius: BorderRadius.circular(4)),
-                  child: const Text("DESTAQUE", style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                      color: accentColor,
+                      borderRadius: BorderRadius.circular(4)),
+                  child: const Text("DESTAQUE",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold)),
                 ),
                 const SizedBox(height: 12),
-                const Text(
-                  "Festa em Louvor a Nossa Senhora Auxiliadora",
-                  style: TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.bold, height: 1.2),
+                Text(
+                  "Festa em Louvor a ${AppConstants.parishName}",
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                      height: 1.2),
                 ),
                 const SizedBox(height: 8),
                 const Text(
@@ -343,15 +391,21 @@ class _HomeWebViewState extends State<HomeWebView> {
       children: [
         Column(
           children: [
-            Text(date.split(' ')[0], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-            Text(date.split(' ')[1], style: const TextStyle(fontSize: 12, color: Colors.grey)),
+            Text(date.split(' ')[0],
+                style:
+                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            Text(date.split(' ')[1],
+                style: const TextStyle(fontSize: 12, color: Colors.grey)),
           ],
         ),
         const SizedBox(width: 16),
         Expanded(
           child: Text(
             title,
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.grey[800]),
+            style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey[800]),
           ),
         ),
       ],
@@ -381,11 +435,16 @@ class _HomeWebViewState extends State<HomeWebView> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Paróquia N. Sra. Auxiliadora", style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+                        Text(AppConstants.parishName,
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold)),
                         const SizedBox(height: 16),
                         Text(
-                          "Av. Pará, 491 - Centro, Iporá-GO\nCEP: 76200-000",
-                          style: TextStyle(color: Colors.grey[400], height: 1.5),
+                          "${AppConstants.parishAddress}\nCEP: 76200-000",
+                          style:
+                              TextStyle(color: Colors.grey[400], height: 1.5),
                         ),
                         const SizedBox(height: 24),
                         Row(
@@ -403,11 +462,19 @@ class _HomeWebViewState extends State<HomeWebView> {
                   if (isMobile) const SizedBox(height: 40),
 
                   // Links
-                  _FooterLinksColumn(title: "Navegação", links: ["Início", "A Paróquia", "Horários", "Pastorais"]),
+                  _FooterLinksColumn(
+                      title: "Navegação",
+                      links: ["Início", "A Paróquia", "Horários", "Pastorais"]),
                   if (isMobile) const SizedBox(height: 30),
-                  _FooterLinksColumn(title: "Serviços", links: ["Secretaria", "Dízimo", "Intenções", "Batismo"]),
+                  _FooterLinksColumn(
+                      title: "Serviços",
+                      links: ["Secretaria", "Dízimo", "Intenções", "Batismo"]),
                   if (isMobile) const SizedBox(height: 30),
-                  _FooterLinksColumn(title: "Contato", links: ["(64) 3674-3149", "auxiliadora@email.com", "Fale Conosco"]),
+                  _FooterLinksColumn(title: "Contato", links: [
+                    AppConstants.parishPhone,
+                    AppConstants.parishEmail,
+                    "Fale Conosco"
+                  ]),
                 ],
               ),
               const SizedBox(height: 60),
@@ -416,9 +483,12 @@ class _HomeWebViewState extends State<HomeWebView> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text("© 2025 PNSA. Todos os direitos reservados.", style: TextStyle(color: Colors.grey[500], fontSize: 13)),
+                  Text("© 2025 PNSA. Todos os direitos reservados.",
+                      style: TextStyle(color: Colors.grey[500], fontSize: 13)),
                   if (!isMobile)
-                    Text("Desenvolvido com Flutter", style: TextStyle(color: Colors.grey[600], fontSize: 13)),
+                    Text("Desenvolvido com Flutter",
+                        style:
+                            TextStyle(color: Colors.grey[600], fontSize: 13)),
                 ],
               )
             ],
@@ -439,7 +509,11 @@ class _HeroButton extends StatelessWidget {
   final bool isPrimary;
   final Color color;
 
-  const _HeroButton({required this.text, required this.icon, required this.isPrimary, required this.color});
+  const _HeroButton(
+      {required this.text,
+      required this.icon,
+      required this.isPrimary,
+      required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -513,7 +587,8 @@ class _ModernServiceCardState extends State<_ModernServiceCard> {
               const SizedBox(height: 20),
               Text(
                 widget.title,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(
@@ -540,15 +615,20 @@ class _FooterLinksColumn extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+        Text(title,
+            style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 16)),
         const SizedBox(height: 20),
         ...links.map((link) => Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: InkWell(
-            onTap: (){},
-            child: Text(link, style: TextStyle(color: Colors.grey[400], fontSize: 14)),
-          ),
-        ))
+              padding: const EdgeInsets.only(bottom: 12),
+              child: InkWell(
+                onTap: () {},
+                child: Text(link,
+                    style: TextStyle(color: Colors.grey[400], fontSize: 14)),
+              ),
+            ))
       ],
     );
   }

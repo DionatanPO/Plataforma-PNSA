@@ -494,11 +494,10 @@ class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
                   flex: 1,
                   child: _buildTextField(
                     controller: telefoneController,
-                    label: 'Celular / WhatsApp *',
+                    label: 'Celular / WhatsApp',
                     icon: Icons.phone_android,
                     formatter: telefoneFormatter,
                     inputType: TextInputType.phone,
-                    validator: (v) => v!.isEmpty ? 'Obrigatório' : null,
                   ),
                 ),
                 _ResponsiveField(
@@ -578,8 +577,8 @@ class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
                   child: DropdownButtonFormField<String>(
                     value: estadoCivil,
                     decoration: _buildInputDecoration(
-                        theme, 'Estado Civil *', Icons.people_outline),
-                    validator: (v) => v == null ? 'Obrigatório' : null,
+                        theme, 'Estado Civil', Icons.people_outline),
+                    // validator removed
                     items: ['Solteiro', 'Casado', 'Viúvo', 'Separado']
                         .map((v) => DropdownMenuItem(value: v, child: Text(v)))
                         .toList(),
@@ -611,12 +610,8 @@ class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
                     isWide: isWide,
                     flex: 1,
                     child: _buildDatePath(
-                      label: 'Data Casamento *',
+                      label: 'Data Casamento',
                       date: dataCasamento,
-                      validator:
-                          (estadoCivil == 'Casado' && dataCasamento == null)
-                              ? 'Obrigatório'
-                              : null,
                       onTap: () => _pickDate(context, dataCasamento,
                           (d) => setState(() => dataCasamento = d)),
                       theme: theme,
@@ -626,12 +621,8 @@ class _CadastroDizimistaViewState extends State<CadastroDizimistaView> {
                     isWide: isWide,
                     flex: 1,
                     child: _buildDatePath(
-                      label: 'Nasc. Cônjuge *',
+                      label: 'Nasc. Cônjuge',
                       date: dataNascimentoConjugue,
-                      validator: (estadoCivil == 'Casado' &&
-                              dataNascimentoConjugue == null)
-                          ? 'Obrigatório'
-                          : null,
                       onTap: () => _pickDate(context, dataNascimentoConjugue,
                           (d) => setState(() => dataNascimentoConjugue = d)),
                       theme: theme,

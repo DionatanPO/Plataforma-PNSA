@@ -5,6 +5,7 @@ import 'dart:ui';
 
 import '../../routes/app_routes.dart';
 import '../core/widgets/custom_sliver_app_bar.dart';
+import 'package:plataforma_pnsa/src/core/constants/app_constants.dart';
 
 class HelpView extends StatelessWidget {
   const HelpView({super.key});
@@ -36,8 +37,7 @@ class HelpView extends StatelessWidget {
           slivers: [
             CustomSliverAppBar(
               title: 'Ajuda',
-              subtitle:
-                  'Sistema de Gestão da Paróquia Nossa Senhora Auxiliadora',
+              subtitle: 'Sistema de Gestão da ${AppConstants.parishName}',
               actions: [],
             ),
             SliverPadding(

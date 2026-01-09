@@ -4,6 +4,7 @@ import 'package:plataforma_pnsa/src/routes/app_routes.dart';
 import 'package:plataforma_pnsa/src/ui/core/theme/app_theme.dart';
 import 'package:plataforma_pnsa/src/ui/web/widgets/mobile_drawer.dart';
 import 'package:plataforma_pnsa/src/ui/web/widgets/web_nav_bar.dart';
+import 'package:plataforma_pnsa/src/core/constants/app_constants.dart';
 
 class TitheView extends StatelessWidget {
   const TitheView({super.key});
@@ -48,12 +49,11 @@ class TitheView extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppTheme.primaryColor,
         image: DecorationImage(
-          image: const AssetImage("assets/images/paroquia_banner.jpg"), // Banner genérico
+          image: const AssetImage(
+              "assets/images/paroquia_banner.jpg"), // Banner genérico
           fit: BoxFit.cover,
-          colorFilter: ColorFilter.mode(
-              Colors.black.withOpacity(0.7),
-              BlendMode.darken
-          ),
+          colorFilter:
+              ColorFilter.mode(Colors.black.withOpacity(0.7), BlendMode.darken),
         ),
       ),
       child: Column(
@@ -66,7 +66,8 @@ class TitheView extends StatelessWidget {
               shape: BoxShape.circle,
               border: Border.all(color: Colors.white30),
             ),
-            child: const Icon(Icons.volunteer_activism, size: 40, color: Colors.white),
+            child: const Icon(Icons.volunteer_activism,
+                size: 40, color: Colors.white),
           ),
           const SizedBox(height: 24),
           const Text(
@@ -156,13 +157,13 @@ class TitheView extends StatelessWidget {
             style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
-                color: Colors.grey[800]
-            ),
+                color: Colors.grey[800]),
           ),
           const SizedBox(height: 24),
           Text(
             "O dízimo é uma experiência de fé, amor e gratidão. É através da sua contribuição fiel que nossa paróquia mantém as portas abertas, realiza obras sociais, sustenta o clero e promove a evangelização.",
-            style: TextStyle(fontSize: 16, color: Colors.grey[600], height: 1.6),
+            style:
+                TextStyle(fontSize: 16, color: Colors.grey[600], height: 1.6),
           ),
           const SizedBox(height: 32),
 
@@ -170,7 +171,8 @@ class TitheView extends StatelessWidget {
           Container(
             padding: const EdgeInsets.only(left: 20),
             decoration: BoxDecoration(
-              border: Border(left: BorderSide(color: AppTheme.accentColor, width: 4)),
+              border: Border(
+                  left: BorderSide(color: AppTheme.accentColor, width: 4)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -189,8 +191,7 @@ class TitheView extends StatelessWidget {
                   "— 2 Coríntios 9:7",
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: AppTheme.primaryColor
-                  ),
+                      color: AppTheme.primaryColor),
                 ),
               ],
             ),
@@ -198,7 +199,10 @@ class TitheView extends StatelessWidget {
           const SizedBox(height: 32),
           Text(
             "Sua oferta sustenta:",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey[800]),
+            style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey[800]),
           ),
           const SizedBox(height: 16),
           _buildCheckItem("Manutenção do Templo e Capelas"),
@@ -227,7 +231,7 @@ class TitheView extends StatelessWidget {
   // Card PIX (Destaque)
   // ---------------------------------------------------------------------------
   Widget _buildPixCard(BuildContext context) {
-    const pixKey = "auxiliadoraipora@gmail.com";
+    const pixKey = AppConstants.parishEmail;
 
     return Container(
       width: double.infinity,
@@ -248,11 +252,16 @@ class TitheView extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.pix, color: Colors.white, size: 28), // Ícone do Flutter tem Pix? Se não, use qr_code
+              const Icon(Icons.pix,
+                  color: Colors.white,
+                  size: 28), // Ícone do Flutter tem Pix? Se não, use qr_code
               const SizedBox(width: 8),
               const Text(
                 "PIX Rápido",
-                style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -270,25 +279,25 @@ class TitheView extends StatelessWidget {
               height: 180,
               // Fallback se não tiver imagem ainda
               errorBuilder: (context, error, stackTrace) => Container(
-                width: 180, height: 180,
+                width: 180,
+                height: 180,
                 alignment: Alignment.center,
-                child: Icon(Icons.qr_code_2, size: 100, color: Colors.grey[800]),
+                child:
+                    Icon(Icons.qr_code_2, size: 100, color: Colors.grey[800]),
               ),
             ),
           ),
           const SizedBox(height: 24),
           Text(
             "Chave E-mail",
-            style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 14),
+            style:
+                TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 14),
           ),
           const SizedBox(height: 4),
           SelectableText(
             pixKey,
             style: const TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold
-            ),
+                color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 24),
           SizedBox(
@@ -302,7 +311,8 @@ class TitheView extends StatelessWidget {
                     content: const Text("Chave PIX copiada!"),
                     behavior: SnackBarBehavior.floating,
                     backgroundColor: Colors.green,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
                   ),
                 );
               },
@@ -311,7 +321,8 @@ class TitheView extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.accentColor,
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
               ),
             ),
           ),
@@ -341,7 +352,10 @@ class TitheView extends StatelessWidget {
               const SizedBox(width: 12),
               Text(
                 "Transferência Bancária",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey[800]),
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey[800]),
               ),
             ],
           ),
@@ -352,9 +366,10 @@ class TitheView extends StatelessWidget {
           const Divider(height: 24),
           _buildBankInfoRow("Conta Corrente", "12345-6"),
           const Divider(height: 24),
-          _buildBankInfoRow("CNPJ", "00.000.000/0001-00"),
+          _buildBankInfoRow("CNPJ", AppConstants.parishCnpj),
           const Divider(height: 24),
-          _buildBankInfoRow("Favorecido", "Mitra Diocesana (Paróquia NSA)"),
+          _buildBankInfoRow(
+              "Favorecido", "Mitra Diocesana (${AppConstants.parishName})"),
         ],
       ),
     );
@@ -365,7 +380,11 @@ class TitheView extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 14)),
-        Text(value, style: TextStyle(color: Colors.grey[900], fontWeight: FontWeight.w600, fontSize: 14)),
+        Text(value,
+            style: TextStyle(
+                color: Colors.grey[900],
+                fontWeight: FontWeight.w600,
+                fontSize: 14)),
       ],
     );
   }
@@ -384,7 +403,7 @@ class TitheView extends StatelessWidget {
           child: Column(
             children: [
               Text(
-                "© 2025 Paróquia Nossa Senhora Auxiliadora",
+                "© 2025 ${AppConstants.parishName}",
                 style: TextStyle(color: Colors.grey[400]),
               ),
               const SizedBox(height: 8),

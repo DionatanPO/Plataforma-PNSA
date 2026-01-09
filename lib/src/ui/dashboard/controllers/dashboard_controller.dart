@@ -19,6 +19,7 @@ import '../../contribuicoes/models/contribuicao_model.dart';
 import '../../dizimistas/models/dizimista_model.dart';
 import '../../../domain/models/acesso_model.dart';
 import '../../home/controlles/home_controller.dart';
+import '../../../core/constants/app_constants.dart';
 
 class DashboardController extends GetxController {
   // Observáveis para dados brutos
@@ -239,7 +240,7 @@ class DashboardController extends GetxController {
         await Share.shareXFiles(
           [XFile(filePath, mimeType: 'application/pdf')],
           text: 'Recibo de Contribuição - ${contribuicao.dizimistaNome}',
-          subject: 'Recibo - Paróquia Nossa Senhora Auxiliadora',
+          subject: 'Recibo - ${AppConstants.parishName}',
         );
 
         Future.delayed(const Duration(seconds: 10), () {
@@ -310,7 +311,7 @@ class DashboardController extends GetxController {
                           crossAxisAlignment: pw.CrossAxisAlignment.start,
                           children: [
                             pw.Text(
-                              'PARÓQUIA NOSSA SENHORA AUXILIADORA',
+                              AppConstants.parishName.toUpperCase(),
                               style: pw.TextStyle(
                                 fontWeight: pw.FontWeight.bold,
                                 fontSize: 12,
@@ -318,7 +319,14 @@ class DashboardController extends GetxController {
                               ),
                             ),
                             pw.Text(
-                              'Endereço da Paróquia, Cidade - UF',
+                              'CNPJ: ${AppConstants.parishCnpj}',
+                              style: const pw.TextStyle(
+                                fontSize: 8,
+                                color: PdfColors.grey600,
+                              ),
+                            ),
+                            pw.Text(
+                              '${AppConstants.parishAddress} | ${AppConstants.parishPhone}',
                               style: const pw.TextStyle(
                                 fontSize: 8,
                                 color: PdfColors.grey600,
@@ -381,17 +389,68 @@ class DashboardController extends GetxController {
 
                 pw.SizedBox(height: 15),
                 pw.Row(
+                  children: [
+                    pw.Text(
+                      'Forma de Pagamento: ',
+                      style: const pw.TextStyle(fontSize: 10),
+                    ),
+                    pw.Text(
+                      contribuicao.metodo,
+                      style: pw.TextStyle(
+                        fontWeight: pw.FontWeight.bold,
+                        fontSize: 10,
+                      ),
+                    ),
+                  ],
+                ),
+
+                pw.Spacer(),
+
+                // Footer e Assinatura Eletrônica
+                pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: pw.CrossAxisAlignment.end,
                   children: [
                     pw.Column(
                       crossAxisAlignment: pw.CrossAxisAlignment.start,
                       children: [
-                        pw.Text(
-                          'Data: ${DateFormat('dd/MM/yyyy HH:mm').format(contribuicao.dataRegistro)}',
-                          style: const pw.TextStyle(fontSize: 10),
+                        pw.Container(
+                          padding: const pw.EdgeInsets.all(6),
+                          decoration: pw.BoxDecoration(
+                            border: pw.Border.all(color: PdfColors.blue100),
+                            borderRadius: pw.BorderRadius.circular(4),
+                            color: PdfColors.blue50,
+                          ),
+                          child: pw.Column(
+                            crossAxisAlignment: pw.CrossAxisAlignment.start,
+                            children: [
+                              pw.Text(
+                                'ASSINATURA ELETRÔNICA',
+                                style: pw.TextStyle(
+                                  fontWeight: pw.FontWeight.bold,
+                                  fontSize: 7,
+                                  color: PdfColors.blue800,
+                                ),
+                              ),
+                              pw.SizedBox(height: 2),
+                              pw.Text(
+                                '${AppConstants.pdfAuthBy}: $agentName',
+                                style: const pw.TextStyle(fontSize: 6),
+                              ),
+                              pw.Text(
+                                '${AppConstants.pdfValidatedVia} ${DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now())}',
+                                style: const pw.TextStyle(fontSize: 6),
+                              ),
+                              pw.Text(
+                                '${AppConstants.pdfVerificacaoCode}: ${contribuicao.id.hashCode.toRadixString(16).toUpperCase()}',
+                                style: const pw.TextStyle(fontSize: 6),
+                              ),
+                            ],
+                          ),
                         ),
+                        pw.SizedBox(height: 8),
                         pw.Text(
-                          'Forma de Pagamento: ${contribuicao.metodo}',
+                          'Data: ${DateFormat('dd/MM/yyyy').format(contribuicao.dataRegistro)}',
                           style: const pw.TextStyle(fontSize: 10),
                         ),
                       ],
@@ -402,19 +461,20 @@ class DashboardController extends GetxController {
                           width: 150,
                           decoration: const pw.BoxDecoration(
                             border: pw.Border(
-                              bottom: pw.BorderSide(color: PdfColors.black),
+                              bottom: pw.BorderSide(
+                                color: PdfColors.black,
+                                width: 0.5,
+                              ),
                             ),
                           ),
                         ),
                         pw.SizedBox(height: 5),
                         pw.Text(
-                          agentName,
-                          style: pw.TextStyle(
-                              fontSize: 9, fontWeight: pw.FontWeight.bold),
-                        ),
-                        pw.Text(
-                          'Responsável',
-                          style: const pw.TextStyle(fontSize: 8),
+                          'Assinatura / Carimbo',
+                          style: const pw.TextStyle(
+                            fontSize: 8,
+                            color: PdfColors.grey600,
+                          ),
                         ),
                       ],
                     ),

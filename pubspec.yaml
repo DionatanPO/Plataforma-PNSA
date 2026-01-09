@@ -66,6 +66,7 @@ dev_dependencies:
   flutter_lints: ^5.0.0
   msix: ^3.16.12
   flutter_native_splash: ^2.4.0
+  flutter_launcher_icons: ^0.13.1
 
 flutter_native_splash:
   color: "#ffffff"
@@ -101,3 +102,18 @@ msix_config:
   msix_version: 1.0.0.0
   logo_path: assets/images/logo.jpg
   capabilities: internetClient
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/logo.jpg"
+  min_sdk_android: 21 # android min sdk min:16, default:21
+  web:
+    generate: true
+    image_path: "assets/images/logo.jpg"
+    backgroundColor: "#ffffff"
+    themeColor: "#ffffff"
+  windows:
+    generate: true
+    image_path: "assets/images/logo.jpg"
+    icon_size: 256 # min:48, max:256, default:256

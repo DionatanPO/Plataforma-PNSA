@@ -204,22 +204,9 @@ class DizimistaController extends GetxController {
       if (dizimista.nome.isEmpty) {
         throw Exception('O Nome Completo é obrigatório.');
       }
-      if (dizimista.telefone.isEmpty) {
-        throw Exception('O Telefone é obrigatório.');
-      }
-      if (dizimista.estadoCivil == null || dizimista.estadoCivil!.isEmpty) {
-        throw Exception('O Estado Civil é obrigatório.');
-      }
       if (dizimista.estadoCivil == 'Casado') {
         if (dizimista.nomeConjugue == null || dizimista.nomeConjugue!.isEmpty) {
           throw Exception('O Nome do Cônjuge é obrigatório para casados.');
-        }
-        if (dizimista.dataCasamento == null) {
-          throw Exception('A Data de Casamento é obrigatória para casados.');
-        }
-        if (dizimista.dataNascimentoConjugue == null) {
-          throw Exception(
-              'A Data de Nascimento do Cônjuge é obrigatória para casados.');
         }
       }
 
@@ -271,22 +258,9 @@ class DizimistaController extends GetxController {
       if (dizimista.nome.isEmpty) {
         throw Exception('O Nome Completo é obrigatório.');
       }
-      if (dizimista.telefone.isEmpty) {
-        throw Exception('O Telefone é obrigatório.');
-      }
-      if (dizimista.estadoCivil == null || dizimista.estadoCivil!.isEmpty) {
-        throw Exception('O Estado Civil é obrigatório.');
-      }
       if (dizimista.estadoCivil == 'Casado') {
         if (dizimista.nomeConjugue == null || dizimista.nomeConjugue!.isEmpty) {
           throw Exception('O Nome do Cônjuge é obrigatório para casados.');
-        }
-        if (dizimista.dataCasamento == null) {
-          throw Exception('A Data de Casamento é obrigatória para casados.');
-        }
-        if (dizimista.dataNascimentoConjugue == null) {
-          throw Exception(
-              'A Data de Nascimento do Cônjuge é obrigatória para casados.');
         }
       }
 

@@ -319,7 +319,7 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
             style: GoogleFonts.inter(
                 color: theme.colorScheme.onSurface, fontSize: 14),
             decoration: inputDecoration.copyWith(
-              labelText: 'Telefone / WhatsApp *',
+              labelText: 'Telefone / WhatsApp',
               hintText: '(00) 00000-0000',
               prefixIcon: Icon(Icons.phone_outlined, color: iconColor),
             ),
@@ -443,7 +443,7 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
             style: GoogleFonts.inter(
                 color: theme.colorScheme.onSurface, fontSize: 14),
             decoration: inputDecoration.copyWith(
-              labelText: 'Estado Civil *',
+              labelText: 'Estado Civil',
               prefixIcon: Icon(Icons.people_outline_rounded, color: iconColor),
             ),
             dropdownColor: theme.colorScheme.surface,
@@ -503,7 +503,7 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
                   style: GoogleFonts.inter(
                       color: theme.colorScheme.onSurface, fontSize: 14),
                   decoration: inputDecoration.copyWith(
-                    labelText: 'Data de Casamento *',
+                    labelText: 'Data de Casamento',
                     hintText: 'Selecione a data',
                     prefixIcon:
                         Icon(Icons.favorite_outline_rounded, color: iconColor),
@@ -539,7 +539,7 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
                   style: GoogleFonts.inter(
                       color: theme.colorScheme.onSurface, fontSize: 14),
                   decoration: inputDecoration.copyWith(
-                    labelText: 'Data de Nascimento do Cônjuge *',
+                    labelText: 'Data de Nascimento do Cônjuge',
                     hintText: 'Selecione a data',
                     prefixIcon: Icon(Icons.cake_outlined, color: iconColor),
                     suffixIcon:
@@ -671,13 +671,11 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
 
   void _submitForm() {
     // Validação dos campos obrigatórios
-    if (nomeController.text.isEmpty ||
-        telefoneController.text.isEmpty ||
-        estadoCivil == null) {
+    if (nomeController.text.isEmpty || estadoCivil == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text(
-            'Preencha os campos obrigatórios: Nome, Telefone e Estado Civil',
+            'Preencha os campos obrigatórios: Nome e Estado Civil',
           ),
           backgroundColor: Theme.of(context).colorScheme.error,
           behavior: SnackBarBehavior.floating,
@@ -687,13 +685,11 @@ class _DizimistaFormDialogState extends State<DizimistaFormDialog> {
     }
 
     if (estadoCivil == 'Casado') {
-      if (nomeConjugueController.text.isEmpty ||
-          dataCasamento == null ||
-          dataNascimentoConjugue == null) {
+      if (nomeConjugueController.text.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text(
-              'Preencha os dados obrigatórios do cônjuge',
+              'Preencha o nome do cônjuge',
             ),
             backgroundColor: Theme.of(context).colorScheme.error,
             behavior: SnackBarBehavior.floating,
