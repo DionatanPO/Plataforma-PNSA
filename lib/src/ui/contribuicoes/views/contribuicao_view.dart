@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
 import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
+import 'package:intl/intl.dart';
 import 'dart:async';
 
 import '../../dizimistas/controllers/dizimista_controller.dart';
@@ -1272,7 +1273,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
                     const SizedBox(height: 12),
                     Text(
                       isAtrasado
-                          ? 'Dízimo Atrasado: Quais meses?'
+                          ? 'Outros Meses: Quais meses?'
                           : 'Nenhum mês de referência selecionado',
                       style: GoogleFonts.inter(
                         fontSize: 14,
@@ -1287,7 +1288,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
                     Text(
                       isAtrasado
                           ? 'Toque aqui para indicar os meses que o fiel está pagando'
-                          : 'Opcional: use para dízimos atrasados ou adiantados',
+                          : 'Opcional: use para outros meses (atrasados ou futuros)',
                       textAlign: TextAlign.center,
                       style: GoogleFonts.inter(
                         fontSize: 11,
@@ -1434,9 +1435,13 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
   void _showMonthPicker() async {
     final now = DateTime.now();
     int selectedYear = now.year;
-    final List<int> selectedMonths = controller.competencias
-        .map((c) => int.parse(c.mesReferencia.split('-')[1]))
-        .toList();
+
+    // Usar um Map para rastrear o mês-referência (ex: 2024-03) e sua respectiva data
+    final Map<String, DateTime> selectedCompetencias = {};
+    for (var c in controller.competencias) {
+      selectedCompetencias[c.mesReferencia] =
+          c.dataPagamento ?? controller.dataSelecionada.value;
+    }
 
     await Get.dialog(
       StatefulBuilder(builder: (context, setDialogState) {
@@ -1474,16 +1479,42 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
               itemCount: 12,
               itemBuilder: (context, index) {
                 final month = index + 1;
-                final isSelected = selectedMonths.contains(month);
+                final monthKey =
+                    '$selectedYear-${month.toString().padLeft(2, '0')}';
+                final isSelected = selectedCompetencias.containsKey(monthKey);
+
                 return InkWell(
-                  onTap: () {
-                    setDialogState(() {
-                      if (isSelected) {
-                        selectedMonths.remove(month);
-                      } else {
-                        selectedMonths.add(month);
+                  onTap: () async {
+                    if (isSelected) {
+                      setDialogState(
+                          () => selectedCompetencias.remove(monthKey));
+                    } else {
+                      // Ao clicar em um mês não selecionado, abre o seletor de data
+                      final DateTime? picked = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2100),
+                        helpText:
+                            'DATA DO PAGAMENTO PARA ${_formatMonth(month).toUpperCase()}',
+                        builder: (context, child) {
+                          return Theme(
+                            data: Theme.of(context).copyWith(
+                              colorScheme:
+                                  Theme.of(context).colorScheme.copyWith(
+                                        primary: accentColor,
+                                      ),
+                            ),
+                            child: child!,
+                          );
+                        },
+                      );
+
+                      if (picked != null) {
+                        setDialogState(
+                            () => selectedCompetencias[monthKey] = picked);
                       }
-                    });
+                    }
                   },
                   borderRadius: BorderRadius.circular(8),
                   child: AnimatedContainer(
@@ -1498,16 +1529,31 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
                       ),
                     ),
                     alignment: Alignment.center,
-                    child: Text(
-                      _formatMonth(month),
-                      style: GoogleFonts.inter(
-                        fontSize: 13,
-                        fontWeight:
-                            isSelected ? FontWeight.bold : FontWeight.normal,
-                        color: isSelected
-                            ? Colors.white
-                            : theme.colorScheme.onSurface,
-                      ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          _formatMonth(month),
+                          style: GoogleFonts.inter(
+                            fontSize: 13,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                            color: isSelected
+                                ? Colors.white
+                                : theme.colorScheme.onSurface,
+                          ),
+                        ),
+                        if (isSelected)
+                          Text(
+                            DateFormat('dd/MM')
+                                .format(selectedCompetencias[monthKey]!),
+                            style: GoogleFonts.inter(
+                              fontSize: 9,
+                              color: Colors.white.withOpacity(0.8),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 );
@@ -1519,10 +1565,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
                 onPressed: () => Get.back(), child: const Text('Cancelar')),
             FilledButton(
               onPressed: () {
-                final List<String> mesesRef = selectedMonths
-                    .map((m) => '$selectedYear-${m.toString().padLeft(2, '0')}')
-                    .toList();
-                controller.adicionarVariasCompetencias(mesesRef);
+                controller.adicionarVariasCompetencias(selectedCompetencias);
                 Get.back();
               },
               child: const Text('Confirmar'),
@@ -1897,7 +1940,11 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
             ),
             const SizedBox(height: 16),
             _summaryRow('Fiel:', controller.dizimistaSelecionado.value?.nome),
-            _summaryRow('Tipo:', controller.tipo.value),
+            _summaryRow(
+                'Tipo:',
+                controller.tipo.value == 'Dízimo Atrasado'
+                    ? 'Outros Meses (Atrasado/Futuro)'
+                    : controller.tipo.value),
             _summaryRow('Método:', controller.metodo.value),
             const Divider(height: 24),
             Row(
@@ -1910,14 +1957,14 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
                     color: theme.colorScheme.onSurface.withOpacity(0.7),
                   ),
                 ),
-                Text(
-                  controller.valor.value,
-                  style: GoogleFonts.outfit(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                    color: theme.colorScheme.primary,
-                  ),
-                ),
+                Obx(() => Text(
+                      controller.valor.value,
+                      style: GoogleFonts.outfit(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                        color: theme.colorScheme.primary,
+                      ),
+                    )),
               ],
             ),
           ],

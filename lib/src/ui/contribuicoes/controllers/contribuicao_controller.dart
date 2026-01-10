@@ -185,13 +185,19 @@ class ContribuicaoController extends GetxController {
     super.onClose();
   }
 
-  void adicionarVariasCompetencias(List<String> meses) {
-    // Mantém os valores se já existirem, ou adiciona novos com 0 e a data selecionada atual
+  void adicionarVariasCompetencias(Map<String, DateTime> mesesComDatas) {
+    // Mantém os valores se já existirem, ou adiciona novos com 0 e a data fornecida
     final novos = <ContribuicaoCompetencia>[];
-    for (var mes in meses) {
+
+    mesesComDatas.forEach((mes, data) {
+      final existente =
+          competencias.firstWhereOrNull((c) => c.mesReferencia == mes);
       novos.add(ContribuicaoCompetencia(
-          mesReferencia: mes, valor: 0, dataPagamento: dataSelecionada.value));
-    }
+          mesReferencia: mes,
+          valor: existente?.valor ?? 0,
+          dataPagamento: data));
+    });
+
     competencias.assignAll(novos);
     competencias.sort((a, b) => a.mesReferencia.compareTo(b.mesReferencia));
     dividirValorEntreCompetencias();
@@ -747,21 +753,16 @@ class ContribuicaoController extends GetxController {
     final dizimista = dizimistaSelecionado.value!;
     final user = Get.find<AuthService>().currentUser;
 
-    // Limpa o valor formatado para obter o valor numérico
-    String valorLimpo = valor.value
-        .replaceAll('.', '') // Remove separador de milhar
-        .replaceAll('R\$', '') // Remove simbolo
-        .replaceAll(' ', '') // Remove espaços
-        .replaceAll(',', '.'); // Troca vírgula por ponto
-
-    final valorDouble = double.tryParse(valorLimpo) ?? 0.0;
+    // O valor total da contribuição agora é a soma de todas as competências
+    final valorTotalCalculado =
+        competencias.fold(0.0, (sum, item) => sum + item.valor);
 
     return Contribuicao(
       id: '', // O ID será definido pelo Firestore
       dizimistaId: dizimista.id,
       dizimistaNome: dizimista.nome,
       tipo: tipo.value,
-      valor: valorDouble,
+      valor: valorTotalCalculado,
       metodo: metodo.value,
       dataRegistro: dataSelecionada.value,
       usuarioId: user?.uid ?? '',
