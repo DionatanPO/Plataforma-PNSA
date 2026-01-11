@@ -105,30 +105,6 @@ class DizimistaDesktopTableView extends StatelessWidget {
               ],
             ),
           ),
-
-          // Linhas da tabela
-          ListView.separated(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: lista.length,
-            separatorBuilder: (_, __) => Divider(
-              height: 1,
-              indent: 24,
-              endIndent: 24,
-              color: borderColor,
-            ),
-            itemBuilder: (context, index) {
-              final d = lista[index];
-              return _TableRow(
-                dizimista: d,
-                theme: theme,
-                borderColor: borderColor,
-                onEditPressed: onEditPressed,
-                onViewHistoryPressed: onViewHistoryPressed,
-                controller: controller,
-              );
-            },
-          ),
         ],
       ),
     );
@@ -170,28 +146,28 @@ class _TableHeaderCell extends StatelessWidget {
 // =============================================================================
 // COMPONENTE: TABLE ROW COM HOVER
 // =============================================================================
-class _TableRow extends StatefulWidget {
+class DizimistaDesktopTableRow extends StatefulWidget {
   final Dizimista dizimista;
   final ThemeData theme;
-  final Color borderColor;
   final Function(Dizimista) onEditPressed;
   final Function(Dizimista) onViewHistoryPressed;
   final DizimistaController controller;
 
-  const _TableRow({
+  const DizimistaDesktopTableRow({
+    Key? key,
     required this.dizimista,
     required this.theme,
-    required this.borderColor,
     required this.onEditPressed,
     required this.onViewHistoryPressed,
     required this.controller,
-  });
+  }) : super(key: key);
 
   @override
-  State<_TableRow> createState() => _TableRowState();
+  State<DizimistaDesktopTableRow> createState() =>
+      _DizimistaDesktopTableRowState();
 }
 
-class _TableRowState extends State<_TableRow> {
+class _DizimistaDesktopTableRowState extends State<DizimistaDesktopTableRow> {
   bool _isHovering = false;
 
   @override

@@ -44,207 +44,222 @@ class DizimistaMobileListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: EdgeInsets.zero,
-      itemCount: lista.length,
-      itemBuilder: (context, index) {
-        final d = lista[index];
-        return Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: surfaceColor,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.03),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+        (context, index) {
+          return DizimistaMobileListViewItem(
+            key: ValueKey(lista[index].id),
+            dizimista: lista[index],
+            theme: theme,
+            surfaceColor: surfaceColor,
+            onEditPressed: onEditPressed,
+            onViewHistoryPressed: onViewHistoryPressed,
+          );
+        },
+        childCount: lista.length,
+      ),
+    );
+  }
+}
+
+class DizimistaMobileListViewItem extends StatelessWidget {
+  final Dizimista dizimista;
+  final ThemeData theme;
+  final Color surfaceColor;
+  final Function(Dizimista) onEditPressed;
+  final Function(Dizimista) onViewHistoryPressed;
+
+  const DizimistaMobileListViewItem({
+    Key? key,
+    required this.dizimista,
+    required this.theme,
+    required this.surfaceColor,
+    required this.onEditPressed,
+    required this.onViewHistoryPressed,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final d = dizimista;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: surfaceColor,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
-          child: Column(
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  DizimistaAvatar(nome: d.nome, theme: theme, size: 48),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+              DizimistaAvatar(nome: d.nome, theme: theme, size: 48),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                d.nome,
-                                style: GoogleFonts.outfit(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                  color: theme.colorScheme.onSurface,
+                        Expanded(
+                          child: Text(
+                            d.nome,
+                            style: GoogleFonts.outfit(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: theme.colorScheme.onSurface,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        StatusBadge(status: d.status, compact: true),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: theme.dividerColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            'Nº Reg: ${d.numeroRegistro}',
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: theme.brightness == Brightness.dark
+                                  ? theme.colorScheme.primary
+                                  : theme.colorScheme.onSurface
+                                      .withOpacity(0.9),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.badge_outlined,
+                                size: 14,
+                                color: theme.colorScheme.onSurface
+                                    .withOpacity(0.5),
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                formatCPF(d.cpf),
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  color: theme.colorScheme.onSurface
+                                      .withOpacity(0.7),
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
-                            ),
-                            StatusBadge(status: d.status, compact: true),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        // NOVA LINHA: Nº Registro e CPF
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: theme.dividerColor.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                'Nº Reg: ${d.numeroRegistro}',
-                                style: GoogleFonts.inter(
-                                  fontSize:
-                                      12, // Leve aumento para legibilidade
-                                  fontWeight: FontWeight.w600, // Destaque sutil
-                                  color: theme.brightness == Brightness.dark
-                                      ? theme.colorScheme.primary
-                                      : theme.colorScheme.onSurface
-                                          .withOpacity(0.9),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            // CPF
-                            Expanded(
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.badge_outlined,
-                                    size: 14,
-                                    color: theme.colorScheme.onSurface
-                                        .withOpacity(0.5),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    formatCPF(d.cpf),
-                                    style: GoogleFonts.inter(
-                                      fontSize: 12,
-                                      color: theme.colorScheme.onSurface
-                                          .withOpacity(0.7),
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow
-                                        .ellipsis, // Previne quebra de linha visualmente feia
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        // ÚLTIMA CONTRIBUIÇÃO (Mobile)
-                        Obx(() {
-                          final controller = Get.find<DizimistaController>();
-                          final timeAgo =
-                              controller.getTimeSinceLastContribution(d.id);
-                          final isDark = theme.brightness == Brightness.dark;
-
-                          return Row(
-                            children: [
-                              Icon(
-                                Icons.history_rounded,
-                                size: 14,
-                                color: timeAgo == 'Nenhuma'
-                                    ? (isDark
-                                        ? Colors.orangeAccent
-                                        : Colors.orange)
-                                    : (isDark
-                                        ? theme.colorScheme.primary
-                                        : theme.colorScheme.primary
-                                            .withOpacity(0.7)),
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                'Últ. Contribuição: ',
-                                style: GoogleFonts.inter(
-                                  fontSize: 12,
-                                  color: theme.colorScheme.onSurface
-                                      .withOpacity(0.5),
-                                ),
-                              ),
-                              Text(
-                                timeAgo,
-                                style: GoogleFonts.inter(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: timeAgo == 'Nenhuma'
-                                      ? (isDark
-                                          ? Colors.orangeAccent
-                                          : Colors.orange.shade800)
-                                      : (isDark
-                                          ? theme.colorScheme.primary
-                                          : theme.colorScheme.primary),
-                                ),
-                              ),
                             ],
-                          );
-                        }),
+                          ),
+                        ),
                       ],
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              const Divider(height: 1),
-              const SizedBox(height: 12),
-              // Botões de Ação Mobile (Largura total)
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () => onEditPressed(d),
-                      icon: const Icon(Icons.edit_rounded, size: 16),
-                      label: const Text('Editar'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: theme.colorScheme.onSurface,
-                        side: BorderSide(
-                            color: theme.dividerColor.withOpacity(0.2)),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: FilledButton.icon(
-                      onPressed: () => onViewHistoryPressed(d),
-                      icon: const Icon(Icons.history_rounded, size: 16),
-                      label: const Text('Histórico'),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: theme.colorScheme.primary.withOpacity(
-                            theme.brightness == Brightness.dark ? 0.2 : 0.1),
-                        foregroundColor: theme.colorScheme.primary,
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
-                      ),
-                    ),
-                  ),
-                ],
+                    const SizedBox(height: 8),
+                    Obx(() {
+                      final controller = Get.find<DizimistaController>();
+                      final timeAgo =
+                          controller.getTimeSinceLastContribution(d.id);
+                      final isDark = theme.brightness == Brightness.dark;
+
+                      return Row(
+                        children: [
+                          Icon(
+                            Icons.history_rounded,
+                            size: 14,
+                            color: timeAgo == 'Nenhuma'
+                                ? (isDark ? Colors.orangeAccent : Colors.orange)
+                                : theme.colorScheme.primary,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Últ. Contribuição: ',
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              color:
+                                  theme.colorScheme.onSurface.withOpacity(0.5),
+                            ),
+                          ),
+                          Text(
+                            timeAgo,
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: timeAgo == 'Nenhuma'
+                                  ? (isDark
+                                      ? Colors.orangeAccent
+                                      : Colors.orange.shade800)
+                                  : theme.colorScheme.primary,
+                            ),
+                          ),
+                        ],
+                      );
+                    }),
+                  ],
+                ),
               ),
             ],
           ),
-        );
-      },
+          const SizedBox(height: 16),
+          const Divider(height: 1),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () => onEditPressed(d),
+                  icon: const Icon(Icons.edit_rounded, size: 16),
+                  label: const Text('Editar'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: theme.colorScheme.onSurface,
+                    side:
+                        BorderSide(color: theme.dividerColor.withOpacity(0.2)),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: () => onViewHistoryPressed(d),
+                  icon: const Icon(Icons.history_rounded, size: 16),
+                  label: const Text('Histórico'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: theme.colorScheme.primary.withOpacity(
+                        theme.brightness == Brightness.dark ? 0.2 : 0.1),
+                    foregroundColor: theme.colorScheme.primary,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

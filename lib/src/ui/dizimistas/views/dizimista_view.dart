@@ -22,15 +22,31 @@ class DizimistaView extends StatefulWidget {
 class _DizimistaViewState extends State<DizimistaView> {
   final DizimistaController controller = Get.find<DizimistaController>();
   final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
-    // Força uma verificação de dados sempre que a View for montada
-    // Isso resolve situações onde o controller já foi iniciado mas sem dados (ex: navegação)
+    _scrollController.addListener(_scrollListener);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       controller.onViewReady();
     });
+  }
+
+  void _scrollListener() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      if (controller.hasMore.value && !controller.isLoading) {
+        controller.loadMore();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -38,7 +54,6 @@ class _DizimistaViewState extends State<DizimistaView> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    // Cores modernas e refinadas
     final surfaceColor = isDark ? const Color(0xFF1A1A1A) : Colors.white;
     final backgroundColor =
         isDark ? const Color(0xFF0D0D0D) : const Color(0xFFF8F9FA);
@@ -47,7 +62,6 @@ class _DizimistaViewState extends State<DizimistaView> {
         : Colors.black.withOpacity(0.06);
     final accentColor = theme.colorScheme.primary;
 
-    // Medidas responsivas
     final screenWidth = MediaQuery.of(context).size.width;
     final isDesktop = screenWidth > 800;
     final double horizontalPadding = isDesktop ? 24.0 : 12.0;
@@ -57,138 +71,177 @@ class _DizimistaViewState extends State<DizimistaView> {
       child: Scaffold(
         backgroundColor: backgroundColor,
         resizeToAvoidBottomInset: false,
-        body: CustomScrollView(
-          slivers: [
-            // =======================================================
-            // MODERN APP BAR COM GRADIENTE
-            // =======================================================
-            // =======================================================
-            // MODERN HEADER
-            // =======================================================
-            ModernHeader(
-              title: 'Fiéis',
-              subtitle: 'Gerenciamento de cadastros',
-              icon: Icons.people_rounded,
-            ),
+        body: Obx(() {
+          final items = controller.paginatedDizimistas;
+          final isLoading = controller.isLoading && items.isEmpty;
+          final isEmpty = !isLoading && items.isEmpty;
 
-            // =======================================================
-            // SEARCH BAR
-            // =======================================================
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(
-                  horizontalPadding,
-                  isDesktop ? 24 : 16,
-                  horizontalPadding,
-                  isDesktop ? 24 : 16,
-                ),
-                child: _buildModernSearchBar(
-                  theme,
-                  backgroundColor,
-                  borderColor,
-                  accentColor,
+          return CustomScrollView(
+            controller: _scrollController,
+            slivers: [
+              ModernHeader(
+                title: 'Fiéis',
+                subtitle: 'Gerenciamento de cadastros',
+                icon: Icons.people_rounded,
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    horizontalPadding,
+                    isDesktop ? 24 : 16,
+                    horizontalPadding,
+                    isDesktop ? 24 : 16,
+                  ),
+                  child: DizimistaSearchBarView(
+                    controller: _searchController,
+                    onChanged: (val) {
+                      controller.searchQuery.value = val;
+                    },
+                  ),
                 ),
               ),
-            ),
-            // =======================================================
-            // LISTA DE DADOS (RESPONSIVA)
-            // =======================================================
-            Obx(() {
-              if (controller.isLoading) {
-                return SliverFillRemaining(
+              if (isLoading)
+                const SliverFillRemaining(
                   hasScrollBody: false,
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: accentColor,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Carregando fiéis...',
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            color: theme.colorScheme.onSurface.withOpacity(0.5),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }
-
-              if (controller.filteredDizimistas.isEmpty) {
-                return SliverFillRemaining(
+                  child:
+                      Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                )
+              else if (isEmpty)
+                SliverFillRemaining(
                   hasScrollBody: false,
                   child: DizimistaEmptyStateView(
                     searchQuery: controller.searchQuery.value,
                   ),
-                );
-              }
+                )
+              else if (isDesktop)
+                SliverPadding(
+                  padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        if (index == 0) {
+                          return Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 16),
+                            decoration: BoxDecoration(
+                              color: surfaceColor,
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(20),
+                                topRight: Radius.circular(20),
+                              ),
+                              border: Border.all(color: borderColor),
+                            ),
+                            child: Row(
+                              children: [
+                                _TableHeaderCell(
+                                    text: 'Nº', flex: 1, theme: theme),
+                                _TableHeaderCell(
+                                    text: 'FIÉL', flex: 3, theme: theme),
+                                _TableHeaderCell(
+                                    text: 'CONTATO', flex: 2, theme: theme),
+                                _TableHeaderCell(
+                                    text: 'LOCALIZAÇÃO', flex: 2, theme: theme),
+                                _TableHeaderCell(
+                                    text: 'STATUS', flex: 1, theme: theme),
+                                _TableHeaderCell(
+                                    text: 'ÚLT. CONTRIBUIÇÃO',
+                                    flex: 2,
+                                    theme: theme),
+                                _TableHeaderCell(
+                                    text: 'CADASTRO', flex: 1, theme: theme),
+                                _TableHeaderCell(
+                                    text: 'AÇÕES', flex: 1, theme: theme),
+                              ],
+                            ),
+                          );
+                        }
 
-              return SliverPadding(
-                padding: EdgeInsets.fromLTRB(
-                  horizontalPadding,
-                  0,
-                  horizontalPadding,
-                  24,
+                        final dizimistaIndex = index - 1;
+                        final isLast = dizimistaIndex == items.length - 1;
+                        return Container(
+                          decoration: BoxDecoration(
+                            color: surfaceColor,
+                            border: Border(
+                              left: BorderSide(color: borderColor),
+                              right: BorderSide(color: borderColor),
+                              bottom: isLast
+                                  ? BorderSide(color: borderColor)
+                                  : BorderSide.none,
+                            ),
+                            borderRadius: isLast
+                                ? const BorderRadius.only(
+                                    bottomLeft: Radius.circular(20),
+                                    bottomRight: Radius.circular(20),
+                                  )
+                                : BorderRadius.zero,
+                          ),
+                          child: DizimistaDesktopTableRow(
+                            key: ValueKey(items[dizimistaIndex].id),
+                            dizimista: items[dizimistaIndex],
+                            theme: theme,
+                            controller: controller,
+                            onEditPressed: (d) => Get.toNamed(
+                                AppRoutes.dizimista_editar,
+                                arguments: d),
+                            onViewHistoryPressed: (d) => _openHistoryDialog(d),
+                          ),
+                        );
+                      },
+                      childCount: items.length + 1,
+                    ),
+                  ),
+                )
+              else
+                SliverPadding(
+                  padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                  sliver: DizimistaMobileListView(
+                    lista: items,
+                    theme: theme,
+                    surfaceColor: surfaceColor,
+                    onEditPressed: (d) =>
+                        Get.toNamed(AppRoutes.dizimista_editar, arguments: d),
+                    onViewHistoryPressed: (d) => _openHistoryDialog(d),
+                  ),
                 ),
-                sliver: SliverLayoutBuilder(
-                  builder: (context, constraints) {
-                    // Reutilizando lógica de desktop se quiser, mas já temos isDesktop no escopo acima
-                    // Porém constraints aqui é mais preciso para o Sliver
-                    final bool isWide = constraints.crossAxisExtent > 800;
-
-                    if (isWide) {
-                      return SliverToBoxAdapter(
-                        child: DizimistaDesktopTableView(
-                          lista: controller.filteredDizimistas,
-                          theme: theme,
-                          surfaceColor: surfaceColor,
-                          controller: controller,
-                          onEditPressed: (dizimista) => Get.toNamed(
-                              AppRoutes.dizimista_editar,
-                              arguments: dizimista),
-                          onViewHistoryPressed: (dizimista) =>
-                              _openHistoryDialog(dizimista),
+              SliverToBoxAdapter(
+                child: Column(
+                  children: [
+                    if (controller.isLoadingMore.value)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 32),
+                        child: Center(
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2, color: accentColor)),
+                      )
+                    else if (!controller.hasMore.value && items.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 32),
+                        child: Center(
+                          child: Text(
+                            'Fim da lista',
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              color:
+                                  theme.colorScheme.onSurface.withOpacity(0.3),
+                            ),
+                          ),
                         ),
-                      );
-                    } else {
-                      return SliverToBoxAdapter(
-                        child: DizimistaMobileListView(
-                          lista: controller.filteredDizimistas,
-                          theme: theme,
-                          surfaceColor: surfaceColor,
-                          onEditPressed: (dizimista) => Get.toNamed(
-                              AppRoutes.dizimista_editar,
-                              arguments: dizimista),
-                          onViewHistoryPressed: (dizimista) =>
-                              _openHistoryDialog(dizimista),
-                        ),
-                      );
-                    }
-                  },
+                      ),
+                    const SizedBox(height: 100),
+                  ],
                 ),
-              );
-            }),
-            // Espaço fixo no final para o FAB não cobrir o último item
-            const SliverToBoxAdapter(
-              child: SizedBox(height: 100),
-            ),
-          ],
-        ),
+              ),
+            ],
+          );
+        }),
         floatingActionButton: FloatingActionButton.extended(
-          heroTag: 'dizimista_fab',
+          heroTag: 'dizimista_fab_v3',
           onPressed: () => Get.toNamed(AppRoutes.dizimista_cadastro),
           backgroundColor: accentColor,
           foregroundColor: Colors.white,
           icon: const Icon(Icons.add_rounded),
-          label: Text(
-            'Novo Fiel',
-            style: GoogleFonts.inter(fontWeight: FontWeight.w600),
-          ),
+          label: Text('Novo Fiel',
+              style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
         ),
       ),
     );
@@ -200,177 +253,27 @@ class _DizimistaViewState extends State<DizimistaView> {
       builder: (context) => DizimistaHistoryDialog(dizimista: d),
     );
   }
-
-  // =======================================================
-  // SEARCH BAR MODERNA
-  // =======================================================
-  Widget _buildModernSearchBar(
-    ThemeData theme,
-    Color backgroundColor,
-    Color borderColor,
-    Color accentColor,
-  ) {
-    return DizimistaSearchBarView(
-      controller: _searchController,
-      onChanged: (val) {
-        controller.searchQuery.value = val;
-      },
-    );
-  }
 }
 
-// =======================================================
-// WIDGET DE SEARCH BAR MODERNA REUTILIZÁVEL
-// =======================================================
-class _ModernSearchBar extends StatefulWidget {
-  final TextEditingController controller;
+class _TableHeaderCell extends StatelessWidget {
+  final String text;
+  final int flex;
   final ThemeData theme;
-  final Color backgroundColor;
-  final Color accentColor;
-  final ValueChanged<String> onChanged;
-  final VoidCallback onClear;
 
-  const _ModernSearchBar({
-    required this.controller,
-    required this.theme,
-    required this.backgroundColor,
-    required this.accentColor,
-    required this.onChanged,
-    required this.onClear,
-  });
-
-  @override
-  State<_ModernSearchBar> createState() => _ModernSearchBarState();
-}
-
-class _ModernSearchBarState extends State<_ModernSearchBar> {
-  bool _isFocused = false;
-  bool _isHovering = false;
+  const _TableHeaderCell(
+      {required this.text, required this.flex, required this.theme});
 
   @override
   Widget build(BuildContext context) {
-    final theme = widget.theme;
-    final isDark = theme.brightness == Brightness.dark;
-
-    // Cores modernas e refinadas
-    final surfaceColor = isDark ? const Color(0xFF1A1A1A) : Colors.white;
-    final inputBgColor =
-        isDark ? const Color(0xFF252525) : const Color(0xFFF8FAFC);
-    final accentColor = widget.accentColor;
-
-    // Cores de estado
-    final borderColor = _isFocused
-        ? accentColor.withOpacity(0.5)
-        : (_isHovering
-            ? theme.dividerColor.withOpacity(0.2)
-            : theme.dividerColor.withOpacity(0.1));
-
-    final iconColor =
-        _isFocused ? accentColor : theme.colorScheme.onSurface.withOpacity(0.4);
-
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHovering = true),
-      onExit: (_) => setState(() => _isHovering = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeOutCubic,
-        decoration: BoxDecoration(
-          color: surfaceColor,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: borderColor, width: _isFocused ? 1.5 : 1),
-          boxShadow: [
-            BoxShadow(
-              color: _isFocused
-                  ? accentColor.withOpacity(0.08)
-                  : Colors.black.withOpacity(isDark ? 0.15 : 0.04),
-              blurRadius: _isFocused ? 20 : 12,
-              offset: const Offset(0, 4),
-              spreadRadius: _isFocused ? 2 : 0,
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            // Ícone de busca com container estilizado
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              margin: const EdgeInsets.only(left: 16),
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: _isFocused ? accentColor.withOpacity(0.1) : inputBgColor,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(Icons.search_rounded, color: iconColor, size: 18),
-            ),
-
-            // Campo de texto
-            Expanded(
-              child: Focus(
-                onFocusChange: (focused) =>
-                    setState(() => _isFocused = focused),
-                child: TextField(
-                  controller: widget.controller,
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                    color: theme.colorScheme.onSurface,
-                  ),
-                  decoration: InputDecoration(
-                    hintText: 'Buscar por nome, CPF, telefone ou endereço...',
-                    hintStyle: GoogleFonts.inter(
-                      color: theme.colorScheme.onSurface.withOpacity(0.35),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                    ),
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 16,
-                    ),
-                  ),
-                  onChanged: widget.onChanged,
-                ),
-              ),
-            ),
-
-            // Botão de limpar (aparece apenas quando há texto)
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 200),
-              transitionBuilder: (child, animation) => ScaleTransition(
-                scale: animation,
-                child: FadeTransition(opacity: animation, child: child),
-              ),
-              child: widget.controller.text.isNotEmpty
-                  ? Container(
-                      key: const ValueKey('clear'),
-                      margin: const EdgeInsets.only(right: 8),
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: widget.onClear,
-                          borderRadius: BorderRadius.circular(8),
-                          child: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.onSurface.withOpacity(
-                                0.05,
-                              ),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Icon(
-                              Icons.close_rounded,
-                              color: theme.colorScheme.onSurface.withOpacity(
-                                0.4,
-                              ),
-                              size: 16,
-                            ),
-                          ),
-                        ),
-                      ),
-                    )
-                  : const SizedBox(width: 16, key: ValueKey('empty')),
-            ),
-          ],
+    return Expanded(
+      flex: flex,
+      child: Text(
+        text,
+        style: GoogleFonts.inter(
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
+          color: theme.colorScheme.onSurface.withOpacity(0.6),
+          letterSpacing: 0.5,
         ),
       ),
     );

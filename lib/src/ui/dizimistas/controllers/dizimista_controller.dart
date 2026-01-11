@@ -20,6 +20,12 @@ class DizimistaController extends GetxController {
   bool get isLoading => _isLoading.value;
   final searchQuery = ''.obs;
 
+  // Paginação
+  final int pageSize = 20;
+  final RxInt displayedCount = 20.obs;
+  final RxBool hasMore = true.obs;
+  final RxBool isLoadingMore = false.obs;
+
   StreamSubscription? _dizimistasSub;
   StreamSubscription? _contribuicoesSub;
   StreamSubscription? _acessosSub;
@@ -57,6 +63,34 @@ class DizimistaController extends GetxController {
     }
   }
 
+  // Lista paginada para exibição
+  List<Dizimista> get paginatedDizimistas {
+    final allFiltered = filteredDizimistas;
+    final count = displayedCount.value;
+
+    if (allFiltered.length <= count) {
+      return allFiltered;
+    }
+
+    return allFiltered.take(count).toList();
+  }
+
+  void loadMore() async {
+    if (isLoadingMore.value || !hasMore.value) return;
+
+    isLoadingMore.value = true;
+    // Simula um pequeno delay para suavidade
+    await Future.delayed(const Duration(milliseconds: 300));
+    displayedCount.value += pageSize;
+    // hasMore será atualizado pelo listener no onInit
+    isLoadingMore.value = false;
+  }
+
+  void resetPagination() {
+    displayedCount.value = pageSize;
+    hasMore.value = true;
+  }
+
   @override
   void onInit() {
     super.onInit();
@@ -83,6 +117,25 @@ class DizimistaController extends GetxController {
         _startListening();
       }
     });
+
+    // Reset da paginação ao buscar (com debounce para não travar a UI ao digitar rápido)
+    Timer? searchDebounce;
+    ever(searchQuery, (query) {
+      searchDebounce?.cancel();
+      searchDebounce = Timer(const Duration(milliseconds: 300), () {
+        resetPagination();
+      });
+    });
+
+    // Atualiza hasMore quando a lista ou a contagem exibida muda
+    void updateHasMore(_) {
+      final allFiltered = filteredDizimistas;
+      hasMore.value = allFiltered.length > displayedCount.value;
+    }
+
+    ever(_dizimistas, updateHasMore);
+    ever(displayedCount, updateHasMore);
+    ever(searchQuery, updateHasMore);
   }
 
   void _startListening() {
