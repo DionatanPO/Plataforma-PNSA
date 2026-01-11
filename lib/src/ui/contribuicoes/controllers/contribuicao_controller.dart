@@ -24,11 +24,51 @@ class ContribuicaoController extends GetxController {
   final _contribuicoes = <Contribuicao>[].obs;
   final _dizimistas = <Dizimista>[].obs;
   final _isLoading = false.obs;
+  final _isLoadingMore = false.obs;
+
+  // Filtros e Pesquisa
+  final searchQuery = ''.obs;
+  final displayedCount = 20.obs;
+  final pageSize = 20;
+  final hasMore = true.obs;
 
   // Getters públicos
   List<Contribuicao> get contribuicoes => _contribuicoes;
   List<Dizimista> get dizimistas => _dizimistas;
   bool get isLoading => _isLoading.value;
+  bool get isLoadingMore => _isLoadingMore.value;
+
+  // Listagem filtrada e paginada
+  List<Contribuicao> get filteredContribuicoes {
+    if (searchQuery.value.isEmpty) {
+      // Ordena por data decrescente
+      final sorted = List<Contribuicao>.from(_contribuicoes);
+      sorted.sort((a, b) => b.dataRegistro.compareTo(a.dataRegistro));
+      return sorted;
+    }
+
+    final query = searchQuery.value.toLowerCase().trim();
+    final filtered = _contribuicoes.where((c) {
+      return c.dizimistaNome.toLowerCase().contains(query) ||
+          c.tipo.toLowerCase().contains(query) ||
+          c.metodo.toLowerCase().contains(query) ||
+          c.id.toLowerCase().contains(query);
+    }).toList();
+
+    filtered.sort((a, b) => b.dataRegistro.compareTo(a.dataRegistro));
+    return filtered;
+  }
+
+  List<Contribuicao> get paginatedContribuicoes {
+    final allFiltered = filteredContribuicoes;
+    final count = displayedCount.value;
+
+    if (allFiltered.length <= count) {
+      return allFiltered;
+    }
+
+    return allFiltered.take(count).toList();
+  }
 
   StreamSubscription? _contribuicoesSub;
   StreamSubscription? _dizimistasSub;
@@ -164,6 +204,31 @@ class ContribuicaoController extends GetxController {
     if (tipo.value == 'Dízimo Regular') {
       _sugerirMesAtual();
     }
+
+    // Workers para listagem
+    ever(searchQuery, (_) => resetPagination());
+
+    void updateHasMore(_) {
+      final allFiltered = filteredContribuicoes;
+      hasMore.value = allFiltered.length > displayedCount.value;
+    }
+
+    ever(_contribuicoes, updateHasMore);
+    ever(displayedCount, updateHasMore);
+    ever(searchQuery, updateHasMore);
+  }
+
+  void loadMore() async {
+    if (_isLoadingMore.value || !hasMore.value) return;
+
+    _isLoadingMore.value = true;
+    await Future.delayed(const Duration(milliseconds: 300));
+    displayedCount.value += pageSize;
+    _isLoadingMore.value = false;
+  }
+
+  void resetPagination() {
+    displayedCount.value = pageSize;
   }
 
   void _startListening() {
@@ -764,7 +829,7 @@ class ContribuicaoController extends GetxController {
       tipo: tipo.value,
       valor: valorTotalCalculado,
       metodo: metodo.value,
-      dataRegistro: dataSelecionada.value,
+      dataRegistro: DateTime.now(), // Sempre pega a data atual do sistema
       usuarioId: user?.uid ?? '',
       observacao: observacao.value.isEmpty ? null : observacao.value,
       competencias: List<ContribuicaoCompetencia>.from(competencias),

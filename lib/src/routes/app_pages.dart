@@ -9,6 +9,7 @@ import '../ui/splash/splash_view.dart';
 
 import '../ui/contribuicoes/bindings/contribuicao_binding.dart';
 import '../ui/contribuicoes/views/contribuicao_view.dart';
+import '../ui/contribuicoes/views/nova_contribuicao_view.dart';
 import '../ui/dashboard/bindings/dhasboard_binding.dart';
 import '../ui/dashboard/views/dashboard_view.dart';
 import '../ui/dizimistas/bindings/dizimista_binding.dart';
@@ -74,6 +75,12 @@ class AppPages {
     GetPage(
       name: AppRoutes.contribuicao,
       page: () => const ContribuicaoView(),
+      binding: ContribuicaoBinding(),
+      middlewares: [AuthMiddleware()],
+    ),
+    GetPage(
+      name: AppRoutes.contribuicao_nova,
+      page: () => const NovaContribuicaoView(),
       binding: ContribuicaoBinding(),
       middlewares: [AuthMiddleware()],
     ),

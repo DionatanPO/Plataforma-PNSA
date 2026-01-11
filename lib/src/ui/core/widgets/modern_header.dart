@@ -11,6 +11,7 @@ class ModernHeader extends StatelessWidget {
   final String? actionLabel;
   final IconData? actionIcon;
   final Color? actionColor;
+  final bool showBackButton;
 
   const ModernHeader({
     Key? key,
@@ -21,6 +22,7 @@ class ModernHeader extends StatelessWidget {
     this.actionLabel,
     this.actionIcon,
     this.actionColor,
+    this.showBackButton = false,
   }) : super(key: key);
 
   @override
@@ -51,24 +53,29 @@ class ModernHeader extends StatelessWidget {
           floating: true,
           snap: true,
           // Botão de Menu no Mobile para abrir o Drawer
-          leading: isMobile
+          leading: showBackButton
               ? IconButton(
-                  icon: Icon(Icons.menu, color: theme.colorScheme.onSurface),
-                  onPressed: () {
-                    // Usa a chave global do HomeController para abrir o Drawer do Scaffold pai (HomeView)
-                    // Isso é necessário pois as Views internas possuem seus próprios Scaffolds
-                    if (Get.isRegistered<HomeController>()) {
-                      Get.find<HomeController>()
-                          .scaffoldKey
-                          .currentState
-                          ?.openDrawer();
-                    } else {
-                      Scaffold.of(context).openDrawer();
-                    }
-                  },
-                  tooltip: 'Menu',
+                  icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                  onPressed: () => Get.back(),
+                  color: theme.colorScheme.onSurface,
                 )
-              : null,
+              : (isMobile
+                  ? IconButton(
+                      icon:
+                          Icon(Icons.menu, color: theme.colorScheme.onSurface),
+                      onPressed: () {
+                        if (Get.isRegistered<HomeController>()) {
+                          Get.find<HomeController>()
+                              .scaffoldKey
+                              .currentState
+                              ?.openDrawer();
+                        } else {
+                          Scaffold.of(context).openDrawer();
+                        }
+                      },
+                      tooltip: 'Menu',
+                    )
+                  : null),
           automaticallyImplyLeading: false,
           toolbarHeight: finalHeight,
           titleSpacing: 0,
