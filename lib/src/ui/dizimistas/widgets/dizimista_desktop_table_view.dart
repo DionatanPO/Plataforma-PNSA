@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
-import '../../../data/services/session_service.dart';
+
 import '../models/dizimista_model.dart';
 import '../controllers/dizimista_controller.dart';
 import 'dizimista_avatar.dart';
@@ -521,48 +521,37 @@ class _TableRowState extends State<_TableRow> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   // Botão Histórico
-                  Obx(() {
-                    final sessionService = Get.find<SessionService>();
-                    if (!sessionService.isSecretaria) {
-                      return const SizedBox.shrink();
-                    }
-                    return Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: () => widget.onViewHistoryPressed(d),
-                            borderRadius: BorderRadius.circular(10),
-                            child: Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    theme.colorScheme.primary.withOpacity(
-                                        theme.brightness == Brightness.dark
-                                            ? 0.25
-                                            : 0.15),
-                                    theme.colorScheme.primary.withOpacity(
-                                        theme.brightness == Brightness.dark
-                                            ? 0.12
-                                            : 0.08),
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Icon(
-                                Icons.history_rounded,
-                                size: 18,
-                                color: theme.colorScheme.primary,
-                              ),
-                            ),
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () => widget.onViewHistoryPressed(d),
+                      borderRadius: BorderRadius.circular(10),
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              theme.colorScheme.primary.withOpacity(
+                                  theme.brightness == Brightness.dark
+                                      ? 0.25
+                                      : 0.15),
+                              theme.colorScheme.primary.withOpacity(
+                                  theme.brightness == Brightness.dark
+                                      ? 0.12
+                                      : 0.08),
+                            ],
                           ),
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                        const SizedBox(width: 8),
-                      ],
-                    );
-                  }),
+                        child: Icon(
+                          Icons.history_rounded,
+                          size: 18,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
                   // Botão Editar
                   Material(
                     color: Colors.transparent,

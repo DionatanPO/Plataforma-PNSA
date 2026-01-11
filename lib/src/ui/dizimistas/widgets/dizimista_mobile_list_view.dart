@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../data/services/session_service.dart';
+
 import '../controllers/dizimista_controller.dart';
 import '../models/dizimista_model.dart';
 import 'dizimista_avatar.dart';
@@ -222,39 +222,23 @@ class DizimistaMobileListView extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Obx(() {
-                    final sessionService = Get.find<SessionService>();
-                    if (!sessionService.isSecretaria) {
-                      return const SizedBox.shrink();
-                    }
-                    return Expanded(
-                      child: Row(
-                        children: [
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: FilledButton.icon(
-                              onPressed: () => onViewHistoryPressed(d),
-                              icon: const Icon(Icons.history_rounded, size: 16),
-                              label: const Text('Histórico'),
-                              style: FilledButton.styleFrom(
-                                backgroundColor: theme.colorScheme.primary
-                                    .withOpacity(
-                                        theme.brightness == Brightness.dark
-                                            ? 0.2
-                                            : 0.1),
-                                foregroundColor: theme.colorScheme.primary,
-                                elevation: 0,
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 12),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12)),
-                              ),
-                            ),
-                          ),
-                        ],
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: FilledButton.icon(
+                      onPressed: () => onViewHistoryPressed(d),
+                      icon: const Icon(Icons.history_rounded, size: 16),
+                      label: const Text('Histórico'),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: theme.colorScheme.primary.withOpacity(
+                            theme.brightness == Brightness.dark ? 0.2 : 0.1),
+                        foregroundColor: theme.colorScheme.primary,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
                       ),
-                    );
-                  }),
+                    ),
+                  ),
                 ],
               ),
             ],
