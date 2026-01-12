@@ -5,6 +5,7 @@ abstract class AppRoutes {
   static const dizimista = '/dizimista';
   static const dizimista_cadastro = '/dizimista/cadastro';
   static const dizimista_editar = '/dizimista/editar';
+  static const dizimista_historico = '/dizimista/historico';
   static const contribuicao = '/contribuicao';
   static const contribuicao_nova = '/contribuicao/nova';
   static const access_management = '/access_management';

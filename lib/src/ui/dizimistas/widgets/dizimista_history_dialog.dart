@@ -26,149 +26,405 @@ class DizimistaHistoryDialog extends StatelessWidget {
 
     final currency = NumberFormat.simpleCurrency(locale: 'pt_BR');
 
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
-      child: Container(
-        width: 800,
-        height: 600,
-        decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              blurRadius: 30,
-              offset: const Offset(0, 10),
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            // Header
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: theme.primaryColor.withOpacity(0.05),
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(24)),
+    return DefaultTabController(
+      length: 2,
+      child: Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+        child: Container(
+          width: 800,
+          height: 700,
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                blurRadius: 30,
+                offset: const Offset(0, 10),
               ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: theme.primaryColor.withOpacity(0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.history_edu_rounded,
-                      color: theme.primaryColor,
-                      size: 28,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+            ],
+          ),
+          child: Column(
+            children: [
+              // Header
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: theme.primaryColor.withOpacity(0.05),
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(24)),
+                ),
+                child: Column(
+                  children: [
+                    Row(
                       children: [
-                        Text(
-                          'Histórico de Contribuições',
-                          style: GoogleFonts.outfit(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: theme.colorScheme.onSurface,
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: theme.primaryColor.withOpacity(0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.history_edu_rounded,
+                            color: theme.primaryColor,
+                            size: 28,
                           ),
                         ),
-                        Text(
-                          '${dizimista.nome} • Nº Reg: ${dizimista.numeroRegistro}',
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            color: theme.colorScheme.onSurface.withOpacity(0.6),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Histórico de Contribuições',
+                                style: GoogleFonts.outfit(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: theme.colorScheme.onSurface,
+                                ),
+                              ),
+                              Text(
+                                '${dizimista.nome} • Nº Reg: ${dizimista.numeroRegistro}',
+                                style: GoogleFonts.inter(
+                                  fontSize: 14,
+                                  color: theme.colorScheme.onSurface
+                                      .withOpacity(0.6),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () => Get.back(),
+                          icon: const Icon(Icons.close_rounded),
+                          style: IconButton.styleFrom(
+                            backgroundColor:
+                                theme.colorScheme.onSurface.withOpacity(0.05),
                           ),
                         ),
                       ],
                     ),
-                  ),
-                  IconButton(
-                    onPressed: () => Get.back(),
-                    icon: const Icon(Icons.close_rounded),
-                    style: IconButton.styleFrom(
-                      backgroundColor:
-                          theme.colorScheme.onSurface.withOpacity(0.05),
+                    const SizedBox(height: 24),
+                    Container(
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.onSurface.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: TabBar(
+                        indicatorSize: TabBarIndicatorSize.tab,
+                        indicator: BoxDecoration(
+                          color: theme.primaryColor,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        labelColor: Colors.white,
+                        unselectedLabelColor:
+                            theme.colorScheme.onSurface.withOpacity(0.7),
+                        labelStyle: GoogleFonts.inter(
+                            fontWeight: FontWeight.bold, fontSize: 13),
+                        tabs: const [
+                          Tab(text: 'Visualização em Lista'),
+                          Tab(text: 'Visualização em Calendário'),
+                        ],
+                        dividerColor: Colors.transparent,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
 
-            // Content
-            Expanded(
-              child: Obx(() {
-                // Filtramos as contribuições dele no controller de dizimista
-                // porque o DizimistaController já mantém a lista syncada.
-                // Usamos as contribuições que estão no DizimistaController
-                // mas acessamos elas via getter ou propriedade privada se necessário.
-                // No DizimistaController as contribuições estão em _contribuicoes.
-                // Mas como _contribuicoes é privado, vamos ver se tem getter.
-                // Olhando dizimista_controller.dart, não vi getter para contribuições.
-                // Vou precisar adicionar um getter ou usar o serviço diretamente.
-                // Na verdade, o DizimistaController usa:
-                // ContribuicaoService.getAllContribuicoes().listen((contribuicaoList) {
-                //   _contribuicoes.assignAll(contribuicaoList);
-                // });
-                // Mas não expõe _contribuicoes. Vou ver se posso usar o ReportController ou adicionar o getter.
+              // Content
+              Expanded(
+                child: Obx(() {
+                  final historico =
+                      controller.historicoContribuicoes(dizimista.id);
 
-                // Opção 1: Adicionar getter no DizimistaController (melhor)
-                // Por agora, vou assumir que vou adicionar o getter lá.
-
-                final historico =
-                    controller.historicoContribuicoes(dizimista.id);
-
-                if (historico.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.receipt_long_outlined,
-                          size: 64,
-                          color: theme.colorScheme.onSurface.withOpacity(0.1),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Nenhuma contribuição encontrada.',
-                          style: GoogleFonts.inter(
-                            color: theme.colorScheme.onSurface.withOpacity(0.5),
+                  if (historico.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.receipt_long_outlined,
+                            size: 64,
+                            color: theme.colorScheme.onSurface.withOpacity(0.1),
                           ),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-
-                return ListView.separated(
-                  padding: const EdgeInsets.all(24),
-                  itemCount: historico.length,
-                  separatorBuilder: (context, index) =>
-                      const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    final c = historico[index];
-                    return _HistoryItemCard(
-                      contribuicao: c,
-                      theme: theme,
-                      currency: currency,
-                      onReceiptPressed: () =>
-                          reportController.downloadOrShareReceiptPdf(c),
-                      agentName: controller.getAgentName(c.usuarioId),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Nenhuma contribuição encontrada.',
+                            style: GoogleFonts.inter(
+                              color:
+                                  theme.colorScheme.onSurface.withOpacity(0.5),
+                            ),
+                          ),
+                        ],
+                      ),
                     );
-                  },
-                );
-              }),
-            ),
-          ],
+                  }
+
+                  return TabBarView(
+                    children: [
+                      _HistoryListView(
+                        historico: historico,
+                        theme: theme,
+                        currency: currency,
+                        reportController: reportController,
+                        controller: controller,
+                      ),
+                      _HistoryCalendarView(
+                        historico: historico,
+                        theme: theme,
+                      ),
+                    ],
+                  );
+                }),
+              ),
+            ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+class _HistoryListView extends StatelessWidget {
+  final List<Contribuicao> historico;
+  final ThemeData theme;
+  final NumberFormat currency;
+  final ReportController reportController;
+  final DizimistaController controller;
+
+  const _HistoryListView({
+    required this.historico,
+    required this.theme,
+    required this.currency,
+    required this.reportController,
+    required this.controller,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      padding: const EdgeInsets.all(24),
+      itemCount: historico.length,
+      separatorBuilder: (context, index) => const SizedBox(height: 12),
+      itemBuilder: (context, index) {
+        final c = historico[index];
+        return _HistoryItemCard(
+          contribuicao: c,
+          theme: theme,
+          currency: currency,
+          onReceiptPressed: () => reportController.downloadOrShareReceiptPdf(c),
+          agentName: controller.getAgentName(c.usuarioId),
+        );
+      },
+    );
+  }
+}
+
+class _HistoryCalendarView extends StatefulWidget {
+  final List<Contribuicao> historico;
+  final ThemeData theme;
+
+  const _HistoryCalendarView({
+    required this.historico,
+    required this.theme,
+  });
+
+  @override
+  State<_HistoryCalendarView> createState() => _HistoryCalendarViewState();
+}
+
+class _HistoryCalendarViewState extends State<_HistoryCalendarView> {
+  late int displayedYear;
+
+  @override
+  void initState() {
+    super.initState();
+    displayedYear = DateTime.now().year;
+  }
+
+  bool _isMonthPaid(int month) {
+    // Format required: YYYY-MM (e.g., 2024-03)
+    // Month is 1-12
+    final monthStr = month.toString().padLeft(2, '0');
+    final target = '$displayedYear-$monthStr';
+
+    return widget.historico.any((c) {
+      if (c.status != 'Pago') return false;
+      // Check competences
+      if (c.mesesCompetencia.contains(target)) return true;
+
+      // Fallback: Check payment date if no competence
+      if (c.mesesCompetencia.isEmpty) {
+        return c.dataPagamento.year == displayedYear &&
+            c.dataPagamento.month == month;
+      }
+      return false;
+    });
+  }
+
+  Contribuicao? _getContributionForMonth(int month) {
+    final monthStr = month.toString().padLeft(2, '0');
+    final target = '$displayedYear-$monthStr';
+
+    // Try to find by competence first
+    try {
+      return widget.historico.firstWhere(
+          (c) => c.status == 'Pago' && c.mesesCompetencia.contains(target));
+    } catch (_) {
+      // Fallback
+      try {
+        return widget.historico.firstWhere((c) =>
+            c.status == 'Pago' &&
+            c.mesesCompetencia.isEmpty &&
+            c.dataPagamento.year == displayedYear &&
+            c.dataPagamento.month == month);
+      } catch (e) {
+        return null;
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        // Year Navigation
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              IconButton(
+                onPressed: () => setState(() => displayedYear--),
+                icon: const Icon(Icons.chevron_left_rounded),
+                color: widget.theme.colorScheme.onSurface,
+              ),
+              const SizedBox(width: 16),
+              Text(
+                '$displayedYear',
+                style: GoogleFonts.outfit(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: widget.theme.primaryColor,
+                ),
+              ),
+              const SizedBox(width: 16),
+              IconButton(
+                onPressed: () => setState(() => displayedYear++),
+                icon: const Icon(Icons.chevron_right_rounded),
+                color: widget.theme.colorScheme.onSurface,
+              ),
+            ],
+          ),
+        ),
+
+        Expanded(
+          child: GridView.builder(
+            padding: const EdgeInsets.all(24),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3, // 3 columns = 4 rows (12 months)
+              childAspectRatio: 1.4,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+            ),
+            itemCount: 12,
+            itemBuilder: (context, index) {
+              final month = index + 1;
+              final isPaid = _isMonthPaid(month);
+              final item = _getContributionForMonth(month);
+              final monthNames = [
+                'Janeiro',
+                'Fevereiro',
+                'Março',
+                'Abril',
+                'Maio',
+                'Junho',
+                'Julho',
+                'Agosto',
+                'Setembro',
+                'Outubro',
+                'Novembro',
+                'Dezembro'
+              ];
+
+              return Container(
+                decoration: BoxDecoration(
+                  color: isPaid
+                      ? Colors.green.withOpacity(0.1)
+                      : widget.theme.colorScheme.onSurface.withOpacity(0.02),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: isPaid
+                        ? Colors.green.withOpacity(0.3)
+                        : widget.theme.dividerColor.withOpacity(0.1),
+                    width: isPaid ? 1.5 : 1,
+                  ),
+                ),
+                child: Stack(
+                  children: [
+                    Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            monthNames[index],
+                            style: GoogleFonts.outfit(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: isPaid
+                                  ? Colors.green.shade700
+                                  : widget.theme.colorScheme.onSurface
+                                      .withOpacity(0.6),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          if (isPaid)
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                  color: Colors.green,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.green.withOpacity(0.3),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
+                                    )
+                                  ]),
+                              child: const Icon(Icons.check,
+                                  color: Colors.white, size: 20),
+                            )
+                          else
+                            Icon(
+                              Icons.close_rounded,
+                              color: widget.theme.colorScheme.onSurface
+                                  .withOpacity(0.1),
+                              size: 24,
+                            ),
+                        ],
+                      ),
+                    ),
+                    if (isPaid && item != null)
+                      Positioned(
+                        bottom: 8,
+                        right: 8,
+                        child: Tooltip(
+                          message:
+                              'Pago em ${DateFormat('dd/MM').format(item.dataPagamento)} via ${item.metodo}',
+                          child: Icon(Icons.info_outline_rounded,
+                              size: 16, color: Colors.green.withOpacity(0.7)),
+                        ),
+                      )
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }

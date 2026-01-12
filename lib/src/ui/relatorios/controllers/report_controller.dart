@@ -15,6 +15,7 @@ import '../../../core/services/data_repository_service.dart';
 import '../../../core/services/contribuicao_service.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../contribuicoes/models/contribuicao_model.dart';
+import '../../dizimistas/models/dizimista_model.dart';
 import '../../../domain/models/acesso_model.dart';
 
 class ReportController extends GetxController {
@@ -461,85 +462,593 @@ class ReportController extends GetxController {
   Future<pw.Document> _createReceiptPdf(
       Contribuicao contribuicao, String agentName) async {
     final pdf = pw.Document();
-    final font = await PdfGoogleFonts.interRegular();
-    final fontBold = await PdfGoogleFonts.interBold();
     final currency = NumberFormat.simpleCurrency(locale: 'pt_BR');
+
+    // Fontes
+    final font = await PdfGoogleFonts.openSansRegular();
+    final fontBold = await PdfGoogleFonts.openSansBold();
+
+    // Logo (opcional)
+    pw.ImageProvider? logoImage;
+    try {
+      final logoData = await rootBundle.load('assets/images/logo.jpg');
+      logoImage = pw.MemoryImage(logoData.buffer.asUint8List());
+    } catch (e) {
+      print('Erro ao carregar logo: $e');
+    }
 
     pdf.addPage(
       pw.Page(
         theme: pw.ThemeData.withFont(base: font, bold: fontBold),
-        pageFormat: PdfPageFormat.a5.landscape,
+        pageFormat: PdfPageFormat.a5.landscape, // Recibos costumam ser menores
         margin: const pw.EdgeInsets.all(30),
         build: (pw.Context context) {
           return pw.Container(
             decoration: pw.BoxDecoration(
-                border: pw.Border.all(color: PdfColors.grey300),
-                borderRadius: pw.BorderRadius.circular(10)),
+              border: pw.Border.all(color: PdfColors.grey300, width: 2),
+              borderRadius: pw.BorderRadius.circular(10),
+            ),
             padding: const pw.EdgeInsets.all(20),
             child: pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
+                // Header
                 pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
-                    pw.Text(AppConstants.parishName.toUpperCase(),
+                    pw.Row(
+                      children: [
+                        if (logoImage != null)
+                          pw.Container(
+                            width: 50,
+                            height: 50,
+                            margin: const pw.EdgeInsets.only(right: 15),
+                            child: pw.Image(logoImage),
+                          ),
+                        pw.Column(
+                          crossAxisAlignment: pw.CrossAxisAlignment.start,
+                          children: [
+                            pw.Text(
+                              AppConstants.parishName.toUpperCase(),
+                              style: pw.TextStyle(
+                                fontWeight: pw.FontWeight.bold,
+                                fontSize: 12,
+                                color: PdfColors.blue900,
+                              ),
+                            ),
+                            pw.Text(
+                              'CNPJ: ${AppConstants.parishCnpj}',
+                              style: const pw.TextStyle(
+                                fontSize: 8,
+                                color: PdfColors.grey600,
+                              ),
+                            ),
+                            pw.Text(
+                              '${AppConstants.parishAddress} | ${AppConstants.parishPhone}',
+                              style: const pw.TextStyle(
+                                fontSize: 8,
+                                color: PdfColors.grey600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    pw.Container(
+                      padding: const pw.EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 5,
+                      ),
+                      decoration: pw.BoxDecoration(
+                        color: PdfColors.blue50,
+                        borderRadius: pw.BorderRadius.circular(5),
+                      ),
+                      child: pw.Text(
+                        'RECIBO nº ${contribuicao.id.substring(0, 8).toUpperCase()}',
                         style: pw.TextStyle(
-                            fontWeight: pw.FontWeight.bold, fontSize: 10)),
-                    pw.Text('RECIBO DE CONTRIBUIÇÃO',
-                        style: pw.TextStyle(
-                            fontWeight: pw.FontWeight.bold, fontSize: 10)),
+                          fontWeight: pw.FontWeight.bold,
+                          fontSize: 10,
+                          color: PdfColors.blue800,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
+
                 pw.SizedBox(height: 20),
-                pw.Divider(),
-                pw.SizedBox(height: 15),
+                pw.Divider(color: PdfColors.grey300),
+                pw.SizedBox(height: 20),
+
+                // Content
                 pw.RichText(
                   text: pw.TextSpan(
-                      style: const pw.TextStyle(fontSize: 12),
-                      children: [
-                        const pw.TextSpan(text: 'Recebemos de '),
-                        pw.TextSpan(
-                            text: contribuicao.dizimistaNome.toUpperCase(),
-                            style:
-                                pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-                        const pw.TextSpan(text: ' a importância de '),
-                        pw.TextSpan(
-                            text: currency.format(contribuicao.valor),
-                            style:
-                                pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-                        const pw.TextSpan(
-                            text: ' referente a contribuição realizada em '),
-                        pw.TextSpan(
-                            text: DateFormat('dd/MM/yyyy')
-                                .format(contribuicao.dataPagamento),
-                            style:
-                                pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-                        const pw.TextSpan(text: '.'),
-                      ]),
-                ),
-                pw.Spacer(),
-                pw.Row(mainAxisAlignment: pw.MainAxisAlignment.end, children: [
-                  pw.Container(
-                      width: 150,
-                      decoration: const pw.BoxDecoration(
-                          border:
-                              pw.Border(bottom: pw.BorderSide(width: 0.5)))),
-                ]),
-                pw.Row(
-                  mainAxisAlignment: pw.MainAxisAlignment.end,
-                  children: [
-                    pw.Container(
-                      width: 150,
-                      child: pw.Center(
-                        child: pw.Text('Assinatura / Carimbo',
-                            style: const pw.TextStyle(fontSize: 8)),
+                    style: const pw.TextStyle(
+                      fontSize: 12,
+                      color: PdfColors.black,
+                    ),
+                    children: [
+                      const pw.TextSpan(text: 'Recebemos de '),
+                      pw.TextSpan(
+                        text: contribuicao.dizimistaNome.toUpperCase(),
+                        style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
                       ),
+                      const pw.TextSpan(text: ' a importância de '),
+                      pw.TextSpan(
+                        text: currency.format(contribuicao.valor),
+                        style: pw.TextStyle(
+                          fontWeight: pw.FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                      pw.TextSpan(text: ' referente a '),
+                      pw.TextSpan(
+                        text: contribuicao.tipo.startsWith('Dízimo')
+                            ? 'DÍZIMO'
+                            : contribuicao.tipo.toUpperCase(),
+                        style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                      ),
+                      if (contribuicao.competencias.isNotEmpty) ...[
+                        const pw.TextSpan(text: ' ('),
+                        pw.TextSpan(
+                          text: contribuicao.competencias.map((c) {
+                            final mes = _formatMesReferencia(c.mesReferencia);
+                            if (c.dataPagamento != null) {
+                              final data = DateFormat('dd/MM/yy')
+                                  .format(c.dataPagamento!);
+                              return '$mes ($data)';
+                            }
+                            return mes;
+                          }).join(', '),
+                          style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                        ),
+                        const pw.TextSpan(text: ')'),
+                      ],
+                      const pw.TextSpan(text: '.'),
+                    ],
+                  ),
+                ),
+
+                if (contribuicao.observacao != null &&
+                    contribuicao.observacao!.isNotEmpty)
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.only(top: 8),
+                    child: pw.Text(
+                      'Obs: ${contribuicao.observacao}',
+                      style: pw.TextStyle(
+                        fontSize: 9,
+                        fontStyle: pw.FontStyle.italic,
+                        color: PdfColors.grey700,
+                      ),
+                    ),
+                  ),
+
+                pw.SizedBox(height: 15),
+                pw.Row(
+                  children: [
+                    pw.Text(
+                      'Forma de Pagamento: ',
+                      style: const pw.TextStyle(fontSize: 10),
+                    ),
+                    pw.Text(
+                      contribuicao.metodo,
+                      style: pw.TextStyle(
+                        fontWeight: pw.FontWeight.bold,
+                        fontSize: 10,
+                      ),
+                    ),
+                  ],
+                ),
+
+                pw.Spacer(),
+
+                // Footer e Assinatura Eletrônica
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: pw.CrossAxisAlignment.end,
+                  children: [
+                    pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      children: [
+                        pw.Container(
+                          padding: const pw.EdgeInsets.all(6),
+                          decoration: pw.BoxDecoration(
+                            border: pw.Border.all(color: PdfColors.blue100),
+                            borderRadius: pw.BorderRadius.circular(4),
+                            color: PdfColors.blue50,
+                          ),
+                          child: pw.Column(
+                            crossAxisAlignment: pw.CrossAxisAlignment.start,
+                            children: [
+                              pw.Text(
+                                'ASSINATURA ELETRÔNICA',
+                                style: pw.TextStyle(
+                                  fontWeight: pw.FontWeight.bold,
+                                  fontSize: 7,
+                                  color: PdfColors.blue800,
+                                ),
+                              ),
+                              pw.SizedBox(height: 2),
+                              pw.Text(
+                                '${AppConstants.pdfAuthBy}: $agentName',
+                                style: const pw.TextStyle(fontSize: 6),
+                              ),
+                              pw.Text(
+                                '${AppConstants.pdfValidatedVia} ${DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now())}',
+                                style: const pw.TextStyle(fontSize: 6),
+                              ),
+                              pw.Text(
+                                '${AppConstants.pdfVerificacaoCode}: ${contribuicao.id.hashCode.toRadixString(16).toUpperCase()}',
+                                style: const pw.TextStyle(fontSize: 6),
+                              ),
+                            ],
+                          ),
+                        ),
+                        pw.SizedBox(height: 8),
+                        pw.Text(
+                          'Data: ${DateFormat('dd/MM/yyyy').format(contribuicao.dataRegistro)}',
+                          style: const pw.TextStyle(fontSize: 10),
+                        ),
+                      ],
+                    ),
+                    pw.Column(
+                      children: [
+                        pw.Container(
+                          width: 150,
+                          decoration: const pw.BoxDecoration(
+                            border: pw.Border(
+                              bottom: pw.BorderSide(
+                                color: PdfColors.black,
+                                width: 0.5,
+                              ),
+                            ),
+                          ),
+                        ),
+                        pw.SizedBox(height: 5),
+                        pw.Text(
+                          'Assinatura / Carimbo',
+                          style: const pw.TextStyle(
+                            fontSize: 8,
+                            color: PdfColors.grey600,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ],
             ),
           );
+        },
+      ),
+    );
+    return pdf;
+  }
+
+  String _formatMesReferencia(String mesRef) {
+    // 2024-03 -> Março/2024
+    final parts = mesRef.split('-');
+    if (parts.length != 2) return mesRef;
+
+    final year = parts[0];
+    final month = int.tryParse(parts[1]) ?? 1;
+
+    final months = [
+      'Jan',
+      'Fev',
+      'Mar',
+      'Abr',
+      'Mai',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Set',
+      'Out',
+      'Nov',
+      'Dez'
+    ];
+
+    return '${months[month - 1]}/$year';
+  }
+
+  Future<void> downloadOrShareDizimistaHistoryPdf(
+      Dizimista dizimista, List<Contribuicao> history) async {
+    try {
+      _isLocalLoading.value = true;
+      final pdf = await _createDizimistaHistoryPdf(dizimista, history);
+      final bytes = await pdf.save();
+      final fileName = 'Historico_${dizimista.nome.replaceAll(' ', '_')}.pdf';
+
+      if (kIsWeb) {
+        await Printing.sharePdf(bytes: bytes, filename: fileName);
+      } else if (Platform.isWindows) {
+        await _showWindowsExportDialog(bytes, fileName);
+      } else {
+        final tempDir = await getTemporaryDirectory();
+        final file = File('${tempDir.path}/$fileName');
+        await file.writeAsBytes(bytes);
+        await Share.shareXFiles([XFile(file.path)],
+            text: 'Histórico de Contribuições - ${dizimista.nome}');
+      }
+    } catch (e) {
+      Get.snackbar('Erro', 'Erro ao gerar histórico: $e');
+    } finally {
+      _isLocalLoading.value = false;
+    }
+  }
+
+  Future<pw.Document> _createDizimistaHistoryPdf(
+      Dizimista dizimista, List<Contribuicao> history) async {
+    final pdf = pw.Document();
+    final font = await PdfGoogleFonts.interRegular();
+    final fontBold = await PdfGoogleFonts.interBold();
+    final currency = NumberFormat.simpleCurrency(locale: 'pt_BR');
+
+    // Calculate totals for this specific history
+    double total = 0;
+    int count = 0;
+    for (var c in history) {
+      if (c.status == 'Pago') {
+        total += c.valor;
+        count++;
+      }
+    }
+
+    // Colors
+    final primaryColor = PdfColors.blue900;
+    final accentColor = PdfColors.blue50;
+    final textColor = PdfColors.grey900;
+    final mutedColor = PdfColors.grey600;
+
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(40),
+        theme: pw.ThemeData.withFont(base: font, bold: fontBold),
+        header: (pw.Context context) => pw.Column(
+          children: [
+            pw.Container(
+              padding:
+                  const pw.EdgeInsets.symmetric(vertical: 20, horizontal: 0),
+              decoration: const pw.BoxDecoration(
+                border: pw.Border(
+                  bottom: pw.BorderSide(color: PdfColors.grey200, width: 1),
+                ),
+              ),
+              child: pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                children: [
+                  pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(
+                        AppConstants.parishName.toUpperCase(),
+                        style: pw.TextStyle(
+                          color: primaryColor,
+                          fontSize: 14,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                      ),
+                      pw.SizedBox(height: 4),
+                      pw.Text(
+                        'Extrato de Contribuições'.toUpperCase(),
+                        style: pw.TextStyle(
+                          color: mutedColor,
+                          fontSize: 10,
+                          letterSpacing: 1.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                  pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.end,
+                    children: [
+                      pw.Text(
+                        'Emitido em',
+                        style: pw.TextStyle(color: mutedColor, fontSize: 8),
+                      ),
+                      pw.Text(
+                        DateFormat('dd/MM/yyyy • HH:mm').format(DateTime.now()),
+                        style: pw.TextStyle(color: textColor, fontSize: 10),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            pw.SizedBox(height: 30),
+          ],
+        ),
+        build: (pw.Context context) {
+          return [
+            // Header do Dizimista (Card Moderno)
+            pw.Container(
+              padding: const pw.EdgeInsets.all(20),
+              decoration: pw.BoxDecoration(
+                color: accentColor,
+                borderRadius: pw.BorderRadius.circular(8),
+                border:
+                    pw.Border.all(color: primaryColor.flatten(), width: 0.5),
+              ),
+              child: pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                children: [
+                  pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(
+                        'DIZIMISTA',
+                        style: pw.TextStyle(
+                          color: primaryColor,
+                          fontSize: 8,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                      ),
+                      pw.SizedBox(height: 4),
+                      pw.Text(
+                        dizimista.nome.toUpperCase(),
+                        style: pw.TextStyle(
+                          color: textColor,
+                          fontSize: 16,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                      ),
+                      pw.SizedBox(height: 4),
+                      pw.Text(
+                        dizimista.numeroRegistro.isNotEmpty
+                            ? 'Reg: ${dizimista.numeroRegistro}'
+                            : 'Sem registro',
+                        style: pw.TextStyle(color: mutedColor, fontSize: 10),
+                      ),
+                    ],
+                  ),
+                  pw.Container(
+                    width: 1,
+                    height: 40,
+                    color: PdfColors.grey300,
+                  ),
+                  pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(
+                        'PERÍODO',
+                        style: pw.TextStyle(
+                          color: primaryColor,
+                          fontSize: 8,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                      ),
+                      pw.SizedBox(height: 4),
+                      pw.Text(
+                        'Geral (Histórico)',
+                        style: pw.TextStyle(color: textColor, fontSize: 12),
+                      ),
+                      pw.SizedBox(height: 4),
+                      pw.Row(children: [
+                        pw.Text(
+                          '$count contribuições',
+                          style: pw.TextStyle(color: mutedColor, fontSize: 10),
+                        ),
+                      ])
+                    ],
+                  ),
+                  pw.Container(
+                    width: 1,
+                    height: 40,
+                    color: PdfColors.grey300,
+                  ),
+                  pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.end,
+                    children: [
+                      pw.Text(
+                        'TOTAL ACUMULADO',
+                        style: pw.TextStyle(
+                          color: primaryColor,
+                          fontSize: 8,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                      ),
+                      pw.SizedBox(height: 4),
+                      pw.Text(
+                        currency.format(total),
+                        style: pw.TextStyle(
+                          color: PdfColors.green800,
+                          fontSize: 18,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            pw.SizedBox(height: 30),
+
+            // Título Tabela
+            pw.Text(
+              'Detalhamento das Contribuições',
+              style: pw.TextStyle(
+                fontSize: 12,
+                fontWeight: pw.FontWeight.bold,
+                color: textColor,
+              ),
+            ),
+            pw.SizedBox(height: 10),
+
+            // Tabela
+            pw.Table.fromTextArray(
+              headers: ['Data', 'Competência', 'Método', 'Valor'],
+              data: history.map((c) {
+                final dateStr =
+                    DateFormat('dd/MM/yyyy').format(c.dataPagamento);
+                final compStr = c.competencias.isNotEmpty
+                    ? c.competencias
+                        .map((k) => _formatMesReferencia(k.mesReferencia))
+                        .join(', ')
+                    : (c.mesesCompetencia.isNotEmpty
+                        ? c.mesesCompetencia
+                            .map((m) => _formatMesReferencia(m))
+                            .join(', ')
+                        : '-');
+
+                return [dateStr, compStr, c.metodo, currency.format(c.valor)];
+              }).toList(),
+              headerStyle: pw.TextStyle(
+                color: primaryColor,
+                fontWeight: pw.FontWeight.bold,
+                fontSize: 9,
+              ),
+              headerDecoration: const pw.BoxDecoration(
+                color: PdfColors.grey50,
+                border:
+                    pw.Border(bottom: pw.BorderSide(color: PdfColors.grey300)),
+              ),
+              rowDecoration: const pw.BoxDecoration(
+                border:
+                    pw.Border(bottom: pw.BorderSide(color: PdfColors.grey100)),
+              ),
+              cellStyle: const pw.TextStyle(
+                fontSize: 9,
+                color: PdfColors.grey800,
+              ),
+              cellHeight: 30,
+              cellAlignments: {
+                0: pw.Alignment.centerLeft,
+                1: pw.Alignment.centerLeft,
+                2: pw.Alignment.center,
+                3: pw.Alignment.centerRight,
+              },
+            ),
+
+            // Footer (Total na base da tabela)
+            pw.SizedBox(height: 20),
+            pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.end,
+              children: [
+                pw.Text(
+                  'Total deste relatório: ',
+                  style: const pw.TextStyle(
+                      fontSize: 10, color: PdfColors.grey600),
+                ),
+                pw.Text(
+                  currency.format(total),
+                  style: pw.TextStyle(
+                      fontSize: 12,
+                      fontWeight: pw.FontWeight.bold,
+                      color: textColor),
+                ),
+              ],
+            ),
+
+            // Disclaimer
+            pw.Spacer(),
+            pw.Divider(color: PdfColors.grey200),
+            pw.SizedBox(height: 10),
+            pw.Text(
+              'Documento gerado eletronicamente. Não possui valor fiscal.',
+              style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey500),
+              textAlign: pw.TextAlign.center,
+            ),
+          ];
         },
       ),
     );
