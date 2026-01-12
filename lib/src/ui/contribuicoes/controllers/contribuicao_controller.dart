@@ -387,6 +387,38 @@ class ContribuicaoController extends GetxController {
     }
   }
 
+  Future<void> toggleStatus(Contribuicao c) async {
+    try {
+      _dataRepo.isSyncing.value = true;
+      final newStatus = c.status == 'Pago' ? 'A Receber' : 'Pago';
+      final updated = c.copyWith(status: newStatus);
+
+      await ContribuicaoService.updateContribuicao(updated);
+
+      Get.snackbar(
+        'Status Atualizado',
+        'O dízimo agora está marcado como $newStatus.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: newStatus == 'Pago' ? Colors.green : Colors.orange,
+        colorText: Colors.white,
+        icon: Icon(
+          newStatus == 'Pago' ? Icons.check_circle : Icons.pending,
+          color: Colors.white,
+        ),
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Erro',
+        'Erro ao atualizar status: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      _dataRepo.isSyncing.value = false;
+    }
+  }
+
   List<Contribuicao> getUltimosLancamentos() {
     // Ordena por data (mais recente primeiro) e pega os 5 primeiros
     final sorted = _contribuicoes.toList()

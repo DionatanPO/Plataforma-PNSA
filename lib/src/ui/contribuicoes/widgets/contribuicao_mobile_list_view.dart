@@ -220,111 +220,289 @@ class ContribuicaoMobileListViewItem extends StatelessWidget {
 
   void _showDetailsDialog(
       BuildContext context, Contribuicao d, ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    final currency = NumberFormat.simpleCurrency(locale: 'pt_BR');
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Detalhes do Lançamento',
-            style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
-        content: SizedBox(
-          width: 400,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+        child: Container(
+          width: double.infinity,
+          constraints: const BoxConstraints(maxWidth: 450),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+            borderRadius: BorderRadius.circular(28),
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _detailRow('Fiel:', d.dizimistaNome, theme),
-              const SizedBox(height: 8),
-              _detailRow('D. Registro:',
-                  DateFormat('dd/MM/yyyy HH:mm').format(d.dataRegistro), theme),
-              const SizedBox(height: 8),
-              _detailRow('D. Pagamento:',
-                  DateFormat('dd/MM/yyyy').format(d.dataPagamento), theme),
-              const SizedBox(height: 8),
-              _detailRow('Método:', d.metodo, theme),
-              if (d.observacao?.isNotEmpty == true) ...[
-                const SizedBox(height: 8),
-                _detailRow('Observação:', d.observacao ?? '', theme),
-              ],
-              const Divider(height: 24),
-              Text('Meses Referência:',
-                  style: GoogleFonts.inter(
-                      fontWeight: FontWeight.bold, fontSize: 13)),
-              const SizedBox(height: 8),
-              if (d.competencias.isEmpty)
-                Text('Nenhum mês específico registrado.',
-                    style: GoogleFonts.inter(
-                        fontSize: 13,
-                        fontStyle: FontStyle.italic,
-                        color: theme.hintColor))
-              else
-                Container(
-                  constraints: const BoxConstraints(maxHeight: 200),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children: d.competencias.map((comp) {
-                        final dateStr = comp.dataPagamento != null
-                            ? DateFormat('dd/MM/yyyy')
-                                .format(comp.dataPagamento!)
-                            : '-';
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 6),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(comp.mesReferencia,
-                                  style: GoogleFonts.inter(fontSize: 13)),
-                              Text('Pago em: $dateStr',
-                                  style: GoogleFonts.inter(
-                                      fontSize: 12, color: theme.hintColor)),
-                            ],
-                          ),
-                        );
-                      }).toList(),
+              // Header
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: theme.primaryColor.withOpacity(0.05),
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(28)),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: theme.primaryColor.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.receipt_long_rounded,
+                          color: theme.primaryColor, size: 20),
                     ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text('Detalhes',
+                          style: GoogleFonts.outfit(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.onSurface,
+                          )),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close_rounded, size: 20),
+                      style: IconButton.styleFrom(
+                        backgroundColor:
+                            theme.colorScheme.onSurface.withOpacity(0.05),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _SectionHeader(title: 'Fiel', theme: theme),
+                      const SizedBox(height: 8),
+                      Text(d.dizimistaNome,
+                          style: GoogleFonts.inter(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              color: theme.colorScheme.onSurface)),
+                      const SizedBox(height: 20),
+                      _SectionHeader(title: 'Pagamento', theme: theme),
+                      const SizedBox(height: 12),
+                      _ModernInfoRow(
+                        icon: Icons.calendar_today_rounded,
+                        label: 'Data Pagamento',
+                        value: DateFormat('dd/MM/yyyy').format(d.dataPagamento),
+                        theme: theme,
+                        valueColor: theme.primaryColor,
+                      ),
+                      const SizedBox(height: 12),
+                      _ModernInfoRow(
+                        icon: Icons.payments_rounded,
+                        label: 'Método',
+                        value: d.metodo,
+                        theme: theme,
+                      ),
+                      const SizedBox(height: 12),
+                      _ModernInfoRow(
+                        icon: Icons.history_rounded,
+                        label: 'Registro',
+                        value:
+                            DateFormat('dd/MM/yy HH:mm').format(d.dataRegistro),
+                        theme: theme,
+                      ),
+                      if (d.observacao?.isNotEmpty == true) ...[
+                        const SizedBox(height: 20),
+                        _SectionHeader(title: 'Observações', theme: theme),
+                        const SizedBox(height: 8),
+                        Text(
+                          d.observacao!,
+                          style: GoogleFonts.inter(
+                            fontSize: 13,
+                            color: theme.colorScheme.onSurface.withOpacity(0.7),
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 20),
+                      _SectionHeader(title: 'Meses Referência', theme: theme),
+                      const SizedBox(height: 8),
+                      if (d.competencias.isEmpty)
+                        Text('Nenhum mês registrado.',
+                            style: GoogleFonts.inter(
+                                fontSize: 13, color: theme.hintColor))
+                      else
+                        Wrap(
+                          spacing: 6,
+                          runSpacing: 6,
+                          children: d.competencias.map((comp) {
+                            return Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.green.withOpacity(0.08),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                comp.mesReferencia,
+                                style: GoogleFonts.inter(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.green.shade700,
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                    ],
                   ),
                 ),
-              const Divider(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('Total:',
-                      style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
-                  Text(
-                      NumberFormat.simpleCurrency(locale: 'pt_BR')
-                          .format(d.valor),
-                      style: GoogleFonts.outfit(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          color: Colors.green)),
-                ],
-              )
+              ),
+
+              // Footer
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.onSurface.withOpacity(0.02),
+                  borderRadius:
+                      const BorderRadius.vertical(bottom: Radius.circular(28)),
+                  border: Border(
+                      top: BorderSide(
+                          color: theme.dividerColor.withOpacity(0.1))),
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Total',
+                                style: GoogleFonts.inter(
+                                    fontSize: 11,
+                                    color: theme.colorScheme.onSurface
+                                        .withOpacity(0.5))),
+                            Text(currency.format(d.valor),
+                                style: GoogleFonts.outfit(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.green)),
+                          ],
+                        ),
+                      ],
+                    ),
+                    if (Get.find<SessionService>().isFinanceiro) ...[
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        child: TextButton.icon(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            controller.toggleStatus(d);
+                          },
+                          icon: Icon(
+                            d.status == 'Pago'
+                                ? Icons.pending_rounded
+                                : Icons.check_circle_rounded,
+                            size: 18,
+                            color: d.status == 'Pago'
+                                ? Colors.orange
+                                : Colors.green,
+                          ),
+                          label: Text(
+                            d.status == 'Pago'
+                                ? 'Marcar como A Receber'
+                                : 'Marcar como Pago',
+                            style: GoogleFonts.inter(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: d.status == 'Pago'
+                                  ? Colors.orange
+                                  : Colors.green,
+                            ),
+                          ),
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            backgroundColor: (d.status == 'Pago'
+                                    ? Colors.orange
+                                    : Colors.green)
+                                .withOpacity(0.1),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
             ],
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Fechar'),
-          ),
-        ],
       ),
     );
   }
+}
 
-  Widget _detailRow(String label, String value, ThemeData theme) {
+class _SectionHeader extends StatelessWidget {
+  final String title;
+  final ThemeData theme;
+  const _SectionHeader({required this.title, required this.theme});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      title.toUpperCase(),
+      style: GoogleFonts.inter(
+        fontSize: 10,
+        fontWeight: FontWeight.bold,
+        letterSpacing: 1.0,
+        color: theme.primaryColor.withOpacity(0.8),
+      ),
+    );
+  }
+}
+
+class _ModernInfoRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  final ThemeData theme;
+  final Color? valueColor;
+
+  const _ModernInfoRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.theme,
+    this.valueColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
-          width: 80,
-          child: Text(label,
-              style: GoogleFonts.inter(
-                  fontSize: 13,
-                  color: theme.colorScheme.onSurface.withOpacity(0.6))),
-        ),
-        Expanded(
-          child: Text(value,
-              style:
-                  GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w500)),
+        Icon(icon,
+            size: 16, color: theme.colorScheme.onSurface.withOpacity(0.3)),
+        const SizedBox(width: 10),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label,
+                style: GoogleFonts.inter(
+                    fontSize: 9,
+                    color: theme.colorScheme.onSurface.withOpacity(0.4))),
+            Text(value,
+                style: GoogleFonts.inter(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: valueColor ?? theme.colorScheme.onSurface)),
+          ],
         ),
       ],
     );
