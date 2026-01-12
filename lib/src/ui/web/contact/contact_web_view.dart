@@ -3,6 +3,7 @@ import 'package:plataforma_pnsa/src/routes/app_routes.dart';
 import 'package:plataforma_pnsa/src/ui/core/theme/app_theme.dart';
 import 'package:plataforma_pnsa/src/ui/web/widgets/mobile_drawer.dart';
 import 'package:plataforma_pnsa/src/ui/web/widgets/web_nav_bar.dart';
+import 'package:plataforma_pnsa/src/core/constants/app_constants.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ContactWebView extends StatelessWidget {
@@ -101,28 +102,28 @@ class ContactWebView extends StatelessWidget {
           ),
           child: isMobile
               ? Column(
-            children: [
-              _buildWhatsAppSection(isMobile: true),
-              const Divider(height: 1),
-              _buildLocationSection(isMobile: true),
-            ],
-          )
+                  children: [
+                    _buildWhatsAppSection(isMobile: true),
+                    const Divider(height: 1),
+                    _buildLocationSection(isMobile: true),
+                  ],
+                )
               : IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(
-                  flex: 5,
-                  child: _buildWhatsAppSection(isMobile: false),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(
+                        flex: 5,
+                        child: _buildWhatsAppSection(isMobile: false),
+                      ),
+                      Container(width: 1, color: Colors.grey[200]),
+                      Expanded(
+                        flex: 4,
+                        child: _buildLocationSection(isMobile: false),
+                      ),
+                    ],
+                  ),
                 ),
-                Container(width: 1, color: Colors.grey[200]),
-                Expanded(
-                  flex: 4,
-                  child: _buildLocationSection(isMobile: false),
-                ),
-              ],
-            ),
-          ),
         ),
       ),
     );
@@ -137,7 +138,7 @@ class ContactWebView extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment:
-        isMobile ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+            isMobile ? CrossAxisAlignment.center : CrossAxisAlignment.start,
         children: [
           Container(
             padding: const EdgeInsets.all(16),
@@ -200,7 +201,7 @@ class ContactWebView extends StatelessWidget {
           const SizedBox(height: 16),
           Row(
             mainAxisAlignment:
-            isMobile ? MainAxisAlignment.center : MainAxisAlignment.start,
+                isMobile ? MainAxisAlignment.center : MainAxisAlignment.start,
             children: [
               Container(
                   width: 8,
@@ -341,9 +342,9 @@ class ContactWebView extends StatelessWidget {
                         Text(
                           "Av. Pará, 491 - Centro\nIporá - GO, 76200-000",
                           textAlign:
-                          isMobile ? TextAlign.center : TextAlign.start,
+                              isMobile ? TextAlign.center : TextAlign.start,
                           style:
-                          TextStyle(color: Colors.grey[400], height: 1.5),
+                              TextStyle(color: Colors.grey[400], height: 1.5),
                         ),
                         const SizedBox(height: 24),
                         Row(
@@ -388,12 +389,13 @@ class ContactWebView extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text("© 2025 PNSA. Todos os direitos reservados.",
+                  Text(
+                      "© ${AppConstants.currentYear} PNSA. Todos os direitos reservados.",
                       style: TextStyle(color: Colors.grey[500], fontSize: 13)),
                   if (!isMobile)
                     Text("Feito com Flutter",
                         style:
-                        TextStyle(color: Colors.grey[600], fontSize: 13)),
+                            TextStyle(color: Colors.grey[600], fontSize: 13)),
                 ],
               )
             ],
@@ -420,7 +422,7 @@ class _FooterLinksColumn extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment:
-      isMobile ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+          isMobile ? CrossAxisAlignment.center : CrossAxisAlignment.start,
       children: [
         Text(title,
             style: const TextStyle(
@@ -429,13 +431,13 @@ class _FooterLinksColumn extends StatelessWidget {
                 fontSize: 16)),
         const SizedBox(height: 20),
         ...links.map((link) => Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: InkWell(
-            onTap: () {},
-            child: Text(link,
-                style: TextStyle(color: Colors.grey[400], fontSize: 14)),
-          ),
-        ))
+              padding: const EdgeInsets.only(bottom: 12),
+              child: InkWell(
+                onTap: () {},
+                child: Text(link,
+                    style: TextStyle(color: Colors.grey[400], fontSize: 14)),
+              ),
+            ))
       ],
     );
   }

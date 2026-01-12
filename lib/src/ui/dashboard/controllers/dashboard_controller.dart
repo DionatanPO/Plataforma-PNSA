@@ -29,6 +29,11 @@ class DashboardController extends GetxController {
   final RxBool isLoading = true.obs;
   final RxString searchTerms = ''.obs;
 
+  // Flags para controle de carga individual
+  bool _contribuicoesLoaded = false;
+  bool _dizimistasLoaded = false;
+  bool _acessosLoaded = false;
+
   // Streams subscripts
   StreamSubscription? _contribuicoesSub;
   StreamSubscription? _dizimistasSub;
@@ -59,9 +64,15 @@ class DashboardController extends GetxController {
     _contribuicoesSub?.cancel();
     _dizimistasSub?.cancel();
     _acessosSub?.cancel();
+    _contribuicoesSub = null;
+    _dizimistasSub = null;
+    _acessosSub = null;
     _todasContribuicoes.clear();
     _todosDizimistas.clear();
     _todosAcessos.clear();
+    _contribuicoesLoaded = false;
+    _dizimistasLoaded = false;
+    _acessosLoaded = false;
     isLoading.value = true;
   }
 
@@ -74,33 +85,44 @@ class DashboardController extends GetxController {
   }
 
   void _startListening() {
+    print('[DashboardController] _startListening: Checking subscriptions...');
     isLoading.value = true;
 
-    _contribuicoesSub =
-        ContribuicaoService.getAllContribuicoes().listen((list) {
-      _todasContribuicoes.value = list;
-      _checkLoading();
-    });
+    if (_contribuicoesSub == null) {
+      print('[DashboardController] Starting Contribuicoes stream.');
+      _contribuicoesSub =
+          ContribuicaoService.getAllContribuicoes().listen((list) {
+        _todasContribuicoes.value = list;
+        _contribuicoesLoaded = true;
+        _checkLoading();
+      });
+    }
 
-    _dizimistasSub = DizimistaService.getAllDizimistas().listen((list) {
-      _todosDizimistas.value = list;
-      _checkLoading();
-    });
+    if (_dizimistasSub == null) {
+      print('[DashboardController] Starting Dizimistas stream.');
+      _dizimistasSub = DizimistaService.getAllDizimistas().listen((list) {
+        _todosDizimistas.value = list;
+        _dizimistasLoaded = true;
+        _checkLoading();
+      });
+    }
 
-    _acessosSub = AccessService.getAllAcessos().listen((list) {
-      _todosAcessos.value = list;
-      _checkLoading();
-    });
+    if (_acessosSub == null) {
+      print('[DashboardController] Starting Acessos stream.');
+      _acessosSub = AccessService.getAllAcessos().listen((list) {
+        _todosAcessos.value = list;
+        _acessosLoaded = true;
+        _checkLoading();
+      });
+    }
   }
 
   void _checkLoading() {
-    if (_todasContribuicoes.isNotEmpty ||
-        _todosDizimistas.isNotEmpty ||
-        _todosAcessos.isNotEmpty) {
+    // Só remove o loading quando TODAS as streams tiverem respondido pelo menos uma vez
+    if (_contribuicoesLoaded && _dizimistasLoaded && _acessosLoaded) {
       isLoading.value = false;
+      print('[DashboardController] All data sources loaded.');
     }
-    // Note: If collections are empty, it might stay loading forever if we don't handle empty case.
-    // However, usually these streams emit even if empty.
   }
 
   // Getters para KPIs Financeiros

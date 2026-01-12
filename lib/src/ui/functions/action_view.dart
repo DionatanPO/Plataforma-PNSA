@@ -449,7 +449,7 @@ class _CardsLayoutSection extends StatelessWidget {
               title: "Convite de Equipe",
               icon: Icons.group_add_outlined,
               content:
-                  "Lucas convidou você para participar do projeto 'Dashboard 2025'.",
+                  "Lucas convidou você para participar do projeto 'Dashboard 2026'.",
               primaryActionLabel: "Aceitar",
               secondaryActionLabel: "Recusar",
               onPrimaryAction: () {},
@@ -584,7 +584,7 @@ class _DataTablesSection extends StatelessWidget {
                   "Beatriz Lima",
                   "Inativo",
                   "Viewer",
-                  "20 Ago, 2025",
+                  "20 Ago, 2026",
                   "actions",
                 ],
               ],

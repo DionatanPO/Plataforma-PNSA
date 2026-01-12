@@ -1,5 +1,5 @@
 # Visão Geral Técnica - Plataforma PNSA
-**Data de Geração:** 16/12/2025
+**Data de Geração:** 16/12/2026
 **Versão do Documento:** 1.0
 
 ## 1. Resumo Executivo

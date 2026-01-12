@@ -309,8 +309,11 @@ class ContribuicaoController extends GetxController {
   void _stopListening() {
     _contribuicoesSub?.cancel();
     _dizimistasSub?.cancel();
+    _contribuicoesSub = null;
+    _dizimistasSub = null;
     _contribuicoes.clear();
     _dizimistas.clear();
+    _isLoading.value = true;
   }
 
   @override

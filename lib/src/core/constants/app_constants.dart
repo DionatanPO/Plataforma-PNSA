@@ -11,4 +11,8 @@ class AppConstants {
   static const String pdfVerificacaoCode = 'Código de Verificação';
   static const String pdfAuthBy = 'Autenticado por';
   static const String pdfValidatedVia = 'Validado via Plataforma PNSA em';
+
+  // App General Information
+  static const int currentYear = 2026;
+  static const String copyright = '© $currentYear $parishName';
 }

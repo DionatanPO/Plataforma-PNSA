@@ -332,7 +332,7 @@ class ParishView extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                      "© 2025 ${AppConstants.parishName}. Todos os direitos reservados.",
+                      "${AppConstants.copyright}. Todos os direitos reservados.",
                       style: TextStyle(color: Colors.grey[500], fontSize: 13)),
                   if (!isMobile)
                     Text("Feito com Flutter",

@@ -403,7 +403,7 @@ class TitheView extends StatelessWidget {
           child: Column(
             children: [
               Text(
-                "© 2025 ${AppConstants.parishName}",
+                AppConstants.copyright,
                 style: TextStyle(color: Colors.grey[400]),
               ),
               const SizedBox(height: 8),

@@ -3,6 +3,7 @@ import 'package:plataforma_pnsa/src/routes/app_routes.dart';
 import 'package:plataforma_pnsa/src/ui/core/theme/app_theme.dart';
 import 'package:plataforma_pnsa/src/ui/web/widgets/mobile_drawer.dart';
 import 'package:plataforma_pnsa/src/ui/web/widgets/web_nav_bar.dart';
+import 'package:plataforma_pnsa/src/core/constants/app_constants.dart';
 
 class EventsView extends StatefulWidget {
   const EventsView({super.key});
@@ -19,7 +20,8 @@ class _EventsViewState extends State<EventsView> {
       'day': '24',
       'month': 'MAI',
       'category': 'Solenidade',
-      'description': 'Celebração maior com missas, procissão luminosa e quermesse.',
+      'description':
+          'Celebração maior com missas, procissão luminosa e quermesse.',
       'image': 'assets/images/paroquia.png',
     },
     {
@@ -27,7 +29,8 @@ class _EventsViewState extends State<EventsView> {
       'day': '19',
       'month': 'JUN',
       'category': 'Liturgia',
-      'description': 'Confecção dos tapetes e procissão do Santíssimo Sacramento.',
+      'description':
+          'Confecção dos tapetes e procissão do Santíssimo Sacramento.',
       'image': 'assets/images/logo.jpg',
     },
     {
@@ -35,7 +38,8 @@ class _EventsViewState extends State<EventsView> {
       'day': '15',
       'month': 'AGO',
       'category': 'Retiro',
-      'description': 'Fim de semana de reflexão e encontro com Deus para a juventude.',
+      'description':
+          'Fim de semana de reflexão e encontro com Deus para a juventude.',
       'image': 'assets/images/paroquia.png',
     },
     {
@@ -104,10 +108,8 @@ class _EventsViewState extends State<EventsView> {
         image: DecorationImage(
           image: const AssetImage("assets/images/paroquia_banner.jpg"),
           fit: BoxFit.cover,
-          colorFilter: ColorFilter.mode(
-              Colors.black.withOpacity(0.6),
-              BlendMode.darken
-          ),
+          colorFilter:
+              ColorFilter.mode(Colors.black.withOpacity(0.6), BlendMode.darken),
         ),
       ),
       child: Center(
@@ -151,7 +153,13 @@ class _EventsViewState extends State<EventsView> {
   Widget _buildCategoryFilters(bool isMobile) {
     if (isMobile) return const SizedBox.shrink();
 
-    final categories = ["Todos", "Solenidades", "Retiros", "Festas", "Formação"];
+    final categories = [
+      "Todos",
+      "Solenidades",
+      "Retiros",
+      "Festas",
+      "Formação"
+    ];
 
     return Center(
       child: Container(
@@ -175,9 +183,11 @@ class _EventsViewState extends State<EventsView> {
               onTap: () {},
               borderRadius: BorderRadius.circular(30),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 decoration: BoxDecoration(
-                  color: isSelected ? AppTheme.primaryColor : Colors.transparent,
+                  color:
+                      isSelected ? AppTheme.primaryColor : Colors.transparent,
                   borderRadius: BorderRadius.circular(30),
                 ),
                 child: Text(
@@ -205,10 +215,13 @@ class _EventsViewState extends State<EventsView> {
         child: LayoutBuilder(
           builder: (context, constraints) {
             int crossAxisCount = 3;
-            if (constraints.maxWidth < 650) crossAxisCount = 1;
+            if (constraints.maxWidth < 650)
+              crossAxisCount = 1;
             else if (constraints.maxWidth < 1100) crossAxisCount = 2;
 
-            double cardWidth = (constraints.maxWidth - ((crossAxisCount - 1) * 30)) / crossAxisCount;
+            double cardWidth =
+                (constraints.maxWidth - ((crossAxisCount - 1) * 30)) /
+                    crossAxisCount;
 
             return Wrap(
               spacing: 30,
@@ -270,9 +283,9 @@ class _EventsViewState extends State<EventsView> {
                         Text(
                           "Av. Pará, 491 - Centro\nIporá - GO, 76200-000",
                           textAlign:
-                          isMobile ? TextAlign.center : TextAlign.start,
+                              isMobile ? TextAlign.center : TextAlign.start,
                           style:
-                          TextStyle(color: Colors.grey[400], height: 1.5),
+                              TextStyle(color: Colors.grey[400], height: 1.5),
                         ),
                         const SizedBox(height: 24),
                         Row(
@@ -317,12 +330,13 @@ class _EventsViewState extends State<EventsView> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text("© 2025 PNSA. Todos os direitos reservados.",
+                  Text(
+                      "${AppConstants.copyright}. Todos os direitos reservados.",
                       style: TextStyle(color: Colors.grey[500], fontSize: 13)),
                   if (!isMobile)
                     Text("Feito com Flutter",
                         style:
-                        TextStyle(color: Colors.grey[600], fontSize: 13)),
+                            TextStyle(color: Colors.grey[600], fontSize: 13)),
                 ],
               )
             ],
@@ -387,7 +401,8 @@ class _ModernEventCardState extends State<_ModernEventCard> {
             Stack(
               children: [
                 ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(16)),
                   child: Image.asset(
                     widget.imageUrl,
                     height: 200,
@@ -399,12 +414,15 @@ class _ModernEventCardState extends State<_ModernEventCard> {
                   top: 16,
                   left: 16,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
-                        BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 8),
+                        BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 8),
                       ],
                     ),
                     child: Column(
@@ -434,7 +452,8 @@ class _ModernEventCardState extends State<_ModernEventCard> {
                   top: 16,
                   right: 16,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
                       color: Colors.black.withOpacity(0.6),
                       borderRadius: BorderRadius.circular(4),
@@ -486,13 +505,15 @@ class _ModernEventCardState extends State<_ModernEventCard> {
                   // Botão "Ler Mais" com animação de cor
                   AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
-                    padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
                     decoration: BoxDecoration(
-                        border: Border(bottom: BorderSide(
-                            color: _isHovering ? AppTheme.primaryColor : Colors.transparent,
-                            width: 2
-                        ))
-                    ),
+                        border: Border(
+                            bottom: BorderSide(
+                                color: _isHovering
+                                    ? AppTheme.primaryColor
+                                    : Colors.transparent,
+                                width: 2))),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -501,7 +522,9 @@ class _ModernEventCardState extends State<_ModernEventCard> {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
-                            color: _isHovering ? AppTheme.primaryColor : Colors.grey[500],
+                            color: _isHovering
+                                ? AppTheme.primaryColor
+                                : Colors.grey[500],
                             letterSpacing: 1,
                           ),
                         ),
@@ -509,7 +532,9 @@ class _ModernEventCardState extends State<_ModernEventCard> {
                         Icon(
                           Icons.arrow_forward,
                           size: 16,
-                          color: _isHovering ? AppTheme.primaryColor : Colors.grey[500],
+                          color: _isHovering
+                              ? AppTheme.primaryColor
+                              : Colors.grey[500],
                         ),
                       ],
                     ),
@@ -540,7 +565,7 @@ class _FooterLinksColumn extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment:
-      isMobile ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+          isMobile ? CrossAxisAlignment.center : CrossAxisAlignment.start,
       children: [
         Text(title,
             style: const TextStyle(
@@ -549,13 +574,13 @@ class _FooterLinksColumn extends StatelessWidget {
                 fontSize: 16)),
         const SizedBox(height: 20),
         ...links.map((link) => Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: InkWell(
-            onTap: () {},
-            child: Text(link,
-                style: TextStyle(color: Colors.grey[400], fontSize: 14)),
-          ),
-        ))
+              padding: const EdgeInsets.only(bottom: 12),
+              child: InkWell(
+                onTap: () {},
+                child: Text(link,
+                    style: TextStyle(color: Colors.grey[400], fontSize: 14)),
+              ),
+            ))
       ],
     );
   }

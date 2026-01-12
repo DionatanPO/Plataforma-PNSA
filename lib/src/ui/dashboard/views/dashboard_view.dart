@@ -51,7 +51,7 @@ class DashboardView extends StatelessWidget {
     return Scaffold(
       backgroundColor: backgroundColor,
       body: Obx(() {
-        if (controller.isLoading.value && controller.totalDizimistas == 0) {
+        if (controller.isLoading.value) {
           return const Center(child: CircularProgressIndicator());
         }
 

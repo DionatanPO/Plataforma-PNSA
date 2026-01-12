@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../core/constants/app_constants.dart';
 import 'login_controller.dart';
 
 class LoginView extends StatelessWidget {
@@ -111,7 +112,7 @@ class _MobileLayout extends StatelessWidget {
                   // Footer
                   Center(
                     child: Text(
-                      "© 2025 Paróquia Nossa Sra. Auxiliadora",
+                      AppConstants.copyright,
                       style: GoogleFonts.inter(
                         fontSize: 12,
                         color: theme.colorScheme.onSurface.withOpacity(0.4),
@@ -198,7 +199,7 @@ class _DesktopLayout extends StatelessWidget {
                                 color: Colors.white.withOpacity(0.8))),
                       ],
                     ),
-                    Text("© 2025 Sistema PNSA",
+                    Text("© ${AppConstants.currentYear} Sistema PNSA",
                         style: GoogleFonts.inter(
                             color: Colors.white.withOpacity(0.5))),
                   ],

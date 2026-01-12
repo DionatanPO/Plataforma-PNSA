@@ -4,7 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../core/widgets/custom_sliver_app_bar.dart';
 
-
 class SalesReportView extends StatefulWidget {
   const SalesReportView({super.key});
 
@@ -12,11 +11,12 @@ class SalesReportView extends StatefulWidget {
   State<SalesReportView> createState() => _SalesReportViewState();
 }
 
-class _SalesReportViewState extends State<SalesReportView> with TickerProviderStateMixin {
+class _SalesReportViewState extends State<SalesReportView>
+    with TickerProviderStateMixin {
   // Dados de exemplo para o relatório de vendas
   final List<Map<String, dynamic>> sales = [
     {
-      'date': '2025-08-27 10:15',
+      'date': '2026-08-27 10:15',
       'client': 'Lucas Mendes',
       'product': 'Smartphone XYZ',
       'quantity': 1,
@@ -26,7 +26,7 @@ class _SalesReportViewState extends State<SalesReportView> with TickerProviderSt
       'category': 'Eletrônicos',
     },
     {
-      'date': '2025-08-26 14:30',
+      'date': '2026-08-26 14:30',
       'client': 'Fernanda Costa',
       'product': 'Camiseta Estampada',
       'quantity': 3,
@@ -36,7 +36,7 @@ class _SalesReportViewState extends State<SalesReportView> with TickerProviderSt
       'category': 'Roupas',
     },
     {
-      'date': '2025-08-25 09:00',
+      'date': '2026-08-25 09:00',
       'client': 'Mariana Silva',
       'product': 'Fone de Ouvido Bluetooth',
       'quantity': 2,
@@ -46,7 +46,7 @@ class _SalesReportViewState extends State<SalesReportView> with TickerProviderSt
       'category': 'Eletrônicos',
     },
     {
-      'date': '2025-08-24 16:45',
+      'date': '2026-08-24 16:45',
       'client': 'Rafael Oliveira',
       'product': 'Tênis Esportivo',
       'quantity': 1,
@@ -56,7 +56,7 @@ class _SalesReportViewState extends State<SalesReportView> with TickerProviderSt
       'category': 'Roupas',
     },
     {
-      'date': '2025-08-23 11:20',
+      'date': '2026-08-23 11:20',
       'client': 'Beatriz Almeida',
       'product': 'Notebook Pro',
       'quantity': 1,
@@ -70,7 +70,8 @@ class _SalesReportViewState extends State<SalesReportView> with TickerProviderSt
   // Resumo estatístico
   Map<String, dynamic> getSummary() {
     final totalSales = sales.length;
-    final totalValue = sales.fold<double>(0, (sum, sale) => sum + (sale['totalPrice'] as double));
+    final totalValue = sales.fold<double>(
+        0, (sum, sale) => sum + (sale['totalPrice'] as double));
     final statusCounts = {
       'Concluído': sales.where((sale) => sale['status'] == 'Concluído').length,
       'Pendente': sales.where((sale) => sale['status'] == 'Pendente').length,
@@ -119,7 +120,6 @@ class _SalesReportViewState extends State<SalesReportView> with TickerProviderSt
           CustomSliverAppBar(
             title: 'Relatório de Vendas',
             subtitle: 'Histórico e resumo de vendas recentes',
-
             actions: [
               IconButton(
                 icon: Icon(
@@ -256,14 +256,16 @@ class _SalesReportViewState extends State<SalesReportView> with TickerProviderSt
           // 🔹 Lista de vendas
           SliverList(
             delegate: SliverChildBuilderDelegate(
-                  (context, index) {
+              (context, index) {
                 final sale = sales[index];
                 return FadeTransition(
                   opacity: _fadeAnimation,
                   child: Padding(
                     padding: isWide
-                        ? const EdgeInsets.symmetric(horizontal: 48, vertical: 8)
-                        : const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                        ? const EdgeInsets.symmetric(
+                            horizontal: 48, vertical: 8)
+                        : const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 8),
                     child: Card(
                       elevation: 2,
                       shape: RoundedRectangleBorder(
@@ -284,15 +286,15 @@ class _SalesReportViewState extends State<SalesReportView> with TickerProviderSt
                                 color: sale['status'] == 'Concluído'
                                     ? Colors.green
                                     : sale['status'] == 'Pendente'
-                                    ? theme.colorScheme.secondaryContainer
-                                    : theme.colorScheme.errorContainer,
+                                        ? theme.colorScheme.secondaryContainer
+                                        : theme.colorScheme.errorContainer,
                               ),
                               child: Icon(
                                 sale['status'] == 'Concluído'
                                     ? Icons.check
                                     : sale['status'] == 'Pendente'
-                                    ? Icons.hourglass_empty
-                                    : Icons.close,
+                                        ? Icons.hourglass_empty
+                                        : Icons.close,
                                 color: Colors.white,
                                 size: 24,
                               ),
@@ -306,7 +308,8 @@ class _SalesReportViewState extends State<SalesReportView> with TickerProviderSt
                                   Text(
                                     sale['client'],
                                     style: GoogleFonts.spaceGrotesk(
-                                      textStyle: theme.textTheme.bodyLarge?.copyWith(
+                                      textStyle:
+                                          theme.textTheme.bodyLarge?.copyWith(
                                         fontWeight: FontWeight.w600,
                                         color: theme.colorScheme.onSurface,
                                       ),
@@ -316,8 +319,10 @@ class _SalesReportViewState extends State<SalesReportView> with TickerProviderSt
                                   Text(
                                     sale['product'],
                                     style: GoogleFonts.spaceGrotesk(
-                                      textStyle: theme.textTheme.bodyMedium?.copyWith(
-                                        color: theme.colorScheme.onSurfaceVariant,
+                                      textStyle:
+                                          theme.textTheme.bodyMedium?.copyWith(
+                                        color:
+                                            theme.colorScheme.onSurfaceVariant,
                                       ),
                                     ),
                                   ),
@@ -325,24 +330,30 @@ class _SalesReportViewState extends State<SalesReportView> with TickerProviderSt
                                   Text(
                                     'Data: ${sale['date']}',
                                     style: GoogleFonts.spaceGrotesk(
-                                      textStyle: theme.textTheme.bodySmall?.copyWith(
-                                        color: theme.colorScheme.onSurfaceVariant,
+                                      textStyle:
+                                          theme.textTheme.bodySmall?.copyWith(
+                                        color:
+                                            theme.colorScheme.onSurfaceVariant,
                                       ),
                                     ),
                                   ),
                                   Text(
                                     'Categoria: ${sale['category']}',
                                     style: GoogleFonts.spaceGrotesk(
-                                      textStyle: theme.textTheme.bodySmall?.copyWith(
-                                        color: theme.colorScheme.onSurfaceVariant,
+                                      textStyle:
+                                          theme.textTheme.bodySmall?.copyWith(
+                                        color:
+                                            theme.colorScheme.onSurfaceVariant,
                                       ),
                                     ),
                                   ),
                                   Text(
                                     'Quantidade: ${sale['quantity']} x R\$ ${sale['unitPrice'].toStringAsFixed(2)}',
                                     style: GoogleFonts.spaceGrotesk(
-                                      textStyle: theme.textTheme.bodySmall?.copyWith(
-                                        color: theme.colorScheme.onSurfaceVariant,
+                                      textStyle:
+                                          theme.textTheme.bodySmall?.copyWith(
+                                        color:
+                                            theme.colorScheme.onSurfaceVariant,
                                       ),
                                     ),
                                   ),
@@ -356,13 +367,14 @@ class _SalesReportViewState extends State<SalesReportView> with TickerProviderSt
                                 Text(
                                   'R\$ ${sale['totalPrice'].toStringAsFixed(2)}',
                                   style: GoogleFonts.spaceGrotesk(
-                                    textStyle: theme.textTheme.bodyLarge?.copyWith(
+                                    textStyle:
+                                        theme.textTheme.bodyLarge?.copyWith(
                                       fontWeight: FontWeight.w600,
                                       color: sale['status'] == 'Concluído'
                                           ? Colors.green
                                           : sale['status'] == 'Pendente'
-                                          ? theme.colorScheme.secondary
-                                          : theme.colorScheme.error,
+                                              ? theme.colorScheme.secondary
+                                              : theme.colorScheme.error,
                                     ),
                                   ),
                                 ),
@@ -370,12 +382,13 @@ class _SalesReportViewState extends State<SalesReportView> with TickerProviderSt
                                 Text(
                                   sale['status'],
                                   style: GoogleFonts.spaceGrotesk(
-                                    textStyle: theme.textTheme.bodyMedium?.copyWith(
+                                    textStyle:
+                                        theme.textTheme.bodyMedium?.copyWith(
                                       color: sale['status'] == 'Concluído'
                                           ? Colors.green
                                           : sale['status'] == 'Pendente'
-                                          ? theme.colorScheme.secondary
-                                          : theme.colorScheme.error,
+                                              ? theme.colorScheme.secondary
+                                              : theme.colorScheme.error,
                                     ),
                                   ),
                                 ),

@@ -88,7 +88,7 @@ class AboutView extends StatelessWidget {
 
                       // Copyright
                       Text(
-                        '© 2025 ${AppConstants.parishName}. Todos os direitos reservados.',
+                        '${AppConstants.copyright}. Todos os direitos reservados.',
                         style: GoogleFonts.inter(
                           fontSize: 12,
                           color: theme.colorScheme.onSurface.withOpacity(0.4),

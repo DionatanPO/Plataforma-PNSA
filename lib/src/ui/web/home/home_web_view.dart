@@ -288,8 +288,8 @@ class _HomeWebViewState extends State<HomeWebView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildSideNewsItem(
-                    "12 DEZ", "Inscrições abertas para a Catequese 2025"),
+                _buildSideNewsItem("12 DEZ",
+                    "Inscrições abertas para a Catequese ${AppConstants.currentYear}"),
                 const Divider(height: 30),
                 _buildSideNewsItem("10 DEZ",
                     "Bazar beneficente neste final de semana no salão"),
@@ -483,7 +483,8 @@ class _HomeWebViewState extends State<HomeWebView> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text("© 2025 PNSA. Todos os direitos reservados.",
+                  Text(
+                      "© ${AppConstants.currentYear} PNSA. Todos os direitos reservados.",
                       style: TextStyle(color: Colors.grey[500], fontSize: 13)),
                   if (!isMobile)
                     Text("Desenvolvido com Flutter",
