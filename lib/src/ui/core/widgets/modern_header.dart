@@ -12,6 +12,7 @@ class ModernHeader extends StatelessWidget {
   final IconData? actionIcon;
   final Color? actionColor;
   final bool showBackButton;
+  final VoidCallback? onBack;
 
   const ModernHeader({
     Key? key,
@@ -23,6 +24,7 @@ class ModernHeader extends StatelessWidget {
     this.actionIcon,
     this.actionColor,
     this.showBackButton = false,
+    this.onBack,
   }) : super(key: key);
 
   @override
@@ -56,7 +58,7 @@ class ModernHeader extends StatelessWidget {
           leading: showBackButton
               ? IconButton(
                   icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                  onPressed: () => Get.back(),
+                  onPressed: onBack ?? () => Get.back(),
                   color: theme.colorScheme.onSurface,
                 )
               : (isMobile

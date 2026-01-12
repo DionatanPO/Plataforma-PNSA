@@ -48,9 +48,9 @@ class ContribuicaoDesktopTableView extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    _HeaderCell(text: 'D. REGISTRO', flex: 2, theme: theme),
                     _HeaderCell(text: 'D. PAGAMENTO', flex: 2, theme: theme),
                     _HeaderCell(text: 'FIÉL', flex: 3, theme: theme),
+                    _HeaderCell(text: 'MÊS REF.', flex: 2, theme: theme),
                     _HeaderCell(text: 'MÉTODO', flex: 2, theme: theme),
                     _HeaderCell(text: 'STATUS', flex: 2, theme: theme),
                     _HeaderCell(text: 'VALOR', flex: 2, theme: theme),
@@ -144,6 +144,23 @@ class _ContribuicaoTableRow extends StatefulWidget {
 class _ContribuicaoTableRowState extends State<_ContribuicaoTableRow> {
   bool _isHovering = false;
 
+  String _formatMeses(List<String> meses) {
+    if (meses.isEmpty) return '-';
+    // Pega o primeiro e formata
+    final first = meses.first;
+    try {
+      final parts = first.split('-');
+      if (parts.length == 2) {
+        final date = DateTime(int.parse(parts[0]), int.parse(parts[1]));
+        final formatted = DateFormat('MMM/yy', 'pt_BR').format(date);
+        return meses.length > 1
+            ? '${formatted[0].toUpperCase()}${formatted.substring(1)} (+${meses.length - 1})'
+            : '${formatted[0].toUpperCase()}${formatted.substring(1)}';
+      }
+    } catch (_) {}
+    return first;
+  }
+
   @override
   Widget build(BuildContext context) {
     final d = widget.item;
@@ -168,30 +185,6 @@ class _ContribuicaoTableRowState extends State<_ContribuicaoTableRow> {
         ),
         child: Row(
           children: [
-            // DATA REGISTRO
-            Expanded(
-              flex: 2,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    DateFormat('dd/MM/yyyy').format(d.dataRegistro),
-                    style: GoogleFonts.inter(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: theme.colorScheme.onSurface,
-                    ),
-                  ),
-                  Text(
-                    DateFormat('HH:mm').format(d.dataRegistro),
-                    style: GoogleFonts.inter(
-                      fontSize: 11,
-                      color: theme.colorScheme.onSurface.withOpacity(0.5),
-                    ),
-                  ),
-                ],
-              ),
-            ),
             // DATA PAGAMENTO
             Expanded(
               flex: 2,
@@ -221,7 +214,18 @@ class _ContribuicaoTableRowState extends State<_ContribuicaoTableRow> {
                 ),
               ),
             ),
-
+            // MÊS REF
+            Expanded(
+              flex: 2,
+              child: Text(
+                _formatMeses(d.mesesCompetencia),
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: theme.colorScheme.onSurface.withOpacity(0.8),
+                ),
+              ),
+            ),
             // MÉTODO
             Expanded(
               flex: 2,

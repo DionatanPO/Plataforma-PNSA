@@ -43,9 +43,9 @@ class ContribuicaoController extends GetxController {
   // Listagem filtrada e paginada
   List<Contribuicao> get filteredContribuicoes {
     if (searchQuery.value.isEmpty) {
-      // Ordena por data decrescente
+      // Ordena por ID decrescente (do último para o primeiro se IDs forem sequenciais/temporais ou apenas por string)
       final sorted = List<Contribuicao>.from(_contribuicoes);
-      sorted.sort((a, b) => b.dataRegistro.compareTo(a.dataRegistro));
+      sorted.sort((a, b) => b.id.compareTo(a.id));
       return sorted;
     }
 
@@ -57,7 +57,7 @@ class ContribuicaoController extends GetxController {
           c.id.toLowerCase().contains(query);
     }).toList();
 
-    filtered.sort((a, b) => b.dataRegistro.compareTo(a.dataRegistro));
+    filtered.sort((a, b) => b.id.compareTo(a.id));
     return filtered;
   }
 

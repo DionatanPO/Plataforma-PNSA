@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:ui';
 
+import 'package:intl/intl.dart';
+
 import '../../routes/app_routes.dart';
 import '../core/widgets/custom_sliver_app_bar.dart';
 import 'package:plataforma_pnsa/src/core/constants/app_constants.dart';
@@ -54,6 +56,9 @@ class HelpView extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        _buildSystemUpdateCard(theme, isDark),
+                        const SizedBox(height: 48),
+
                         // Quick Access / Topics
                         Text(
                           'Tópicos Populares',
@@ -406,6 +411,57 @@ class HelpView extends StatelessWidget {
             color: theme.colorScheme.onSurface.withOpacity(0.7),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSystemUpdateCard(ThemeData theme, bool isDark) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.green.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.green.withOpacity(0.2)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.green.withOpacity(0.2),
+              shape: BoxShape.circle,
+            ),
+            child:
+                const Icon(Icons.sync_rounded, size: 28, color: Colors.green),
+          ),
+          const SizedBox(width: 20),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Sistema Atualizado',
+                  style: GoogleFonts.outfit(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.green,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Última verificação: ${DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now())}',
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    color:
+                        isDark ? Colors.green.shade200 : Colors.green.shade800,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
