@@ -28,7 +28,27 @@ class DizimistaController extends GetxController {
 
   // Método para obter o histórico de contribuições de um dizimista
   List<Contribuicao> historicoContribuicoes(String dizimistaId) {
-    return _contribuicoes.where((c) => c.dizimistaId == dizimistaId).toList();
+    final list =
+        _contribuicoes.where((c) => c.dizimistaId == dizimistaId).toList();
+
+    // Ordena pelo mês de referência (decrescente: mais recente primeiro)
+    list.sort((a, b) {
+      String mesA = '';
+      String mesB = '';
+
+      if (a.mesesCompetencia.isNotEmpty) mesA = a.mesesCompetencia.first;
+      if (b.mesesCompetencia.isNotEmpty) mesB = b.mesesCompetencia.first;
+
+      // Se ambos tiverem mês, compara como strings (YYYY-MM funciona lexicograficamente)
+      if (mesA.isNotEmpty && mesB.isNotEmpty) {
+        return mesB.compareTo(mesA);
+      }
+
+      // Se não tiver mês, usa data de registro como fallback
+      return b.dataRegistro.compareTo(a.dataRegistro);
+    });
+
+    return list;
   }
 
   List<Dizimista> get filteredDizimistas {
