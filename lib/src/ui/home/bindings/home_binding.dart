@@ -4,6 +4,7 @@ import '../../dizimistas/controllers/dizimista_controller.dart';
 import '../../contribuicoes/controllers/contribuicao_controller.dart';
 import '../../access_management/controllers/access_management_controller.dart';
 import '../../dashboard/controllers/dashboard_controller.dart';
+import '../../relatorios/controllers/report_controller.dart';
 
 class HomeBinding extends Bindings {
   @override
@@ -15,5 +16,6 @@ class HomeBinding extends Bindings {
     // AccessManagementController deve ser criado imediatamente
     Get.put(AccessManagementController(), permanent: true);
     Get.put(DashboardController(), permanent: true);
+    Get.put(ReportController(), permanent: true);
   }
 }

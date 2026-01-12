@@ -13,6 +13,7 @@ import 'app.dart';
 import 'firebase_options.dart';
 import 'src/data/services/auth_service.dart';
 import 'src/data/services/session_service.dart';
+import 'src/core/services/data_repository_service.dart';
 
 import 'package:intl/date_symbol_data_local.dart';
 
@@ -29,6 +30,7 @@ Future<void> main() async {
   // Instanciar os serviços principais
   Get.put<SessionService>(SessionService());
   Get.put<AuthService>(AuthService());
+  Get.put<DataRepositoryService>(DataRepositoryService());
   Get.put<ThemeService>(ThemeService());
   Get.put(AuthGuard());
 

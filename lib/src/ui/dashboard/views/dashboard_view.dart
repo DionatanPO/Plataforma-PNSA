@@ -51,7 +51,7 @@ class DashboardView extends StatelessWidget {
     return Scaffold(
       backgroundColor: backgroundColor,
       body: Obx(() {
-        if (controller.isLoading.value) {
+        if (controller.isLoading) {
           return const Center(child: CircularProgressIndicator());
         }
 
@@ -188,53 +188,51 @@ class DashboardView extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 16),
-                    LayoutBuilder(builder: (context, constraints) {
-                      return GridView.count(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        crossAxisCount: crossAxisCount,
-                        mainAxisSpacing: 16,
-                        crossAxisSpacing: 16,
-                        childAspectRatio: dynamicAspectRatio,
-                        children: [
-                          _ResponsiveStatCard(
-                            title: 'Arrecadação Hoje',
-                            value: controller
-                                .formatCurrency(controller.arrecadacaoDia),
-                            change: '',
-                            icon: Icons.today_rounded,
-                            color: Colors.teal,
-                            theme: theme,
-                            surfaceColor: surfaceColor,
-                            borderColor: borderColor,
-                          ),
-                          _ResponsiveStatCard(
-                            title: 'Arrecadação Mês',
-                            value: controller
-                                .formatCurrency(controller.arrecadacaoMesAtual),
-                            change: controller
-                                .formatPercent(controller.variacaoArrecadacao),
-                            isNegative: controller.variacaoArrecadacao < 0,
-                            icon: Icons.calendar_month_rounded,
-                            color: Colors.green,
-                            theme: theme,
-                            surfaceColor: surfaceColor,
-                            borderColor: borderColor,
-                          ),
-                          _ResponsiveStatCard(
-                            title: 'Arrecadação Ano',
-                            value: controller
-                                .formatCurrency(controller.arrecadacaoAno),
-                            change: '',
-                            icon: Icons.event_note_rounded,
-                            color: Colors.blueAccent,
-                            theme: theme,
-                            surfaceColor: surfaceColor,
-                            borderColor: borderColor,
-                          ),
-                        ],
-                      );
-                    }),
+                    GridView.count(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      crossAxisCount: crossAxisCount,
+                      mainAxisSpacing: 16,
+                      crossAxisSpacing: 16,
+                      childAspectRatio: dynamicAspectRatio,
+                      children: [
+                        _ResponsiveStatCard(
+                          title: 'Arrecadação Hoje',
+                          value: controller
+                              .formatCurrency(controller.arrecadacaoDia),
+                          change: '',
+                          icon: Icons.today_rounded,
+                          color: Colors.teal,
+                          theme: theme,
+                          surfaceColor: surfaceColor,
+                          borderColor: borderColor,
+                        ),
+                        _ResponsiveStatCard(
+                          title: 'Arrecadação Mês',
+                          value: controller
+                              .formatCurrency(controller.arrecadacaoMesAtual),
+                          change: controller
+                              .formatPercent(controller.variacaoArrecadacao),
+                          isNegative: controller.variacaoArrecadacao < 0,
+                          icon: Icons.calendar_month_rounded,
+                          color: Colors.green,
+                          theme: theme,
+                          surfaceColor: surfaceColor,
+                          borderColor: borderColor,
+                        ),
+                        _ResponsiveStatCard(
+                          title: 'Arrecadação Ano',
+                          value: controller
+                              .formatCurrency(controller.arrecadacaoAno),
+                          change: '',
+                          icon: Icons.event_note_rounded,
+                          color: Colors.blueAccent,
+                          theme: theme,
+                          surfaceColor: surfaceColor,
+                          borderColor: borderColor,
+                        ),
+                      ],
+                    ),
 
                     const SizedBox(height: 32),
 
@@ -267,49 +265,47 @@ class DashboardView extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 16),
-                    LayoutBuilder(builder: (context, constraints) {
-                      return GridView.count(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        crossAxisCount: crossAxisCount,
-                        mainAxisSpacing: 16,
-                        crossAxisSpacing: 16,
-                        childAspectRatio: dynamicAspectRatio,
-                        children: [
-                          _ResponsiveStatCard(
-                            title: 'Fiéis Ativos',
-                            value: controller.ativosDizimistas.toString(),
-                            subtitle: '${controller.totalDizimistas} Total',
-                            change: '',
-                            icon: Icons.check_circle_outline_rounded,
-                            color: Colors.blue,
-                            theme: theme,
-                            surfaceColor: surfaceColor,
-                            borderColor: borderColor,
-                          ),
-                          _ResponsiveStatCard(
-                            title: 'Fiéis Inativos',
-                            value: controller.inativosDizimistas.toString(),
-                            change: '',
-                            icon: Icons.pause_circle_outline_rounded,
-                            color: Colors.orange,
-                            theme: theme,
-                            surfaceColor: surfaceColor,
-                            borderColor: borderColor,
-                          ),
-                          _ResponsiveStatCard(
-                            title: 'Fiéis Afastados',
-                            value: controller.afastadosDizimistas.toString(),
-                            change: '',
-                            icon: Icons.error_outline_rounded,
-                            color: Colors.redAccent,
-                            theme: theme,
-                            surfaceColor: surfaceColor,
-                            borderColor: borderColor,
-                          ),
-                        ],
-                      );
-                    }),
+                    GridView.count(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      crossAxisCount: crossAxisCount,
+                      mainAxisSpacing: 16,
+                      crossAxisSpacing: 16,
+                      childAspectRatio: dynamicAspectRatio,
+                      children: [
+                        _ResponsiveStatCard(
+                          title: 'Fiéis Ativos',
+                          value: controller.ativosDizimistas.toString(),
+                          subtitle: '${controller.totalDizimistas} Total',
+                          change: '',
+                          icon: Icons.check_circle_outline_rounded,
+                          color: Colors.blue,
+                          theme: theme,
+                          surfaceColor: surfaceColor,
+                          borderColor: borderColor,
+                        ),
+                        _ResponsiveStatCard(
+                          title: 'Fiéis Inativos',
+                          value: controller.inativosDizimistas.toString(),
+                          change: '',
+                          icon: Icons.pause_circle_outline_rounded,
+                          color: Colors.orange,
+                          theme: theme,
+                          surfaceColor: surfaceColor,
+                          borderColor: borderColor,
+                        ),
+                        _ResponsiveStatCard(
+                          title: 'Fiéis Afastados',
+                          value: controller.afastadosDizimistas.toString(),
+                          change: '',
+                          icon: Icons.error_outline_rounded,
+                          color: Colors.redAccent,
+                          theme: theme,
+                          surfaceColor: surfaceColor,
+                          borderColor: borderColor,
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),

@@ -14,6 +14,8 @@ class ContribuicaoService {
       'valor': contribuicao.valor,
       'metodo': contribuicao.metodo,
       'dataRegistro': contribuicao.dataRegistro.millisecondsSinceEpoch,
+      'dataPagamento': contribuicao.dataPagamento.millisecondsSinceEpoch,
+      'status': contribuicao.status,
       'usuarioId': contribuicao.usuarioId,
       'observacao': contribuicao.observacao,
       'competencias': contribuicao.competencias.map((c) => c.toMap()).toList(),
@@ -35,6 +37,9 @@ class ContribuicaoService {
       metodo: data['metodo'] ?? '',
       dataRegistro:
           DateTime.fromMillisecondsSinceEpoch(data['dataRegistro'] ?? 0),
+      dataPagamento: DateTime.fromMillisecondsSinceEpoch(
+          data['dataPagamento'] ?? data['dataRegistro'] ?? 0),
+      status: data['status'] ?? 'Pago',
       usuarioId: data['usuarioId'] ?? '',
       observacao: data['observacao'],
       competencias: data['competencias'] != null
@@ -114,11 +119,11 @@ class ContribuicaoService {
       DateTime startDate, DateTime endDate) {
     return FirebaseFirestore.instance
         .collection(_collectionName)
-        .where('dataRegistro',
+        .where('dataPagamento',
             isGreaterThanOrEqualTo: startDate.millisecondsSinceEpoch)
-        .where('dataRegistro',
+        .where('dataPagamento',
             isLessThanOrEqualTo: endDate.millisecondsSinceEpoch)
-        .orderBy('dataRegistro', descending: true)
+        .orderBy('dataPagamento', descending: true)
         .snapshots()
         .map((snapshot) {
       return snapshot.docs.map((doc) => _fromFirestoreDocument(doc)).toList();
@@ -135,5 +140,14 @@ class ContribuicaoService {
         .map((snapshot) {
       return snapshot.docs.map((doc) => _fromFirestoreDocument(doc)).toList();
     });
+  }
+
+  // Obter contribuições por data específica (yyyy-MM-dd)
+  static Stream<List<Contribuicao>> getContribuicoesByDate(String dateStr) {
+    final date = DateTime.parse(dateStr);
+    final startOfDay = DateTime(date.year, date.month, date.day);
+    final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59, 999);
+
+    return getContribuicoesByPeriod(startOfDay, endOfDay);
   }
 }

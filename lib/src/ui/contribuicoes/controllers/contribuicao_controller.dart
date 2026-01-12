@@ -13,18 +13,20 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../models/contribuicao_model.dart';
 import '../../dizimistas/models/dizimista_model.dart';
-import '../../dizimistas/controllers/dizimista_controller.dart';
 import '../../../core/services/dizimista_service.dart';
 import '../../../core/services/contribuicao_service.dart';
 import '../../../data/services/auth_service.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/services/data_repository_service.dart';
 
 class ContribuicaoController extends GetxController {
-  // Estado privado
-  final _contribuicoes = <Contribuicao>[].obs;
-  final _dizimistas = <Dizimista>[].obs;
-  final _isLoading =
-      true.obs; // Inicia como true para evitar "lista vazia" antes do stream
+  final _dataRepo = Get.find<DataRepositoryService>();
+
+  // Estado privado derivado do repositório
+  List<Contribuicao> get _contribuicoes => _dataRepo.contribuicoes;
+  List<Dizimista> get _dizimistas => _dataRepo.dizimistas;
+
+  bool get isLoading => _dataRepo.isSyncing.value;
   final _isLoadingMore = false.obs;
 
   // Filtros e Pesquisa
@@ -36,7 +38,6 @@ class ContribuicaoController extends GetxController {
   // Getters públicos
   List<Contribuicao> get contribuicoes => _contribuicoes;
   List<Dizimista> get dizimistas => _dizimistas;
-  bool get isLoading => _isLoading.value;
   bool get isLoadingMore => _isLoadingMore.value;
 
   // Listagem filtrada e paginada
@@ -71,8 +72,7 @@ class ContribuicaoController extends GetxController {
     return allFiltered.take(count).toList();
   }
 
-  StreamSubscription? _contribuicoesSub;
-  StreamSubscription? _dizimistasSub;
+  // Removido subscrições redundantes
 
   // ==================================================================
   // VARIÁVEIS DO FORMULÁRIO
@@ -88,6 +88,7 @@ class ContribuicaoController extends GetxController {
 
   final tipo = 'Dízimo Regular'.obs; // Transformar em observável
   final metodo = 'PIX'.obs; // Transformar em observável
+  final status = 'Pago'.obs; // ex: 'Pago', 'A Receber'
   final valor = ''.obs; // Transformar em observável
   final observacao = ''.obs;
 
@@ -119,6 +120,8 @@ class ContribuicaoController extends GetxController {
         valor: compExistente.valor,
         dataPagamento: novaData,
       );
+      // Sincroniza a data principal do lançamento
+      dataSelecionada.value = novaData;
     }
   }
 
@@ -128,7 +131,7 @@ class ContribuicaoController extends GetxController {
 
     // Recalcular se houver valor
     if (valor.value.isNotEmpty) {
-      dividirValorEntreCompetencias();
+      atribuirValorEntreCompetencias();
     }
   }
 
@@ -137,8 +140,8 @@ class ContribuicaoController extends GetxController {
     competencias.clear();
   }
 
-  // Método para dividir o valor total igualmente entre as competências selecionadas
-  void dividirValorEntreCompetencias() {
+  // Método para aplicar o valor informado em cada uma das competências selecionadas
+  void atribuirValorEntreCompetencias() {
     if (competencias.isEmpty) return;
 
     String valorLimpo = valor.value
@@ -147,10 +150,11 @@ class ContribuicaoController extends GetxController {
         .replaceAll(' ', '')
         .replaceAll(',', '.');
 
-    double total = double.tryParse(valorLimpo) ?? 0.0;
-    if (total <= 0) return;
+    double valorInformado = double.tryParse(valorLimpo) ?? 0.0;
+    if (valorInformado <= 0) return;
 
-    double valorPorMes = total / competencias.length;
+    // Agora cada mês recebe o valor integral informado no campo
+    double valorPorMes = valorInformado;
 
     // Atualizar a lista mantendo a ordem mas com novos valores e mantendo as datas se existirem
     final novosDados = competencias
@@ -174,33 +178,10 @@ class ContribuicaoController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    // Contribuição agora é passiva e observa o repositório central
 
-    final authService = Get.find<AuthService>();
-
-    // Reage a mudanças no login
-    ever(authService.userData, (userData) {
-      if (userData != null) {
-        print('[ContribuicaoController] User logged in. Starting listener.');
-        _startListening();
-      } else {
-        print('[ContribuicaoController] User logged out. Stopping listener.');
-        _stopListening();
-      }
-    });
-
-    // Se já estiver logado (ex: F5)
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (authService.userData.value != null) {
-        if (_contribuicoesSub == null) {
-          print(
-              '[ContribuicaoController] onInit: User is logged in. Starting listener.');
-          _startListening();
-        }
-      }
-    });
-
-    // Recalcular divisão quando o valor mudar
-    ever(valor, (_) => dividirValorEntreCompetencias());
+    // Recalcular atribuição quando o valor mudar
+    ever(valor, (_) => atribuirValorEntreCompetencias());
 
     // Gerenciar competências e categorização automática
     ever<String>(tipo, (novoTipo) {
@@ -231,24 +212,16 @@ class ContribuicaoController extends GetxController {
       hasMore.value = allFiltered.length > displayedCount.value;
     }
 
-    ever(_contribuicoes, updateHasMore);
+    ever(_dataRepo.contribuicoes, updateHasMore);
     ever(displayedCount, updateHasMore);
     ever(searchQuery, updateHasMore);
 
     print('[ContribuicaoController] onInit: Check initial state...');
-    // Tentativa imediata se o usuário já estiver disponível
-    if (authService.userData.value != null) {
-      _startListening();
-    }
   }
 
   @override
   void onReady() {
     super.onReady();
-    print(
-        '[ContribuicaoController] onReady: Interface ready. Ensuring synchronization...');
-    // Garante sincronização se onInit ou ever falharam por tempo de resposta
-    _startListening();
   }
 
   String _calcularTipoDizimoAutomatico() {
@@ -292,28 +265,11 @@ class ContribuicaoController extends GetxController {
   }
 
   void _startListening() {
-    print(
-        '[ContribuicaoController] _startListening: Checking subscriptions...');
-
-    if (_contribuicoesSub == null) {
-      print('[ContribuicaoController] Starting Contribuicoes stream.');
-      fetchContribuicoes();
-    }
-
-    if (_dizimistasSub == null) {
-      print('[ContribuicaoController] Starting Dizimistas stream.');
-      fetchDizimistas();
-    }
+    // Agora gerenciado pelo DataRepositoryService
   }
 
   void _stopListening() {
-    _contribuicoesSub?.cancel();
-    _dizimistasSub?.cancel();
-    _contribuicoesSub = null;
-    _dizimistasSub = null;
-    _contribuicoes.clear();
-    _dizimistas.clear();
-    _isLoading.value = true;
+    // Agora gerenciado pelo DataRepositoryService
   }
 
   @override
@@ -337,7 +293,13 @@ class ContribuicaoController extends GetxController {
 
     competencias.assignAll(novos);
     competencias.sort((a, b) => a.mesReferencia.compareTo(b.mesReferencia));
-    dividirValorEntreCompetencias();
+
+    // Atualiza a data principal do lançamento com a data da primeira competência selecionada
+    if (competencias.isNotEmpty && competencias.first.dataPagamento != null) {
+      dataSelecionada.value = competencias.first.dataPagamento!;
+    }
+
+    atribuirValorEntreCompetencias();
   }
 
   void _sugerirMesAtual() {
@@ -345,7 +307,7 @@ class ContribuicaoController extends GetxController {
     final mesRef = '${now.year}-${now.month.toString().padLeft(2, '0')}';
     competencias.clear();
     adicionarCompetencia(mesRef, 0);
-    dividirValorEntreCompetencias();
+    atribuirValorEntreCompetencias();
   }
 
   void resetForm() {
@@ -355,79 +317,54 @@ class ContribuicaoController extends GetxController {
     observacao.value = '';
     tipo.value = 'Dízimo';
     metodo.value = 'PIX';
+    status.value = 'Pago';
     _sugerirMesAtual();
   }
 
   Future<void> fetchContribuicoes() async {
-    _isLoading.value = true;
-    try {
-      // Buscar contribuições reais do Firestore usando stream
-      final contribuicoesStream = ContribuicaoService.getAllContribuicoes();
-
-      // Escutar o stream e atualizar a lista local
-      _contribuicoesSub = contribuicoesStream.listen(
-        (contribuicoesList) {
-          print(
-              '[ContribuicaoController] Received ${contribuicoesList.length} contributions.');
-          _contribuicoes.assignAll(contribuicoesList);
-          _isLoading.value =
-              false; // Desativa apenas após receber os primeiros dados
-        },
-        onError: (error) {
-          print("Erro ao carregar contribuições do Firestore: $error");
-          _isLoading.value = false;
-        },
-      );
-    } catch (e) {
-      print("Erro ao carregar contribuições: $e");
-      _isLoading.value = false;
-    }
-    // Removido o finally que setava isLoading para false precocemente
+    _dataRepo.refreshData();
   }
 
   Future<void> fetchDizimistas() async {
-    _isLoading.value = true;
-    try {
-      // Buscar diretamente do Firestore usando o serviço
-      final dizimistasStream = DizimistaService.getAllDizimistas();
-
-      // Escutar o stream e atualizar a lista local
-      _dizimistasSub = dizimistasStream.listen(
-        (dizimistasList) {
-          _dizimistas.assignAll(dizimistasList);
-        },
-        onError: (error) {
-          print("Erro ao carregar dizimistas do Firestore: $error");
-        },
-      );
-    } catch (e) {
-      print("Erro ao carregar dizimistas: $e");
-    } finally {
-      _isLoading.value = false;
-    }
+    _dataRepo.refreshData();
   }
 
   Future<Contribuicao> addContribuicao(Contribuicao contribuicao) async {
-    _isLoading.value = true;
+    _dataRepo.isSyncing.value = true;
     try {
-      // Salvar no Firestore e obter o ID do documento criado
       final docId = await ContribuicaoService.addContribuicao(contribuicao);
-
-      // Criar uma nova contribuição com o ID do documento do Firestore para retorno
       final contribuicaoComId = contribuicao.copyWith(id: docId);
-
       return contribuicaoComId;
     } catch (e) {
       print("Erro ao adicionar contribuição no Firestore: $e");
-      rethrow; // Re-lançar o erro para que a view possa tratar
+      rethrow;
     } finally {
-      _isLoading.value = false;
+      _dataRepo.isSyncing.value = false;
+    }
+  }
+
+  // Novo método para adicionar várias contribuições de uma vez
+  Future<List<Contribuicao>> addContribuicoes(
+      List<Contribuicao> listContribuicoes) async {
+    _dataRepo.isSyncing.value = true;
+    final List<Contribuicao> salvas = [];
+    try {
+      for (var c in listContribuicoes) {
+        final docId = await ContribuicaoService.addContribuicao(c);
+        salvas.add(c.copyWith(id: docId));
+      }
+      return salvas;
+    } catch (e) {
+      print("Erro ao adicionar lote de contribuições: $e");
+      rethrow;
+    } finally {
+      _dataRepo.isSyncing.value = false;
     }
   }
 
   Future<void> deleteContribuicao(String id) async {
     try {
-      _isLoading.value = true;
+      _dataRepo.isSyncing.value = true;
       await ContribuicaoService.deleteContribuicao(id);
       Get.snackbar(
         'Sucesso',
@@ -446,7 +383,7 @@ class ContribuicaoController extends GetxController {
         colorText: Colors.white,
       );
     } finally {
-      _isLoading.value = false;
+      _dataRepo.isSyncing.value = false;
     }
   }
 
@@ -524,11 +461,10 @@ class ContribuicaoController extends GetxController {
     }
   }
 
-  // Método para obter os dados de um dizimista pelo ID
+  // Método para obter os dados de um dizimista pelo ID direto do repositório
   Dizimista? getDizimistaById(String id) {
-    final controller = Get.find<DizimistaController>();
     try {
-      return controller.dizimistas.firstWhere(
+      return _dataRepo.dizimistas.firstWhere(
         (dizimista) => dizimista.id == id,
       );
     } catch (e) {
@@ -602,7 +538,7 @@ class ContribuicaoController extends GetxController {
 
   Future<void> downloadOrShareReceiptPdf(Contribuicao contribuicao) async {
     try {
-      _isLoading.value = true;
+      _dataRepo.isSyncing.value = true;
       final pdf = await _createReceiptPdf(contribuicao);
       final bytes = await pdf.save();
       final fileName =
@@ -641,7 +577,7 @@ class ContribuicaoController extends GetxController {
         colorText: Get.theme.colorScheme.onError,
       );
     } finally {
-      _isLoading.value = false;
+      _dataRepo.isSyncing.value = false;
     }
   }
 
@@ -771,7 +707,9 @@ class ContribuicaoController extends GetxController {
                       ),
                       pw.TextSpan(text: ' referente a '),
                       pw.TextSpan(
-                        text: contribuicao.tipo.toUpperCase(),
+                        text: contribuicao.tipo.startsWith('Dízimo')
+                            ? 'DÍZIMO'
+                            : contribuicao.tipo.toUpperCase(),
                         style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
                       ),
                       if (contribuicao.competencias.isNotEmpty) ...[
@@ -912,7 +850,42 @@ class ContribuicaoController extends GetxController {
     return pdf;
   }
 
-  // Criar uma nova contribuição a partir dos dados do formulário
+  List<Contribuicao> createContribuicoesFromFormSplit() {
+    final dizimista = dizimistaSelecionado.value!;
+    final user = Get.find<AuthService>().currentUser;
+    final now = DateTime.now();
+
+    return competencias.map((comp) {
+      final baseDate = comp.dataPagamento ?? dataSelecionada.value;
+      // Combina a data selecionada com a hora atual do sistema
+      final dataComHora = DateTime(
+        baseDate.year,
+        baseDate.month,
+        baseDate.day,
+        now.hour,
+        now.minute,
+        now.second,
+      );
+
+      return Contribuicao(
+        id: '',
+        dizimistaId: dizimista.id,
+        dizimistaNome: dizimista.nome,
+        tipo: tipo.value,
+        valor: comp.valor,
+        metodo: metodo.value,
+        dataRegistro: now, // Auditoria: quando foi digitado
+        dataPagamento: dataComHora, // Contábil: quando foi pago
+        status: status.value,
+        usuarioId: user?.uid ?? '',
+        observacao: observacao.value.isEmpty ? null : observacao.value,
+        competencias: [comp],
+        mesesCompetencia: [comp.mesReferencia],
+      );
+    }).toList();
+  }
+
+  // Criar uma única contribuição agregada (usado para o recibo consolidado)
   Contribuicao createContribuicaoFromForm() {
     final dizimista = dizimistaSelecionado.value!;
     final user = Get.find<AuthService>().currentUser;
@@ -921,6 +894,17 @@ class ContribuicaoController extends GetxController {
     final valorTotalCalculado =
         competencias.fold(0.0, (sum, item) => sum + item.valor);
 
+    final now = DateTime.now();
+    final baseDate = dataSelecionada.value;
+    final dataComHora = DateTime(
+      baseDate.year,
+      baseDate.month,
+      baseDate.day,
+      now.hour,
+      now.minute,
+      now.second,
+    );
+
     return Contribuicao(
       id: '', // O ID será definido pelo Firestore
       dizimistaId: dizimista.id,
@@ -928,8 +912,9 @@ class ContribuicaoController extends GetxController {
       tipo: tipo.value,
       valor: valorTotalCalculado,
       metodo: metodo.value,
-      dataRegistro:
-          DateTime.now(), // Sempre registra o momento real do lançamento
+      dataRegistro: now, // Auditoria: quando foi digitado
+      dataPagamento: dataComHora, // Contábil: quando foi pago
+      status: status.value,
       usuarioId: user?.uid ?? '',
       observacao: observacao.value.isEmpty ? null : observacao.value,
       competencias: List<ContribuicaoCompetencia>.from(competencias),

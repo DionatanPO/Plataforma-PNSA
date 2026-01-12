@@ -48,9 +48,11 @@ class ContribuicaoDesktopTableView extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    _HeaderCell(text: 'DATA', flex: 2, theme: theme),
-                    _HeaderCell(text: 'FIÉL', flex: 5, theme: theme),
+                    _HeaderCell(text: 'D. REGISTRO', flex: 2, theme: theme),
+                    _HeaderCell(text: 'D. PAGAMENTO', flex: 2, theme: theme),
+                    _HeaderCell(text: 'FIÉL', flex: 3, theme: theme),
                     _HeaderCell(text: 'MÉTODO', flex: 2, theme: theme),
+                    _HeaderCell(text: 'STATUS', flex: 2, theme: theme),
                     _HeaderCell(text: 'VALOR', flex: 2, theme: theme),
                     _HeaderCell(text: 'AÇÕES', flex: 2, theme: theme),
                   ],
@@ -166,7 +168,7 @@ class _ContribuicaoTableRowState extends State<_ContribuicaoTableRow> {
         ),
         child: Row(
           children: [
-            // DATA
+            // DATA REGISTRO
             Expanded(
               flex: 2,
               child: Column(
@@ -190,9 +192,26 @@ class _ContribuicaoTableRowState extends State<_ContribuicaoTableRow> {
                 ],
               ),
             ),
+            // DATA PAGAMENTO
+            Expanded(
+              flex: 2,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    DateFormat('dd/MM/yyyy').format(d.dataPagamento),
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
             // FIÉL
             Expanded(
-              flex: 5,
+              flex: 3,
               child: Text(
                 d.dizimistaNome,
                 style: GoogleFonts.inter(
@@ -213,6 +232,11 @@ class _ContribuicaoTableRowState extends State<_ContribuicaoTableRow> {
                   color: theme.colorScheme.onSurface.withOpacity(0.7),
                 ),
               ),
+            ),
+            // STATUS
+            Expanded(
+              flex: 2,
+              child: _StatusBadge(status: d.status),
             ),
             // VALOR
             Expanded(
@@ -328,8 +352,11 @@ class _ContribuicaoTableRowState extends State<_ContribuicaoTableRow> {
             children: [
               _detailRow('Fiel:', d.dizimistaNome, theme),
               const SizedBox(height: 8),
-              _detailRow('Data:',
+              _detailRow('D. Registro:',
                   DateFormat('dd/MM/yyyy HH:mm').format(d.dataRegistro), theme),
+              const SizedBox(height: 8),
+              _detailRow('D. Pagamento:',
+                  DateFormat('dd/MM/yyyy').format(d.dataPagamento), theme),
               const SizedBox(height: 8),
               _detailRow('Método:', d.metodo, theme),
               if (d.observacao?.isNotEmpty == true) ...[
@@ -399,6 +426,47 @@ class _ContribuicaoTableRowState extends State<_ContribuicaoTableRow> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _StatusBadge extends StatelessWidget {
+  final String status;
+  const _StatusBadge({required this.status});
+
+  @override
+  Widget build(BuildContext context) {
+    final isPago = status == 'Pago';
+    final color = isPago ? Colors.green : Colors.orange;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: color.withOpacity(0.2)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(isPago ? Icons.check_circle_rounded : Icons.pending_rounded,
+                  size: 12, color: color),
+              const SizedBox(width: 4),
+              Text(
+                status,
+                style: GoogleFonts.inter(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

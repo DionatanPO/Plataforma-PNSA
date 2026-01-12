@@ -100,12 +100,23 @@ class ContribuicaoMobileListViewItem extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      dateStr,
+                      'Pago em: ${DateFormat('dd/MM/yyyy').format(d.dataPagamento)}',
                       style: GoogleFonts.inter(
                         fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Registrado: $dateStr',
+                      style: GoogleFonts.inter(
+                        fontSize: 10,
                         color: theme.colorScheme.onSurface.withOpacity(0.5),
                       ),
                     ),
+                    const SizedBox(height: 4),
+                    _StatusBadge(status: d.status),
                   ],
                 ),
               ),
@@ -222,8 +233,11 @@ class ContribuicaoMobileListViewItem extends StatelessWidget {
             children: [
               _detailRow('Fiel:', d.dizimistaNome, theme),
               const SizedBox(height: 8),
-              _detailRow('Data:',
+              _detailRow('D. Registro:',
                   DateFormat('dd/MM/yyyy HH:mm').format(d.dataRegistro), theme),
+              const SizedBox(height: 8),
+              _detailRow('D. Pagamento:',
+                  DateFormat('dd/MM/yyyy').format(d.dataPagamento), theme),
               const SizedBox(height: 8),
               _detailRow('Método:', d.metodo, theme),
               if (d.observacao?.isNotEmpty == true) ...[
@@ -311,6 +325,47 @@ class ContribuicaoMobileListViewItem extends StatelessWidget {
           child: Text(value,
               style:
                   GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w500)),
+        ),
+      ],
+    );
+  }
+}
+
+class _StatusBadge extends StatelessWidget {
+  final String status;
+  const _StatusBadge({required this.status});
+
+  @override
+  Widget build(BuildContext context) {
+    final isPago = status == 'Pago';
+    final color = isPago ? Colors.green : Colors.orange;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: color.withOpacity(0.2)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(isPago ? Icons.check_circle_rounded : Icons.pending_rounded,
+                  size: 10, color: color),
+              const SizedBox(width: 4),
+              Text(
+                status,
+                style: GoogleFonts.inter(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );

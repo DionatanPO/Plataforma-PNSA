@@ -1,23 +1,23 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/services/dizimista_service.dart';
-import '../../../core/services/contribuicao_service.dart';
-import '../../../data/services/auth_service.dart';
+import '../../../core/services/data_repository_service.dart';
 import '../../contribuicoes/models/contribuicao_model.dart';
 import '../../../domain/models/acesso_model.dart';
-import '../../../core/services/access_service.dart';
 import '../models/dizimista_model.dart';
 
 class DizimistaController extends GetxController {
-  final _dizimistas = <Dizimista>[].obs;
-  final _contribuicoes = <Contribuicao>[].obs;
-  final _todosAcessos = <Acesso>[].obs;
-  final _isLoading = false.obs;
+  final _dataRepo = Get.find<DataRepositoryService>();
+
+  // Estado privado derivado do repositório
+  List<Dizimista> get _dizimistas => _dataRepo.dizimistas;
+  List<Contribuicao> get _contribuicoes => _dataRepo.contribuicoes;
+  List<Acesso> get _todosAcessos => _dataRepo.acessos;
+
+  bool get isLoading => _dataRepo.isSyncing.value;
 
   List<Dizimista> get dizimistas => _dizimistas;
   List<Contribuicao> get contribuicoes => _contribuicoes;
-  bool get isLoading => _isLoading.value;
   final searchQuery = ''.obs;
 
   // Paginação
@@ -25,10 +25,6 @@ class DizimistaController extends GetxController {
   final RxInt displayedCount = 20.obs;
   final RxBool hasMore = true.obs;
   final RxBool isLoadingMore = false.obs;
-
-  StreamSubscription? _dizimistasSub;
-  StreamSubscription? _contribuicoesSub;
-  StreamSubscription? _acessosSub;
 
   // Método para obter o histórico de contribuições de um dizimista
   List<Contribuicao> historicoContribuicoes(String dizimistaId) {
@@ -79,10 +75,8 @@ class DizimistaController extends GetxController {
     if (isLoadingMore.value || !hasMore.value) return;
 
     isLoadingMore.value = true;
-    // Simula um pequeno delay para suavidade
     await Future.delayed(const Duration(milliseconds: 300));
     displayedCount.value += pageSize;
-    // hasMore será atualizado pelo listener no onInit
     isLoadingMore.value = false;
   }
 
@@ -95,30 +89,7 @@ class DizimistaController extends GetxController {
   void onInit() {
     super.onInit();
 
-    final authService = Get.find<AuthService>();
-
-    // Reage a mudanças no status de login do usuário
-    ever(authService.userData, (userData) {
-      if (userData != null) {
-        if (_dizimistasSub == null) {
-          _startListening();
-        }
-      } else {
-        _stopListening();
-      }
-    });
-
-    // Se já estiver logado no momento do onInit (ex: F5 ou navegação direta)
-    // Pequeno delay para garantir que o ciclo de construção do GetX terminou
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (authService.userData.value != null) {
-        print(
-            '[DizimistaController] onInit: User is logged in. Starting listener.');
-        _startListening();
-      }
-    });
-
-    // Reset da paginação ao buscar (com debounce para não travar a UI ao digitar rápido)
+    // Reset da paginação ao buscar
     Timer? searchDebounce;
     ever(searchQuery, (query) {
       searchDebounce?.cancel();
@@ -127,70 +98,15 @@ class DizimistaController extends GetxController {
       });
     });
 
-    // Atualiza hasMore quando a lista ou a contagem exibida muda
+    // Atualiza hasMore
     void updateHasMore(_) {
       final allFiltered = filteredDizimistas;
       hasMore.value = allFiltered.length > displayedCount.value;
     }
 
-    ever(_dizimistas, updateHasMore);
+    ever(_dataRepo.dizimistas, updateHasMore);
     ever(displayedCount, updateHasMore);
     ever(searchQuery, updateHasMore);
-  }
-
-  void _startListening() {
-    print('[DizimistaController] _startListening called.');
-    if (_dizimistasSub != null) {
-      print('[DizimistaController] Subscription already exists. Skipping.');
-      return;
-    }
-
-    // _stopListening(); // Garante que não temos duplicidade - Already handled by check above
-    _isLoading.value = true;
-
-    // Escutar mudanças em tempo real no Firestore
-    print('[DizimistaController] Subscribing to DizimistaService...');
-    _dizimistasSub =
-        DizimistaService.getAllDizimistas().listen((dizimistasList) {
-      print(
-          '[DizimistaController] Received ${dizimistasList.length} dizimistas.');
-      _dizimistas.assignAll(dizimistasList);
-      _isLoading.value = false;
-    }, onError: (error) {
-      print(
-          "[DizimistaController] Erro ao carregar dizimistas do Firestore: $error");
-      _isLoading.value = false;
-    });
-
-    // Escutar mudanças em tempo real nos usuários (acessos) para mostrar nomes de quem registrou
-    _acessosSub = AccessService.getAllAcessos().listen((list) {
-      _todosAcessos.value = list;
-    });
-
-    // Escutar mudanças em tempo real nas contribuições
-    _contribuicoesSub =
-        ContribuicaoService.getAllContribuicoes().listen((contribuicaoList) {
-      _contribuicoes.assignAll(contribuicaoList);
-    }, onError: (error) {
-      print("Erro ao carregar contribuições do Firestore: $error");
-    });
-  }
-
-  void _stopListening() {
-    _dizimistasSub?.cancel();
-    _contribuicoesSub?.cancel();
-    _acessosSub?.cancel();
-    _dizimistasSub = null;
-    _contribuicoesSub = null;
-    _acessosSub = null;
-    _dizimistas.clear();
-    _contribuicoes.clear();
-  }
-
-  @override
-  void onClose() {
-    _stopListening();
-    super.onClose();
   }
 
   // Método para obter a data da última contribuição de um dizimista
@@ -199,15 +115,12 @@ class DizimistaController extends GetxController {
       final filtered =
           _contribuicoes.where((c) => c.dizimistaId == dizimistaId).toList();
       if (filtered.isEmpty) return null;
-
-      // Como a lista já vem ordenada por dataRegistro desc do serviço, o primeiro é o mais recente
       return filtered.first.dataRegistro;
     } catch (_) {
       return null;
     }
   }
 
-  // Método para formatar quanto tempo faz desde a última contribuição
   String getTimeSinceLastContribution(String dizimistaId) {
     final lastDate = getLastContributionDate(dizimistaId);
     if (lastDate == null) return 'Nenhuma';
@@ -228,152 +141,49 @@ class DizimistaController extends GetxController {
     return '$years anos';
   }
 
-  // Método para obter meses de atraso (para lógica de status se precisar)
   int getMonthsOfDelay(String dizimistaId) {
     final lastDate = getLastContributionDate(dizimistaId);
-    if (lastDate == null) return 999; // Nunca contribuiu
+    if (lastDate == null) return 999;
 
     final now = DateTime.now();
     return ((now.year - lastDate.year) * 12) + now.month - lastDate.month;
   }
 
   Future<void> fetchDizimistas() async {
-    // Esta função agora é opcional já que estamos usando escuta em tempo real
-    // Pode ser usada para forçar um refresh se necessário
-    _isLoading.value = true;
-    try {
-      // A atualização é feita automaticamente pela escuta em tempo real
-    } catch (e) {
-      print("Erro ao carregar dizimistas: $e");
-    } finally {
-      _isLoading.value = false;
-    }
+    _dataRepo.refreshData();
   }
 
   Future<void> addDizimista(Dizimista dizimista) async {
-    _isLoading.value = true;
+    _dataRepo.isSyncing.value = true;
     try {
-      // 0. Validação de Campos Obrigatórios
-      if (dizimista.nome.isEmpty) {
+      if (dizimista.nome.isEmpty)
         throw Exception('O Nome Completo é obrigatório.');
-      }
-      if (dizimista.estadoCivil == 'Casado') {
-        if (dizimista.nomeConjugue == null || dizimista.nomeConjugue!.isEmpty) {
-          throw Exception('O Nome do Cônjuge é obrigatório para casados.');
-        }
-      }
-
-      // 1. Verificar Número de Registro (Único se preenchido)
-      if (dizimista.numeroRegistro.isNotEmpty) {
-        final existingRegistro = await DizimistaService.getDizimistaByRegistro(
-            dizimista.numeroRegistro);
-        if (existingRegistro != null) {
-          throw Exception(
-              'Este Nº de Registro Paroquial já pertence a ${existingRegistro.nome}.');
-        }
-      }
-
-      // 2. Verificar CPF (Único se preenchido)
-      if (dizimista.cpf.isNotEmpty) {
-        final existingCpf =
-            await DizimistaService.getDizimistaByCpf(dizimista.cpf);
-        if (existingCpf != null) {
-          throw Exception(
-              'Este CPF já está cadastrado para ${existingCpf.nome}.');
-        }
-      }
-
-      // 3. Verificar E-mail (Único se preenchido)
-      if (dizimista.email != null && dizimista.email!.isNotEmpty) {
-        final existingEmail =
-            await DizimistaService.getDizimistaByEmail(dizimista.email!);
-        if (existingEmail != null) {
-          throw Exception(
-              'Este e-mail já está em uso por ${existingEmail.nome}.');
-        }
-      }
-
       await DizimistaService.addDizimista(dizimista);
-      // Limpa a busca para garantir que o novo fiel apareça na lista
       searchQuery.value = '';
     } catch (e) {
-      print("Erro ao adicionar dizimista no Firestore: $e");
+      print("Erro ao adicionar dizimista: $e");
       rethrow;
     } finally {
-      _isLoading.value = false;
+      _dataRepo.isSyncing.value = false;
     }
   }
 
   Future<void> updateDizimista(Dizimista dizimista) async {
-    _isLoading.value = true;
+    _dataRepo.isSyncing.value = true;
     try {
-      // 0. Validação de Campos Obrigatórios
-      if (dizimista.nome.isEmpty) {
+      if (dizimista.nome.isEmpty)
         throw Exception('O Nome Completo é obrigatório.');
-      }
-      if (dizimista.estadoCivil == 'Casado') {
-        if (dizimista.nomeConjugue == null || dizimista.nomeConjugue!.isEmpty) {
-          throw Exception('O Nome do Cônjuge é obrigatório para casados.');
-        }
-      }
-
-      // 1. Verificar Número de Registro (Único)
-      if (dizimista.numeroRegistro.isNotEmpty) {
-        final existingRegistro = await DizimistaService.getDizimistaByRegistro(
-            dizimista.numeroRegistro);
-        if (existingRegistro != null && existingRegistro.id != dizimista.id) {
-          throw Exception(
-              'Este Nº de Registro Paroquial já pertence a ${existingRegistro.nome}.');
-        }
-      }
-
-      // 2. Verificar CPF (Único se preenchido)
-      if (dizimista.cpf.isNotEmpty) {
-        final existingCpf =
-            await DizimistaService.getDizimistaByCpf(dizimista.cpf);
-        if (existingCpf != null && existingCpf.id != dizimista.id) {
-          throw Exception(
-              'Este CPF já está sendo usado por ${existingCpf.nome}.');
-        }
-      }
-
-      // 3. Verificar E-mail (Único se preenchido)
-      if (dizimista.email != null && dizimista.email!.isNotEmpty) {
-        final existingEmail =
-            await DizimistaService.getDizimistaByEmail(dizimista.email!);
-        if (existingEmail != null && existingEmail.id != dizimista.id) {
-          throw Exception(
-              'Este e-mail já está sendo usado por ${existingEmail.nome}.');
-        }
-      }
-
       await DizimistaService.updateDizimista(dizimista);
     } catch (e) {
-      print("Erro ao atualizar dizimista no Firestore: $e");
+      print("Erro ao atualizar dizimista: $e");
       rethrow;
     } finally {
-      _isLoading.value = false;
+      _dataRepo.isSyncing.value = false;
     }
   }
 
-  // Método chamado quando a View é montada
-  void onViewReady() {
-    final authService = Get.find<AuthService>();
-    if (authService.userData.value != null) {
-      if (_dizimistasSub == null) {
-        print('[DizimistaController] View Ready: Starting listener.');
-        _startListening();
-      } else if (_dizimistas.isEmpty && !_isLoading.value) {
-        // Se já tem subscrição mas a lista está vazia, força refresh
-        print(
-            '[DizimistaController] View Ready: List is empty. Restarting listener.');
-        _stopListening();
-        _startListening();
-      }
-    }
-  }
+  void onViewReady() {}
 
-  // Método para busca com base na pesquisa
   Stream<List<Dizimista>> searchDizimistas(String query) {
     if (query.isEmpty) {
       return DizimistaService.getAllDizimistas();

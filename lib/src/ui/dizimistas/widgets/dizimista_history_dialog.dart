@@ -191,7 +191,8 @@ class _HistoryItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = theme.brightness == Brightness.dark;
-    final dateStr =
+    final dateStr = DateFormat('dd/MM/yyyy').format(contribuicao.dataPagamento);
+    final regDateStr =
         DateFormat('dd/MM/yyyy HH:mm').format(contribuicao.dataRegistro);
 
     return Container(
@@ -237,30 +238,16 @@ class _HistoryItemCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: theme.primaryColor.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        contribuicao.tipo,
-                        style: GoogleFonts.inter(
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          color: theme.primaryColor,
-                        ),
-                      ),
-                    ),
+                    _StatusBadge(status: contribuicao.status),
                   ],
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  dateStr,
+                  'Pago em: $dateStr',
                   style: GoogleFonts.inter(
                     fontSize: 12,
-                    color: theme.colorScheme.onSurface.withOpacity(0.5),
+                    fontWeight: FontWeight.w600,
+                    color: theme.colorScheme.primary,
                   ),
                 ),
                 if (contribuicao.mesesCompetencia.isNotEmpty) ...[
@@ -330,7 +317,7 @@ class _HistoryItemCard extends StatelessWidget {
                         size: 14, color: Colors.blue.withOpacity(0.7)),
                     const SizedBox(width: 6),
                     Text(
-                      'Reg. por: $agentName',
+                      'Reg. por: $agentName em $regDateStr',
                       style: GoogleFonts.inter(
                         fontSize: 11,
                         fontWeight: FontWeight.w500,
@@ -416,5 +403,41 @@ class _HistoryItemCard extends StatelessWidget {
     } catch (_) {
       return mesRef;
     }
+  }
+}
+
+class _StatusBadge extends StatelessWidget {
+  final String status;
+  const _StatusBadge({required this.status});
+
+  @override
+  Widget build(BuildContext context) {
+    final isPago = status == 'Pago';
+    final color = isPago ? Colors.green : Colors.orange;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: color.withOpacity(0.2)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(isPago ? Icons.check_circle_rounded : Icons.pending_rounded,
+              size: 10, color: color),
+          const SizedBox(width: 4),
+          Text(
+            status,
+            style: GoogleFonts.inter(
+              fontSize: 9,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

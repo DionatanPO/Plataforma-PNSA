@@ -11,118 +11,29 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
-import '../../../core/services/contribuicao_service.dart';
-import '../../../core/services/dizimista_service.dart';
-import '../../../core/services/access_service.dart';
-import '../../../data/services/auth_service.dart';
 import '../../contribuicoes/models/contribuicao_model.dart';
 import '../../dizimistas/models/dizimista_model.dart';
 import '../../../domain/models/acesso_model.dart';
 import '../../home/controlles/home_controller.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/services/data_repository_service.dart';
 
 class DashboardController extends GetxController {
-  // Observáveis para dados brutos
-  final RxList<Contribuicao> _todasContribuicoes = <Contribuicao>[].obs;
-  final RxList<Dizimista> _todosDizimistas = <Dizimista>[].obs;
-  final RxList<Acesso> _todosAcessos = <Acesso>[].obs;
-  final RxBool isLoading = true.obs;
-  final RxString searchTerms = ''.obs;
+  final _dataRepo = Get.find<DataRepositoryService>();
 
-  // Flags para controle de carga individual
-  bool _contribuicoesLoaded = false;
-  bool _dizimistasLoaded = false;
-  bool _acessosLoaded = false;
+  // Getters para dados brutos
+  List<Contribuicao> get _todasContribuicoes => _dataRepo.contribuicoes;
+  List<Dizimista> get _todosDizimistas => _dataRepo.dizimistas;
+  List<Acesso> get _todosAcessos => _dataRepo.acessos;
 
-  // Streams subscripts
-  StreamSubscription? _contribuicoesSub;
-  StreamSubscription? _dizimistasSub;
-  StreamSubscription? _acessosSub;
+  final searchTerms = ''.obs;
+
+  bool get isLoading => _dataRepo.isSyncing.value;
 
   @override
   void onInit() {
     super.onInit();
-
-    final authService = Get.find<AuthService>();
-
-    // Reage a mudanças no usuário (login/logout)
-    ever(authService.userData, (userData) {
-      if (userData != null) {
-        _startListening();
-      } else {
-        _stopListening();
-      }
-    });
-
-    // Se já estiver logado (ex: refresh), inicia agora
-    if (authService.userData.value != null) {
-      _startListening();
-    }
-  }
-
-  void _stopListening() {
-    _contribuicoesSub?.cancel();
-    _dizimistasSub?.cancel();
-    _acessosSub?.cancel();
-    _contribuicoesSub = null;
-    _dizimistasSub = null;
-    _acessosSub = null;
-    _todasContribuicoes.clear();
-    _todosDizimistas.clear();
-    _todosAcessos.clear();
-    _contribuicoesLoaded = false;
-    _dizimistasLoaded = false;
-    _acessosLoaded = false;
-    isLoading.value = true;
-  }
-
-  @override
-  void onClose() {
-    _contribuicoesSub?.cancel();
-    _dizimistasSub?.cancel();
-    _acessosSub?.cancel();
-    super.onClose();
-  }
-
-  void _startListening() {
-    print('[DashboardController] _startListening: Checking subscriptions...');
-    isLoading.value = true;
-
-    if (_contribuicoesSub == null) {
-      print('[DashboardController] Starting Contribuicoes stream.');
-      _contribuicoesSub =
-          ContribuicaoService.getAllContribuicoes().listen((list) {
-        _todasContribuicoes.value = list;
-        _contribuicoesLoaded = true;
-        _checkLoading();
-      });
-    }
-
-    if (_dizimistasSub == null) {
-      print('[DashboardController] Starting Dizimistas stream.');
-      _dizimistasSub = DizimistaService.getAllDizimistas().listen((list) {
-        _todosDizimistas.value = list;
-        _dizimistasLoaded = true;
-        _checkLoading();
-      });
-    }
-
-    if (_acessosSub == null) {
-      print('[DashboardController] Starting Acessos stream.');
-      _acessosSub = AccessService.getAllAcessos().listen((list) {
-        _todosAcessos.value = list;
-        _acessosLoaded = true;
-        _checkLoading();
-      });
-    }
-  }
-
-  void _checkLoading() {
-    // Só remove o loading quando TODAS as streams tiverem respondido pelo menos uma vez
-    if (_contribuicoesLoaded && _dizimistasLoaded && _acessosLoaded) {
-      isLoading.value = false;
-      print('[DashboardController] All data sources loaded.');
-    }
+    // Dashboard agora apenas observa o repositório central
   }
 
   // Getters para KPIs Financeiros
@@ -130,9 +41,9 @@ class DashboardController extends GetxController {
     final now = DateTime.now();
     return _todasContribuicoes
         .where((c) =>
-            c.dataRegistro.year == now.year &&
-            c.dataRegistro.month == now.month &&
-            c.dataRegistro.day == now.day)
+            c.dataPagamento.year == now.year &&
+            c.dataPagamento.month == now.month &&
+            c.dataPagamento.day == now.day)
         .fold(0.0, (sum, c) => sum + c.valor);
   }
 
@@ -140,15 +51,15 @@ class DashboardController extends GetxController {
     final now = DateTime.now();
     return _todasContribuicoes
         .where((c) =>
-            c.dataRegistro.year == now.year &&
-            c.dataRegistro.month == now.month)
+            c.dataPagamento.year == now.year &&
+            c.dataPagamento.month == now.month)
         .fold(0.0, (sum, c) => sum + c.valor);
   }
 
   double get arrecadacaoAno {
     final now = DateTime.now();
     return _todasContribuicoes
-        .where((c) => c.dataRegistro.year == now.year)
+        .where((c) => c.dataPagamento.year == now.year)
         .fold(0.0, (sum, c) => sum + c.valor);
   }
 
@@ -159,8 +70,8 @@ class DashboardController extends GetxController {
         firstDayCurrentMonth.subtract(const Duration(days: 1));
     return _todasContribuicoes
         .where((c) =>
-            c.dataRegistro.year == lastDayLastMonth.year &&
-            c.dataRegistro.month == lastDayLastMonth.month)
+            c.dataPagamento.year == lastDayLastMonth.year &&
+            c.dataPagamento.month == lastDayLastMonth.month)
         .fold(0.0, (sum, c) => sum + c.valor);
   }
 
@@ -175,8 +86,8 @@ class DashboardController extends GetxController {
     final now = DateTime.now();
     final contribuicoesMes = _todasContribuicoes
         .where((c) =>
-            c.dataRegistro.year == now.year &&
-            c.dataRegistro.month == now.month)
+            c.dataPagamento.year == now.year &&
+            c.dataPagamento.month == now.month)
         .toList();
     if (contribuicoesMes.isEmpty) return 0.0;
     return arrecadacaoMesAtual / contribuicoesMes.length;
@@ -242,7 +153,7 @@ class DashboardController extends GetxController {
 
   Future<void> downloadOrShareReceiptPdf(Contribuicao contribuicao) async {
     try {
-      isLoading.value = true;
+      _dataRepo.isSyncing.value = true;
       final pdf = await _createReceiptPdf(contribuicao);
       final bytes = await pdf.save();
       final fileName =
@@ -281,26 +192,13 @@ class DashboardController extends GetxController {
         colorText: Get.theme.colorScheme.onError,
       );
     } finally {
-      isLoading.value = false;
+      _dataRepo.isSyncing.value = false;
     }
   }
 
   Future<pw.Document> _createReceiptPdf(Contribuicao contribuicao) async {
     final pdf = pw.Document();
-    final authService = Get.find<AuthService>();
-    final user = authService.currentUser;
-    String agentName = user?.displayName ?? 'Usuário do Sistema';
-
     final currency = NumberFormat.simpleCurrency(locale: 'pt_BR');
-
-    // Logo
-    pw.ImageProvider? logoImage;
-    try {
-      final logoData = await rootBundle.load('assets/images/logo.jpg');
-      logoImage = pw.MemoryImage(logoData.buffer.asUint8List());
-    } catch (e) {
-      print('Erro ao carregar logo: $e');
-    }
 
     pdf.addPage(
       pw.Page(
@@ -320,70 +218,17 @@ class DashboardController extends GetxController {
                 pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
-                    pw.Row(
-                      children: [
-                        if (logoImage != null)
-                          pw.Container(
-                            width: 50,
-                            height: 50,
-                            margin: const pw.EdgeInsets.only(right: 15),
-                            child: pw.Image(logoImage),
-                          ),
-                        pw.Column(
-                          crossAxisAlignment: pw.CrossAxisAlignment.start,
-                          children: [
-                            pw.Text(
-                              AppConstants.parishName.toUpperCase(),
-                              style: pw.TextStyle(
-                                fontWeight: pw.FontWeight.bold,
-                                fontSize: 12,
-                                color: PdfColors.blue900,
-                              ),
-                            ),
-                            pw.Text(
-                              'CNPJ: ${AppConstants.parishCnpj}',
-                              style: const pw.TextStyle(
-                                fontSize: 8,
-                                color: PdfColors.grey600,
-                              ),
-                            ),
-                            pw.Text(
-                              '${AppConstants.parishAddress} | ${AppConstants.parishPhone}',
-                              style: const pw.TextStyle(
-                                fontSize: 8,
-                                color: PdfColors.grey600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    pw.Container(
-                      padding: const pw.EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 5,
-                      ),
-                      decoration: pw.BoxDecoration(
-                        color: PdfColors.blue50,
-                        borderRadius: pw.BorderRadius.circular(5),
-                      ),
-                      child: pw.Text(
-                        'RECIBO nº ${contribuicao.id.length > 8 ? contribuicao.id.substring(0, 8).toUpperCase() : "NOVO"}',
+                    pw.Text(AppConstants.parishName.toUpperCase(),
                         style: pw.TextStyle(
-                          fontWeight: pw.FontWeight.bold,
-                          fontSize: 10,
-                          color: PdfColors.blue800,
-                        ),
-                      ),
-                    ),
+                            fontWeight: pw.FontWeight.bold, fontSize: 10)),
+                    pw.Text('RECIBO DE CONTRIBUIÇÃO',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold, fontSize: 10)),
                   ],
                 ),
-
                 pw.SizedBox(height: 20),
                 pw.Divider(color: PdfColors.grey300),
-                pw.SizedBox(height: 20),
-
-                // Content
+                pw.SizedBox(height: 15),
                 pw.RichText(
                   text: pw.TextSpan(
                     style: const pw.TextStyle(
@@ -404,79 +249,20 @@ class DashboardController extends GetxController {
                           fontSize: 14,
                         ),
                       ),
+                      const pw.TextSpan(
+                          text: ' referente a contribuição realizada em '),
+                      pw.TextSpan(
+                          text: DateFormat('dd/MM/yyyy')
+                              .format(contribuicao.dataPagamento),
+                          style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
                       const pw.TextSpan(text: '.'),
                     ],
                   ),
                 ),
-
-                pw.SizedBox(height: 15),
-                pw.Row(
-                  children: [
-                    pw.Text(
-                      'Forma de Pagamento: ',
-                      style: const pw.TextStyle(fontSize: 10),
-                    ),
-                    pw.Text(
-                      contribuicao.metodo,
-                      style: pw.TextStyle(
-                        fontWeight: pw.FontWeight.bold,
-                        fontSize: 10,
-                      ),
-                    ),
-                  ],
-                ),
-
                 pw.Spacer(),
-
-                // Footer e Assinatura Eletrônica
                 pw.Row(
-                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: pw.CrossAxisAlignment.end,
+                  mainAxisAlignment: pw.MainAxisAlignment.end,
                   children: [
-                    pw.Column(
-                      crossAxisAlignment: pw.CrossAxisAlignment.start,
-                      children: [
-                        pw.Container(
-                          padding: const pw.EdgeInsets.all(6),
-                          decoration: pw.BoxDecoration(
-                            border: pw.Border.all(color: PdfColors.blue100),
-                            borderRadius: pw.BorderRadius.circular(4),
-                            color: PdfColors.blue50,
-                          ),
-                          child: pw.Column(
-                            crossAxisAlignment: pw.CrossAxisAlignment.start,
-                            children: [
-                              pw.Text(
-                                'ASSINATURA ELETRÔNICA',
-                                style: pw.TextStyle(
-                                  fontWeight: pw.FontWeight.bold,
-                                  fontSize: 7,
-                                  color: PdfColors.blue800,
-                                ),
-                              ),
-                              pw.SizedBox(height: 2),
-                              pw.Text(
-                                '${AppConstants.pdfAuthBy}: $agentName',
-                                style: const pw.TextStyle(fontSize: 6),
-                              ),
-                              pw.Text(
-                                '${AppConstants.pdfValidatedVia} ${DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now())}',
-                                style: const pw.TextStyle(fontSize: 6),
-                              ),
-                              pw.Text(
-                                '${AppConstants.pdfVerificacaoCode}: ${contribuicao.id.hashCode.toRadixString(16).toUpperCase()}',
-                                style: const pw.TextStyle(fontSize: 6),
-                              ),
-                            ],
-                          ),
-                        ),
-                        pw.SizedBox(height: 8),
-                        pw.Text(
-                          'Data: ${DateFormat('dd/MM/yyyy').format(contribuicao.dataRegistro)}',
-                          style: const pw.TextStyle(fontSize: 10),
-                        ),
-                      ],
-                    ),
                     pw.Column(
                       children: [
                         pw.Container(

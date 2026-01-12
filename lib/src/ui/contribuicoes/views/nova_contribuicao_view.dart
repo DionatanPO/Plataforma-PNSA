@@ -321,7 +321,7 @@ class _NovaContribuicaoViewState extends State<NovaContribuicaoView> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '• Para dízimos atrasados, selecione "Dízimo Atrasado" e indique os meses de referência',
+                    '• Para múltiplos meses, selecione os períodos desejados no calendário de referência',
                     style: GoogleFonts.inter(
                       fontSize: 13,
                       height: 1.5,
@@ -950,18 +950,6 @@ class _NovaContribuicaoViewState extends State<NovaContribuicaoView> {
             ),
           ),
         ),
-
-        // Badge de Status: Mostra automaticamente se é Regular, Atrasado ou Antecipado
-        Obx(() {
-          if (controller.competencias.isEmpty ||
-              controller.tipo.value == 'Dízimo') {
-            return const SizedBox.shrink();
-          }
-          return Padding(
-            padding: const EdgeInsets.only(top: 12),
-            child: _buildTypeBadge(),
-          );
-        }),
         const SizedBox(height: 24),
         const SizedBox(height: 20),
         _label('Qual o valor total recebido?'),
@@ -1002,6 +990,13 @@ class _NovaContribuicaoViewState extends State<NovaContribuicaoView> {
               _paymentChip('Transferência', Icons.sync_alt_rounded)
             ])),
         const SizedBox(height: 24),
+        _label('Status do Pagamento'),
+        Obx(() => Row(children: [
+              _statusChip('Pago', Icons.check_circle_rounded, Colors.green),
+              const SizedBox(width: 12),
+              _statusChip('A Receber', Icons.pending_rounded, Colors.orange),
+            ])),
+        const SizedBox(height: 24),
         _label('Observação (Opcional)'),
         Container(
           decoration: BoxDecoration(
@@ -1024,46 +1019,6 @@ class _NovaContribuicaoViewState extends State<NovaContribuicaoView> {
         const SizedBox(height: 32),
         _buildSummaryCard(),
       ],
-    );
-  }
-
-  Widget _buildTypeBadge() {
-    Color color = Colors.blue;
-    IconData icon = Icons.check_circle_outline_rounded;
-
-    if (controller.tipo.value == 'Dízimo Atrasado') {
-      color = Colors.orange;
-      icon = Icons.history_rounded;
-    } else if (controller.tipo.value == 'Dízimo Antecipado') {
-      color = Colors.green;
-      icon = Icons.fast_forward_rounded;
-    } else if (controller.tipo.value == 'Dízimo Regular') {
-      color = Colors.blue;
-      icon = Icons.check_circle_outline_rounded;
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.2)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: color),
-          const SizedBox(width: 6),
-          Text(
-            controller.tipo.value,
-            style: GoogleFonts.inter(
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -1300,46 +1255,54 @@ class _NovaContribuicaoViewState extends State<NovaContribuicaoView> {
                     '$selectedYear-${month.toString().padLeft(2, '0')}';
                 final isSelected = selectedCompetencias.containsKey(monthKey);
                 return InkWell(
-                    onTap: () {
+                    onTap: () async {
                       if (isSelected) {
                         setDialogState(
                             () => selectedCompetencias.remove(monthKey));
                       } else {
-                        // Seleção rápida com data padrão
-                        final defaultDate = DateTime(
-                            selectedYear,
-                            month,
-                            (selectedYear == now.year && month == now.month)
-                                ? now.day
-                                : 1);
-                        setDialogState(
-                            () => selectedCompetencias[monthKey] = defaultDate);
+                        // Ao clicar, já abre o seletor de data
+                        final DateTime? picked = await showDatePicker(
+                            context: context,
+                            initialDate: DateTime(
+                                selectedYear,
+                                month,
+                                (selectedYear == now.year && month == now.month)
+                                    ? now.day
+                                    : 1),
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime(2100),
+                            helpText:
+                                'DATA DO PAGAMENTO PARA ${_formatMonth(month).toUpperCase()}',
+                            builder: (context, child) => Theme(
+                                data: theme.copyWith(
+                                    colorScheme: theme.colorScheme
+                                        .copyWith(primary: accentColor)),
+                                child: child!));
+                        if (picked != null) {
+                          setDialogState(
+                              () => selectedCompetencias[monthKey] = picked);
+                        }
                       }
                     },
                     onLongPress: () async {
-                      // Pressão longa para escolher data específica
-                      final DateTime? picked = await showDatePicker(
-                          context: context,
-                          initialDate: selectedCompetencias[monthKey] ??
-                              DateTime(
-                                  selectedYear,
-                                  month,
-                                  (selectedYear == now.year &&
-                                          month == now.month)
-                                      ? now.day
-                                      : 1),
-                          firstDate: DateTime(2000),
-                          lastDate: DateTime(2100),
-                          helpText:
-                              'DATA DO PAGAMENTO PARA ${_formatMonth(month).toUpperCase()}',
-                          builder: (context, child) => Theme(
-                              data: theme.copyWith(
-                                  colorScheme: theme.colorScheme
-                                      .copyWith(primary: accentColor)),
-                              child: child!));
-                      if (picked != null) {
-                        setDialogState(
-                            () => selectedCompetencias[monthKey] = picked);
+                      // Se já estiver selecionado, permite trocar a data sem desmarcar
+                      if (isSelected) {
+                        final DateTime? picked = await showDatePicker(
+                            context: context,
+                            initialDate: selectedCompetencias[monthKey]!,
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime(2100),
+                            helpText:
+                                'ALTERAR DATA PARA ${_formatMonth(month).toUpperCase()}',
+                            builder: (context, child) => Theme(
+                                data: theme.copyWith(
+                                    colorScheme: theme.colorScheme
+                                        .copyWith(primary: accentColor)),
+                                child: child!));
+                        if (picked != null) {
+                          setDialogState(
+                              () => selectedCompetencias[monthKey] = picked);
+                        }
                       }
                     },
                     borderRadius: BorderRadius.circular(8),
@@ -1399,7 +1362,7 @@ class _NovaContribuicaoViewState extends State<NovaContribuicaoView> {
                 Padding(
                   padding: const EdgeInsets.only(right: 16, bottom: 8),
                   child: Text(
-                    'Dica: Pressione e segure o mês para alterar a data específica.',
+                    'Dica: Clique no mês para selecionar e definir a data.',
                     style: GoogleFonts.inter(
                         fontSize: 10, fontStyle: FontStyle.italic),
                   ),
@@ -1493,9 +1456,15 @@ class _NovaContribuicaoViewState extends State<NovaContribuicaoView> {
       return;
     }
     try {
-      final novaContribuicao = controller.createContribuicaoFromForm();
-      final contribuicaoSalva =
-          await controller.addContribuicao(novaContribuicao);
+      // Criamos as contribuições separadas para o banco de dados
+      final listaParaSalvar = controller.createContribuicoesFromFormSplit();
+
+      // Criamos uma contribuição agregada apenas para gerar o recibo completo
+      final contribuicaoParaRecibo = controller.createContribuicaoFromForm();
+
+      // Salvamos cada mês como um lançamento separado no Firestore
+      await controller.addContribuicoes(listaParaSalvar);
+
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Row(children: [
             const Icon(Icons.check_circle_rounded, color: Colors.white),
@@ -1505,9 +1474,10 @@ class _NovaContribuicaoViewState extends State<NovaContribuicaoView> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                  Text('Lançamento registrado com sucesso!',
+                  Text('Lançamentos registrados com sucesso!',
                       style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
-                  Text('O recibo já está disponível para download.',
+                  Text(
+                      '${listaParaSalvar.length} mês(es) foram lançados individualmente.',
                       style: GoogleFonts.inter(fontSize: 12))
                 ]))
           ]),
@@ -1515,7 +1485,7 @@ class _NovaContribuicaoViewState extends State<NovaContribuicaoView> {
               label: 'RECIBO',
               textColor: Colors.white,
               onPressed: () =>
-                  controller.downloadOrShareReceiptPdf(contribuicaoSalva)),
+                  controller.downloadOrShareReceiptPdf(contribuicaoParaRecibo)),
           backgroundColor: Colors.green,
           duration: const Duration(seconds: 8),
           behavior: SnackBarBehavior.floating,
@@ -1547,6 +1517,38 @@ class _NovaContribuicaoViewState extends State<NovaContribuicaoView> {
               fontWeight: FontWeight.w600,
               color: theme.colorScheme.onSurface.withOpacity(0.6),
               letterSpacing: 0.3)));
+
+  Widget _statusChip(String label, IconData icon, Color color) {
+    final isSelected = controller.status.value == label;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => controller.status.value = label,
+        borderRadius: BorderRadius.circular(12),
+        child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+                color: isSelected ? color.withOpacity(0.1) : backgroundColor,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                    color: isSelected ? color : borderColor, width: 1.5)),
+            child: Row(mainAxisSize: MainAxisSize.min, children: [
+              Icon(icon,
+                  size: 20, color: isSelected ? color : theme.disabledColor),
+              const SizedBox(width: 10),
+              Text(label,
+                  style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.w500,
+                      color: isSelected
+                          ? color
+                          : theme.colorScheme.onSurface.withOpacity(0.6))),
+            ])),
+      ),
+    );
+  }
 
   Widget _paymentChip(String label, IconData icon) {
     final isSelected = controller.metodo.value == label;
@@ -1621,12 +1623,8 @@ class _NovaContribuicaoViewState extends State<NovaContribuicaoView> {
           ]),
           const SizedBox(height: 16),
           _summaryRow('Fiel:', controller.dizimistaSelecionado.value?.nome),
-          _summaryRow(
-              'Tipo:',
-              controller.tipo.value == 'Dízimo Atrasado'
-                  ? 'Outros Meses (Atrasado/Futuro)'
-                  : controller.tipo.value),
           _summaryRow('Método:', controller.metodo.value),
+          _summaryRow('Status:', controller.status.value),
           if (controller.competencias.isNotEmpty) ...[
             const Divider(height: 24),
             Text('Períodos Selecionados:',
@@ -1661,7 +1659,7 @@ class _NovaContribuicaoViewState extends State<NovaContribuicaoView> {
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
-                        'Pago em: ${DateFormat('dd/MM/yyyy').format(comp.dataPagamento ?? DateTime.now())}',
+                        'Pago em: ${DateFormat('dd/MM/yyyy').format(comp.dataPagamento ?? controller.dataSelecionada.value)}',
                         style: GoogleFonts.inter(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,

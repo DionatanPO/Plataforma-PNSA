@@ -41,6 +41,8 @@ class Contribuicao {
   final double valor;
   final String metodo;
   final DateTime dataRegistro;
+  final DateTime dataPagamento;
+  final String status; // ex: 'Pago', 'A Receber'
   final String usuarioId;
   final String? observacao;
   final List<ContribuicaoCompetencia> competencias;
@@ -54,6 +56,8 @@ class Contribuicao {
     required this.valor,
     required this.metodo,
     required this.dataRegistro,
+    required this.dataPagamento,
+    required this.status,
     required this.usuarioId,
     this.observacao,
     this.competencias = const [],
@@ -68,6 +72,8 @@ class Contribuicao {
     double? valor,
     String? metodo,
     DateTime? dataRegistro,
+    DateTime? dataPagamento,
+    String? status,
     String? usuarioId,
     String? observacao,
     List<ContribuicaoCompetencia>? competencias,
@@ -81,6 +87,8 @@ class Contribuicao {
       valor: valor ?? this.valor,
       metodo: metodo ?? this.metodo,
       dataRegistro: dataRegistro ?? this.dataRegistro,
+      dataPagamento: dataPagamento ?? this.dataPagamento,
+      status: status ?? this.status,
       usuarioId: usuarioId ?? this.usuarioId,
       observacao: observacao ?? this.observacao,
       competencias: competencias ?? this.competencias,
@@ -97,6 +105,8 @@ class Contribuicao {
       'valor': valor,
       'metodo': metodo,
       'dataRegistro': dataRegistro.millisecondsSinceEpoch,
+      'dataPagamento': dataPagamento.millisecondsSinceEpoch,
+      'status': status,
       'usuarioId': usuarioId,
       'observacao': observacao,
       'competencias': competencias.map((x) => x.toMap()).toList(),
@@ -116,6 +126,9 @@ class Contribuicao {
       metodo: map['metodo'] ?? '',
       dataRegistro:
           DateTime.fromMillisecondsSinceEpoch(map['dataRegistro'] ?? 0),
+      dataPagamento:
+          DateTime.fromMillisecondsSinceEpoch(map['dataPagamento'] ?? 0),
+      status: map['status'] ?? 'Pago',
       usuarioId: map['usuarioId'] ?? '',
       observacao: map['observacao'],
       competencias: map['competencias'] != null

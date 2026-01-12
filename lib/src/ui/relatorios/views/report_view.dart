@@ -135,12 +135,11 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
                                     ),
                                   );
                                 }
-                                if (controller.isRangeMode.value &&
-                                    controller.selectedRange.value != null) {
+                                if (controller.isRangeMode.value) {
                                   final start = DateFormat('dd/MM/yy').format(
-                                      controller.selectedRange.value!.start);
+                                      controller.selectedRange.value.start);
                                   final end = DateFormat('dd/MM/yy').format(
-                                      controller.selectedRange.value!.end);
+                                      controller.selectedRange.value.end);
                                   return Text(
                                     'Período: $start até $end',
                                     style: GoogleFonts.inter(
@@ -945,7 +944,7 @@ class _ModernTableCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                flex: 6,
+                flex: 5,
                 child: Text(
                   'Nome',
                   style: GoogleFonts.inter(
@@ -958,7 +957,18 @@ class _ModernTableCard extends StatelessWidget {
               Expanded(
                 flex: 2,
                 child: Text(
-                  'Pagamento',
+                  'MÉTODO',
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: theme.colorScheme.onSurface.withOpacity(0.5),
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 2,
+                child: Text(
+                  'STATUS',
                   style: GoogleFonts.inter(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
@@ -975,6 +985,7 @@ class _ModernTableCard extends StatelessWidget {
                     fontWeight: FontWeight.w700,
                     color: theme.colorScheme.onSurface.withOpacity(0.5),
                   ),
+                  textAlign: TextAlign.right,
                 ),
               ),
             ],
@@ -1054,7 +1065,7 @@ class _TableRowState extends State<_TableRow> {
               children: [
                 // Nome e Data
                 Expanded(
-                  flex: 6,
+                  flex: 5,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -1073,17 +1084,40 @@ class _TableRowState extends State<_TableRow> {
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          Icon(Icons.access_time_rounded,
+                          Icon(Icons.calendar_today_rounded,
                               size: 12,
+                              color: widget.theme.colorScheme.primary
+                                  .withOpacity(0.6)),
+                          const SizedBox(width: 4),
+                          Flexible(
+                            child: Text(
+                              DateFormat('dd/MM/yy')
+                                  .format(widget.contribuicao.dataPagamento),
+                              style: GoogleFonts.inter(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: widget.theme.colorScheme.primary
+                                    .withOpacity(0.8),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      Row(
+                        children: [
+                          Icon(Icons.access_time_rounded,
+                              size: 11,
                               color: widget.theme.colorScheme.onSurface
                                   .withOpacity(0.4)),
                           const SizedBox(width: 4),
                           Flexible(
                             child: Text(
-                              DateFormat('dd/MM/yy HH:mm')
-                                  .format(widget.contribuicao.dataRegistro),
+                              'Reg: ${DateFormat('dd/MM/yy HH:mm').format(widget.contribuicao.dataRegistro)}',
                               style: GoogleFonts.inter(
-                                fontSize: 11,
+                                fontSize: 10,
                                 color: widget.theme.colorScheme.onSurface
                                     .withOpacity(0.4),
                               ),
@@ -1136,6 +1170,11 @@ class _TableRowState extends State<_TableRow> {
                       ),
                     ],
                   ),
+                ),
+                // Status
+                Expanded(
+                  flex: 2,
+                  child: _StatusBadge(status: widget.contribuicao.status),
                 ),
                 // Valor
                 Expanded(
@@ -1204,28 +1243,18 @@ class _StatusBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     Color color;
     switch (status) {
-      case 'Dízimo':
-      case 'Dízimo Regular':
-      case 'Dízimo Atrasado':
-      case 'Oferta':
-      case 'Doação':
+      case 'Pago':
       case 'Concluído':
       case 'Recebido':
-      case 'Salários':
         color = Colors.green;
         break;
+      case 'A Receber':
       case 'Pendente':
       case 'Processando':
-      case 'Alimentação':
-      case 'Materiais':
-        color = Colors.blue;
+        color = Colors.orange;
         break;
       case 'Estornado':
         color = Colors.red;
-        break;
-      case 'Manutenção':
-      case 'Serviços':
-        color = Colors.orange;
         break;
       default:
         color = Colors.grey;
