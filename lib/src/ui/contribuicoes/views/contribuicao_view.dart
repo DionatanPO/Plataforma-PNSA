@@ -138,6 +138,7 @@ class _ContribuicaoViewState extends State<ContribuicaoView> {
                 sliver: ContribuicaoMobileListView(
                   items: items,
                   theme: theme,
+                  controller: controller,
                   surfaceColor: surfaceColor,
                   onReceiptPressed: (c) =>
                       controller.downloadOrShareReceiptPdf(c),

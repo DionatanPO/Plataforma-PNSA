@@ -893,63 +893,76 @@ class _NovaContribuicaoViewState extends State<NovaContribuicaoView> {
             ],
           ),
         ),
-        const SizedBox(height: 24),
-        _label('O que está sendo pago?'),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          decoration: BoxDecoration(
-              color: backgroundColor,
+        _label('Meses de Referência'),
+        InkWell(
+          onTap: () => _showMonthPicker(),
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: accentColor.withOpacity(0.05),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: borderColor)),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              isExpanded: true,
-              dropdownColor: surfaceColor,
-              value: controller.tipo.value,
-              icon: Icon(Icons.expand_more_rounded,
-                  size: 24,
-                  color: theme.colorScheme.onSurface.withOpacity(0.5)),
-              items: [
-                DropdownMenuItem(
-                    value: 'Dízimo Regular',
-                    child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Dízimo Regular (Mês Atual)',
-                              style: GoogleFonts.inter(
-                                  fontWeight: FontWeight.w600, fontSize: 14)),
-                          Text('Pagamento normal do mês',
-                              style: GoogleFonts.inter(
-                                  fontSize: 11,
-                                  color: theme.colorScheme.onSurface
-                                      .withOpacity(0.5)))
-                        ])),
-                DropdownMenuItem(
-                    value: 'Dízimo Atrasado',
-                    child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Dízimo Atrasado / Adiantado',
-                              style: GoogleFonts.inter(
-                                  fontWeight: FontWeight.w600, fontSize: 14)),
-                          Text('Para pagamentos de outros meses',
-                              style: GoogleFonts.inter(
-                                  fontSize: 11,
-                                  color: theme.colorScheme.onSurface
-                                      .withOpacity(0.5)))
-                        ])),
+              border:
+                  Border.all(color: accentColor.withOpacity(0.2), width: 1.5),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: accentColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(Icons.calendar_month_rounded,
+                      color: accentColor, size: 24),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Obx(() => Text(
+                            controller.competencias.isEmpty
+                                ? 'Clique para selecionar os meses'
+                                : 'Meses Selecionados',
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: theme.colorScheme.onSurface,
+                            ),
+                          )),
+                      Obx(() {
+                        if (controller.competencias.isEmpty)
+                          return const SizedBox.shrink();
+                        return Text(
+                          '${controller.competencias.length} mês(es) selecionado(s)',
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: theme.colorScheme.onSurface.withOpacity(0.5),
+                          ),
+                        );
+                      }),
+                    ],
+                  ),
+                ),
+                Icon(Icons.add_circle_outline_rounded, color: accentColor),
               ],
-              onChanged: (val) {
-                setState(() => controller.tipo.value = val!);
-                if (val == 'Dízimo Atrasado')
-                  Future.delayed(const Duration(milliseconds: 300),
-                      () => _showMonthPicker());
-              },
             ),
           ),
         ),
+
+        // Badge de Status: Mostra automaticamente se é Regular, Atrasado ou Antecipado
+        Obx(() {
+          if (controller.competencias.isEmpty ||
+              controller.tipo.value == 'Dízimo') {
+            return const SizedBox.shrink();
+          }
+          return Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: _buildTypeBadge(),
+          );
+        }),
+        const SizedBox(height: 24),
         const SizedBox(height: 20),
         _label('Qual o valor total recebido?'),
         Container(
@@ -1008,13 +1021,49 @@ class _NovaContribuicaoViewState extends State<NovaContribuicaoView> {
                 contentPadding: const EdgeInsets.all(16)),
           ),
         ),
-        const SizedBox(height: 16),
-        Obx(() => controller.tipo.value == 'Dízimo Atrasado'
-            ? _buildCompetenciaSection()
-            : const SizedBox.shrink()),
         const SizedBox(height: 32),
         _buildSummaryCard(),
       ],
+    );
+  }
+
+  Widget _buildTypeBadge() {
+    Color color = Colors.blue;
+    IconData icon = Icons.check_circle_outline_rounded;
+
+    if (controller.tipo.value == 'Dízimo Atrasado') {
+      color = Colors.orange;
+      icon = Icons.history_rounded;
+    } else if (controller.tipo.value == 'Dízimo Antecipado') {
+      color = Colors.green;
+      icon = Icons.fast_forward_rounded;
+    } else if (controller.tipo.value == 'Dízimo Regular') {
+      color = Colors.blue;
+      icon = Icons.check_circle_outline_rounded;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withOpacity(0.2)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: color),
+          const SizedBox(width: 6),
+          Text(
+            controller.tipo.value,
+            style: GoogleFonts.inter(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -1251,27 +1300,46 @@ class _NovaContribuicaoViewState extends State<NovaContribuicaoView> {
                     '$selectedYear-${month.toString().padLeft(2, '0')}';
                 final isSelected = selectedCompetencias.containsKey(monthKey);
                 return InkWell(
-                    onTap: () async {
+                    onTap: () {
                       if (isSelected) {
                         setDialogState(
                             () => selectedCompetencias.remove(monthKey));
                       } else {
-                        final DateTime? picked = await showDatePicker(
-                            context: context,
-                            initialDate: DateTime.now(),
-                            firstDate: DateTime(2000),
-                            lastDate: DateTime(2100),
-                            helpText:
-                                'DATA DO PAGAMENTO PARA ${_formatMonth(month).toUpperCase()}',
-                            builder: (context, child) => Theme(
-                                data: Theme.of(context).copyWith(
-                                    colorScheme: Theme.of(context)
-                                        .colorScheme
-                                        .copyWith(primary: accentColor)),
-                                child: child!));
-                        if (picked != null)
-                          setDialogState(
-                              () => selectedCompetencias[monthKey] = picked);
+                        // Seleção rápida com data padrão
+                        final defaultDate = DateTime(
+                            selectedYear,
+                            month,
+                            (selectedYear == now.year && month == now.month)
+                                ? now.day
+                                : 1);
+                        setDialogState(
+                            () => selectedCompetencias[monthKey] = defaultDate);
+                      }
+                    },
+                    onLongPress: () async {
+                      // Pressão longa para escolher data específica
+                      final DateTime? picked = await showDatePicker(
+                          context: context,
+                          initialDate: selectedCompetencias[monthKey] ??
+                              DateTime(
+                                  selectedYear,
+                                  month,
+                                  (selectedYear == now.year &&
+                                          month == now.month)
+                                      ? now.day
+                                      : 1),
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime(2100),
+                          helpText:
+                              'DATA DO PAGAMENTO PARA ${_formatMonth(month).toUpperCase()}',
+                          builder: (context, child) => Theme(
+                              data: theme.copyWith(
+                                  colorScheme: theme.colorScheme
+                                      .copyWith(primary: accentColor)),
+                              child: child!));
+                      if (picked != null) {
+                        setDialogState(
+                            () => selectedCompetencias[monthKey] = picked);
                       }
                     },
                     borderRadius: BorderRadius.circular(8),
@@ -1286,38 +1354,73 @@ class _NovaContribuicaoViewState extends State<NovaContribuicaoView> {
                             border: Border.all(
                                 color: isSelected ? accentColor : borderColor)),
                         alignment: Alignment.center,
-                        child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(_formatMonth(month),
-                                  style: GoogleFonts.inter(
-                                      fontSize: 13,
-                                      fontWeight: isSelected
-                                          ? FontWeight.bold
-                                          : FontWeight.normal,
-                                      color: isSelected
-                                          ? Colors.white
-                                          : theme.colorScheme.onSurface)),
-                              if (isSelected)
-                                Text(
-                                    DateFormat('dd/MM').format(
-                                        selectedCompetencias[monthKey]!),
-                                    style: GoogleFonts.inter(
-                                        fontSize: 9,
-                                        color: Colors.white.withOpacity(0.8)))
-                            ])));
+                        child: Stack(
+                          children: [
+                            Center(
+                              child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(_formatMonth(month),
+                                        style: GoogleFonts.inter(
+                                            fontSize: 13,
+                                            fontWeight: isSelected
+                                                ? FontWeight.bold
+                                                : FontWeight.normal,
+                                            color: isSelected
+                                                ? Colors.white
+                                                : theme.colorScheme.onSurface)),
+                                    if (isSelected)
+                                      Text(
+                                          DateFormat('dd/MM').format(
+                                              selectedCompetencias[monthKey]!),
+                                          style: GoogleFonts.inter(
+                                              fontSize: 9,
+                                              color: Colors.white
+                                                  .withOpacity(0.8)))
+                                  ]),
+                            ),
+                            if (isSelected)
+                              Positioned(
+                                top: 4,
+                                right: 4,
+                                child: Icon(Icons.edit_calendar_rounded,
+                                    size: 10,
+                                    color: Colors.white.withOpacity(0.6)),
+                              ),
+                          ],
+                        )));
               },
             ),
           ),
           actions: [
-            TextButton(
-                onPressed: () => Get.back(), child: const Text('Cancelar')),
-            FilledButton(
-                onPressed: () {
-                  controller.adicionarVariasCompetencias(selectedCompetencias);
-                  Get.back();
-                },
-                child: const Text('Confirmar'))
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 16, bottom: 8),
+                  child: Text(
+                    'Dica: Pressione e segure o mês para alterar a data específica.',
+                    style: GoogleFonts.inter(
+                        fontSize: 10, fontStyle: FontStyle.italic),
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                        onPressed: () => Get.back(),
+                        child: const Text('Cancelar')),
+                    FilledButton(
+                        onPressed: () {
+                          controller.adicionarVariasCompetencias(
+                              selectedCompetencias);
+                          Get.back();
+                        },
+                        child: const Text('Confirmar')),
+                  ],
+                ),
+              ],
+            )
           ],
         );
       }),
@@ -1524,6 +1627,53 @@ class _NovaContribuicaoViewState extends State<NovaContribuicaoView> {
                   ? 'Outros Meses (Atrasado/Futuro)'
                   : controller.tipo.value),
           _summaryRow('Método:', controller.metodo.value),
+          if (controller.competencias.isNotEmpty) ...[
+            const Divider(height: 24),
+            Text('Períodos Selecionados:',
+                style: GoogleFonts.inter(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.primary,
+                    letterSpacing: 0.5)),
+            const SizedBox(height: 12),
+            ...controller.competencias.map((comp) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.calendar_today_rounded,
+                            size: 12,
+                            color: theme.colorScheme.primary.withOpacity(0.5)),
+                        const SizedBox(width: 8),
+                        Text(_formatMesReferencia(comp.mesReferencia),
+                            style: GoogleFonts.inter(
+                                fontSize: 13, fontWeight: FontWeight.w500)),
+                      ],
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.onSurface.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        'Pago em: ${DateFormat('dd/MM/yyyy').format(comp.dataPagamento ?? DateTime.now())}',
+                        style: GoogleFonts.inter(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color:
+                                theme.colorScheme.onSurface.withOpacity(0.6)),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ],
           const Divider(height: 24),
           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
             Text('Total a Receber:',

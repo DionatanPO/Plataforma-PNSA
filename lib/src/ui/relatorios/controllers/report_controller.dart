@@ -67,9 +67,13 @@ class ReportController extends GetxController {
     });
 
     // Se já estiver logado (ex: F5)
-    if (authService.userData.value != null) {
-      _fetchAllInitially();
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (authService.userData.value != null) {
+        if (_reportSub == null) {
+          _fetchAllInitially();
+        }
+      }
+    });
 
     // Listen to changes to refetch
     ever(selectedDate, (date) {
@@ -111,6 +115,7 @@ class ReportController extends GetxController {
   }
 
   void _startListeningAcessos() {
+    if (_acessosSub != null) return;
     _acessosSub = AccessService.getAllAcessos().listen((list) {
       _todosAcessos.value = list;
     });

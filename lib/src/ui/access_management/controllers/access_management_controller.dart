@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../data/services/auth_service.dart';
 import '../../../domain/models/acesso_model.dart';
@@ -34,13 +35,17 @@ class AccessManagementController extends GetxController {
     });
 
     // Se já estiver logado (ex: F5)
-    if (authService.userData.value != null) {
-      _setupAcessosStream();
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (authService.userData.value != null) {
+        if (_acessosSub == null) {
+          _setupAcessosStream();
+        }
+      }
+    });
   }
 
   void _setupAcessosStream() {
-    _stopListening();
+    if (_acessosSub != null) return;
     _isLoading.value = true;
     final authService = Get.find<AuthService>();
 

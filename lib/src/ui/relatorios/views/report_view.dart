@@ -232,8 +232,6 @@ class _ReportViewState extends State<ReportView> with TickerProviderStateMixin {
                             ? 'Lançamentos Vinculados ao Mês'
                             : 'Entradas Reais do Dia',
                         contribuicoes: lista,
-                        onReceiptPressed: (c) =>
-                            controller.downloadOrShareReceiptPdf(c),
                         theme: theme,
                       );
                     }),
@@ -891,13 +889,11 @@ class _MiniStat extends StatelessWidget {
 class _ModernTableCard extends StatelessWidget {
   final String title;
   final List<Contribuicao> contribuicoes;
-  final Function(Contribuicao) onReceiptPressed;
   final ThemeData theme;
 
   const _ModernTableCard({
     required this.title,
     required this.contribuicoes,
-    required this.onReceiptPressed,
     required this.theme,
   });
 
@@ -949,7 +945,7 @@ class _ModernTableCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                flex: 2,
+                flex: 6,
                 child: Text(
                   'Nome',
                   style: GoogleFonts.inter(
@@ -960,16 +956,7 @@ class _ModernTableCard extends StatelessWidget {
                 ),
               ),
               Expanded(
-                child: Text(
-                  'Tipo',
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: theme.colorScheme.onSurface.withOpacity(0.5),
-                  ),
-                ),
-              ),
-              Expanded(
+                flex: 2,
                 child: Text(
                   'Pagamento',
                   style: GoogleFonts.inter(
@@ -980,6 +967,7 @@ class _ModernTableCard extends StatelessWidget {
                 ),
               ),
               Expanded(
+                flex: 3,
                 child: Text(
                   'Valor',
                   style: GoogleFonts.inter(
@@ -989,7 +977,6 @@ class _ModernTableCard extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 100), // Espaço para coluna de Ações
             ],
           ),
           const SizedBox(height: 8),
@@ -1011,7 +998,6 @@ class _ModernTableCard extends StatelessWidget {
             ...contribuicoes.map(
               (c) => _TableRow(
                 contribuicao: c,
-                onReceiptPressed: () => onReceiptPressed(c),
                 theme: theme,
                 agentName:
                     Get.find<ReportController>().getAgentName(c.usuarioId),
@@ -1025,13 +1011,11 @@ class _ModernTableCard extends StatelessWidget {
 
 class _TableRow extends StatefulWidget {
   final Contribuicao contribuicao;
-  final VoidCallback onReceiptPressed;
   final ThemeData theme;
   final String agentName;
 
   const _TableRow({
     required this.contribuicao,
-    required this.onReceiptPressed,
     required this.theme,
     required this.agentName,
   });
@@ -1070,7 +1054,7 @@ class _TableRowState extends State<_TableRow> {
               children: [
                 // Nome e Data
                 Expanded(
-                  flex: 4,
+                  flex: 6,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -1112,14 +1096,7 @@ class _TableRowState extends State<_TableRow> {
                     ],
                   ),
                 ),
-                // Tipo (Badge)
-                Expanded(
-                  flex: 2,
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: _StatusBadge(status: widget.contribuicao.tipo),
-                  ),
-                ),
+
                 // Método e Agente
                 Expanded(
                   flex: 2,
@@ -1176,15 +1153,6 @@ class _TableRowState extends State<_TableRow> {
                   ),
                 ),
                 // Ações
-                const SizedBox(width: 16),
-                IconButton(
-                  onPressed: widget.onReceiptPressed,
-                  icon: const Icon(Icons.receipt_long_rounded, size: 20),
-                  tooltip: 'Gerar Recibo',
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                  color: widget.theme.colorScheme.primary.withOpacity(0.7),
-                ),
               ],
             ),
             if (widget.contribuicao.observacao != null &&

@@ -23,7 +23,8 @@ class ContribuicaoController extends GetxController {
   // Estado privado
   final _contribuicoes = <Contribuicao>[].obs;
   final _dizimistas = <Dizimista>[].obs;
-  final _isLoading = false.obs;
+  final _isLoading =
+      true.obs; // Inicia como true para evitar "lista vazia" antes do stream
   final _isLoadingMore = false.obs;
 
   // Filtros e Pesquisa
@@ -97,13 +98,15 @@ class ContribuicaoController extends GetxController {
 
   // Método para adicionar uma competência
   void adicionarCompetencia(String mesAno, double valor) {
-    // Se já existe, remove primeiro
-    competencias.removeWhere((c) => c.mesReferencia == mesAno);
-    competencias.add(ContribuicaoCompetencia(
+    final list = List<ContribuicaoCompetencia>.from(competencias);
+    list.removeWhere((c) => c.mesReferencia == mesAno);
+    list.add(ContribuicaoCompetencia(
         mesReferencia: mesAno,
         valor: valor,
         dataPagamento: dataSelecionada.value));
-    competencias.sort((a, b) => a.mesReferencia.compareTo(b.mesReferencia));
+    list.sort((a, b) => a.mesReferencia.compareTo(b.mesReferencia));
+
+    competencias.assignAll(list);
   }
 
   // Método para atualizar a data de uma competência específica
@@ -157,14 +160,15 @@ class ContribuicaoController extends GetxController {
             })
         .toList();
 
-    competencias.clear();
-    for (var item in novosDados) {
-      competencias.add(ContribuicaoCompetencia(
-        mesReferencia: item['mes'] as String,
-        valor: valorPorMes,
-        dataPagamento: item['data'] as DateTime,
-      ));
-    }
+    final novasComps = novosDados
+        .map((item) => ContribuicaoCompetencia(
+              mesReferencia: item['mes'] as String,
+              valor: valorPorMes,
+              dataPagamento: item['data'] as DateTime,
+            ))
+        .toList();
+
+    competencias.assignAll(novasComps);
   }
 
   @override
@@ -176,34 +180,48 @@ class ContribuicaoController extends GetxController {
     // Reage a mudanças no login
     ever(authService.userData, (userData) {
       if (userData != null) {
+        print('[ContribuicaoController] User logged in. Starting listener.');
         _startListening();
       } else {
+        print('[ContribuicaoController] User logged out. Stopping listener.');
         _stopListening();
       }
     });
 
     // Se já estiver logado (ex: F5)
-    if (authService.userData.value != null) {
-      _startListening();
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (authService.userData.value != null) {
+        if (_contribuicoesSub == null) {
+          print(
+              '[ContribuicaoController] onInit: User is logged in. Starting listener.');
+          _startListening();
+        }
+      }
+    });
 
     // Recalcular divisão quando o valor mudar
     ever(valor, (_) => dividirValorEntreCompetencias());
 
-    // Gerenciar competências baseado no tipo
-    ever(tipo, (String? novoTipo) {
-      if (novoTipo == 'Dízimo Regular') {
-        _sugerirMesAtual();
-      } else {
-        // Se for Atrasado, deixa o usuário escolher (limpa a sugestão automática)
-        competencias.clear();
+    // Gerenciar competências e categorização automática
+    ever<String>(tipo, (novoTipo) {
+      // Se não for dízimo, garante que competências fiquem limpas
+      if (!novoTipo.startsWith('Dízimo')) {
+        if (competencias.isNotEmpty) {
+          competencias.clear();
+        }
       }
     });
 
-    // Inicialização
-    if (tipo.value == 'Dízimo Regular') {
-      _sugerirMesAtual();
-    }
+    // Categorizar automaticamente o sub-tipo de dízimo quando as competências mudarem
+    ever(competencias, (_) {
+      // Só auto-categoriza se já for um tipo de Dízimo ou estiver vazio
+      if (tipo.value.isEmpty || tipo.value.startsWith('Dízimo')) {
+        final novoSubTipo = _calcularTipoDizimoAutomatico();
+        if (tipo.value != novoSubTipo) {
+          tipo.value = novoSubTipo;
+        }
+      }
+    });
 
     // Workers para listagem
     ever(searchQuery, (_) => resetPagination());
@@ -216,6 +234,48 @@ class ContribuicaoController extends GetxController {
     ever(_contribuicoes, updateHasMore);
     ever(displayedCount, updateHasMore);
     ever(searchQuery, updateHasMore);
+
+    print('[ContribuicaoController] onInit: Check initial state...');
+    // Tentativa imediata se o usuário já estiver disponível
+    if (authService.userData.value != null) {
+      _startListening();
+    }
+  }
+
+  @override
+  void onReady() {
+    super.onReady();
+    print(
+        '[ContribuicaoController] onReady: Interface ready. Ensuring synchronization...');
+    // Garante sincronização se onInit ou ever falharam por tempo de resposta
+    _startListening();
+  }
+
+  String _calcularTipoDizimoAutomatico() {
+    if (competencias.isEmpty) return 'Dízimo';
+
+    final now = DateTime.now();
+    final currentMesRef = '${now.year}-${now.month.toString().padLeft(2, '0')}';
+
+    bool temAnterior = false;
+    bool temAtual = false;
+    bool temFuturo = false;
+
+    for (var comp in competencias) {
+      if (comp.mesReferencia == currentMesRef) {
+        temAtual = true;
+      } else if (comp.mesReferencia.compareTo(currentMesRef) < 0) {
+        temAnterior = true;
+      } else {
+        temFuturo = true;
+      }
+    }
+
+    if (temAnterior && !temAtual && !temFuturo) return 'Dízimo Atrasado';
+    if (temFuturo && !temAtual && !temAnterior) return 'Dízimo Antecipado';
+    if (temAtual && !temAnterior && !temFuturo) return 'Dízimo Regular';
+
+    return 'Dízimo';
   }
 
   void loadMore() async {
@@ -232,9 +292,18 @@ class ContribuicaoController extends GetxController {
   }
 
   void _startListening() {
-    _stopListening();
-    fetchContribuicoes();
-    fetchDizimistas();
+    print(
+        '[ContribuicaoController] _startListening: Checking subscriptions...');
+
+    if (_contribuicoesSub == null) {
+      print('[ContribuicaoController] Starting Contribuicoes stream.');
+      fetchContribuicoes();
+    }
+
+    if (_dizimistasSub == null) {
+      print('[ContribuicaoController] Starting Dizimistas stream.');
+      fetchDizimistas();
+    }
   }
 
   void _stopListening() {
@@ -281,7 +350,7 @@ class ContribuicaoController extends GetxController {
     dataSelecionada.value = DateTime.now();
     valor.value = '';
     observacao.value = '';
-    tipo.value = 'Dízimo Regular';
+    tipo.value = 'Dízimo';
     metodo.value = 'PIX';
     _sugerirMesAtual();
   }
@@ -295,17 +364,22 @@ class ContribuicaoController extends GetxController {
       // Escutar o stream e atualizar a lista local
       _contribuicoesSub = contribuicoesStream.listen(
         (contribuicoesList) {
+          print(
+              '[ContribuicaoController] Received ${contribuicoesList.length} contributions.');
           _contribuicoes.assignAll(contribuicoesList);
+          _isLoading.value =
+              false; // Desativa apenas após receber os primeiros dados
         },
         onError: (error) {
           print("Erro ao carregar contribuições do Firestore: $error");
+          _isLoading.value = false;
         },
       );
     } catch (e) {
       print("Erro ao carregar contribuições: $e");
-    } finally {
       _isLoading.value = false;
     }
+    // Removido o finally que setava isLoading para false precocemente
   }
 
   Future<void> fetchDizimistas() async {
@@ -336,16 +410,38 @@ class ContribuicaoController extends GetxController {
       // Salvar no Firestore e obter o ID do documento criado
       final docId = await ContribuicaoService.addContribuicao(contribuicao);
 
-      // Criar uma nova contribuição com o ID do documento do Firestore
+      // Criar uma nova contribuição com o ID do documento do Firestore para retorno
       final contribuicaoComId = contribuicao.copyWith(id: docId);
-
-      // Atualizar a lista local adicionando no topo
-      _contribuicoes.insert(0, contribuicaoComId);
 
       return contribuicaoComId;
     } catch (e) {
       print("Erro ao adicionar contribuição no Firestore: $e");
       rethrow; // Re-lançar o erro para que a view possa tratar
+    } finally {
+      _isLoading.value = false;
+    }
+  }
+
+  Future<void> deleteContribuicao(String id) async {
+    try {
+      _isLoading.value = true;
+      await ContribuicaoService.deleteContribuicao(id);
+      Get.snackbar(
+        'Sucesso',
+        'Lançamento de dízimo removido com sucesso!',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+    } catch (e) {
+      print("Erro ao excluir contribuição: $e");
+      Get.snackbar(
+        'Erro',
+        'Não foi possível excluir o lançamento.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } finally {
       _isLoading.value = false;
     }
@@ -829,7 +925,8 @@ class ContribuicaoController extends GetxController {
       tipo: tipo.value,
       valor: valorTotalCalculado,
       metodo: metodo.value,
-      dataRegistro: DateTime.now(), // Sempre pega a data atual do sistema
+      dataRegistro:
+          DateTime.now(), // Sempre registra o momento real do lançamento
       usuarioId: user?.uid ?? '',
       observacao: observacao.value.isEmpty ? null : observacao.value,
       competencias: List<ContribuicaoCompetencia>.from(competencias),
