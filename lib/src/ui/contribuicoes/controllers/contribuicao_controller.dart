@@ -19,6 +19,8 @@ import '../../../data/services/auth_service.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/services/data_repository_service.dart';
 
+enum DistribuicaoModo { integral, rateado }
+
 class ContribuicaoController extends GetxController {
   final _dataRepo = Get.find<DataRepositoryService>();
 
@@ -91,11 +93,15 @@ class ContribuicaoController extends GetxController {
   final status = 'Pago'.obs; // ex: 'Pago', 'A Receber'
   final valor = ''.obs; // Transformar em observável
   final observacao = ''.obs;
+  final distribuicaoModo = DistribuicaoModo.integral.obs;
 
   // Lista de competências (mês/ano e valor)
   final competencias = <ContribuicaoCompetencia>[].obs;
 
   double valorNumerico = 0.0;
+
+  double get totalContribuicao =>
+      competencias.fold(0.0, (sum, item) => sum + item.valor);
 
   // Método para adicionar uma competência
   void adicionarCompetencia(String mesAno, double valor) {
@@ -108,6 +114,7 @@ class ContribuicaoController extends GetxController {
     list.sort((a, b) => a.mesReferencia.compareTo(b.mesReferencia));
 
     competencias.assignAll(list);
+    atribuirValorEntreCompetencias();
   }
 
   // Método para atualizar a data de uma competência específica
@@ -140,6 +147,20 @@ class ContribuicaoController extends GetxController {
     competencias.clear();
   }
 
+  // Método para atualizar o valor de uma competência específica
+  void atualizarValorCompetencia(String mesAno, double novoValor) {
+    final index = competencias.indexWhere((c) => c.mesReferencia == mesAno);
+    if (index != -1) {
+      final comp = competencias[index];
+      competencias[index] = ContribuicaoCompetencia(
+          mesReferencia: comp.mesReferencia,
+          valor: novoValor,
+          dataPagamento: comp.dataPagamento);
+    }
+    // Opcional: Atualizar o valor "macro" se todos forem iguais?
+    // Por enquanto não vamos mexer no valor.value para não causar loops ou confusão
+  }
+
   // Método para aplicar o valor informado em cada uma das competências selecionadas
   void atribuirValorEntreCompetencias() {
     if (competencias.isEmpty) return;
@@ -153,8 +174,11 @@ class ContribuicaoController extends GetxController {
     double valorInformado = double.tryParse(valorLimpo) ?? 0.0;
     if (valorInformado <= 0) return;
 
-    // Agora cada mês recebe o valor integral informado no campo
+    // Decide o valor por mês baseado no modo
     double valorPorMes = valorInformado;
+    if (distribuicaoModo.value == DistribuicaoModo.rateado) {
+      valorPorMes = valorInformado / competencias.length;
+    }
 
     // Atualizar a lista mantendo a ordem mas com novos valores e mantendo as datas se existirem
     final novosDados = competencias
@@ -180,8 +204,9 @@ class ContribuicaoController extends GetxController {
     super.onInit();
     // Contribuição agora é passiva e observa o repositório central
 
-    // Recalcular atribuição quando o valor mudar
+    // Recalcular atribuição quando o valor mudar ou o modo de distribuição mudar
     ever(valor, (_) => atribuirValorEntreCompetencias());
+    ever(distribuicaoModo, (_) => atribuirValorEntreCompetencias());
 
     // Gerenciar competências e categorização automática
     ever<String>(tipo, (novoTipo) {
@@ -315,10 +340,11 @@ class ContribuicaoController extends GetxController {
     dataSelecionada.value = DateTime.now();
     valor.value = '';
     observacao.value = '';
-    tipo.value = 'Dízimo';
+    tipo.value = 'Dízimo Regular';
     metodo.value = 'PIX';
     status.value = 'Pago';
-    _sugerirMesAtual();
+    distribuicaoModo.value = DistribuicaoModo.integral;
+    competencias.clear();
   }
 
   Future<void> fetchContribuicoes() async {
@@ -507,12 +533,13 @@ class ContribuicaoController extends GetxController {
   // Validações
   bool validateForm() {
     if (dizimistaSelecionado.value == null) {
-      print("Erro: Nenhum dizimista selecionado");
+      _showValidationError('Campo Obrigatório', 'Selecione um dízimista.');
       return false;
     }
 
     if (valor.value.isEmpty) {
-      print("Erro: Valor não informado");
+      _showValidationError(
+          'Campo Obrigatório', 'Informe o valor da contribuição.');
       return false;
     }
 
@@ -525,17 +552,32 @@ class ContribuicaoController extends GetxController {
 
     final valorDouble = double.tryParse(valorLimpo);
     if (valorDouble == null || valorDouble <= 0) {
-      print("Erro: Valor inválido");
+      _showValidationError(
+          'Valor Inválido', 'O valor da contribuição deve ser maior que zero.');
       return false;
     }
 
     // Verificar se o método de pagamento foi selecionado
     if (metodo.value.isEmpty) {
-      print("Erro: Método de pagamento não selecionado");
+      _showValidationError(
+          'Campo Obrigatório', 'Selecione o método de pagamento.');
       return false;
     }
 
     return true;
+  }
+
+  void _showValidationError(String title, String message) {
+    Get.snackbar(
+      title,
+      message,
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.orange,
+      colorText: Colors.white,
+      margin: const EdgeInsets.all(20),
+      borderRadius: 12,
+      icon: const Icon(Icons.warning_amber_rounded, color: Colors.white),
+    );
   }
 
   String _formatMesReferencia(String mesRef) {

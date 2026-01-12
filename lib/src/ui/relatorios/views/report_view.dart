@@ -944,7 +944,7 @@ class _ModernTableCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                flex: 5,
+                flex: 4,
                 child: Text(
                   'Nome',
                   style: GoogleFonts.inter(
@@ -968,6 +968,17 @@ class _ModernTableCard extends StatelessWidget {
               Expanded(
                 flex: 2,
                 child: Text(
+                  'MÊS REF.',
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: theme.colorScheme.onSurface.withOpacity(0.5),
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 2,
+                child: Text(
                   'STATUS',
                   style: GoogleFonts.inter(
                     fontSize: 12,
@@ -977,7 +988,7 @@ class _ModernTableCard extends StatelessWidget {
                 ),
               ),
               Expanded(
-                flex: 3,
+                flex: 2,
                 child: Text(
                   'Valor',
                   style: GoogleFonts.inter(
@@ -1065,7 +1076,7 @@ class _TableRowState extends State<_TableRow> {
               children: [
                 // Nome e Data
                 Expanded(
-                  flex: 5,
+                  flex: 4,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -1098,28 +1109,6 @@ class _TableRowState extends State<_TableRow> {
                                 fontWeight: FontWeight.w600,
                                 color: widget.theme.colorScheme.primary
                                     .withOpacity(0.8),
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 2),
-                      Row(
-                        children: [
-                          Icon(Icons.access_time_rounded,
-                              size: 11,
-                              color: widget.theme.colorScheme.onSurface
-                                  .withOpacity(0.4)),
-                          const SizedBox(width: 4),
-                          Flexible(
-                            child: Text(
-                              'Reg: ${DateFormat('dd/MM/yy HH:mm').format(widget.contribuicao.dataRegistro)}',
-                              style: GoogleFonts.inter(
-                                fontSize: 10,
-                                color: widget.theme.colorScheme.onSurface
-                                    .withOpacity(0.4),
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -1171,6 +1160,45 @@ class _TableRowState extends State<_TableRow> {
                     ],
                   ),
                 ),
+                Expanded(
+                  flex: 2,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (widget.contribuicao.mesesCompetencia.isEmpty)
+                        Text(
+                          'N/A',
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: widget.theme.colorScheme.onSurface
+                                .withOpacity(0.4),
+                          ),
+                        )
+                      else
+                        ...widget.contribuicao.mesesCompetencia.take(2).map(
+                              (m) => Text(
+                                Get.find<ReportController>()
+                                    .formatMesReferencia(m),
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: widget.theme.colorScheme.primary,
+                                ),
+                              ),
+                            ),
+                      if (widget.contribuicao.mesesCompetencia.length > 2)
+                        Text(
+                          '+${widget.contribuicao.mesesCompetencia.length - 2} meses',
+                          style: GoogleFonts.inter(
+                            fontSize: 9,
+                            color: widget.theme.colorScheme.onSurface
+                                .withOpacity(0.4),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
                 // Status
                 Expanded(
                   flex: 2,
@@ -1178,7 +1206,7 @@ class _TableRowState extends State<_TableRow> {
                 ),
                 // Valor
                 Expanded(
-                  flex: 3,
+                  flex: 2,
                   child: Text(
                     currency.format(widget.contribuicao.valor),
                     style: GoogleFonts.outfit(

@@ -591,7 +591,7 @@ class ReportController extends GetxController {
                         const pw.TextSpan(text: ' ('),
                         pw.TextSpan(
                           text: contribuicao.competencias.map((c) {
-                            final mes = _formatMesReferencia(c.mesReferencia);
+                            final mes = formatMesReferencia(c.mesReferencia);
                             if (c.dataPagamento != null) {
                               final data = DateFormat('dd/MM/yy')
                                   .format(c.dataPagamento!);
@@ -724,8 +724,9 @@ class ReportController extends GetxController {
     return pdf;
   }
 
-  String _formatMesReferencia(String mesRef) {
+  String formatMesReferencia(String mesRef) {
     // 2024-03 -> Março/2024
+    if (mesRef.isEmpty) return 'N/A';
     final parts = mesRef.split('-');
     if (parts.length != 2) return mesRef;
 
@@ -982,11 +983,11 @@ class ReportController extends GetxController {
                     DateFormat('dd/MM/yyyy').format(c.dataPagamento);
                 final compStr = c.competencias.isNotEmpty
                     ? c.competencias
-                        .map((k) => _formatMesReferencia(k.mesReferencia))
+                        .map((k) => formatMesReferencia(k.mesReferencia))
                         .join(', ')
                     : (c.mesesCompetencia.isNotEmpty
                         ? c.mesesCompetencia
-                            .map((m) => _formatMesReferencia(m))
+                            .map((m) => formatMesReferencia(m))
                             .join(', ')
                         : '-');
 

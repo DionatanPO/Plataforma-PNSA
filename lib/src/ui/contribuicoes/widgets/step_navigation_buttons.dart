@@ -5,18 +5,22 @@ import '../controllers/contribuicao_controller.dart';
 
 class StepNavigationButtons extends StatelessWidget {
   final int currentStep;
+  final bool isLastStep;
   final Function(int) goToStep;
   final Function() goToNextStep;
   final Function() submitForm;
   final bool dizimistaSelecionado;
+  final bool isLoading;
 
   const StepNavigationButtons({
     Key? key,
     required this.currentStep,
+    this.isLastStep = false,
     required this.goToStep,
     required this.goToNextStep,
     required this.submitForm,
     required this.dizimistaSelecionado,
+    this.isLoading = false,
   }) : super(key: key);
 
   @override
@@ -33,7 +37,7 @@ class StepNavigationButtons extends StatelessWidget {
               margin: const EdgeInsets.only(right: 8),
               height: 56,
               child: OutlinedButton(
-                onPressed: () => goToStep(currentStep - 1),
+                onPressed: isLoading ? null : () => goToStep(currentStep - 1),
                 style: OutlinedButton.styleFrom(
                   side: BorderSide(color: theme.dividerColor),
                   shape: RoundedRectangleBorder(
@@ -59,28 +63,43 @@ class StepNavigationButtons extends StatelessWidget {
             margin: EdgeInsets.only(left: currentStep > 0 ? 8 : 0),
             height: 56,
             child: Obx(() {
-              bool dizimistaSelecionadoValue = controller.dizimistaSelecionado.value != null;
+              bool dizimistaSelecionadoValue =
+                  controller.dizimistaSelecionado.value != null;
+
+              // Only enable Next if dizimista selected on step 0
+              final bool canContinue =
+                  currentStep > 0 || dizimistaSelecionadoValue;
+
               return ElevatedButton(
-                onPressed: currentStep == 0
-                    ? (dizimistaSelecionadoValue ? goToNextStep : null) // Only enable if dizimista selected
-                    : submitForm,
+                onPressed: (canContinue && !isLoading)
+                    ? (isLastStep ? submitForm : goToNextStep)
+                    : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: currentStep == 0
-                      ? (dizimistaSelecionadoValue ? Colors.green : Colors.grey.shade400) // Verde se selecionado, cinza se não
-                      : Colors.green, // Verde para concluir
+                  backgroundColor: (canContinue && !isLoading)
+                      ? (isLastStep ? Colors.green : theme.colorScheme.primary)
+                      : Colors.grey.shade400,
                   foregroundColor: Colors.white,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
                 ),
-                child: Text(
-                  currentStep == 0 ? 'Próximo' : 'Confirmar Lançamento',
-                  style: GoogleFonts.outfit(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                child: isLoading
+                    ? const SizedBox(
+                        height: 24,
+                        width: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Text(
+                        isLastStep ? 'Confirmar Lançamento' : 'Próximo',
+                        style: GoogleFonts.outfit(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
               );
             }),
           ),

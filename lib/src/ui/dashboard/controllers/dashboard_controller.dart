@@ -47,32 +47,45 @@ class DashboardController extends GetxController {
         .fold(0.0, (sum, c) => sum + c.valor);
   }
 
+  double _calculateCompetenceValue(String mesRef) {
+    return _todasContribuicoes
+        .where((c) => c.mesesCompetencia.contains(mesRef))
+        .fold(0.0, (sum, c) {
+      if (c.mesesCompetencia.isEmpty) return sum;
+      return sum + (c.valor / c.mesesCompetencia.length);
+    });
+  }
+
+  double _calculateCompetenceValueForYear(int year) {
+    double total = 0;
+    for (var c in _todasContribuicoes) {
+      int countInYear =
+          c.mesesCompetencia.where((m) => m.startsWith('$year-')).length;
+      if (countInYear > 0 && c.mesesCompetencia.isNotEmpty) {
+        total += (c.valor / c.mesesCompetencia.length) * countInYear;
+      }
+    }
+    return total;
+  }
+
   double get arrecadacaoMesAtual {
     final now = DateTime.now();
-    return _todasContribuicoes
-        .where((c) =>
-            c.dataPagamento.year == now.year &&
-            c.dataPagamento.month == now.month)
-        .fold(0.0, (sum, c) => sum + c.valor);
+    final currentMesRef = DateFormat('yyyy-MM').format(now);
+    return _calculateCompetenceValue(currentMesRef);
   }
 
   double get arrecadacaoAno {
     final now = DateTime.now();
-    return _todasContribuicoes
-        .where((c) => c.dataPagamento.year == now.year)
-        .fold(0.0, (sum, c) => sum + c.valor);
+    return _calculateCompetenceValueForYear(now.year);
   }
 
   double get arrecadacaoMesAnterior {
     final now = DateTime.now();
     final firstDayCurrentMonth = DateTime(now.year, now.month, 1);
-    final lastDayLastMonth =
+    final lastMonthDate =
         firstDayCurrentMonth.subtract(const Duration(days: 1));
-    return _todasContribuicoes
-        .where((c) =>
-            c.dataPagamento.year == lastDayLastMonth.year &&
-            c.dataPagamento.month == lastDayLastMonth.month)
-        .fold(0.0, (sum, c) => sum + c.valor);
+    final lastMesRef = DateFormat('yyyy-MM').format(lastMonthDate);
+    return _calculateCompetenceValue(lastMesRef);
   }
 
   double get variacaoArrecadacao {
@@ -84,10 +97,9 @@ class DashboardController extends GetxController {
 
   double get ticketMedio {
     final now = DateTime.now();
+    final currentMesRef = DateFormat('yyyy-MM').format(now);
     final contribuicoesMes = _todasContribuicoes
-        .where((c) =>
-            c.dataPagamento.year == now.year &&
-            c.dataPagamento.month == now.month)
+        .where((c) => c.mesesCompetencia.contains(currentMesRef))
         .toList();
     if (contribuicoesMes.isEmpty) return 0.0;
     return arrecadacaoMesAtual / contribuicoesMes.length;

@@ -28,6 +28,14 @@ class _NovaContribuicaoViewState extends State<NovaContribuicaoView> {
   int _currentStep = 0;
   Timer? _debounceTimer;
   Future<List<Dizimista>>? _searchFuture;
+  int _displayYear = DateTime.now().year;
+  bool _isSucceeded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    controller.resetForm();
+  }
 
   final CurrencyTextInputFormatter _currencyFormatter =
       CurrencyTextInputFormatter.currency(
@@ -105,19 +113,15 @@ class _NovaContribuicaoViewState extends State<NovaContribuicaoView> {
           return Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                flex: 5,
-                child: Container(
-                  padding: const EdgeInsets.only(right: 16),
-                  child: _buildStepperCard(),
-                ),
+              // Menu Lateral de Etapas
+              SizedBox(
+                width: 250,
+                child: _buildLateralStepper(),
               ),
+              const SizedBox(width: 24),
+              // Conteúdo Principal
               Expanded(
-                flex: 3,
-                child: Container(
-                  padding: const EdgeInsets.only(left: 16),
-                  child: _buildExplanationColumn(),
-                ),
+                child: _buildStepperCard(isLateral: true),
               ),
             ],
           );
@@ -125,8 +129,6 @@ class _NovaContribuicaoViewState extends State<NovaContribuicaoView> {
           return Column(
             children: [
               _buildStepperCard(),
-              const SizedBox(height: 24),
-              _buildExplanationColumn(),
             ],
           );
         }
@@ -134,7 +136,97 @@ class _NovaContribuicaoViewState extends State<NovaContribuicaoView> {
     );
   }
 
-  Widget _buildStepperCard() {
+  Widget _buildLateralStepper() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+      decoration: BoxDecoration(
+        color: surfaceColor,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: borderColor),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildLateralStepItem(
+              0, 'Selecionar Fiel', Icons.person_search_rounded),
+          _buildDivider(),
+          _buildLateralStepItem(
+              1, 'Definir Período', Icons.calendar_month_rounded),
+          _buildDivider(),
+          _buildLateralStepItem(
+              2, 'Dados do Pagamento', Icons.credit_card_rounded),
+          _buildDivider(),
+          _buildLateralStepItem(
+              3, 'Resumo do Lançamento', Icons.verified_user_rounded),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDivider() {
+    return Container(
+      height: 20,
+      width: 2,
+      color: borderColor,
+      margin: const EdgeInsets.symmetric(vertical: 4),
+    );
+  }
+
+  Widget _buildLateralStepItem(int step, String title, IconData icon) {
+    final bool isActive = _currentStep == step;
+    final bool isCompleted = _currentStep > step;
+
+    return InkWell(
+      onTap: () {
+        // Allow navigation only to previous steps or if current is valid
+        if (step < _currentStep) setState(() => _currentStep = step);
+      },
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isActive ? accentColor.withOpacity(0.1) : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: isActive
+                    ? accentColor
+                    : (isCompleted
+                        ? Colors.green
+                        : theme.disabledColor.withOpacity(0.2)),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(isCompleted ? Icons.check : icon,
+                  size: 16, color: Colors.white),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                title,
+                style: GoogleFonts.inter(
+                  fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
+                  color: isActive
+                      ? accentColor
+                      : theme.colorScheme.onSurface
+                          .withOpacity(isCompleted ? 0.8 : 0.5),
+                  fontSize: 14,
+                ),
+              ),
+            ),
+            if (isActive)
+              Icon(Icons.arrow_forward_ios_rounded,
+                  size: 12, color: accentColor)
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStepperCard({bool isLateral = false}) {
     return Container(
       decoration: BoxDecoration(
         color: surfaceColor,
@@ -151,264 +243,19 @@ class _NovaContribuicaoViewState extends State<NovaContribuicaoView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Container(
-            padding: EdgeInsets.all(isMobile ? 16 : 24),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  accentColor.withOpacity(0.05),
-                  accentColor.withOpacity(0.02),
-                ],
-              ),
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(isMobile ? 16 : 20),
-                topRight: Radius.circular(isMobile ? 16 : 20),
-              ),
-              border: Border(bottom: BorderSide(color: borderColor)),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: accentColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    Icons.add_card_rounded,
-                    color: accentColor,
-                    size: 22,
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Text(
-                  'Nova Entrada',
-                  style: GoogleFonts.outfit(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.onSurface,
-                    letterSpacing: -0.5,
-                  ),
-                ),
-              ],
-            ),
-          ),
           Padding(
             padding: EdgeInsets.all(isMobile ? 16 : 24),
             child: Column(
               children: [
-                _buildModernStepIndicator(),
+                if (!isLateral) _buildModernStepIndicator(),
+                if (!isLateral) const SizedBox(height: 32),
                 const SizedBox(height: 32),
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 300),
-                  child: _currentStep == 0
-                      ? _buildStep1DizimistaSelection()
-                      : _buildStep2ContributionForm(),
+                  child: _getStepContent(),
                 ),
                 const SizedBox(height: 24),
                 _buildStepNavigationButtons(),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildExplanationColumn() {
-    return Container(
-      decoration: BoxDecoration(
-        color: surfaceColor,
-        borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
-        border: Border.all(color: borderColor),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.2 : 0.03),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(isMobile ? 16 : 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: accentColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    Icons.info_rounded,
-                    color: accentColor,
-                    size: 22,
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Text(
-                  'Como Contribuir',
-                  style: GoogleFonts.outfit(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.onSurface,
-                    letterSpacing: -0.5,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            _buildInstructionCard(
-              step: 1,
-              title: 'Selecione o Fiel',
-              description:
-                  'Busque e selecione o fiel que está fazendo a contribuição usando o campo de busca.',
-              icon: Icons.person_search_rounded,
-            ),
-            const SizedBox(height: 16),
-            _buildInstructionCard(
-              step: 2,
-              title: 'Preencha os Dados',
-              description:
-                  'Informe o tipo de contribuição, valor, forma de pagamento e observações.',
-              icon: Icons.edit_note_rounded,
-            ),
-            const SizedBox(height: 16),
-            _buildInstructionCard(
-              step: 3,
-              title: 'Confirme o Registro',
-              description:
-                  'Revise todos os dados e clique em "Registrar" para concluir o lançamento.',
-              icon: Icons.check_circle_rounded,
-            ),
-            const SizedBox(height: 24),
-            Container(
-              padding: EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: accentColor.withOpacity(0.08),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.lightbulb_rounded,
-                          color: accentColor, size: 20),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Dicas Importantes',
-                        style: GoogleFonts.outfit(
-                          fontWeight: FontWeight.w600,
-                          color: theme.colorScheme.onSurface,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    '• Use o campo de busca com nome, CPF ou telefone para localizar rapidamente o fiel',
-                    style: GoogleFonts.inter(
-                      fontSize: 13,
-                      height: 1.5,
-                      color: theme.colorScheme.onSurface.withOpacity(0.8),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '• Para múltiplos meses, selecione os períodos desejados no calendário de referência',
-                    style: GoogleFonts.inter(
-                      fontSize: 13,
-                      height: 1.5,
-                      color: theme.colorScheme.onSurface.withOpacity(0.8),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '• O valor total será dividido automaticamente entre os meses selecionados',
-                    style: GoogleFonts.inter(
-                      fontSize: 13,
-                      height: 1.5,
-                      color: theme.colorScheme.onSurface.withOpacity(0.8),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInstructionCard({
-    required int step,
-    required String title,
-    required String description,
-    required IconData icon,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: borderColor),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [accentColor, accentColor.withOpacity(0.8)],
-              ),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Center(
-              child: Text(
-                step.toString(),
-                style: GoogleFonts.outfit(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  fontSize: 16,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(icon, size: 18, color: accentColor),
-                    const SizedBox(width: 8),
-                    Text(
-                      title,
-                      style: GoogleFonts.outfit(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 15,
-                        color: theme.colorScheme.onSurface,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  description,
-                  style: GoogleFonts.inter(
-                    fontSize: 13,
-                    height: 1.4,
-                    color: theme.colorScheme.onSurface.withOpacity(0.7),
-                  ),
-                ),
               ],
             ),
           ),
@@ -427,9 +274,13 @@ class _NovaContribuicaoViewState extends State<NovaContribuicaoView> {
       ),
       child: Row(
         children: [
-          _buildStepButton(0, 'Selecionar Fiel', Icons.person_search_rounded),
-          const SizedBox(width: 8),
-          _buildStepButton(1, 'Dados', Icons.edit_note_rounded),
+          _buildStepButton(0, 'Fiel', Icons.person_search_rounded),
+          const SizedBox(width: 4),
+          _buildStepButton(1, 'Período', Icons.calendar_month_rounded),
+          const SizedBox(width: 4),
+          _buildStepButton(2, 'Pagamento', Icons.credit_card_rounded),
+          const SizedBox(width: 4),
+          _buildStepButton(3, 'Resumo', Icons.verified_user_rounded),
         ],
       ),
     );
@@ -840,163 +691,272 @@ class _NovaContribuicaoViewState extends State<NovaContribuicaoView> {
     );
   }
 
-  Widget _buildStep2ContributionForm() {
+  Widget _getStepContent() {
+    switch (_currentStep) {
+      case 0:
+        return _buildStep1DizimistaSelection();
+      case 1:
+        return _buildStep2MonthSelection();
+      case 2:
+        return _buildStep3PaymentData();
+      case 3:
+        return _buildStep4Summary();
+      default:
+        return Container();
+    }
+  }
+
+  bool _isManualSelection = false;
+
+  Widget _buildStep2MonthSelection() {
     return Column(
       key: const ValueKey('step2'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          padding: EdgeInsets.all(isMobile ? 12 : 16),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(colors: [
-              accentColor.withOpacity(0.08),
-              accentColor.withOpacity(0.04)
-            ]),
-            borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
-            border: Border.all(color: accentColor.withOpacity(0.2)),
-          ),
-          child: Row(
-            children: [
-              Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                      color: accentColor.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(10)),
-                  child:
-                      Icon(Icons.person_rounded, color: accentColor, size: 20)),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Fiel selecionado',
-                        style: GoogleFonts.inter(
-                            fontSize: 11,
-                            color: theme.colorScheme.onSurface.withOpacity(0.5),
-                            fontWeight: FontWeight.w500)),
-                    const SizedBox(height: 2),
-                    Text(controller.dizimistaSelecionado.value?.nome ?? '',
-                        style: GoogleFonts.outfit(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: theme.colorScheme.onSurface)),
-                  ],
-                ),
-              ),
-              IconButton(
-                  icon: Icon(Icons.edit_rounded, size: 20, color: accentColor),
-                  onPressed: () => Get.toNamed(AppRoutes.dizimista_editar,
-                      arguments: controller.dizimistaSelecionado.value),
-                  padding: EdgeInsets.zero,
-                  constraints: BoxConstraints.tight(const Size(32, 32)),
-                  visualDensity: VisualDensity.compact),
-            ],
+        Text(
+          'Referência da Contribuição',
+          style: GoogleFonts.outfit(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: theme.colorScheme.onSurface,
           ),
         ),
-        _label('Meses de Referência'),
-        InkWell(
-          onTap: () => _showMonthPicker(),
-          borderRadius: BorderRadius.circular(16),
-          child: Container(
-            padding: const EdgeInsets.all(16),
+        const SizedBox(height: 8),
+        Text(
+          'Selecione a quais meses este pagamento se refere.',
+          style: GoogleFonts.inter(
+            fontSize: 14,
+            height: 1.5,
+            color: theme.colorScheme.onSurface.withOpacity(0.7),
+          ),
+        ),
+        const SizedBox(height: 24),
+        LayoutBuilder(builder: (context, constraints) {
+          final double cardWidth = (constraints.maxWidth > 600)
+              ? (constraints.maxWidth - 16) / 2
+              : constraints.maxWidth;
+
+          return Wrap(
+            spacing: 16,
+            runSpacing: 16,
+            children: [
+              SizedBox(
+                width: cardWidth,
+                child: _buildQuickOptionCard(
+                  title: 'Mês Atual',
+                  subtitle: _formatMonthAndYear(DateTime.now()),
+                  icon: Icons.calendar_today_rounded,
+                  color: Colors.blue,
+                  onTap: () {
+                    setState(() {
+                      _isManualSelection = false;
+                    });
+                    controller.limparCompetencias();
+                    final now = DateTime.now();
+                    final mesRef =
+                        '${now.year}-${now.month.toString().padLeft(2, '0')}';
+                    controller.adicionarCompetencia(mesRef, 0);
+                    _goToNextStep();
+                  },
+                ),
+              ),
+              SizedBox(
+                width: cardWidth,
+                child: _buildQuickOptionCard(
+                  title: 'Seleção Manual',
+                  subtitle: 'Selecione múltiplos meses',
+                  icon: Icons.edit_calendar_rounded,
+                  color: Colors.orange,
+                  onTap: () {
+                    setState(() {
+                      _isManualSelection = true;
+                    });
+                  },
+                ),
+              ),
+            ],
+          );
+        }),
+        if (_isManualSelection) ...[
+          const SizedBox(height: 24),
+          Container(
+            padding: EdgeInsets.all(isMobile ? 16 : 24),
             decoration: BoxDecoration(
-              color: accentColor.withOpacity(0.05),
+              color: backgroundColor,
+              border: Border.all(color: borderColor),
               borderRadius: BorderRadius.circular(16),
-              border:
-                  Border.all(color: accentColor.withOpacity(0.2), width: 1.5),
             ),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: accentColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(Icons.calendar_month_rounded,
-                      color: accentColor, size: 24),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Obx(() => Text(
-                            controller.competencias.isEmpty
-                                ? 'Clique para selecionar os meses'
-                                : 'Meses Selecionados',
-                            style: GoogleFonts.inter(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: theme.colorScheme.onSurface,
-                            ),
-                          )),
-                      Obx(() {
-                        if (controller.competencias.isEmpty)
-                          return const SizedBox.shrink();
-                        return Text(
-                          '${controller.competencias.length} mês(es) selecionado(s)',
-                          style: GoogleFonts.inter(
-                            fontSize: 12,
-                            color: theme.colorScheme.onSurface.withOpacity(0.5),
-                          ),
-                        );
-                      }),
-                    ],
-                  ),
-                ),
-                Icon(Icons.add_circle_outline_rounded, color: accentColor),
+                _buildEmbeddedMonthPicker(),
               ],
             ),
           ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildStep3PaymentData() {
+    return Column(
+      key: const ValueKey('step3'),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSelectedMonthsSummary(),
+        const SizedBox(height: 32),
+
+        // VALOR E DATA AQUI
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 2,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _label('Valor da Contribuição'),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: backgroundColor,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: borderColor),
+                    ),
+                    child: TextField(
+                      controller: _valorController,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [_currencyFormatter],
+                      onChanged: (val) => controller.valor.value = val,
+                      style: GoogleFonts.inter(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: accentColor,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'R\$ 0,00',
+                        prefixIcon: Icon(Icons.attach_money_rounded,
+                            color: accentColor),
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 16),
+                      ),
+                    ),
+                  ),
+                  if (controller.competencias.length > 1) ...[
+                    const SizedBox(height: 16),
+                    _label('Modo de Distribuição'),
+                    Obx(() => Row(
+                          children: [
+                            Expanded(
+                              child: _paymentChip(
+                                'Integral / Cada Mês',
+                                Icons.repeat_rounded,
+                                isSelectedOverride:
+                                    controller.distribuicaoModo.value ==
+                                        DistribuicaoModo.integral,
+                                onTapOverride: () => controller.distribuicaoModo
+                                    .value = DistribuicaoModo.integral,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: _paymentChip(
+                                'Dividir Valor Total',
+                                Icons.splitscreen_rounded,
+                                isSelectedOverride:
+                                    controller.distribuicaoModo.value ==
+                                        DistribuicaoModo.rateado,
+                                onTapOverride: () => controller.distribuicaoModo
+                                    .value = DistribuicaoModo.rateado,
+                              ),
+                            ),
+                          ],
+                        )),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _label('Data do Pagamento'),
+                  InkWell(
+                    onTap: () async {
+                      final DateTime? picked = await showDatePicker(
+                        context: context,
+                        initialDate: controller.dataSelecionada.value,
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2100),
+                        builder: (context, child) => Theme(
+                          data: theme.copyWith(
+                            colorScheme: theme.colorScheme.copyWith(
+                              primary: accentColor,
+                            ),
+                          ),
+                          child: child!,
+                        ),
+                      );
+                      if (picked != null) {
+                        controller.dataSelecionada.value = picked;
+                        // Sincroniza todas as competências com esta data
+                        for (var c in controller.competencias) {
+                          controller.atualizarDataCompetencia(
+                              c.mesReferencia, picked);
+                        }
+                      }
+                    },
+                    borderRadius: BorderRadius.circular(16),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 16),
+                      decoration: BoxDecoration(
+                        color: backgroundColor,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: borderColor),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.calendar_today_rounded,
+                              size: 20,
+                              color:
+                                  theme.colorScheme.onSurface.withOpacity(0.6)),
+                          const SizedBox(width: 12),
+                          Obx(() => Text(
+                                DateFormat('dd/MM/yy')
+                                    .format(controller.dataSelecionada.value),
+                                style: GoogleFonts.inter(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              )),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 24),
-        const SizedBox(height: 20),
-        _label('Qual o valor total recebido?'),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-          decoration: BoxDecoration(
-              gradient: LinearGradient(colors: [
-                accentColor.withOpacity(0.05),
-                accentColor.withOpacity(0.02)
-              ]),
-              borderRadius: BorderRadius.circular(16),
-              border:
-                  Border.all(color: accentColor.withOpacity(0.2), width: 1.5)),
-          child: TextField(
-            controller: _valorController,
-            keyboardType: TextInputType.number,
-            inputFormatters: [_currencyFormatter],
-            style: GoogleFonts.outfit(
-                fontSize: 36,
-                fontWeight: FontWeight.bold,
-                color: theme.colorScheme.onSurface,
-                height: 1.2),
-            onChanged: (value) => controller.valor.value = value,
-            decoration: InputDecoration(
-                border: InputBorder.none,
-                hintText: 'R\$ 0,00',
-                hintStyle: TextStyle(
-                    color: theme.colorScheme.onSurface.withOpacity(0.15)),
-                contentPadding: const EdgeInsets.symmetric(vertical: 12)),
-          ),
-        ),
-        const SizedBox(height: 24),
+
+        const SizedBox(height: 32),
         _label('Como foi recebido?'),
-        Obx(() => Wrap(spacing: 10, runSpacing: 10, children: [
+        Obx(() => Wrap(spacing: 12, runSpacing: 12, children: [
               _paymentChip('PIX', Icons.qr_code_2_rounded),
               _paymentChip('Dinheiro', Icons.payments_rounded),
               _paymentChip('Cartão', Icons.credit_card_rounded),
               _paymentChip('Transferência', Icons.sync_alt_rounded)
             ])),
-        const SizedBox(height: 24),
+        const SizedBox(height: 32),
         _label('Status do Pagamento'),
         Obx(() => Row(children: [
               _statusChip('Pago', Icons.check_circle_rounded, Colors.green),
-              const SizedBox(width: 12),
+              const SizedBox(width: 16),
               _statusChip('A Receber', Icons.pending_rounded, Colors.orange),
             ])),
-        const SizedBox(height: 24),
+        const SizedBox(height: 32),
         _label('Observação (Opcional)'),
         Container(
           decoration: BoxDecoration(
@@ -1017,9 +977,293 @@ class _NovaContribuicaoViewState extends State<NovaContribuicaoView> {
           ),
         ),
         const SizedBox(height: 32),
-        _buildSummaryCard(),
+        // Removido o summary card daqui, pois agora existe uma 4ª etapa dedicada
       ],
     );
+  }
+
+  void _addAllMonthsCurrentYear() {
+    controller.limparCompetencias();
+    final now = DateTime.now();
+    final year = now.year;
+    final Map<String, DateTime> months = {};
+    for (int i = 1; i <= 12; i++) {
+      final mesRef = '$year-${i.toString().padLeft(2, '0')}';
+      months[mesRef] = DateTime(year, i, 10);
+    }
+    controller.adicionarVariasCompetencias(months);
+  }
+
+  Widget _buildQuickOptionCard({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+              color: surfaceColor,
+              border: Border.all(color: color.withOpacity(0.3)),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                    color: color.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4))
+              ]),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, color: color, size: 24),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title,
+                        style: GoogleFonts.outfit(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.onSurface)),
+                    Text(subtitle,
+                        style: GoogleFonts.inter(
+                            fontSize: 13,
+                            color:
+                                theme.colorScheme.onSurface.withOpacity(0.6))),
+                  ],
+                ),
+              ),
+              Icon(Icons.arrow_forward_ios_rounded,
+                  size: 14, color: color.withOpacity(0.5)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmbeddedMonthPicker() {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              IconButton(
+                icon: Icon(Icons.chevron_left_rounded,
+                    color: theme.colorScheme.onSurface),
+                onPressed: () => setState(() => _displayYear--),
+              ),
+              Text(
+                _displayYear.toString(),
+                style: GoogleFonts.outfit(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+              IconButton(
+                icon: Icon(Icons.chevron_right_rounded,
+                    color: theme.colorScheme.onSurface),
+                onPressed: () => setState(() => _displayYear++),
+              ),
+            ],
+          ),
+        ),
+        Obx(() {
+          final selectedKeys =
+              controller.competencias.map((c) => c.mesReferencia).toSet();
+
+          return GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: isMobile ? 3 : 6,
+              childAspectRatio: 1.5,
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
+            ),
+            itemCount: 12,
+            itemBuilder: (context, index) {
+              final month = index + 1;
+              final monthKey =
+                  '$_displayYear-${month.toString().padLeft(2, '0')}';
+              final isSelected = selectedKeys.contains(monthKey);
+
+              return InkWell(
+                  onTap: () {
+                    if (isSelected) {
+                      controller.removerCompetencia(monthKey);
+                    } else {
+                      controller.adicionarCompetencia(monthKey, 0);
+                    }
+                  },
+                  borderRadius: BorderRadius.circular(8),
+                  child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      decoration: BoxDecoration(
+                          color: isSelected ? accentColor : surfaceColor,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                              color: isSelected ? accentColor : borderColor)),
+                      child: Center(
+                          child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                            Text(
+                                DateFormat('MMM', 'pt_BR')
+                                    .format(DateTime(2024, month))
+                                    .toUpperCase(),
+                                style: GoogleFonts.inter(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                    color: isSelected
+                                        ? Colors.white
+                                        : theme.colorScheme.onSurface)),
+                          ]))));
+            },
+          );
+        }),
+      ],
+    );
+  }
+
+  String _formatMonthAndYear(DateTime date) {
+    return DateFormat('MMMM yyyy', 'pt_BR').format(date);
+  }
+
+  Widget _buildSelectedDizimistaSummary() {
+    return Container(
+      padding: EdgeInsets.all(isMobile ? 12 : 16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(colors: [
+          accentColor.withOpacity(0.08),
+          accentColor.withOpacity(0.04)
+        ]),
+        borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
+        border: Border.all(color: accentColor.withOpacity(0.2)),
+      ),
+      child: Row(
+        children: [
+          Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                  color: accentColor.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(10)),
+              child: Icon(Icons.person_rounded, color: accentColor, size: 20)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Fiel selecionado',
+                    style: GoogleFonts.inter(
+                        fontSize: 11,
+                        color: theme.colorScheme.onSurface.withOpacity(0.5),
+                        fontWeight: FontWeight.w500)),
+                const SizedBox(height: 2),
+                Text(controller.dizimistaSelecionado.value?.nome ?? '',
+                    style: GoogleFonts.outfit(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: theme.colorScheme.onSurface)),
+              ],
+            ),
+          ),
+          IconButton(
+              icon: Icon(Icons.edit_rounded, size: 20, color: accentColor),
+              onPressed: () => setState(() => _currentStep = 0),
+              padding: EdgeInsets.zero,
+              constraints: BoxConstraints.tight(const Size(32, 32)),
+              visualDensity: VisualDensity.compact),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSelectedMonthsSummary() {
+    return Container(
+        padding: EdgeInsets.all(isMobile ? 12 : 16),
+        decoration: BoxDecoration(
+            color: backgroundColor,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: borderColor)),
+        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                  color: Colors.purple.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10)),
+              child: const Icon(Icons.calendar_today_rounded,
+                  size: 20, color: Colors.purple)),
+          const SizedBox(width: 12),
+          Expanded(
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                Text('Meses Referentes',
+                    style: GoogleFonts.inter(
+                        fontSize: 11,
+                        color: theme.colorScheme.onSurface.withOpacity(0.5),
+                        fontWeight: FontWeight.w500)),
+                const SizedBox(height: 4),
+                Obx(() {
+                  if (controller.competencias.isEmpty)
+                    return Text('Nenhum mês selecionado',
+                        style: GoogleFonts.inter(color: Colors.red));
+
+                  // Sort competencies
+                  final sorted = controller.competencias.toList()
+                    ..sort(
+                        (a, b) => a.mesReferencia.compareTo(b.mesReferencia));
+
+                  if (sorted.length > 3) {
+                    return Text(
+                        '${sorted.length} meses selecionados (${_formatMesReferencia(sorted.first.mesReferencia)} a ${_formatMesReferencia(sorted.last.mesReferencia)})',
+                        style: GoogleFonts.outfit(
+                            fontWeight: FontWeight.w600, fontSize: 14));
+                  }
+
+                  return Wrap(
+                      spacing: 4,
+                      runSpacing: 4,
+                      children: sorted
+                          .map((c) => Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 2),
+                              decoration: BoxDecoration(
+                                  color: Colors.purple.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(4)),
+                              child: Text(_formatMesReferencia(c.mesReferencia),
+                                  style: GoogleFonts.inter(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.purple))))
+                          .toList());
+                })
+              ])),
+          IconButton(
+              icon: Icon(Icons.edit_rounded,
+                  size: 20, color: theme.colorScheme.onSurfaceVariant),
+              onPressed: () => setState(() => _currentStep = 1),
+              padding: EdgeInsets.zero,
+              constraints: BoxConstraints.tight(const Size(32, 32)),
+              visualDensity: VisualDensity.compact),
+        ]));
   }
 
   void _pickDateForCompetencia(String mesAno, DateTime? dataAtual) async {
@@ -1409,26 +1653,60 @@ class _NovaContribuicaoViewState extends State<NovaContribuicaoView> {
   }
 
   Widget _buildStepNavigationButtons() {
-    return StepNavigationButtons(
-      currentStep: _currentStep,
-      goToStep: (step) => setState(() => _currentStep = step),
-      goToNextStep: _goToNextStep,
-      submitForm: _submitForm,
-      dizimistaSelecionado: controller.dizimistaSelecionado.value != null,
-    );
+    return Obx(() => StepNavigationButtons(
+          currentStep: _currentStep,
+          isLastStep: _currentStep == 3,
+          goToStep: (step) => setState(() => _currentStep = step),
+          goToNextStep: _goToNextStep,
+          submitForm: _submitForm,
+          dizimistaSelecionado: controller.dizimistaSelecionado.value != null,
+          isLoading: controller.isLoading || _isSucceeded,
+        ));
   }
 
   void _goToNextStep() {
-    if (controller.dizimistaSelecionado.value != null)
-      setState(() => _currentStep = 1);
-    else
-      Get.snackbar('Atenção', 'Selecione um fiel antes de continuar.',
-          snackPosition: SnackPosition.BOTTOM,
-          margin: const EdgeInsets.all(24),
-          backgroundColor: surfaceColor,
-          colorText: theme.colorScheme.onSurface,
-          borderRadius: 12,
-          icon: Icon(Icons.warning_rounded, color: Colors.orange));
+    if (_currentStep == 0) {
+      if (controller.dizimistaSelecionado.value != null) {
+        setState(() => _currentStep = 1);
+      } else {
+        _showErrorSnackbar('Selecione um fiel antes de continuar.');
+      }
+    } else if (_currentStep == 1) {
+      if (controller.competencias.isNotEmpty) {
+        setState(() => _currentStep = 2);
+      } else {
+        _showErrorSnackbar('Selecione ao menos um mês de referência.');
+      }
+    } else if (_currentStep == 2) {
+      // Validar valor > 0
+      String valorLimpo = controller.valor.value
+          .replaceAll('.', '')
+          .replaceAll('R\$', '')
+          .replaceAll(' ', '')
+          .replaceAll(',', '.');
+      double valorDouble = double.tryParse(valorLimpo) ?? 0;
+
+      if (valorDouble <= 0) {
+        _showErrorSnackbar('O valor da contribuição deve ser maior que zero.');
+        return;
+      }
+
+      if (controller.metodo.value.isNotEmpty) {
+        setState(() => _currentStep = 3);
+      } else {
+        _showErrorSnackbar('Selecione o método de pagamento.');
+      }
+    }
+  }
+
+  void _showErrorSnackbar(String message) {
+    Get.snackbar('Atenção', message,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(24),
+        backgroundColor: surfaceColor,
+        colorText: theme.colorScheme.onSurface,
+        borderRadius: 12,
+        icon: const Icon(Icons.warning_rounded, color: Colors.orange));
   }
 
   void _submitForm() async {
@@ -1456,11 +1734,11 @@ class _NovaContribuicaoViewState extends State<NovaContribuicaoView> {
       return;
     }
     try {
+      // Lock the form immediately to prevent double submissions
+      setState(() => _isSucceeded = true);
+
       // Criamos as contribuições separadas para o banco de dados
       final listaParaSalvar = controller.createContribuicoesFromFormSplit();
-
-      // Criamos uma contribuição agregada apenas para gerar o recibo completo
-      final contribuicaoParaRecibo = controller.createContribuicaoFromForm();
 
       // Salvamos cada mês como um lançamento separado no Firestore
       await controller.addContribuicoes(listaParaSalvar);
@@ -1481,24 +1759,28 @@ class _NovaContribuicaoViewState extends State<NovaContribuicaoView> {
                       style: GoogleFonts.inter(fontSize: 12))
                 ]))
           ]),
-          action: SnackBarAction(
-              label: 'RECIBO',
-              textColor: Colors.white,
-              onPressed: () =>
-                  controller.downloadOrShareReceiptPdf(contribuicaoParaRecibo)),
           backgroundColor: Colors.green,
-          duration: const Duration(seconds: 8),
+          duration: const Duration(seconds: 4),
           behavior: SnackBarBehavior.floating,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           margin: const EdgeInsets.all(24)));
-      _valorController.clear();
-      _searchController.clear();
-      _searchFuture = null;
-      controller.resetForm();
-      setState(() => _currentStep = 0);
-      Get.back(); // Volta para a listagem
+
+      // Aguarda um momento para o usuário ver o sucesso e o botão ficar travado
+      await Future.delayed(const Duration(milliseconds: 1500));
+
+      if (mounted) {
+        _valorController.clear();
+        _searchController.clear();
+        _searchFuture = null;
+        _displayYear = DateTime.now().year;
+        controller.resetForm();
+        Get.back(); // Volta para a listagem
+      }
     } catch (e) {
+      if (mounted) {
+        setState(() => _isSucceeded = false);
+      }
       Get.snackbar('Erro', 'Falha ao registrar lançamento: ${e.toString()}',
           snackPosition: SnackPosition.BOTTOM,
           margin: const EdgeInsets.all(24),
@@ -1550,12 +1832,13 @@ class _NovaContribuicaoViewState extends State<NovaContribuicaoView> {
     );
   }
 
-  Widget _paymentChip(String label, IconData icon) {
-    final isSelected = controller.metodo.value == label;
+  Widget _paymentChip(String label, IconData icon,
+      {bool? isSelectedOverride, VoidCallback? onTapOverride}) {
+    final isSelected = isSelectedOverride ?? controller.metodo.value == label;
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () => controller.metodo.value = label,
+        onTap: onTapOverride ?? () => controller.metodo.value = label,
         borderRadius: BorderRadius.circular(12),
         child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
@@ -1596,6 +1879,79 @@ class _NovaContribuicaoViewState extends State<NovaContribuicaoView> {
                           : theme.colorScheme.onSurface.withOpacity(0.7)))
             ])),
       ),
+    );
+  }
+
+  Widget _buildStep4Summary() {
+    return Column(
+      key: const ValueKey('step4'),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.green.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.verified_user_rounded,
+                  color: Colors.green, size: 28),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Revisão Final',
+                    style: GoogleFonts.outfit(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                  Text(
+                    'Confira os dados antes de confirmar o lançamento.',
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      color: theme.colorScheme.onSurface.withOpacity(0.6),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 32),
+        _buildSummaryCard(),
+        const SizedBox(height: 24),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.blue.withOpacity(0.05),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.blue.withOpacity(0.2)),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.info_outline_rounded,
+                  color: Colors.blue, size: 20),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Ao confirmar, os lançamentos serão registrados e você poderá gerar o recibo na próxima tela.',
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    color: Colors.blue.shade800,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -1651,21 +2007,36 @@ class _NovaContribuicaoViewState extends State<NovaContribuicaoView> {
                                 fontSize: 13, fontWeight: FontWeight.w500)),
                       ],
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.onSurface.withOpacity(0.05),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        'Pago em: ${DateFormat('dd/MM/yyyy').format(comp.dataPagamento ?? controller.dataSelecionada.value)}',
-                        style: GoogleFonts.inter(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
+                    Row(
+                      children: [
+                        Text(
+                          NumberFormat.simpleCurrency(locale: 'pt_BR')
+                              .format(comp.valor),
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
                             color:
-                                theme.colorScheme.onSurface.withOpacity(0.6)),
-                      ),
+                                theme.colorScheme.onSurface.withOpacity(0.05),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            'Em: ${DateFormat('dd/MM').format(comp.dataPagamento ?? controller.dataSelecionada.value)}',
+                            style: GoogleFonts.inter(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                                color: theme.colorScheme.onSurface
+                                    .withOpacity(0.6)),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -1674,11 +2045,13 @@ class _NovaContribuicaoViewState extends State<NovaContribuicaoView> {
           ],
           const Divider(height: 24),
           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            Text('Total a Receber:',
+            Text('Total do Lançamento:',
                 style: GoogleFonts.inter(
                     fontWeight: FontWeight.w600,
                     color: theme.colorScheme.onSurface.withOpacity(0.7))),
-            Text(controller.valor.value,
+            Text(
+                NumberFormat.simpleCurrency(locale: 'pt_BR')
+                    .format(controller.totalContribuicao),
                 style: GoogleFonts.outfit(
                     fontWeight: FontWeight.bold,
                     fontSize: 20,
