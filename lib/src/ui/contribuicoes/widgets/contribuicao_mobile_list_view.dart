@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../models/contribuicao_model.dart';
 import '../controllers/contribuicao_controller.dart';
+import '../../../data/services/session_service.dart';
+import 'package:get/get.dart';
 
 class ContribuicaoMobileListView extends StatelessWidget {
   final List<Contribuicao> items;
@@ -156,15 +158,17 @@ class ContribuicaoMobileListViewItem extends StatelessWidget {
                   foregroundColor: theme.primaryColor,
                 ),
               ),
-              const SizedBox(width: 8),
-              IconButton(
-                onPressed: () => _confirmDelete(context, d),
-                icon: const Icon(Icons.delete_outline_rounded),
-                style: IconButton.styleFrom(
-                  backgroundColor: Colors.red.withOpacity(0.1),
-                  foregroundColor: Colors.red,
+              if (Get.find<SessionService>().isFinanceiro) ...[
+                const SizedBox(width: 8),
+                IconButton(
+                  onPressed: () => _confirmDelete(context, d),
+                  icon: const Icon(Icons.delete_outline_rounded),
+                  style: IconButton.styleFrom(
+                    backgroundColor: Colors.red.withOpacity(0.1),
+                    foregroundColor: Colors.red,
+                  ),
                 ),
-              ),
+              ],
             ],
           ),
         ],

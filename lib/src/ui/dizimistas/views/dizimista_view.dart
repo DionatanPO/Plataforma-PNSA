@@ -237,8 +237,6 @@ class _DizimistaViewState extends State<DizimistaView> {
         floatingActionButton: FloatingActionButton.extended(
           heroTag: 'dizimista_fab_v3',
           onPressed: () => Get.toNamed(AppRoutes.dizimista_cadastro),
-          backgroundColor: accentColor,
-          foregroundColor: Colors.white,
           icon: const Icon(Icons.add_rounded),
           label: Text('Novo Fiel',
               style: GoogleFonts.inter(fontWeight: FontWeight.w600)),

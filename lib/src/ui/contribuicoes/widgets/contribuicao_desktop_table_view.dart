@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../models/contribuicao_model.dart';
 import '../controllers/contribuicao_controller.dart';
+import '../../../data/services/session_service.dart';
+import 'package:get/get.dart';
 
 class ContribuicaoDesktopTableView extends StatelessWidget {
   final List<Contribuicao> items;
@@ -242,13 +244,15 @@ class _ContribuicaoTableRowState extends State<_ContribuicaoTableRow> {
                     color: theme.primaryColor,
                     tooltip: 'Ver Recibo',
                   ),
-                  const SizedBox(width: 4),
-                  IconButton(
-                    icon: const Icon(Icons.delete_outline_rounded, size: 20),
-                    onPressed: () => _confirmDelete(context, d),
-                    color: Colors.red.withOpacity(0.7),
-                    tooltip: 'Apagar Lançamento',
-                  ),
+                  if (Get.find<SessionService>().isFinanceiro) ...[
+                    const SizedBox(width: 4),
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline_rounded, size: 20),
+                      onPressed: () => _confirmDelete(context, d),
+                      color: Colors.red.withOpacity(0.7),
+                      tooltip: 'Apagar Lançamento',
+                    ),
+                  ],
                 ],
               ),
             ),

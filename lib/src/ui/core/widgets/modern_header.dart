@@ -121,7 +121,7 @@ class ModernHeader extends StatelessWidget {
                       ],
                       if (onActionPressed != null) ...[
                         const SizedBox(height: 12),
-                        _buildActionButton(isMobile: true),
+                        _buildActionButton(context, isMobile: true),
                       ],
                     ],
                   )
@@ -157,7 +157,7 @@ class ModernHeader extends StatelessWidget {
                         ),
                       ),
                       if (onActionPressed != null)
-                        _buildActionButton(isMobile: false),
+                        _buildActionButton(context, isMobile: false),
                     ],
                   ),
           ),
@@ -186,7 +186,8 @@ class ModernHeader extends StatelessWidget {
     );
   }
 
-  Widget _buildActionButton({required bool isMobile}) {
+  Widget _buildActionButton(BuildContext context, {required bool isMobile}) {
+    final theme = Theme.of(context);
     return SizedBox(
       width: isMobile ? double.infinity : null,
       child: ElevatedButton.icon(
@@ -194,7 +195,7 @@ class ModernHeader extends StatelessWidget {
         icon: Icon(actionIcon ?? Icons.add_rounded, size: 20),
         label: Text(actionLabel ?? 'Adicionar'),
         style: ElevatedButton.styleFrom(
-          backgroundColor: actionColor ?? Colors.blue,
+          backgroundColor: actionColor ?? theme.colorScheme.primary,
           foregroundColor: Colors.white,
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
