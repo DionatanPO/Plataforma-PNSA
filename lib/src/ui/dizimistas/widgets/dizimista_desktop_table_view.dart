@@ -92,17 +92,76 @@ class DizimistaDesktopTableView extends StatelessWidget {
             ),
             child: Row(
               children: [
-                _TableHeaderCell(text: 'Nº', flex: 1, theme: theme),
-                _TableHeaderCell(text: 'FIÉL', flex: 3, theme: theme),
-                _TableHeaderCell(text: 'CONTATO', flex: 2, theme: theme),
-                _TableHeaderCell(text: 'LOCALIZAÇÃO', flex: 2, theme: theme),
-                _TableHeaderCell(text: 'STATUS', flex: 1, theme: theme),
                 _TableHeaderCell(
-                    text: 'ÚLT. CONTRIBUIÇÃO', flex: 2, theme: theme),
-                _TableHeaderCell(text: 'CADASTRO', flex: 1, theme: theme),
-                _TableHeaderCell(text: '', flex: 2, theme: theme),
+                  text: 'Nº',
+                  flex: 1,
+                  theme: theme,
+                  column: 'numeroRegistro',
+                  controller: controller,
+                ),
+                _TableHeaderCell(
+                  text: 'FIÉL',
+                  flex: 3,
+                  theme: theme,
+                  column: 'nome',
+                  controller: controller,
+                ),
+                const Expanded(
+                    flex: 2,
+                    child: Text('CONTATO',
+                        style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey))),
+                _TableHeaderCell(
+                  text: 'LOCALIZAÇÃO',
+                  flex: 2,
+                  theme: theme,
+                  column: 'localizacao',
+                  controller: controller,
+                ),
+                _TableHeaderCell(
+                  text: 'STATUS',
+                  flex: 1,
+                  theme: theme,
+                  column: 'status',
+                  controller: controller,
+                ),
+                _TableHeaderCell(
+                  text: 'ÚLT. CONTRIBUIÇÃO',
+                  flex: 2,
+                  theme: theme,
+                  column: 'ultimaContribuicao',
+                  controller: controller,
+                ),
+                _TableHeaderCell(
+                  text: 'CADASTRO',
+                  flex: 1,
+                  theme: theme,
+                  column:
+                      'dataRegistro', // Changed from 'dataCadastro' to 'dataRegistro'
+                  controller: controller,
+                ),
+                const Expanded(flex: 2, child: SizedBox.shrink()),
               ],
             ),
+          ),
+          // Lista de dizimistas
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: lista.length,
+            itemBuilder: (context, index) {
+              final d = lista[index];
+              return DizimistaDesktopTableRow(
+                key: ValueKey(d.id),
+                dizimista: d,
+                theme: theme,
+                controller: controller,
+                onEditPressed: onEditPressed,
+                onViewHistoryPressed: onViewHistoryPressed,
+              );
+            },
           ),
         ],
       ),
@@ -117,25 +176,55 @@ class _TableHeaderCell extends StatelessWidget {
   final String text;
   final int flex;
   final ThemeData theme;
+  final String column;
+  final DizimistaController controller;
 
   const _TableHeaderCell({
     required this.text,
     required this.flex,
     required this.theme,
+    required this.column,
+    required this.controller,
   });
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
       flex: flex,
-      child: Text(
-        text,
-        style: GoogleFonts.inter(
-          fontSize: 11,
-          fontWeight: FontWeight.bold,
-          color: theme.colorScheme.onSurface
-              .withOpacity(theme.brightness == Brightness.dark ? 0.8 : 0.6),
-          letterSpacing: 0.5,
+      child: InkWell(
+        onTap: () => controller.toggleSort(column),
+        child: Row(
+          children: [
+            Flexible(
+              child: Text(
+                text,
+                style: GoogleFonts.inter(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.onSurface.withOpacity(
+                      theme.brightness == Brightness.dark ? 0.8 : 0.6),
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ),
+            const SizedBox(width: 4),
+            Obx(() {
+              if (controller.sortColumn.value == column) {
+                return Icon(
+                  controller.isAscending.value
+                      ? Icons.arrow_upward_rounded
+                      : Icons.arrow_downward_rounded,
+                  size: 12,
+                  color: theme.primaryColor,
+                );
+              }
+              return Icon(
+                Icons.unfold_more_rounded,
+                size: 12,
+                color: theme.colorScheme.onSurface.withOpacity(0.2),
+              );
+            }),
+          ],
         ),
       ),
     );

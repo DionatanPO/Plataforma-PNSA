@@ -37,6 +37,19 @@ class ContribuicaoController extends GetxController {
   final pageSize = 20;
   final hasMore = true.obs;
 
+  // Ordenação
+  final sortColumn = 'dataPagamento'.obs;
+  final isAscending = false.obs;
+
+  void toggleSort(String column) {
+    if (sortColumn.value == column) {
+      isAscending.value = !isAscending.value;
+    } else {
+      sortColumn.value = column;
+      isAscending.value = true;
+    }
+  }
+
   // Getters públicos
   List<Contribuicao> get contribuicoes => _contribuicoes;
   List<Dizimista> get dizimistas => _dizimistas;
@@ -44,23 +57,61 @@ class ContribuicaoController extends GetxController {
 
   // Listagem filtrada e paginada
   List<Contribuicao> get filteredContribuicoes {
+    List<Contribuicao> listToFilter;
+
     if (searchQuery.value.isEmpty) {
-      // Ordena por ID decrescente (do último para o primeiro se IDs forem sequenciais/temporais ou apenas por string)
-      final sorted = List<Contribuicao>.from(_contribuicoes);
-      sorted.sort((a, b) => b.id.compareTo(a.id));
-      return sorted;
+      listToFilter = List<Contribuicao>.from(_contribuicoes);
+    } else {
+      final query = _normalize(searchQuery.value);
+      listToFilter = _contribuicoes.where((c) {
+        return _normalize(c.dizimistaNome).contains(query) ||
+            _normalize(c.tipo).contains(query) ||
+            _normalize(c.metodo).contains(query) ||
+            c.id.toLowerCase().contains(query);
+      }).toList();
     }
 
-    final query = searchQuery.value.toLowerCase().trim();
-    final filtered = _contribuicoes.where((c) {
-      return c.dizimistaNome.toLowerCase().contains(query) ||
-          c.tipo.toLowerCase().contains(query) ||
-          c.metodo.toLowerCase().contains(query) ||
-          c.id.toLowerCase().contains(query);
-    }).toList();
+    return _applySorting(listToFilter);
+  }
 
-    filtered.sort((a, b) => b.id.compareTo(a.id));
-    return filtered;
+  List<Contribuicao> _applySorting(List<Contribuicao> list) {
+    final col = sortColumn.value;
+    final asc = isAscending.value;
+
+    list.sort((a, b) {
+      int result = 0;
+      switch (col) {
+        case 'dataPagamento':
+          result = a.dataPagamento.compareTo(b.dataPagamento);
+          break;
+        case 'dizimistaNome':
+          result = _normalize(a.dizimistaNome)
+              .compareTo(_normalize(b.dizimistaNome));
+          break;
+        case 'metodo':
+          result = a.metodo.toLowerCase().compareTo(b.metodo.toLowerCase());
+          break;
+        case 'status':
+          result = a.status.toLowerCase().compareTo(b.status.toLowerCase());
+          break;
+        case 'valor':
+          result = a.valor.compareTo(b.valor);
+          break;
+        case 'mesReferencia':
+          // Ordena pelo primeiro mês de competência se existir
+          final aMes =
+              a.mesesCompetencia.isNotEmpty ? a.mesesCompetencia.first : '';
+          final bMes =
+              b.mesesCompetencia.isNotEmpty ? b.mesesCompetencia.first : '';
+          result = aMes.compareTo(bMes);
+          break;
+        default:
+          result = a.id.compareTo(b.id);
+      }
+      return asc ? result : -result;
+    });
+
+    return list;
   }
 
   List<Contribuicao> get paginatedContribuicoes {
@@ -459,26 +510,17 @@ class ContribuicaoController extends GetxController {
   List<Dizimista> searchDizimistas(String query) {
     if (query.isEmpty) return _dizimistas;
 
-    final queryLower = query.toLowerCase().trim();
+    final queryNorm = _normalize(query);
 
     return _dizimistas.where((dizimista) {
-      return dizimista.nome.toLowerCase().contains(queryLower) ||
-          dizimista.cpf.contains(query) ||
-          dizimista.telefone.contains(query) ||
-          (dizimista.email?.toLowerCase().contains(queryLower) ?? false) ||
-          (dizimista.rua?.toLowerCase().contains(queryLower) ?? false) ||
-          (dizimista.numero?.toLowerCase().contains(queryLower) ?? false) ||
-          (dizimista.bairro?.toLowerCase().contains(queryLower) ?? false) ||
-          dizimista.cidade.toLowerCase().contains(queryLower) ||
-          dizimista.estado.toLowerCase().contains(queryLower) ||
-          (dizimista.cep?.contains(query) ?? false) ||
-          (dizimista.nomeConjugue?.toLowerCase().contains(queryLower) ??
-              false) ||
-          (dizimista.estadoCivil?.toLowerCase().contains(queryLower) ??
-              false) ||
-          (dizimista.observacoes?.toLowerCase().contains(queryLower) ??
-              false) ||
-          dizimista.status.toLowerCase().contains(queryLower);
+      final nomeNorm = _normalize(dizimista.nome);
+      final cpf = dizimista.cpf.replaceAll(RegExp(r'[^0-9]'), '');
+      final queryNumbers = queryNorm.replaceAll(RegExp(r'[^0-9]'), '');
+
+      return nomeNorm.contains(queryNorm) ||
+          dizimista.numeroRegistro.contains(query) ||
+          (queryNumbers.isNotEmpty && cpf.contains(queryNumbers)) ||
+          dizimista.telefone.contains(query);
     }).toList();
   }
 
@@ -1054,5 +1096,17 @@ class ContribuicaoController extends GetxController {
         ],
       ),
     );
+  }
+
+  String _normalize(String text) {
+    if (text.isEmpty) return '';
+    var s = text.toLowerCase();
+    s = s.replaceAll(RegExp(r'[áàâãä]'), 'a');
+    s = s.replaceAll(RegExp(r'[éèêë]'), 'e');
+    s = s.replaceAll(RegExp(r'[íìîï]'), 'i');
+    s = s.replaceAll(RegExp(r'[óòôõö]'), 'o');
+    s = s.replaceAll(RegExp(r'[úùûü]'), 'u');
+    s = s.replaceAll(RegExp(r'[ç]'), 'c');
+    return s.trim();
   }
 }

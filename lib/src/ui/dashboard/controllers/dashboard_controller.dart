@@ -117,6 +117,13 @@ class DashboardController extends GetxController {
 
   int get totalAcessos => _todosAcessos.length;
 
+  // Getters para Contribuições
+  int get totalContribuicoes => _todasContribuicoes.length;
+  int get contribuicoesPagas =>
+      _todasContribuicoes.where((c) => c.status == 'Pago').length;
+  int get contribuicoesAReceber =>
+      _todasContribuicoes.where((c) => c.status == 'A Receber').length;
+
   List<Contribuicao> get ultimasContribuicoes =>
       _todasContribuicoes.take(5).toList();
 

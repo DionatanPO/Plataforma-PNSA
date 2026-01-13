@@ -56,7 +56,7 @@ class ContribuicaoService {
   static Stream<List<Contribuicao>> getAllContribuicoes() {
     return FirebaseFirestore.instance
         .collection(_collectionName)
-        .orderBy('dataRegistro', descending: true)
+        .orderBy('dataPagamento', descending: true)
         .snapshots()
         .map((snapshot) {
       return snapshot.docs.map((doc) => _fromFirestoreDocument(doc)).toList();
@@ -69,7 +69,7 @@ class ContribuicaoService {
     return FirebaseFirestore.instance
         .collection(_collectionName)
         .where('dizimistaId', isEqualTo: dizimistaId)
-        .orderBy('dataRegistro', descending: true)
+        .orderBy('dataPagamento', descending: true)
         .snapshots()
         .map((snapshot) {
       return snapshot.docs.map((doc) => _fromFirestoreDocument(doc)).toList();
@@ -136,6 +136,7 @@ class ContribuicaoService {
     return FirebaseFirestore.instance
         .collection(_collectionName)
         .where('mesesCompetencia', arrayContains: mesReferencia)
+        .orderBy('dataPagamento', descending: true)
         .snapshots()
         .map((snapshot) {
       return snapshot.docs.map((doc) => _fromFirestoreDocument(doc)).toList();

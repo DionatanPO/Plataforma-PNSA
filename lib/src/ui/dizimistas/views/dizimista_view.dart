@@ -56,9 +56,6 @@ class _DizimistaViewState extends State<DizimistaView> {
     final surfaceColor = isDark ? const Color(0xFF1A1A1A) : Colors.white;
     final backgroundColor =
         isDark ? const Color(0xFF0D0D0D) : const Color(0xFFF8F9FA);
-    final borderColor = isDark
-        ? Colors.white.withOpacity(0.08)
-        : Colors.black.withOpacity(0.06);
     final accentColor = theme.colorScheme.primary;
 
     final screenWidth = MediaQuery.of(context).size.width;
@@ -113,80 +110,18 @@ class _DizimistaViewState extends State<DizimistaView> {
                   ),
                 )
               else if (isDesktop)
-                SliverPadding(
-                  padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-                  sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        if (index == 0) {
-                          return Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 24, vertical: 16),
-                            decoration: BoxDecoration(
-                              color: surfaceColor,
-                              borderRadius: const BorderRadius.only(
-                                topLeft: Radius.circular(20),
-                                topRight: Radius.circular(20),
-                              ),
-                              border: Border.all(color: borderColor),
-                            ),
-                            child: Row(
-                              children: [
-                                _TableHeaderCell(
-                                    text: 'Nº', flex: 1, theme: theme),
-                                _TableHeaderCell(
-                                    text: 'FIÉL', flex: 3, theme: theme),
-                                _TableHeaderCell(
-                                    text: 'CONTATO', flex: 2, theme: theme),
-                                _TableHeaderCell(
-                                    text: 'LOCALIZAÇÃO', flex: 2, theme: theme),
-                                _TableHeaderCell(
-                                    text: 'STATUS', flex: 1, theme: theme),
-                                _TableHeaderCell(
-                                    text: 'ÚLT. CONTRIBUIÇÃO',
-                                    flex: 2,
-                                    theme: theme),
-                                _TableHeaderCell(
-                                    text: 'CADASTRO', flex: 1, theme: theme),
-                                _TableHeaderCell(
-                                    text: 'AÇÕES', flex: 1, theme: theme),
-                              ],
-                            ),
-                          );
-                        }
-
-                        final dizimistaIndex = index - 1;
-                        final isLast = dizimistaIndex == items.length - 1;
-                        return Container(
-                          decoration: BoxDecoration(
-                            color: surfaceColor,
-                            border: Border(
-                              left: BorderSide(color: borderColor),
-                              right: BorderSide(color: borderColor),
-                              bottom: isLast
-                                  ? BorderSide(color: borderColor)
-                                  : BorderSide.none,
-                            ),
-                            borderRadius: isLast
-                                ? const BorderRadius.only(
-                                    bottomLeft: Radius.circular(20),
-                                    bottomRight: Radius.circular(20),
-                                  )
-                                : BorderRadius.zero,
-                          ),
-                          child: DizimistaDesktopTableRow(
-                            key: ValueKey(items[dizimistaIndex].id),
-                            dizimista: items[dizimistaIndex],
-                            theme: theme,
-                            controller: controller,
-                            onEditPressed: (d) => Get.toNamed(
-                                AppRoutes.dizimista_editar,
-                                arguments: d),
-                            onViewHistoryPressed: (d) => _openHistoryDialog(d),
-                          ),
-                        );
-                      },
-                      childCount: items.length + 1,
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: horizontalPadding),
+                    child: DizimistaDesktopTableView(
+                      lista: items,
+                      theme: theme,
+                      surfaceColor: surfaceColor,
+                      controller: controller,
+                      onEditPressed: (d) =>
+                          Get.toNamed(AppRoutes.dizimista_editar, arguments: d),
+                      onViewHistoryPressed: (d) => _openHistoryDialog(d),
                     ),
                   ),
                 )
@@ -246,30 +181,5 @@ class _DizimistaViewState extends State<DizimistaView> {
 
   void _openHistoryDialog(Dizimista d) {
     Get.toNamed(AppRoutes.dizimista_historico, arguments: d);
-  }
-}
-
-class _TableHeaderCell extends StatelessWidget {
-  final String text;
-  final int flex;
-  final ThemeData theme;
-
-  const _TableHeaderCell(
-      {required this.text, required this.flex, required this.theme});
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      flex: flex,
-      child: Text(
-        text,
-        style: GoogleFonts.inter(
-          fontSize: 11,
-          fontWeight: FontWeight.bold,
-          color: theme.colorScheme.onSurface.withOpacity(0.6),
-          letterSpacing: 0.5,
-        ),
-      ),
-    );
   }
 }

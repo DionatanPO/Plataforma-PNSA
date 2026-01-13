@@ -29,6 +29,19 @@ class DizimistaController extends GetxController {
   final RxBool hasMore = true.obs;
   final RxBool isLoadingMore = false.obs;
 
+  // Ordenação
+  final sortColumn = 'nome'.obs;
+  final isAscending = true.obs;
+
+  void toggleSort(String column) {
+    if (sortColumn.value == column) {
+      isAscending.value = !isAscending.value;
+    } else {
+      sortColumn.value = column;
+      isAscending.value = true;
+    }
+  }
+
   // Verificação de permissão para apagar
   bool get isAuthorizedToDelete {
     final auth = Get.find<AuthService>();
@@ -62,31 +75,81 @@ class DizimistaController extends GetxController {
   }
 
   List<Dizimista> get filteredDizimistas {
+    List<Dizimista> listToFilter;
+
     if (searchQuery.value.isEmpty) {
-      return _dizimistas;
+      listToFilter = List<Dizimista>.from(_dizimistas);
     } else {
-      final queryLower = searchQuery.value.toLowerCase().trim();
-      return _dizimistas.where((dizimista) {
-        return dizimista.nome.toLowerCase().contains(queryLower) ||
-            dizimista.cpf.contains(searchQuery.value) ||
-            dizimista.numeroRegistro.contains(searchQuery.value) ||
-            dizimista.telefone.contains(searchQuery.value) ||
-            (dizimista.email?.toLowerCase().contains(queryLower) ?? false) ||
-            (dizimista.rua?.toLowerCase().contains(queryLower) ?? false) ||
-            (dizimista.numero?.toLowerCase().contains(queryLower) ?? false) ||
-            (dizimista.bairro?.toLowerCase().contains(queryLower) ?? false) ||
-            dizimista.cidade.toLowerCase().contains(queryLower) ||
-            dizimista.estado.toLowerCase().contains(queryLower) ||
-            (dizimista.cep?.contains(searchQuery.value) ?? false) ||
-            (dizimista.nomeConjugue?.toLowerCase().contains(queryLower) ??
-                false) ||
-            (dizimista.estadoCivil?.toLowerCase().contains(queryLower) ??
-                false) ||
-            (dizimista.observacoes?.toLowerCase().contains(queryLower) ??
-                false) ||
-            dizimista.status.toLowerCase().contains(queryLower);
+      final queryLower = _normalize(searchQuery.value);
+      listToFilter = _dizimistas.where((dizimista) {
+        final nome = _normalize(dizimista.nome);
+        final registro = dizimista.numeroRegistro.toLowerCase();
+        final cpf = dizimista.cpf.replaceAll(RegExp(r'[^0-9]'), '');
+        final queryNumbers = queryLower.replaceAll(RegExp(r'[^0-9]'), '');
+
+        return nome.contains(queryLower) ||
+            registro.contains(queryLower) ||
+            (queryNumbers.isNotEmpty && cpf.contains(queryNumbers)) ||
+            dizimista.telefone.contains(queryLower);
       }).toList();
     }
+
+    return _applySorting(listToFilter);
+  }
+
+  String _normalize(String text) {
+    if (text.isEmpty) return '';
+    var s = text.toLowerCase();
+    s = s.replaceAll(RegExp(r'[áàâãä]'), 'a');
+    s = s.replaceAll(RegExp(r'[éèêë]'), 'e');
+    s = s.replaceAll(RegExp(r'[íìîï]'), 'i');
+    s = s.replaceAll(RegExp(r'[óòôõö]'), 'o');
+    s = s.replaceAll(RegExp(r'[úùûü]'), 'u');
+    s = s.replaceAll(RegExp(r'[ç]'), 'c');
+    return s.trim();
+  }
+
+  List<Dizimista> _applySorting(List<Dizimista> list) {
+    final col = sortColumn.value;
+    final asc = isAscending.value;
+
+    list.sort((a, b) {
+      int result = 0;
+      switch (col) {
+        case 'nome':
+          result = _normalize(a.nome).compareTo(_normalize(b.nome));
+          break;
+        case 'numeroRegistro':
+          // Tenta comparar como número se possível, senão string
+          final regA = int.tryParse(a.numeroRegistro) ?? 0;
+          final regB = int.tryParse(b.numeroRegistro) ?? 0;
+          if (regA != 0 && regB != 0) {
+            result = regA.compareTo(regB);
+          } else {
+            result = a.numeroRegistro.compareTo(b.numeroRegistro);
+          }
+          break;
+        case 'status':
+          result = a.status.toLowerCase().compareTo(b.status.toLowerCase());
+          break;
+        case 'dataRegistro':
+          result = a.dataRegistro.compareTo(b.dataRegistro);
+          break;
+        case 'ultimaContribuicao':
+          final dateA = getLastContributionDate(a.id) ?? DateTime(1900);
+          final dateB = getLastContributionDate(b.id) ?? DateTime(1900);
+          result = dateA.compareTo(dateB);
+          break;
+        case 'localizacao':
+          result = a.cidade.toLowerCase().compareTo(b.cidade.toLowerCase());
+          break;
+        default:
+          result = a.nome.toLowerCase().compareTo(b.nome.toLowerCase());
+      }
+      return asc ? result : -result;
+    });
+
+    return list;
   }
 
   // Lista paginada para exibição

@@ -306,12 +306,81 @@ class DashboardView extends StatelessWidget {
                         ),
                       ],
                     ),
+                    const SizedBox(height: 32),
+
+                    // =======================================================
+                    // GERAL DE CONTRIBUIÇÕES
+                    // =======================================================
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.purple.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.pie_chart_rounded,
+                            color: Colors.purple,
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Visão Geral de Contribuições',
+                          style: GoogleFonts.outfit(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    GridView.count(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      crossAxisCount: crossAxisCount,
+                      mainAxisSpacing: 16,
+                      crossAxisSpacing: 16,
+                      childAspectRatio: dynamicAspectRatio,
+                      children: [
+                        _ResponsiveStatCard(
+                          title: 'Total de Lançamentos',
+                          value: controller.totalContribuicoes.toString(),
+                          change: '',
+                          icon: Icons.assignment_rounded,
+                          color: Colors.purple,
+                          theme: theme,
+                          surfaceColor: surfaceColor,
+                          borderColor: borderColor,
+                        ),
+                        _ResponsiveStatCard(
+                          title: 'Contribuições Pagas',
+                          value: controller.contribuicoesPagas.toString(),
+                          change: '',
+                          icon: Icons.check_circle_rounded,
+                          color: Colors.green.shade700,
+                          theme: theme,
+                          surfaceColor: surfaceColor,
+                          borderColor: borderColor,
+                        ),
+                        _ResponsiveStatCard(
+                          title: 'Contribuições A Receber',
+                          value: controller.contribuicoesAReceber.toString(),
+                          change: '',
+                          icon: Icons.pending_actions_rounded,
+                          color: Colors.orange.shade700,
+                          theme: theme,
+                          surfaceColor: surfaceColor,
+                          borderColor: borderColor,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 32),
                   ],
                 ),
               ),
-            ),
-            SliverToBoxAdapter(
-              child: const SizedBox(height: 32),
             ),
           ],
         );

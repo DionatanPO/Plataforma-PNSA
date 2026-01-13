@@ -48,13 +48,56 @@ class ContribuicaoDesktopTableView extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    _HeaderCell(text: 'D. PAGAMENTO', flex: 2, theme: theme),
-                    _HeaderCell(text: 'FIÉL', flex: 3, theme: theme),
-                    _HeaderCell(text: 'MÊS REF.', flex: 2, theme: theme),
-                    _HeaderCell(text: 'MÉTODO', flex: 2, theme: theme),
-                    _HeaderCell(text: 'STATUS', flex: 2, theme: theme),
-                    _HeaderCell(text: 'VALOR', flex: 2, theme: theme),
-                    _HeaderCell(text: 'AÇÕES', flex: 2, theme: theme),
+                    _HeaderCell(
+                      text: 'D. PAGAMENTO',
+                      flex: 2,
+                      theme: theme,
+                      column: 'dataPagamento',
+                      controller: controller,
+                    ),
+                    _HeaderCell(
+                      text: 'FIÉL',
+                      flex: 3,
+                      theme: theme,
+                      column: 'dizimistaNome',
+                      controller: controller,
+                    ),
+                    _HeaderCell(
+                      text: 'MÊS REF.',
+                      flex: 2,
+                      theme: theme,
+                      column: 'mesReferencia',
+                      controller: controller,
+                    ),
+                    _HeaderCell(
+                      text: 'MÉTODO',
+                      flex: 2,
+                      theme: theme,
+                      column: 'metodo',
+                      controller: controller,
+                    ),
+                    _HeaderCell(
+                      text: 'STATUS',
+                      flex: 2,
+                      theme: theme,
+                      column: 'status',
+                      controller: controller,
+                    ),
+                    _HeaderCell(
+                      text: 'VALOR',
+                      flex: 2,
+                      theme: theme,
+                      column: 'valor',
+                      controller: controller,
+                    ),
+                    const Expanded(
+                        flex: 2,
+                        child: Text('AÇÕES',
+                            style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 0.5,
+                                color: Colors.grey))),
                   ],
                 ),
               );
@@ -100,21 +143,54 @@ class _HeaderCell extends StatelessWidget {
   final String text;
   final int flex;
   final ThemeData theme;
+  final String column;
+  final ContribuicaoController controller;
 
-  const _HeaderCell(
-      {required this.text, required this.flex, required this.theme});
+  const _HeaderCell({
+    required this.text,
+    required this.flex,
+    required this.theme,
+    required this.column,
+    required this.controller,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
       flex: flex,
-      child: Text(
-        text,
-        style: GoogleFonts.inter(
-          fontSize: 11,
-          fontWeight: FontWeight.bold,
-          color: theme.colorScheme.onSurface.withOpacity(0.6),
-          letterSpacing: 0.5,
+      child: InkWell(
+        onTap: () => controller.toggleSort(column),
+        child: Row(
+          children: [
+            Flexible(
+              child: Text(
+                text,
+                style: GoogleFonts.inter(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ),
+            const SizedBox(width: 4),
+            Obx(() {
+              if (controller.sortColumn.value == column) {
+                return Icon(
+                  controller.isAscending.value
+                      ? Icons.arrow_upward_rounded
+                      : Icons.arrow_downward_rounded,
+                  size: 12,
+                  color: theme.primaryColor,
+                );
+              }
+              return Icon(
+                Icons.unfold_more_rounded,
+                size: 12,
+                color: theme.colorScheme.onSurface.withOpacity(0.2),
+              );
+            }),
+          ],
         ),
       ),
     );

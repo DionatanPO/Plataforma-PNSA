@@ -137,6 +137,18 @@ class DizimistaService {
     });
   }
 
+  static String _normalize(String text) {
+    if (text.isEmpty) return '';
+    var s = text.toLowerCase();
+    s = s.replaceAll(RegExp(r'[áàâãä]'), 'a');
+    s = s.replaceAll(RegExp(r'[éèêë]'), 'e');
+    s = s.replaceAll(RegExp(r'[íìîï]'), 'i');
+    s = s.replaceAll(RegExp(r'[óòôõö]'), 'o');
+    s = s.replaceAll(RegExp(r'[úùûü]'), 'u');
+    s = s.replaceAll(RegExp(r'[ç]'), 'c');
+    return s.trim();
+  }
+
   // Método para busca avançada que busca em múltiplos campos
   static Stream<List<Dizimista>> advancedSearch(String query) {
     if (query.isEmpty) {
@@ -153,22 +165,16 @@ class DizimistaService {
           snapshot.docs.map((doc) => _fromFirestoreDocument(doc)).toList();
 
       // Filtra os resultados localmente nos campos relevantes
-      final queryLower = query.toLowerCase();
+      final queryNorm = _normalize(query);
       final filteredDocs = allDocs.where((dizimista) {
-        return dizimista.nome.toLowerCase().contains(queryLower) ||
-            dizimista.cpf.contains(query) ||
+        final nomeNorm = _normalize(dizimista.nome);
+        final cpf = dizimista.cpf.replaceAll(RegExp(r'[^0-9]'), '');
+        final queryNumbers = queryNorm.replaceAll(RegExp(r'[^0-9]'), '');
+
+        return nomeNorm.contains(queryNorm) ||
             dizimista.numeroRegistro.contains(query) ||
-            dizimista.telefone.contains(query) ||
-            (dizimista.email?.toLowerCase().contains(queryLower) ?? false) ||
-            dizimista.cidade.toLowerCase().contains(queryLower) ||
-            dizimista.estado.toLowerCase().contains(queryLower) ||
-            (dizimista.nomeConjugue?.toLowerCase().contains(queryLower) ??
-                false) ||
-            (dizimista.estadoCivil?.toLowerCase().contains(queryLower) ??
-                false) ||
-            (dizimista.observacoes?.toLowerCase().contains(queryLower) ??
-                false) ||
-            dizimista.status.toLowerCase().contains(queryLower);
+            (queryNumbers.isNotEmpty && cpf.contains(queryNumbers)) ||
+            dizimista.telefone.contains(query);
       }).toList();
 
       return filteredDocs;
