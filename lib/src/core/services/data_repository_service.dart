@@ -106,6 +106,15 @@ class DataRepositoryService extends GetxService {
   }
 
   void _handleError(String source, dynamic e) {
+    // Ignora erros de permissão se o usuário não estiver mais logado
+    // (comum acontecer quando os listeners do Firebase tentam ler logo após o logout)
+    final authService = Get.find<AuthService>();
+    if ((authService.userData.value == null ||
+            authService.isLoggingOut.value) &&
+        e.toString().contains('permission-denied')) {
+      return;
+    }
+
     print('[DataRepository] Erro em $source: $e');
     hasError.value = true;
     isSyncing.value = false;

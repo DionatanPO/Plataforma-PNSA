@@ -28,6 +28,8 @@ import '../ui/dizimistas/views/cadastro/cadastro_dizimista_view.dart';
 import '../ui/dizimistas/views/dizimista_history_view.dart';
 import '../ui/access_management/views/access_form_view.dart';
 import '../ui/auth/password_reset/password_reset_view.dart';
+import '../ui/notifications/bindings/notification_binding.dart';
+import '../ui/notifications/views/notification_view.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -131,6 +133,12 @@ class AppPages {
       page: () => const PasswordResetView(),
       binding: PasswordResetBinding(),
       // Removido middleware aqui para permitir que o usuário mude a senha se houver pendência logo após o login
+    ),
+    GetPage(
+      name: AppRoutes.notifications,
+      page: () => const NotificationView(),
+      binding: NotificationBinding(),
+      middlewares: [AuthMiddleware()],
     ),
     GetPage(
       name: AppRoutes.splash,

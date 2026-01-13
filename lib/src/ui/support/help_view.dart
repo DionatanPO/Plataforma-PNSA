@@ -3,8 +3,6 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:ui';
 
-import 'package:intl/intl.dart';
-
 import '../../routes/app_routes.dart';
 import '../core/widgets/custom_sliver_app_bar.dart';
 import 'package:plataforma_pnsa/src/core/constants/app_constants.dart';
@@ -150,6 +148,17 @@ class HelpView extends StatelessWidget {
           '• Visualize totais do dia, mês atual e ano vigente.',
           '• O sistema gera gráficos de desempenho e variação percentual.',
           '• Relatórios detalhados podem ser exportados para contabilidade na aba Relatórios.',
+        ],
+      },
+      {
+        'icon': Icons.notifications_active_outlined,
+        'title': 'Notificações',
+        'desc': 'Alertas de vencimento',
+        'content': [
+          '• O novo módulo de Notificações monitora dízimos pendentes ("A Receber").',
+          '• Itens em vermelho indicam vencimento hoje ou dízimos já atrasados.',
+          '• Itens em laranja/azul indicam vencimentos nos próximos 3 dias.',
+          '• Você pode confirmar o recebimento diretamente pela notificação clicando no card.',
         ],
       },
     ];
@@ -441,7 +450,7 @@ class HelpView extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Sistema Atualizado',
+                  'Novidades de Hoje (13/01)',
                   style: GoogleFonts.outfit(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -450,7 +459,7 @@ class HelpView extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Última verificação: ${DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now())}',
+                  'Foi adicionada a funcionalidade de Notificações! Agora o sistema alerta automaticamente sobre dízimos a receber e próximos do vencimento.',
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     color:

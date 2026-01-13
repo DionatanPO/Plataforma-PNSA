@@ -14,6 +14,7 @@ class AuthService extends GetxService {
   // Observáveis para o usuário atual
   final Rxn<User> _firebaseUser = Rxn<User>();
   final Rxn<UserModel> userData = Rxn<UserModel>();
+  final isLoggingOut = false.obs;
 
   User? get currentUser => _firebaseUser.value;
   UserModel? get currentUserData => userData.value;
@@ -159,8 +160,10 @@ class AuthService extends GetxService {
 
   /// Efetua o logout do usuário.
   Future<void> logout() async {
+    isLoggingOut.value = true;
     await _auth.signOut();
     await _sessionService.clearSession();
+    isLoggingOut.value = false;
   }
 
   /// Atualiza o status de pendência do usuário no Firestore.

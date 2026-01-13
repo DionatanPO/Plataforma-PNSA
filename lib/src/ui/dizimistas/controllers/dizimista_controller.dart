@@ -1,7 +1,10 @@
 import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/services/dizimista_service.dart';
 import '../../../core/services/data_repository_service.dart';
+import '../../../core/services/contribuicao_service.dart';
+import '../../../data/services/auth_service.dart';
 import '../../contribuicoes/models/contribuicao_model.dart';
 import '../../../domain/models/acesso_model.dart';
 import '../models/dizimista_model.dart';
@@ -25,6 +28,13 @@ class DizimistaController extends GetxController {
   final RxInt displayedCount = 20.obs;
   final RxBool hasMore = true.obs;
   final RxBool isLoadingMore = false.obs;
+
+  // Verificação de permissão para apagar
+  bool get isAuthorizedToDelete {
+    final auth = Get.find<AuthService>();
+    final role = auth.currentUserData?.funcao ?? '';
+    return role == 'Administrador' || role == 'Financeiro';
+  }
 
   // Método para obter o histórico de contribuições de um dizimista
   List<Contribuicao> historicoContribuicoes(String dizimistaId) {
@@ -178,6 +188,17 @@ class DizimistaController extends GetxController {
     try {
       if (dizimista.nome.isEmpty)
         throw Exception('O Nome Completo é obrigatório.');
+
+      // Validar duplicidade de Número de Registro (se informado)
+      if (dizimista.numeroRegistro.isNotEmpty) {
+        final existente = await DizimistaService.getDizimistaByRegistro(
+            dizimista.numeroRegistro);
+        if (existente != null) {
+          throw Exception(
+              'O número de registro "${dizimista.numeroRegistro}" já pertence a: ${existente.nome}.');
+        }
+      }
+
       await DizimistaService.addDizimista(dizimista);
       searchQuery.value = '';
     } catch (e) {
@@ -193,10 +214,65 @@ class DizimistaController extends GetxController {
     try {
       if (dizimista.nome.isEmpty)
         throw Exception('O Nome Completo é obrigatório.');
+
+      // Validar duplicidade de Número de Registro ao atualizar
+      if (dizimista.numeroRegistro.isNotEmpty) {
+        final existente = await DizimistaService.getDizimistaByRegistro(
+            dizimista.numeroRegistro);
+        if (existente != null && existente.id != dizimista.id) {
+          throw Exception(
+              'O número de registro "${dizimista.numeroRegistro}" já pertence a outro fiel: ${existente.nome}.');
+        }
+      }
+
       await DizimistaService.updateDizimista(dizimista);
     } catch (e) {
       print("Erro ao atualizar dizimista: $e");
       rethrow;
+    } finally {
+      _dataRepo.isSyncing.value = false;
+    }
+  }
+
+  Future<void> deleteDizimistaComHistorico(Dizimista dizimista) async {
+    if (!isAuthorizedToDelete) {
+      Get.snackbar(
+        'Acesso Negado',
+        'Você não tem permissão para excluir registros.',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    _dataRepo.isSyncing.value = true;
+    try {
+      // 1. Buscar todas as contribuições do dizimista
+      final historico =
+          _contribuicoes.where((c) => c.dizimistaId == dizimista.id).toList();
+
+      // 2. Apagar cada contribuição
+      for (var c in historico) {
+        await ContribuicaoService.deleteContribuicao(c.id);
+      }
+
+      // 3. Apagar o dizimista
+      await DizimistaService.deleteDizimista(dizimista.id);
+
+      Get.snackbar(
+        'Sucesso',
+        'Fiel e todo seu histórico foram removidos.',
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+    } catch (e) {
+      print("Erro ao excluir dizimista e histórico: $e");
+      Get.snackbar(
+        'Erro',
+        'Não foi possível concluir a exclusão: $e',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } finally {
       _dataRepo.isSyncing.value = false;
     }

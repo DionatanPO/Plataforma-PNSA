@@ -14,6 +14,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../../core/services/data_repository_service.dart';
 import '../../../core/services/contribuicao_service.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../data/services/auth_service.dart';
 import '../../contribuicoes/models/contribuicao_model.dart';
 import '../../dizimistas/models/dizimista_model.dart';
 import '../../../domain/models/acesso_model.dart';
@@ -135,6 +136,13 @@ class ReportController extends GetxController {
       _isLocalLoading.value = false;
     }, onError: (e) {
       _isLocalLoading.value = false;
+      //ignora se for erro de permissão durante logout
+      final auth = Get.find<AuthService>();
+      if (auth.userData.value == null ||
+          auth.isLoggingOut.value ||
+          e.toString().contains('permission-denied')) {
+        if (e.toString().contains('permission-denied')) return;
+      }
       Get.snackbar('Erro', 'Erro ao carregar relatório diário: $e');
     });
   }
@@ -152,6 +160,13 @@ class ReportController extends GetxController {
       _isLocalLoading.value = false;
     }, onError: (e) {
       _isLocalLoading.value = false;
+      //ignora se for erro de permissão durante logout
+      final auth = Get.find<AuthService>();
+      if (auth.userData.value == null ||
+          auth.isLoggingOut.value ||
+          e.toString().contains('permission-denied')) {
+        if (e.toString().contains('permission-denied')) return;
+      }
       Get.snackbar('Erro', 'Erro ao carregar relatório por período: $e');
     });
   }
@@ -168,6 +183,13 @@ class ReportController extends GetxController {
       _isLocalLoading.value = false;
     }, onError: (e) {
       _isLocalLoading.value = false;
+      //ignora se for erro de permissão durante logout
+      final auth = Get.find<AuthService>();
+      if (auth.userData.value == null ||
+          auth.isLoggingOut.value ||
+          e.toString().contains('permission-denied')) {
+        if (e.toString().contains('permission-denied')) return;
+      }
       Get.snackbar('Erro', 'Erro ao carregar relatório por competência: $e');
     });
   }

@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 
 import '../models/dizimista_model.dart';
 import '../controllers/dizimista_controller.dart';
-import 'dizimista_avatar.dart';
 import 'status_badge.dart';
 import 'table_header_cell.dart';
 import 'action_button.dart';
@@ -101,7 +100,7 @@ class DizimistaDesktopTableView extends StatelessWidget {
                 _TableHeaderCell(
                     text: 'ÚLT. CONTRIBUIÇÃO', flex: 2, theme: theme),
                 _TableHeaderCell(text: 'CADASTRO', flex: 1, theme: theme),
-                _TableHeaderCell(text: '', flex: 1, theme: theme),
+                _TableHeaderCell(text: '', flex: 2, theme: theme),
               ],
             ),
           ),
@@ -214,60 +213,52 @@ class _DizimistaDesktopTableRowState extends State<DizimistaDesktopTableRow> {
 
             const SizedBox(width: 12),
 
-            // Coluna 2: Avatar + Nome
+            // Coluna 2: Nome
             Expanded(
               flex: 3,
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  DizimistaAvatar(nome: d.nome, theme: theme),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          d.nome,
-                          style: GoogleFonts.outfit(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                            color: theme.colorScheme.onSurface,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(3),
-                              decoration: BoxDecoration(
-                                color: theme.colorScheme.onSurface.withOpacity(
-                                  0.08,
-                                ),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Icon(
-                                Icons.badge_outlined,
-                                size: 10,
-                                color: theme.colorScheme.onSurface.withOpacity(
-                                  0.5,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              formatCPF(d.cpf),
-                              style: GoogleFonts.inter(
-                                fontSize: 11,
-                                color: theme.colorScheme.onSurface.withOpacity(
-                                  0.5,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                  Text(
+                    d.nome,
+                    style: GoogleFonts.outfit(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      color: theme.colorScheme.onSurface,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(3),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.onSurface.withOpacity(
+                            0.08,
+                          ),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Icon(
+                          Icons.badge_outlined,
+                          size: 10,
+                          color: theme.colorScheme.onSurface.withOpacity(
+                            0.5,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        formatCPF(d.cpf),
+                        style: GoogleFonts.inter(
+                          fontSize: 11,
+                          color: theme.colorScheme.onSurface.withOpacity(
+                            0.5,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -492,7 +483,7 @@ class _DizimistaDesktopTableRowState extends State<DizimistaDesktopTableRow> {
 
             // Coluna 7: Ações
             Expanded(
-              flex: 1,
+              flex: 2,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -553,11 +544,132 @@ class _DizimistaDesktopTableRowState extends State<DizimistaDesktopTableRow> {
                       ),
                     ),
                   ),
+                  if (widget.controller.isAuthorizedToDelete) ...[
+                    const SizedBox(width: 8),
+                    // Botão Excluir
+                    Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () => _showDeleteConfirmation(context, d),
+                        borderRadius: BorderRadius.circular(10),
+                        child: Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.red.withOpacity(0.1),
+                                Colors.red.withOpacity(0.05),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(
+                            Icons.delete_outline_rounded,
+                            size: 18,
+                            color: Colors.red,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showDeleteConfirmation(BuildContext context, Dizimista d) {
+    final theme = widget.theme;
+    Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: Row(
+          children: [
+            const Icon(Icons.warning_amber_rounded, color: Colors.red),
+            const SizedBox(width: 12),
+            Text('Excluir Fiel?',
+                style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Você está prestes a excluir permanentemente:',
+              style: GoogleFonts.inter(fontSize: 14),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.onSurface.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                children: [
+                  _infoRow('Nome:', d.nome),
+                  _infoRow('Registro:', d.numeroRegistro),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'ATENÇÃO: Todas as contribuições e dízimos vinculados a este fiel também serão EXCLUÍDOS. Esta ação não pode ser desfeita.',
+              style: GoogleFonts.inter(
+                fontSize: 13,
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: Text('Cancelar',
+                style: GoogleFonts.inter(
+                    color: theme.colorScheme.onSurface.withOpacity(0.5))),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Get.back();
+              await widget.controller.deleteDizimistaComHistorico(d);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+            ),
+            child: Text('Sim, Excluir Tudo',
+                style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _infoRow(String label, String value) {
+    final theme = widget.theme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label,
+              style: GoogleFonts.inter(
+                  fontSize: 12,
+                  color: theme.colorScheme.onSurface.withOpacity(0.6))),
+          Text(value,
+              style: GoogleFonts.inter(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.onSurface)),
+        ],
       ),
     );
   }

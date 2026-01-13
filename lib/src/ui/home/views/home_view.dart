@@ -11,6 +11,8 @@ import '../../relatorios/views/report_view.dart';
 import '../../profile/profile_view.dart';
 import '../../support/help_view.dart';
 import '../controlles/home_controller.dart';
+import '../../notifications/views/notification_view.dart';
+import '../../notifications/controllers/notification_controller.dart';
 
 class NavigationItem {
   final Widget icon;
@@ -33,6 +35,7 @@ class NavigationItem {
 class HomeView extends StatelessWidget {
   final controller = Get.put(HomeController());
   final session = Get.find<SessionService>();
+  final notificationController = Get.put(NotificationController());
 
   HomeView({Key? key}) : super(key: key);
 
@@ -87,6 +90,21 @@ class HomeView extends StatelessWidget {
         page: ReportView(),
         isVisible:
             session.isAdmin || session.isFinanceiro || session.isSecretaria,
+      ),
+      NavigationItem(
+        icon: Obx(() => Badge(
+              label: Text(notificationController.notificationCount.toString()),
+              isLabelVisible: notificationController.notificationCount > 0,
+              child: const Icon(Icons.notifications_outlined),
+            )),
+        selectedIcon: Obx(() => Badge(
+              label: Text(notificationController.notificationCount.toString()),
+              isLabelVisible: notificationController.notificationCount > 0,
+              child: const Icon(Icons.notifications),
+            )),
+        label: 'Notificações',
+        page: const NotificationView(),
+        isVisible: true,
       ),
       NavigationItem(
         icon: const Icon(Icons.person_outline),

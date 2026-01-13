@@ -15,6 +15,7 @@ abstract class AppRoutes {
   static const about = '/about';
   static const login = '/login';
   static const theme_settings = '/theme_settings';
+  static const notifications = '/notifications';
   static const CONTACT = '/contact';
   static const PARISH = '/parish';
   static const EVENTS = '/events';
