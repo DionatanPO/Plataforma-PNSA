@@ -1109,4 +1109,14 @@ class ContribuicaoController extends GetxController {
     s = s.replaceAll(RegExp(r'[ç]'), 'c');
     return s.trim();
   }
+
+  String getUsuarioNome(String uid) {
+    if (uid.isEmpty) return 'Sistema';
+    try {
+      final user = _dataRepo.acessos.firstWhereOrNull((a) => a.id == uid);
+      return user?.nome ?? 'Usuário Desconhecido';
+    } catch (_) {
+      return 'Usuário Desconhecido';
+    }
+  }
 }

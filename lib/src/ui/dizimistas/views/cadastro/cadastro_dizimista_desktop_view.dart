@@ -455,22 +455,22 @@ class _CadastroDizimistaDesktopViewState
                                       const SizedBox(height: 16),
                                       _buildRow([
                                         _buildDateField(
-                                          label: 'Data Casamento',
-                                          date: dataCasamento,
-                                          onTap: () => _pickDate(
-                                              dataCasamento,
-                                              (d) => setState(
-                                                  () => dataCasamento = d)),
-                                          theme: theme,
-                                          flex: 1,
-                                        ),
-                                        _buildDateField(
                                           label: 'Nasc. Cônjuge',
                                           date: dataNascimentoConjugue,
                                           onTap: () => _pickDate(
                                               dataNascimentoConjugue,
                                               (d) => setState(() =>
                                                   dataNascimentoConjugue = d)),
+                                          theme: theme,
+                                          flex: 1,
+                                        ),
+                                        _buildDateField(
+                                          label: 'Data Casamento',
+                                          date: dataCasamento,
+                                          onTap: () => _pickDate(
+                                              dataCasamento,
+                                              (d) => setState(
+                                                  () => dataCasamento = d)),
                                           theme: theme,
                                           flex: 1,
                                         ),

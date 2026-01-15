@@ -115,6 +115,15 @@ class ContribuicaoMobileListViewItem extends StatelessWidget {
                         color: theme.colorScheme.onSurface.withOpacity(0.5),
                       ),
                     ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Atendente: ${controller.getUsuarioNome(d.usuarioId)}',
+                      style: GoogleFonts.inter(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w500,
+                        color: theme.colorScheme.onSurface.withOpacity(0.5),
+                      ),
+                    ),
                     const SizedBox(height: 4),
                     _StatusBadge(status: d.status),
                   ],
@@ -314,6 +323,13 @@ class ContribuicaoMobileListViewItem extends StatelessWidget {
                         label: 'Registro',
                         value:
                             DateFormat('dd/MM/yy HH:mm').format(d.dataRegistro),
+                        theme: theme,
+                      ),
+                      const SizedBox(height: 12),
+                      _ModernInfoRow(
+                        icon: Icons.person_outline_rounded,
+                        label: 'Atendente',
+                        value: controller.getUsuarioNome(d.usuarioId),
                         theme: theme,
                       ),
                       if (d.observacao?.isNotEmpty == true) ...[

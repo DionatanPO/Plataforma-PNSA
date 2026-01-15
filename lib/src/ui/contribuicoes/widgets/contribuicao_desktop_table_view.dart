@@ -90,6 +90,13 @@ class ContribuicaoDesktopTableView extends StatelessWidget {
                       column: 'valor',
                       controller: controller,
                     ),
+                    _HeaderCell(
+                      text: 'ATENDENTE',
+                      flex: 2,
+                      theme: theme,
+                      column: 'usuarioId',
+                      controller: controller,
+                    ),
                     const Expanded(
                         flex: 2,
                         child: Text('AÇÕES',
@@ -330,6 +337,19 @@ class _ContribuicaoTableRowState extends State<_ContribuicaoTableRow> {
                 ),
               ),
             ),
+            // ATENDENTE
+            Expanded(
+              flex: 2,
+              child: Text(
+                widget.controller.getUsuarioNome(d.usuarioId),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                ),
+              ),
+            ),
             // AÇÕES
             Expanded(
               flex: 2,
@@ -518,6 +538,13 @@ class _ContribuicaoTableRowState extends State<_ContribuicaoTableRow> {
                         label: 'Data do Registro',
                         value: DateFormat('dd/MM/yyyy HH:mm')
                             .format(d.dataRegistro),
+                        theme: theme,
+                      ),
+                      const SizedBox(height: 12),
+                      _ModernInfoRow(
+                        icon: Icons.person_outline_rounded,
+                        label: 'Atendente (Registrado por)',
+                        value: widget.controller.getUsuarioNome(d.usuarioId),
                         theme: theme,
                       ),
                       if (d.observacao?.isNotEmpty == true) ...[
